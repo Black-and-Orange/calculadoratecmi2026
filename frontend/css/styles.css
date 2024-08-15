@@ -1548,6 +1548,27 @@ p.msg.error {
 		border-style: solid;
 		border-color: #26D07C transparent transparent transparent;
 	}
+
+.text-red-color{
+  color: red!important;
+}
+.benefits-item{
+  text-align: center;
+  background-color: #FFF!important;
+}
+
+#plan-section td{
+  padding: 1rem 3rem;
+}
+
+#alwas-included td{
+  padding: 0.5rem 3rem;
+}
+
+.bg-\[\#ADADAD\] {
+  background-color: #ADADAD;
+}
+
 @media (min-width: 768px) {
 		.tooltip .tooltiptext {
 			bottom: unset;

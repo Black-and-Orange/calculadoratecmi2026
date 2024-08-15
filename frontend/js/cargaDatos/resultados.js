@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24";
             
             benefitItem.innerHTML = `
-                <div class="border-2 border-solid ${beneficio.colorClass} rounded-[6px] relative px-[20px] py-[30px] h-full" style="background-color: #FFFFFF!important">
+                <div class="border-2 border-solid ${beneficio.colorClass} rounded-[6px] relative px-[20px] py-[30px] h-full benefits-item">
                     <div class="${beneficio.colorClass} w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
                         <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                             src="${beneficio.icon}">
