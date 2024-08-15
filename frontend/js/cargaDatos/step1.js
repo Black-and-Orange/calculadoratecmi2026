@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const apiConfigs = {
-        grade: { url: 'http://localhost:3008/api/nivel', property: 'descripcion' },
-        plan: { baseUrl: 'http://localhost:3008/api/planes/nivel/', property: 'descripcion' },
-        campus: { baseUrl: 'http://localhost:3008/api/campus/nivel/', property: 'nombre' },
-        period: { baseUrl: 'http://localhost:3008/api/periodo/nivel/', property: 'periodo_descripcion' },
-        subjects: { baseUrl: 'http://localhost:3008/api/materias/nivel/', property: 'numero' }
+        grade: { url: 'https://tecmilenio-calculadora-backend.testingbo.com/api/nivel', property: 'descripcion' },
+        plan: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/planes/nivel/', property: 'descripcion' },
+        campus: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/campus/nivel/', property: 'nombre' },
+        period: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/periodo/nivel/', property: 'periodo_descripcion' },
+        subjects: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias/nivel/', property: 'numero' }
     };
 
     const calcularCostoTotal = (numeroMaterias, costoMateria) => {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchCostosMateria = async (nivelId) => {
         try {
-            const response = await fetch(`http://localhost:3008/api/costos/nivel/${nivelId}`);
+            const response = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/costos/nivel/${nivelId}`);
             if (!response.ok) {
                 throw new Error('Error al obtener los costos de materia');
             }
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let property = apiConfigs[key].property;
 
                     if (mappedLevel === 2 && key === 'subjects') {
-                        apiUrl = 'http://localhost:3008/api/creditos/nivel/2';
+                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/2';
                         property = 'credito';
                         selectors.subjectsLabel.textContent = 'Créditos';
                     } else {

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchSeguros() {
         try {
-            const response = await fetch('http://localhost:3008/api/seguros');
+            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros');
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const data = await response.json();
             segurosData = data[0]; // Asumiendo que la respuesta es un array con un objeto

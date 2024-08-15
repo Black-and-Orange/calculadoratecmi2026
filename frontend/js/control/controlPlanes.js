@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // Cargar objetos para un nivel o categoría específica
     function loadObjects(level, containerId) {
-        fetch(`http://localhost:3008/api/objects/nivel/${level}`) // Cambia la URL según tu API
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/nivel/${level}`) // Cambia la URL según tu API
             .then(response => response.json())
             .then(data => {
                 $(containerId).empty();
@@ -33,7 +33,7 @@ $(document).ready(function () {
             event.preventDefault();
             const name = $(`${formId}Name`).val();
             const category = $(`${formId}Category`).val();
-            fetch('http://localhost:3008/api/objects', { // Cambia la URL según tu API
+            fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/objects', { // Cambia la URL según tu API
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ $(document).ready(function () {
 
     // Eliminar objeto
     window.deleteObject = function(id) {
-        fetch(`http://localhost:3008/api/objects/${id}`, { // Cambia la URL según tu API
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
             method: 'DELETE',
         })
             .then(response => response.json())
@@ -67,7 +67,7 @@ $(document).ready(function () {
         const newName = prompt('Nuevo nombre del objeto:', currentName);
         const newCategory = prompt('Nueva categoría del objeto:', currentCategory);
         if (newName && newCategory) {
-            fetch(`http://localhost:3008/api/objects/${id}`, { // Cambia la URL según tu API
+            fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

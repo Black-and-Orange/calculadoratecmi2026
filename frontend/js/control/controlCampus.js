@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // Cargar campus en una tabla para un nivel específico
     function loadCampus(level, containerId) {
-        fetch(`http://localhost:3008/api/campus/nivel/${level}`)
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/nivel/${level}`)
             .then(response => response.json())
             .then(data => {
                 $(containerId).empty();
@@ -68,7 +68,7 @@ $(document).ready(function () {
         event.preventDefault();
         const name = $('#campusPreparatoriaName').val();
         const category = $('#campusPreparatoriaCategory').val();
-        fetch('http://localhost:3008/api/campus', {
+        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/campus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ $(document).ready(function () {
         event.preventDefault();
         const name = $('#campusProfesionalName').val();
         const category = $('#campusProfesionalCategory').val();
-        fetch('http://localhost:3008/api/campus', {
+        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/campus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ $(document).ready(function () {
 
 // Eliminar campus
 function deleteCampus(id) {
-    fetch(`http://localhost:3008/api/campus/${id}`, {
+    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
@@ -121,7 +121,7 @@ function editCampus(id, currentName, currentCategory) {
     const newName = prompt('Nuevo nombre del campus:', currentName);
     const newCategory = prompt('Nueva categoría del campus:', currentCategory);
     if (newName && newCategory) {
-        fetch(`http://localhost:3008/api/campus/${id}`, {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apoyosContainer = document.getElementById('apoyosContainer');
 
     function fetchBecas() {
-        fetch('http://localhost:3008/api/becas')
+        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/becas')
             .then(response => response.json())
             .then(data => {
                 becasContainer.innerHTML = '';
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchApoyosEstudiantiles() {
-        fetch('http://localhost:3008/api/apoyos')
+        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos')
             .then(response => response.json())
             .then(data => {
                 apoyosContainer.innerHTML = '';
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const porcentaje_max = parseFloat(document.getElementById('becaPorcentajeMax').value);
 
     
-        fetch('http://localhost:3008/api/becas', {
+        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/becas', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const porcentaje = parseFloat(document.getElementById('apoyoPorcentaje').value);
 
-        fetch('http://localhost:3008/api/apoyos', {
+        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.deleteBeca = function(id) {
-        fetch(`http://localhost:3008/api/becas/${id}`, {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becas/${id}`, {
             method: 'DELETE'
         })
         .then(response => response.json())
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.deleteApoyo = function(id) {
-        fetch(`http://localhost:3008/api/apoyos/${id}`, {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/${id}`, {
             method: 'DELETE'
         })
         .then(response => response.json())
