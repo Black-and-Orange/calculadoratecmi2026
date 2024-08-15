@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Description">
+    <meta name="keywords" content="Keywords">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Cada css style- sirve para darle un nuevo estilo a la página/calculadora-->
+    <!-- link(rel="stylesheet", href="style-universidad.css")-->
+    <!-- link(rel="stylesheet", href="style-icbi.css")-->
+    <!-- link(rel="stylesheet", href="style-profesional-asociado.css")-->
+
+    <head rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <title>Inicio | Calculadora Tecmilenio</title>
+    </head>
+
+<body class="flex flex-col bg-white font-display">
+    <header class="header-alt-version fixed t-0 l-0 w-full z-40">
+        <div class="info bg-header-color-1 py-[11px]">
+            <div class="container mx-auto px-4 sm:px-8 xl:px-28">
+                <div class="flex justify-end flex-row">
+                    <div class="flex flex-row mb-0 justify-center sm:justify-end">
+                        <div class="pr-3 flex flex-col justify-center"><a class="link white text-[20px]" href="#"><i
+                                    class="fa-brands fa-facebook-f"></i></a></div>
+                        <div class="px-3 flex flex-col justify-center"><a class="link white text-[20px]" href="#"><i
+                                    class="fa-brands fa-twitter"></i></a></div>
+                        <div class="pl-3 flex flex-col justify-center"><a class="link white text-[20px]" href="#"><i
+                                    class="fa-brands fa-instagram"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="navbar bg-main-color-1 min-h-[80px] pt-[20px] pb-[22px]">
+            <div class="container mx-auto px-4 sm:px-8 xl:px-28">
+                <div class="flex justify-between flex-col xl:flex-row">
+                    <div class="flex flex-row justify-between xl:justify-start grow flex-wrap">
+                        <div class="mr-4"><a class="link white" href="#"><img class="max-w-[190px]"
+                                    src="./img/tecmilenio-logo.svg" alt="Tecmilenio - Logo"></a></div>
+                        <div class="flex flex-col justify-center xl:hidden">
+                            <button class="mobile-btn"><i
+                                    class="fa-solid fa-bars text-2xl show text-header-color-3"></i><i
+                                    class="fa-solid fa-times text-2xl hidden close text-header-color-3"></i></button>
+                        </div>
+                        <div
+                            class="menu submenu flex-row xl:justify-center hidden xl:block relative z-40 top-0 left-0 grow xl:pl-8 2xl:pl-16 bg-accent-color w-full xl:w-auto pt-4 xl:py-0">
+                            <div class="h-full flex flex-row justify-end">
+                                <ul class="flex flex-col xl:flex-row">
+                                    <li
+                                        class="px-0 pb-2 xl:pb-0 xl:pr-3 2xl:pr-4 xl:text-lg relative flex flex-col justify-center">
+                                        <a class="link white" href="#">About</a>
+                                    </li>
+                                    <li
+                                        class="px-0 pb-2 xl:pb-0 xl:px-3 2xl:px-4 xl:text-lg relative flex flex-col justify-center">
+                                        <a class="link white" href="#">Portfolio</a>
+                                    </li>
+                                    <li
+                                        class="px-0 pb-2 xl:pb-0 xl:px-3 2xl:px-4 xl:text-lg relative flex flex-col justify-center">
+                                        <a class="link white" href="#">Blog</a>
+                                    </li>
+                                    <li
+                                        class="px-0 pb-2 xl:pb-0 xl:px-3 2xl:px-4 xl:text-lg relative flex flex-col justify-center">
+                                        <a class="link white" href="#">Contact</a>
+                                    </li>
+                                    <li
+                                        class="px-0 pb-2 xl:pb-0 xl:pl-3 2xl:pl-4 xl:text-lg relative flex flex-col justify-center">
+                                        <a class="link white" href="#"><i
+                                                class="fa-solid fa-magnifying-glass text-2xl text-header-color-3"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </nav>
+            </div>
+    </header>
+    <main class="mt-[128px]">
+        <section class="banner-form-section relative bg-main-color-2 text-white overflow-hidden min-h-[210px]"
+            id="banner-form-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28 min-h-[150px] lg:min-h-[90px]">
+                <div class="flex justify-between flex-col lg:flex-row">
+                    <div class="px-4 w-full min-h-[150px] lg:min-h-[90px] flex flex-col justify-center">
+                        <h1 class="text-left lg:text-center mb-0">Impulsa tu futuro desde hoy</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="benefits-section" id="benefits-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="flex flex-row justify-center">
+                    <div class="px-4 w-full text-center">
+                        <h2 class="text-write-color-3">Beneficios de Estudiar En Prepa Tecmilenio</h2>
+                    </div>
+                </div>
+                <div class="flex flex-row flex-wrap justify-center">
+                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24">
+                        <div
+                            class="border-2 border-solid border-secondary-color-3 rounded-[6px] relative px-[20px] py-[30px] h-full">
+                            <div
+                                class="bg-secondary-color-3 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
+                                <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                    src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-1.svg">
+                            </div>
+                            <p class="font-bold text-[18px] leading-[26px]">Certificaciones</p>
+                            <p>Te ofrecemos 3 certificaciones que te preparan con habilidades para el futuro: Tecnología
+                                (Python), Creatividad e Innovación y Finanzas personales</p>
+                        </div>
+                    </div>
+                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24">
+                        <div
+                            class="border-2 border-solid border-main-color-2 rounded-[6px] relative px-[20px] py-[30px] h-full">
+                            <div
+                                class="bg-main-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
+                                <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                    src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg">
+                            </div>
+                            <p class="font-bold text-[18px] leading-[26px]">Interculturalidad</p>
+                            <p>Aprende en un entorno global donde te desarrollas junto a una comunidad multicultural por
+                                medio de programas como el verano intercultural.</p>
+                        </div>
+                    </div>
+                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24">
+                        <div
+                            class="border-2 border-solid border-secondary-color-1 rounded-[6px] relative px-[20px] py-[30px] h-full">
+                            <div
+                                class="bg-secondary-color-1 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
+                                <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                    src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg">
+                            </div>
+                            <p class="font-bold text-[18px] leading-[26px]">Vivencia Estudiantil</p>
+                            <p>Participarás en proyectos y eventos que fomentan tu desarrollo académico y personal, como
+                                ser parte de una Sociedad Estudiantil  donde harás nuevas amigas y amigos, o en la
+                                competencia de robótica FIRST, que te brindará la oportunidad para destacar a nivel
+                                internacional.</p>
+                        </div>
+                    </div>
+                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24">
+                        <div
+                            class="border-2 border-solid border-secondary-color-2 rounded-[6px] relative px-[20px] py-[30px] h-full">
+                            <div
+                                class="bg-secondary-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
+                                <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                                    src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-4.svg">
+                            </div>
+                            <p class="font-bold text-[18px] leading-[26px]">Propósito de Vida</p>
+                            <p>Descubre tu propósito a través de un acompañamiento apreciativo y el Plan Vocacional
+                                Tecmilenio.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="basic-info-section" id="basic-info-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="flex flex-row justify-center">
+                    <div class="px-4 w-full text-center">
+                        <h2 class="text-write-color-3">Información Básica</h2>
+                    </div>
+                </div>
+                <div class="flex flex-row flex-wrap justify-center">
+                    <div
+                        class="bg-secondary-color-5 px-[10px] lg:px-[50px] py-[20px] rounded-[6px] flex flex-row flex-wrap lg:flex-nowrap justify-center">
+                        <div class="px-4 grow w-1/2 lg:w-auto">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nombre</p>
+                            <p id="nombre" class="text-[21px] leading-[29px]">Jerónimo Garza</p>
+                        </div>
+                        <div class="px-4 grow w-1/2 lg:w-auto">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Periodo</p>
+                            <p id="periodo" class="text-[21px] leading-[29px]">Verano 2024</p>
+                        </div>
+                        <div class="px-4 grow w-1/2 lg:w-auto">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Campus</p>
+                            <p id="campus" class="text-[21px] leading-[29px]">Mérida</p>
+                        </div>
+                        <div class="px-4 grow w-1/2 lg:w-auto">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nivel</p>
+                            <p id="nivel" class="text-[21px] leading-[29px]">Preparatoria Semestral</p>
+                        </div>
+                        <div class="px-4 grow w-1/2 lg:w-auto">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Materias</p>
+                            <p id="materias" class="text-[21px] leading-[29px]">6</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="plan-section" id="plan-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="flex flex-row justify-center">
+                    <div class="px-4 w-full text-center">
+                        <h2 class="text-write-color-3">Colegiatura, Seguros y Apoyo Educativo</h2>
+                    </div>
+                </div>
+                <div class="flex flex-row flex-wrap justify-center">
+                    <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables">
+                        <div
+                            class="relative overflow-hidden border-2 border-solid border-secondary-color-3 rounded-[6px] h-full">
+                            <table class="w-full">
+                                <tr>
+                                    <th class="bg-secondary-color-3 text-white p-[11px]" colspan="2">
+                                        <p class="text-[18px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
+                                            de contado</p>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p
+                                            class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            Colegiatura 2024</p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p id="colegiatura"
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                            $0</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p
+                                            class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            Monto apoyo financiamiento</p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p id="apoyoFinanciamiento"
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right text-red-color">
+                                            -$0</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]" colspan="2">
+                                        <hr class="border-t border-solid border-[#E6E6E6]">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p
+                                            class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            Total Contado</p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p id="totalContado"
+                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right">
+                                            $0</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables">
+                        <div
+                            class="relative overflow-hidden border-2 border-solid border-secondary-color-2 rounded-[6px] h-full">
+                            <table class="w-full">
+                                <tr>
+                                    <th class="bg-secondary-color-2 text-white p-[11px]" colspan="2">
+                                        <p class="text-[18px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
+                                            de financiamiento</p>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p
+                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-secondary-color-2">
+                                            Primer pago</p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p id="primerPago"
+                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right text-secondary-color-2">
+                                            $0</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p
+                                            class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            4 Mensualidades</p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p id="mensualidades"
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                            $0</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]" colspan="2">
+                                        <hr class="border-t border-solid border-[#E6E6E6]">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p
+                                            class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            Total financiado</p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[10px]">
+                                        <p id="totalFinanciado"
+                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right">
+                                            $0</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-row flex-wrap justify-center">
+                    <div class="px-4 w-full pt-6">
+                        <div class="hidden lg:block table-print">
+                            <div
+                                class="relative overflow-hidden border-2 border-solid border-[#ADADAD] rounded-[6px] h-full">
+                                <table class="w-full">
+                                    <tr>
+                                        <th class="bg-[#ADADAD] text-white p-[11px]" colspan="5">
+                                            <p class="text-[18px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">
+                                                Cualquier plan incluye</p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] bg-[#ADADAD] rounded-full text-white text-[15px]"><i
+                                                        class="fa-solid fa-check"
+                                                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i></span>
+                                                Apoyo financiero
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                                Beca Académica</p>
+                                        </td>
+                                        <td class="w-[95px]">&nbsp;</td>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] bg-[#ADADAD] rounded-full text-white text-[15px]"><i
+                                                        class="fa-solid fa-check"
+                                                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i></span>
+                                                Seguros y cobertura VIVE
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                                &nbsp;</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Beca
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                30%</p>
+                                        </td>
+                                        <td>&nbsp;</td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Seguro accidentes
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p id="seguroAccidentes"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Apoyo estudiantil $
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $3,050.00</p>
+                                        </td>
+                                        <td>&nbsp;</td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Seguro estudiantil
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p id="coberturaEstudiantil"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Apoyo estudiantil %
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                0%</p>
+                                        </td>
+                                        <td>&nbsp;</td>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Cobertura VIVE
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p id="vive"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="block lg:hidden no-print">
+                            <div
+                                class="relative overflow-hidden border-2 border-solid border-[#ADADAD] rounded-[6px] h-full">
+                                <table class="w-full">
+                                    <tr>
+                                        <th class="bg-[#ADADAD] text-white p-[11px]" colspan="2">
+                                            <p class="text-[18px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">
+                                                Cualquier plan incluye</p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] bg-[#ADADAD] rounded-full text-white text-[15px]"><i
+                                                        class="fa-solid fa-check"></i> </span> Apoyo financiero
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p id="apoyoFinanciero"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Beca
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p id="beca"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                0%</p>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Apoyo estudiantil %
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p id="apoyoEstudiantil"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                0%</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] bg-[#ADADAD] rounded-full text-white text-[15px]"><i
+                                                        class="fa-solid fa-check"></i> </span> Seguros y cobertura VIVE
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                            <p
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                                &nbsp;</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Seguro accidentes
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p id="seguroAccidentes2"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Seguro estudiantil
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[4px]">
+                                            <p id="coberturaEstudiantil2"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                                <span
+                                                    class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                                </span> Cobertura VIVE
+                                            </p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                            <p id="vive2"
+                                                class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="flex flex-row flex-wrap justify-center hidden no-print">
+                    <div class="px-4 w-full md:w-3/4 pt-6">
+                        <div
+                            class="relative overflow-hidden border-2 border-solid border-[#ADADAD] rounded-[6px] h-full">
+                            <table class="w-full">
+                                <tr>
+                                    <th class="bg-[#ADADAD] text-white p-[11px]" colspan="2">
+                                        <p class="text-[18px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">
+                                            Cualquier plan incluye</p>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                        <p
+                                            class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            <span
+                                                class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] bg-[#ADADAD] rounded-full text-white text-[15px]"><i
+                                                    class="fa-solid fa-check"></i> </span> Seguros y cobertura VIVE
+                                        </p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] pt-[24px] pb-[4px]">
+                                        <p
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                            &nbsp;</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[4px]">
+                                        <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                            <span
+                                                class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                            </span> Seguro accidentes
+                                        </p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[4px]">
+                                        <p
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                            $690.00</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] py-[4px]">
+                                        <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                            <span
+                                                class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                            </span> Seguro estudiantil
+                                        </p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] py-[4px]">
+                                        <p
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                            $350.00</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                        <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0">
+                                            <span
+                                                class="h-[22px] w-[22px] relative inline-block mr-2 text-center leading-[25px] text-[15px]">&nbsp;
+                                            </span> Cobertura VIVE
+                                        </p>
+                                    </td>
+                                    <td class="px-[10px] md:px-[20px] pt-[4px] pb-[24px]">
+                                        <p
+                                            class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                                            $970.00</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="details-section" id="details-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="flex flex-row justify-center">
+                    <div class="px-4 w-full text-center">
+                        <div class="bg-write-color-3 text-white rounded-[6px] p-[8px] mb-6">
+                            <p class="font-bold mb-0">Vigencia de la propuesta: 07/06/2024</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-row justify-center">
+                    <div class="px-4 w-full mb-10">
+                        <div
+                            class="bg-[#e6eeee] text-main-color-1 rounded-[6px] px-[20px] lg:px-[50px] py-[30px] text-[15px] leading-[23px]">
+                            <p>*El presente documento es un ejercicio de carácter informativo, sin validez, sujeto a
+                                cambios y no representa la formalización de ningún acuerdo con Universidad Tecmilenio.
+                            </p>
+                            <p>*Pago Fijo: Pago que se realiza adicional a la colegiatura. El Pago fijo se descuenta del
+                                total de tu adeudo del Prestamo.</p>
+                            <p>Considerar que los adeudos anteriores del alumno deberán de cubrirse al momento de la
+                                inscripción.</p>
+                            <p>El importe de las colegiaturas consignado en este documento, podrá incrementarse con los
+                                impuestos Federales o Estatales correspondientes, si así lo establecieren las
+                                disposiciones fiscales en el futuro.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-row justify-center no-print">
+                    <div class="px-4 w-full">
+                        <div class="flex flex-row flex-wrap justify-center">
+                            <div class="px-4 mb-4"><button onclick="descargarPDF()"
+                                    class="btn btn-main">Imprimir</button></div>
+                            <div class="px-4 mb-4"><a class="btn btn-main" href="#">Hacer otro cálculo</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div>
+        <script src="js/main.js"></script>
+        <script src="js/cargaDatos/resultados.js"></script>
+
+</body>
+
+</html>

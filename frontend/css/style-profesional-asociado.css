@@ -1,0 +1,94 @@
+/*  ========== COLOR VARIABLES ========== */
+:root {
+  --mainColor1: #00534C;
+  --mainColor2: #DB0032;
+  --mainColor3: "";
+
+  --secondaryColor1: #771115;
+  --secondaryColor2: #9B2C32;
+  --secondaryColor3: #D67E80;
+  --secondaryColor4: ;
+  --secondaryColor5: #f7e5e6;
+  
+}
+
+.banner-form-section::before {
+  background: var(--secondaryColor1);
+}
+
+.banner-form-section::after {
+  background: var(--secondaryColor3);
+}
+
+.text-main-color-1 {
+  color: var(--mainColor1);
+}
+
+.text-main-color-2 {
+  color: var(--mainColor2);
+}
+
+.text-secondary-color-1 {
+  color: var(--secondaryColor1);
+}
+
+.text-secondary-color-2 {
+  color: var(--secondaryColor2);
+}
+
+.text-secondary-color-3 {
+  color: var(--secondaryColor3);
+}
+
+.text-secondary-color-5 {
+  color: var(--secondaryColor5);
+}
+
+.bg-main-color-1 {
+  background: var(--mainColor1);
+}
+
+.bg-main-color-2 {
+  background: var(--mainColor2);
+}
+
+.bg-secondary-color-1 {
+  background: var(--secondaryColor1);
+}
+
+.bg-secondary-color-2 {
+  background: var(--secondaryColor2);
+}
+
+.bg-secondary-color-3 {
+  background: var(--secondaryColor3);
+}
+
+.bg-secondary-color-5 {
+  background: var(--secondaryColor5);
+}
+
+
+.border-main-color-1 {
+  border-color: var(--mainColor1);
+}
+
+.border-main-color-2 {
+  border-color: var(--mainColor2);
+}
+
+.border-secondary-color-1 {
+  border-color: var(--secondaryColor1);
+}
+
+.border-secondary-color-2 {
+  border-color: var(--secondaryColor2);
+}
+
+.border-secondary-color-3 {
+  border-color: var(--secondaryColor3);
+}
+
+.border-secondary-color-5 {
+  border-color: var(--secondaryColor5);
+}

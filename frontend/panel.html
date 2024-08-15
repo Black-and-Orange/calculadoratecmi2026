@@ -1,0 +1,338 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head rel="shortcut icon" href="favicon.ico" type="image/x-icon"></head>
+    <title>Panel Administrativo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            /* Alinea verticalmente los elementos en el centro */
+            margin-bottom: 10px;
+            /* Espacio entre los elementos */
+        }
+
+        .action-buttons p {
+            margin: 0 15px 0 0;
+            /* Espacio alrededor del texto */
+        }
+
+        .action-buttons button {
+            margin-right: 10px;
+            /* Espacio entre los botones */
+        }
+
+        .action-buttons i {
+            font-size: 16px;
+            /* Ajusta el tamaño del ícono si es necesario */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="preparatoria-tab" data-toggle="tab" href="#preparatoria" role="tab" aria-controls="preparatoria" aria-selected="true">Preparatoria</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="profesional-tab" data-toggle="tab" href="#profesional" role="tab" aria-controls="profesional" aria-selected="false">Profesional</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+
+            <!-- Preparatoria Tab -->
+            <div class="tab-pane fade show active" id="preparatoria" role="tabpanel" aria-labelledby="preparatoria-tab">
+                <ul class="nav nav-tabs" id="preparatoriaSubTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="campus-preparatoria-tab" data-toggle="tab" href="#campus-preparatoria" role="tab" aria-controls="campus-preparatoria" aria-selected="true">Campus</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="programas-preparatoria-tab" data-toggle="tab" href="#programas-preparatoria" role="tab" aria-controls="programas-preparatoria" aria-selected="false">Plan de estudios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="formato-preparatoria-tab" data-toggle="tab" href="#formato-preparatoria" role="tab" aria-controls="formato-preparatoria" aria-selected="false">Formato</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="periodo-preparatoria-tab" data-toggle="tab" href="#periodo-preparatoria" role="tab" aria-controls="periodo-preparatoria" aria-selected="false">Periodo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="seguros-preparatoria-tab" data-toggle="tab" href="#seguros-preparatoria" role="tab" aria-controls="seguros-preparatoria" aria-selected="false">Seguros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="becas-preparatoria-tab" data-toggle="tab" href="#becas-preparatoria" role="tab" aria-controls="becas-preparatoria" aria-selected="false">Becas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="apoyos-preparatoria-tab" data-toggle="tab" href="#apoyos-preparatoria" role="tab" aria-controls="apoyos-preparatoria" aria-selected="false">Apoyos Estudiantiles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="carga-materias-preparatoria-tab" data-toggle="tab" href="#carga-materias-preparatoria" role="tab" aria-controls="carga-materias-preparatoria" aria-selected="false">Carga de materias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="costo-materias-preparatoria-tab" data-toggle="tab" href="#costo-materias-preparatoria" role="tab" aria-controls="costo-materias-preparatoria" aria-selected="false">Costo de materias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="beneficios-preparatoria-tab" data-toggle="tab" href="#beneficios-preparatoria" role="tab" aria-controls="beneficios-preparatoria" aria-selected="false">Beneficios</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="preparatoriaSubTabContent">
+                    <div class="tab-pane fade show active" id="campus-preparatoria" role="tabpanel" aria-labelledby="campus-preparatoria-tab">
+                        <button id="loadCampusPreparatoria" class="btn btn-primary">Cargar Campus</button>
+                        <div id="campusPreparatoria"></div>
+                        <form id="createCampusPreparatoriaForm">
+                            <input type="text" id="campusPreparatoriaName" placeholder="Nombre del campus" required>
+                            <input type="text" id="campusPreparatoriaCategory" placeholder="Categoría del campus" required>
+                            <button type="submit" class="btn btn-success">Crear Campus</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="programas-preparatoria" role="tabpanel" aria-labelledby="programas-preparatoria-tab">
+                        <button id="loadPlanPreparatoria" class="btn btn-primary">Cargar Plan de Estudios</button>
+                        <div id="planPreparatoria"></div>
+                        <form id="createPlanPreparatoriaForm">
+                            <input type="text" id="planPreparatoriaName" placeholder="Plan de Estudios" required>
+                            <input type="text" id="planPreparatoriaCategory" placeholder="Tipo de Plan" required>
+                            <button type="submit" class="btn btn-success">Crear Plan de Estudios</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="formato-preparatoria" role="tabpanel" aria-labelledby="formato-preparatoria-tab">
+                        <button id="loadFormatoPreparatoria" class="btn btn-primary">Cargar Formato</button>
+                        <div id="formatoPreparatoria"></div>
+                        <form id="createFormatoPreparatoriaForm">
+                            <input type="text" id="formatoPreparatoriaName" placeholder="Formato" required>
+                            <button type="submit" class="btn btn-success">Crear Formato</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="periodo-preparatoria" role="tabpanel" aria-labelledby="periodo-preparatoria-tab">
+                        <button id="loadPeriodoPreparatoria" class="btn btn-primary">Cargar Periodo</button>
+                        <div id="periodoPreparatoria"></div>
+                        <form id="createPeriodoPreparatoriaForm">
+                            <input type="text" id="periodoPreparatoriaName" placeholder="Periodo" required>
+                            <input type="text" id="periodoPreparatoriaClave" placeholder="Clave" required>
+                            <button type="submit" class="btn btn-success">Crear Periodo</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="seguros-preparatoria" role="tabpanel" aria-labelledby="seguros-preparatoria-tab">
+                        <button id="loadSegurosPreparatoria" class="btn btn-primary">Cargar Seguros</button>
+                        <div id="segurosPreparatoria"></div>
+                    </div>
+
+                    <div class="tab-pane fade" id="becas-preparatoria" role="tabpanel" aria-labelledby="becas-preparatoria-tab">
+                        <button id="loadBecasPreparatoria" class="btn btn-primary">Cargar Becas</button>
+                        <div id="becasPreparatoria"></div>
+                        <form id="createBecasPreparatoriaForm">
+                            <input type="text" id="becaTipo" name="becaTipo" placeholder="Nombre" required>
+                            <input type="number" id="becaPromedioMin" name="becaPromedioMin" placeholder="Promedio Min" required>
+                            <input type="number" id="becaPromedioMax" name="becaPromedioMax" placeholder="Promedio Max" required>
+                            <input type="number" id="becaPorcentaje" name="becaPorcentaje" placeholder="Porcentaje" required>
+                            <button type="submit" class="btn btn-success">Crear Beca</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="apoyos-preparatoria" role="tabpanel" aria-labelledby="apoyos-preparatoria-tab">
+                        <button id="loadApoyosPreparatoria" class="btn btn-primary">Cargar Apoyos</button>
+                        <div id="apoyosPreparatoria"></div>
+                        <form id="createApoyoPreparatoriaForm">
+                            <input type="text" id="apoyoTipo" name="apoyoTipo" placeholder="Nombre" required>
+                            <input type="number" id="apoyoPromedioMin" name="apoyoPromedioMin" placeholder="Promedio Min" required>
+                            <input type="number" id="apoyoPromedioMax" name="apoyoPromedioMax" placeholder="Promedio Max" required>
+                            <input type="number" id="apoyoPorcentaje" name="apoyoPorcentaje" placeholder="Porcentaje" required>
+                            <button type="submit" class="btn btn-success">Crear Apoyo</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="carga-materias-preparatoria" role="tabpanel" aria-labelledby="carga-materias-preparatoria-tab">
+                        <button id="loadMateriasPreparatoria" class="btn btn-primary">Cargar Materias</button>
+                        <div id="materiasPreparatoria"></div>
+                        <form id="createMateriasPreparatoriaForm">
+                            <input type="text" id="materiaPreparatoriaName" placeholder="Nombre de la materia" required>
+                            <input type="text" id="materiaPreparatoriaClave" placeholder="Clave de la materia" required>
+                            <button type="submit" class="btn btn-success">Crear Materia</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="costo-materias-preparatoria" role="tabpanel" aria-labelledby="costo-materias-preparatoria-tab">
+                        <button id="loadCostoMateriasPreparatoria" class="btn btn-primary">Cargar Costo de Materias</button>
+                        <div id="costoMateriasPreparatoria"></div>
+                        <form id="createCostoMateriasPreparatoriaForm">
+                            <input type="text" id="costoMateriaPreparatoriaName" placeholder="Nombre de la materia" required>
+                            <input type="text" id="costoMateriaPreparatoriaClave" placeholder="Clave de la materia" required>
+                            <input type="number" id="costoMateriaPreparatoria" placeholder="Costo de la materia" required>
+                            <button type="submit" class="btn btn-success">Crear Costo de Materia</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="beneficios-preparatoria" role="tabpanel" aria-labelledby="beneficios-preparatoria-tab">
+                        <button id="loadBeneficiosPreparatoria" class="btn btn-primary">Cargar Beneficios</button>
+                        <div id="beneficiosPreparatoria"></div>
+                        <form id="createBeneficioPreparatoriaForm">
+                            <input type="text" id="beneficioPreparatoriaName" placeholder="Nombre del beneficio" required>
+                            <input type="text" id="beneficioPreparatoriaDescription" placeholder="Descripción del beneficio" required>
+                            <button type="submit" class="btn btn-success">Crear Beneficio</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profesional Tab -->
+            <div class="tab-pane fade" id="profesional" role="tabpanel" aria-labelledby="profesional-tab">
+                <ul class="nav nav-tabs" id="profesionalSubTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="campus-profesional-tab" data-toggle="tab" href="#campus-profesional" role="tab" aria-controls="campus-profesional" aria-selected="true">Campus</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="programas-profesional-tab" data-toggle="tab" href="#programas-profesional" role="tab" aria-controls="programas-profesional" aria-selected="false">Plan de estudios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="formato-profesional-tab" data-toggle="tab" href="#formato-profesional" role="tab" aria-controls="formato-profesional" aria-selected="false">Formato</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="periodo-profesional-tab" data-toggle="tab" href="#periodo-profesional" role="tab" aria-controls="periodo-profesional" aria-selected="false">Periodo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="seguros-profesional-tab" data-toggle="tab" href="#seguros-profesional" role="tab" aria-controls="seguros-profesional" aria-selected="false">Seguros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="becas-profesional-tab" data-toggle="tab" href="#becas-profesional" role="tab" aria-controls="becas-profesional" aria-selected="false">Becas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="apoyos-profesional-tab" data-toggle="tab" href="#apoyos-profesional" role="tab" aria-controls="apoyos-profesional" aria-selected="false">Apoyos Estudiantiles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="carga-materias-profesional-tab" data-toggle="tab" href="#carga-materias-profesional" role="tab" aria-controls="carga-materias-profesional" aria-selected="false">Carga de materias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="costo-materias-profesional-tab" data-toggle="tab" href="#costo-materias-profesional" role="tab" aria-controls="costo-materias-profesional" aria-selected="false">Costo de materias</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="beneficios-profesional-tab" data-toggle="tab" href="#beneficios-profesional" role="tab" aria-controls="beneficios-profesional" aria-selected="false">Beneficios</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="profesionalSubTabContent">
+                    <div class="tab-pane fade show active" id="campus-profesional" role="tabpanel" aria-labelledby="campus-profesional-tab">
+                        <button id="loadCampusProfesional" class="btn btn-primary">Cargar Campus</button>
+                        <div id="campusProfesional"></div>
+                        <form id="createCampusProfesionalForm">
+                            <input type="text" id="campusProfesionalName" placeholder="Nombre del campus" required>
+                            <input type="text" id="campusProfesionalCategory" placeholder="Categoría del campus" required>
+                            <button type="submit" class="btn btn-success">Crear Campus</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="programas-profesional" role="tabpanel" aria-labelledby="programas-profesional-tab">
+                        <button id="loadPlanProfesional" class="btn btn-primary">Cargar Plan de Estudios</button>
+                        <div id="planProfesional"></div>
+                        <form id="createPlanProfesionalForm">
+                            <input type="text" id="planProfesionalName" placeholder="Plan de Estudios" required>
+                            <input type="text" id="planProfesionalCategory" placeholder="Tipo de Plan" required>
+                            <button type="submit" class="btn btn-success">Crear Plan de Estudios</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="formato-profesional" role="tabpanel" aria-labelledby="formato-profesional-tab">
+                        <button id="loadFormatoProfesional" class="btn btn-primary">Cargar Formato</button>
+                        <div id="formatoProfesional"></div>
+                        <form id="createFormatoProfesionalForm">
+                            <input type="text" id="formatoProfesionalName" placeholder="Formato" required>
+                            <button type="submit" class="btn btn-success">Crear Formato</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="periodo-profesional" role="tabpanel" aria-labelledby="periodo-profesional-tab">
+                        <button id="loadPeriodoProfesional" class="btn btn-primary">Cargar Periodo</button>
+                        <div id="periodoProfesional"></div>
+                        <form id="createPeriodoProfesionalForm">
+                            <input type="text" id="periodoProfesionalName" placeholder="Periodo" required>
+                            <input type="text" id="periodoProfesionalCategory" placeholder="Categoría" required>
+                            <button type="submit" class="btn btn-success">Crear Periodo</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="seguros-profesional" role="tabpanel" aria-labelledby="seguros-profesional-tab">
+                        <button id="loadSegurosProfesional" class="btn btn-primary">Cargar Seguros</button>
+                        <div id="segurosProfesional"></div>
+                        <form id="createSegurosProfesionalForm">
+                            <input type="text" id="segurosProfesionalName" placeholder="Seguro" required>
+                            <input type="text" id="segurosProfesionalDescription" placeholder="Descripción" required>
+                            <button type="submit" class="btn btn-success">Crear Seguro</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="becas-profesional" role="tabpanel" aria-labelledby="becas-profesional-tab">
+                        <button id="loadBecasProfesional" class="btn btn-primary">Cargar Becas</button>
+                        <div id="becasProfesional"></div>
+                        <form id="createBecaProfesionalForm">
+                            <input type="text" id="becaProfesionalName" name="becaProfesionalName" placeholder="Nombre" required>
+                            <input type="number" id="becaProfesionalPromedioMin" name="becaProfesionalPromedioMin" placeholder="Promedio Min" required>
+                            <input type="number" id="becaProfesionalPromedioMax" name="becaProfesionalPromedioMax" placeholder="Promedio Max" required>
+                            <input type="number" id="becaProfesionalPorcentaje" name="becaProfesionalPorcentaje" placeholder="Porcentaje" required>
+                            <button type="submit" class="btn btn-success">Crear Beca</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="apoyos-profesional" role="tabpanel" aria-labelledby="apoyos-profesional-tab">
+                        <button id="loadApoyosProfesional" class="btn btn-primary">Cargar Apoyos</button>
+                        <div id="apoyosProfesional"></div>
+                        <form id="createApoyoProfesionalForm">
+                            <input type="text" id="apoyoProfesionalTipo" name="apoyoProfesionalTipo" placeholder="Nombre" required>
+                            <input type="number" id="apoyoProfesionalPromedioMin" name="apoyoProfesionalPromedioMin" placeholder="Promedio Min" required>
+                            <input type="number" id="apoyoProfesionalPromedioMax" name="apoyoProfesionalPromedioMax" placeholder="Promedio Max" required>
+                            <input type="number" id="apoyoProfesionalPorcentaje" name="apoyoProfesionalPorcentaje" placeholder="Porcentaje" required>
+                            <button type="submit" class="btn btn-success">Crear Apoyo</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="carga-materias-profesional" role="tabpanel" aria-labelledby="carga-materias-profesional-tab">
+                        <button id="loadMateriasProfesional" class="btn btn-primary">Cargar Materias</button>
+                        <div id="materiasProfesional"></div>
+                        <form id="createMateriasProfesionalForm">
+                            <input type="text" id="materiaProfesionalName" placeholder="Nombre de la materia" required>
+                            <input type="text" id="materiaProfesionalClave" placeholder="Clave de la materia" required>
+                            <button type="submit" class="btn btn-success">Crear Materia</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="costo-materias-profesional" role="tabpanel" aria-labelledby="costo-materias-profesional-tab">
+                        <button id="loadCostoMateriasProfesional" class="btn btn-primary">Cargar Costo de Materias</button>
+                        <div id="costoMateriasProfesional"></div>
+                        <form id="createCostoMateriasProfesionalForm">
+                            <input type="text" id="costoMateriaProfesionalName" placeholder="Nombre de la materia" required>
+                            <input type="text" id="costoMateriaProfesionalClave" placeholder="Clave de la materia" required>
+                            <input type="number" id="costoMateriaProfesional" placeholder="Costo de la materia" required>
+                            <button type="submit" class="btn btn-success">Crear Costo de Materia</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="beneficios-profesional" role="tabpanel" aria-labelledby="beneficios-profesional-tab">
+                        <button id="loadBeneficiosProfesional" class="btn btn-primary">Cargar Beneficios</button>
+                        <div id="beneficiosProfesional"></div>
+                        <form id="createBeneficioProfesionalForm">
+                            <input type="text" id="beneficioProfesionalName" placeholder="Nombre del beneficio" required>
+                            <input type="text" id="beneficioProfesionalDescription" placeholder="Descripción del beneficio" required>
+                            <button type="submit" class="btn btn-success">Crear Beneficio</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js\control\controlCampus.js"></script>
+</body>
+
+</html>

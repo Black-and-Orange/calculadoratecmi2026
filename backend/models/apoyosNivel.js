@@ -1,0 +1,44 @@
+// models/apoyoNivel.js
+const db = require('../config/dbConfig');
+
+const getAllApoyosNiveles = (callback) => {
+    db.query('SELECT * FROM apoyos_nivel', callback);
+};
+
+const getApoyoNivelById = (id, callback) => {
+    db.query('SELECT * FROM apoyos_nivel WHERE id = ?', [id], callback);
+};
+
+const createApoyoNivel = (apoyoNivel, callback) => {
+    const { apoyo_id, nivel_id } = apoyoNivel;
+    db.query('INSERT INTO apoyos_nivel (apoyo_id, nivel_id) VALUES (?, ?)', [apoyo_id, nivel_id], callback);
+};
+
+const deleteApoyoNivel = (id, callback) => {
+    db.query('DELETE FROM apoyos_nivel WHERE id = ?', [id], callback);
+};
+
+const updateApoyoNivel = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
+    }
+
+    queryValues.push(id);
+    const query = `UPDATE apoyos_nivel SET ${queryParts.join(', ')} WHERE id = ?`;
+
+    db.query(query, queryValues, callback);
+};
+
+module.exports = {
+    getAllApoyosNiveles,
+    getApoyoNivelById,
+    createApoyoNivel,
+    deleteApoyoNivel,
+    updateApoyoNivel
+};
