@@ -94,15 +94,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (apoyoFinanciero.textContent == "null") {
             apoyoFinanciero.textContent = `Sin Apoyo Estudiantil`;
         }
-        if (seguroAccidentes2) {
-            seguroAccidentes2.textContent = valores.insurance;
-        }
-        if (coberturaEstudiantil2) {
-            coberturaEstudiantil2.textContent = valores.coverage;
-        }
-        if (vive2) {
-            vive2.textContent = valores.vive;
-        }
         if (seguroAccidentes) {
             seguroAccidentes.textContent = valores.insurance;
         }

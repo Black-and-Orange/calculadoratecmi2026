@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
         uptadetSuportPercentage(supportPercentageSelect.value);
     });
 
+    prestamoPercentageSelect.addEventListener('change', () => {
+        uptadetPrestamoPercentage(prestamoPercentageSelect.value);
+    });
+
     async function fetchInteres(levelId) {
         try {
             const response = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/intereses/nivel/${levelId}`);
@@ -46,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, costoTotal) => {
+    const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, prestamo, costoTotal) => {
         let finalAmount = 0;
 
         if (scholarshipPercentage > 0) {
@@ -57,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
             finalAmount = (supportPercentage / 100) * costoTotal;
         }
 
+        if (prestamo > 0) {
+            finalAmount += (prestamo / 100) * costoTotal;
+            
+        }
+
         return finalAmount;
     };
 
@@ -65,8 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const supportPercentage = parseFloat(document.getElementById('txt-support-percentage').value) || 0;
         const isFixedScholarshipSelected = document.getElementById('txt-scholarship').querySelector('option:checked[data-fixed="true"]');
         const selectedPercentage = isFixedScholarshipSelected ? parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0 : 0;
+        const selectedprestamo = parseFloat(JSON.parse(localStorage.getItem('selectedprestamo'))) || 0;
 
-        const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, window.costoTotal);
+        const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, selectedprestamo,  window.costoTotal);
 
         localStorage.setItem('finalAmount', JSON.stringify(finalAmount));
 
@@ -95,12 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } 
 
     const uptadetPrestamoPercentage = (value) => {
-        localStorage.setItem('selectedPrestamoValue', JSON.stringify(value));
+        localStorage.setItem('selectedprestamo', JSON.stringify(value));
     } 
-
-    prestamoPercentageSelect.addEventListener('change', () => {
-        uptadetPrestamoPercentage(prestamoPercentageSelect.value);
-    });
 
     [scholarshipSelect, percentageSelect, supportPercentageSelect, prestamoPercentageSelect, averageInput].forEach(element => {
         element.addEventListener('change', () => {
@@ -238,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             option.textContent = prestamo.prestamo;
                             prestamoPercentageSelect.appendChild(option);
                         });
+
                     } catch (error) {
                         console.error('Error en la carga de datos de préstamos:', error);
                         prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
