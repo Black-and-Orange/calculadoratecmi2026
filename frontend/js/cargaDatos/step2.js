@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const percentageSelect2 = document.getElementById('txt-percentage2');
     const supportPercentageSelect = document.getElementById('txt-support-percentage');
     const prestamoPercentageSelect = document.getElementById('txt-prestamo-percentage');
+    const prestamoPercentageContainer = document.querySelector('.field-avg-4');
+
+    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
 
     percentageSelect.addEventListener('change', () => {
         uptadetSelectedPercentage(percentageSelect.value);
@@ -16,10 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     supportPercentageSelect.addEventListener('change', () => {
         uptadetSuportPercentage(supportPercentageSelect.value);
-    });
-
-    prestamoPercentageSelect.addEventListener('change', () => {
-        uptadetPrestamoPercentage(prestamoPercentageSelect.value);
     });
 
     async function fetchInteres(levelId) {
@@ -47,8 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const levelId = window.selectedLevelId || 1;  // Valor por defecto 1 si no se ha seleccionado un nivel
-
     const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, costoTotal) => {
         let finalAmount = 0;
 
@@ -64,9 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const calculateFinalAmount = async () => {
-        const scholarshipPercentage = parseFloat(percentageSelect.value) || 0;
-        const supportPercentage = parseFloat(supportPercentageSelect.value) || 0;
-        const isFixedScholarshipSelected = scholarshipSelect.querySelector('option:checked[data-fixed="true"]');
+        const scholarshipPercentage = parseFloat(document.getElementById('txt-percentage').value) || 0;
+        const supportPercentage = parseFloat(document.getElementById('txt-support-percentage').value) || 0;
+        const isFixedScholarshipSelected = document.getElementById('txt-scholarship').querySelector('option:checked[data-fixed="true"]');
         const selectedPercentage = isFixedScholarshipSelected ? parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0 : 0;
 
         const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, window.costoTotal);
@@ -84,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return totalConInteres;
     };
 
+
     const uptadetSelectedPercentage = (value) => {
         localStorage.setItem('selectedPercentage', JSON.stringify(value));
     }
@@ -99,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uptadetPrestamoPercentage = (value) => {
         localStorage.setItem('selectedPrestamoValue', JSON.stringify(value));
     } 
+
+    prestamoPercentageSelect.addEventListener('change', () => {
+        uptadetPrestamoPercentage(prestamoPercentageSelect.value);
+    });
 
     [scholarshipSelect, percentageSelect, supportPercentageSelect, prestamoPercentageSelect, averageInput].forEach(element => {
         element.addEventListener('change', () => {
@@ -218,25 +220,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
             }
             
-            if (levelId === 2) {
-                const prestamoResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/nivel/${levelId}`);
-                if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
-                const prestamos = await prestamoResponse.json();
-
-                prestamoPercentageSelect.classList.remove('hidden');
-                prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-                prestamos.forEach(prestamo => {
-                    const option = document.createElement('option');
-                    option.value = prestamo.porcentaje;
-                    option.textContent = prestamo.porcentaje;
-                    prestamoPercentageSelect.appendChild(option);
-                });
-            } else {
-                prestamoPercentageSelect.classList.add('hidden');
-                prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-            }
-
+            console.log("levelId", levelId);
+            
+            const mostrarPrestamoSelectSiNivel2 = async () => {
+                if (levelId === 2) {
+                    try {
+                        const prestamoResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/nivel/${levelId}`);
+                        if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
+                        const prestamos = await prestamoResponse.json();
+        
+                        prestamoPercentageContainer.classList.remove('hidden');
+                        prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
+        
+                        prestamos.forEach(prestamo => {
+                            const option = document.createElement('option');
+                            option.value = prestamo.prestamo;
+                            option.textContent = prestamo.prestamo;
+                            prestamoPercentageSelect.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error en la carga de datos de préstamos:', error);
+                        prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
+                        prestamoPercentageContainer.classList.add('hidden');
+                    }
+                } else {
+                    prestamoPercentageContainer.classList.add('hidden');
+                    prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
+                }
+            };
+        
+            mostrarPrestamoSelectSiNivel2();
 
         } catch (error) {
             console.error('Error en la carga de datos:', error);
