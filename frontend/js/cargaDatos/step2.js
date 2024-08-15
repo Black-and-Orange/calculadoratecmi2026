@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
         uptadetSelectedName(scholarshipSelect.options[scholarshipSelect.selectedIndex].text);
     });
 
+    supportPercentageSelect.addEventListener('change', () => {
+        uptadetSuportPercentage(supportPercentageSelect.value);
+    });
+
     async function fetchInteres(levelId) {
         try {
             const response = await fetch(`http://localhost:3008/api/intereses/nivel/${levelId}`);
@@ -82,6 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uptadetSelectedName = (value) => {
         localStorage.setItem('selectedScholarshipName', JSON.stringify(value));
     }
+
+    const uptadetSuportPercentage = (value) => {
+        localStorage.setItem('selectedSupportValue', JSON.stringify(value));
+    } 
 
     [scholarshipSelect, percentageSelect, supportPercentageSelect, averageInput].forEach(element => {
         element.addEventListener('change', () => {

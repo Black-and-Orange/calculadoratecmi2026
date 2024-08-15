@@ -150,7 +150,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('nivel').textContent = nivel;
     document.getElementById('materias').textContent = materias;
 
+
+    const tituloPorNivel = {
+        'Preparatoria Semestral': 'Impulsa tu futuro desde hoy',
+        'Preparatoria Tetramestral': 'Avanza con determinación hacia tu futuro profesional',
+    }
+
+
     const beneficiosPorNivel = {
+
         'Preparatoria Semestral': [
             {
                 title: "Certificaciones",
@@ -181,13 +189,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             {
                 title: "Duración",
                 description: "Completarás tu preparatoria tetramestral en dos años.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-1.svg",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/duracion.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
             {
                 title: "Certificación en Tecnología",
                 description: "Aprende lenguaje de programación Python.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-4.svg",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/certificaci%C3%B3n_tecnolog%C3%ADa.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             },
             {
@@ -212,8 +220,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     function actualizarBeneficios(nivel) {
-        const benefitsSection = document.getElementById('benefits-content');
-        benefitsSection.innerHTML = '';  
+        const benefitsWrapper = document.getElementById('benefits-wrappers');
+        const titleBenefit= document.getElementById('titleBenefit');
+        benefitsWrapper.innerHTML = '';  
+        titleBenefit.innerText = '';  
+        titleBenefit.innerText = tituloPorNivel[nivel] || 'N/A';
 
         const beneficios = beneficiosPorNivel[nivel] || [];
 
@@ -222,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24";
             
             benefitItem.innerHTML = `
-                <div class="border-2 border-solid ${beneficio.colorClass} rounded-[6px] relative px-[20px] py-[30px] h-full">
+                <div class="border-2 border-solid ${beneficio.colorClass} rounded-[6px] relative px-[20px] py-[30px] h-full" style="background-color: #FFFFFF!important">
                     <div class="${beneficio.colorClass} w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
                         <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                             src="${beneficio.icon}">
@@ -232,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
             
-            benefitsSection.appendChild(benefitItem);
+            benefitsWrapper.appendChild(benefitItem);
         });
     }
 
