@@ -6,14 +6,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('http://localhost:3008/api/seguros');
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const data = await response.json();
-            segurosData = data[0]; // Asumiendo que la respuesta es un array con un objeto
+            segurosData = data[0];
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
     }
 
-    await fetchSeguros(); // Asegurarse de que los datos se carguen antes de continuar
-
+    await fetchSeguros(); 
     function recuperarValores() {
         // Recuperar los valores de localStorage
         const insuranceValue = JSON.parse(localStorage.getItem('insuranceValue'));
@@ -29,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function recuperarValoresAdicionales() {
-        // Recuperar valores adicionales de localStorage
+        // Recuperar valores de localStorage
         const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));
         const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount'));
         const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
@@ -65,9 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function mostrarValores(valores) {
-        // Mostrar valores procesados en la consola
-        console.log('Valor de la Beca Recuperado:', valores.scholarshipValue);
-        console.log('Valor del Apoyo Recuperado:', valores.supportValue);
+
         const totalfinanciado = valores.interesDividido * 4 + valores.primeraCuota;
 
         if (colegiatura) {
@@ -94,6 +91,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (apoyoFinanciero.textContent == 'Elige') {
             apoyoFinanciero.textContent = `Apoyo Estudiantil`;
         }
+        if (apoyoFinanciero.textContent == "null") {
+            apoyoFinanciero.textContent = `Sin Apoyo Estudiantil`;
+        }
         if (seguroAccidentes2) {
             seguroAccidentes2.textContent = valores.insurance;
         }
@@ -115,6 +115,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (apoyoEstudiantil) {
             apoyoEstudiantil.textContent = `${valores.supportValue}%`;
         }
+        if (apoyoEstudiantil.textContent == "null%") {
+            apoyoEstudiantil.textContent = `0%`;
+        }
         if (beca) {
             beca.textContent =
                 valores.scholarshipValue > 0 ? `${valores.scholarshipValue}%` :
@@ -135,14 +138,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const params = new URLSearchParams(window.location.search);
 
-    // Asignar los valores de los parámetros a las variables correspondientes
     const nombre = params.get('txt-name') || 'N/A';
     const periodo = params.get('select-period') || 'N/A';
     const campus = params.get('select-campus') || 'N/A';
     const nivel = params.get('select-grade') || 'N/A';
     const materias = params.get('select-subjects') || 'N/A';
 
-    // Llenar los elementos HTML con los valores
     document.getElementById('nombre').textContent = nombre;
     document.getElementById('periodo').textContent = periodo;
     document.getElementById('campus').textContent = campus;

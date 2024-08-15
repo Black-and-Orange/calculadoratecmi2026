@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     selectors.grade.addEventListener('change', async () => {
+        localStorage.clear();
         const selectedLevel = selectors.grade.value;
         const levelMapping = {
             'Preparatoria Semestral': 1,

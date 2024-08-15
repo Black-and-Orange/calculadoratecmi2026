@@ -32,68 +32,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const levelId = window.selectedLevelId || 1;  // Valor por defecto 1 si no se ha seleccionado un nivel
 
+    const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, costoTotal) => {
+        let finalAmount = 0;
+
+        if (scholarshipPercentage > 0) {
+            finalAmount = (scholarshipPercentage / 100) * costoTotal;
+        } else if (selectedPercentage > 0) {
+            finalAmount = (selectedPercentage / 100) * costoTotal;
+        } else if (supportPercentage > 0) {
+            finalAmount = (supportPercentage / 100) * costoTotal;
+        }
+
+        return finalAmount;
+    };
+
     const calculateFinalAmount = async () => {
         const scholarshipPercentage = parseFloat(percentageSelect.value) || 0;
         const supportPercentage = parseFloat(supportPercentageSelect.value) || 0;
         const isFixedScholarshipSelected = scholarshipSelect.querySelector('option:checked[data-fixed="true"]');
-        
-        // Recuperar el porcentaje de la beca fija desde localStorage
         const selectedPercentage = isFixedScholarshipSelected ? parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0 : 0;
-    
-        // Calcular los montos de beca y apoyo según cuál esté seleccionado
-        let finalAmount = 0;
-    
-        if (scholarshipPercentage > 0) {
-            // Si hay una beca variable seleccionada, se calcula solo la beca variable
-            finalAmount = (scholarshipPercentage / 100) * window.costoTotal;
-            console.log('Monto de beca variable:', finalAmount);
-        } else if (selectedPercentage > 0) {
-            // Si no hay beca variable, pero hay una beca fija seleccionada, se calcula solo la beca fija
-            finalAmount = (selectedPercentage / 100) * window.costoTotal;
-            console.log('Monto de beca fija:', finalAmount);
-        } else if (supportPercentage > 0) {
-            // Si no hay becas, pero hay un apoyo, se calcula solo el apoyo
-            finalAmount = (supportPercentage / 100) * window.costoTotal;
-            console.log('Monto de apoyo:', finalAmount);
-        }
-    
-        // Almacenar el monto final y total contado en localStorage
+
+        const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, window.costoTotal);
+
         localStorage.setItem('finalAmount', JSON.stringify(finalAmount));
-    
+
         const totalContado = window.costoTotal - finalAmount;
         localStorage.setItem('totalContado', JSON.stringify(totalContado));
-    
-        // Obtener y aplicar el interés al total contado
+
         const interes = await fetchInteres(levelId);
         const totalConInteres = totalContado * (1 + interes / 100);
-    
+
         window.totalConInteres = totalConInteres;
-    
+
         return totalConInteres;
     };
-    
-    [scholarshipSelect, percentageSelect, supportPercentageSelect].forEach(select => {
-        select.addEventListener('change', () => {
+
+    [scholarshipSelect, percentageSelect, supportPercentageSelect, averageInput].forEach(element => {
+        element.addEventListener('change', () => {
             calculateFinalAmount();
-
-            // Log de la beca seleccionada
-            const selectedScholarshipName = scholarshipSelect.options[scholarshipSelect.selectedIndex]?.text || 'Ninguna';
-            const selectedScholarshipValue = scholarshipSelect.value || 'Ninguna';
-
-            // Log del apoyo financiero
-            const selectedSupportValue = supportPercentageSelect.value || 0;
-
-            const selectedScholarshipNameString = JSON.stringify(selectedScholarshipName);
-            const selectedScholarshipValueString = JSON.stringify(percentageSelect.value);
-            const selectedSupportValueString = JSON.stringify(selectedSupportValue);
-
-            // Almacenar los valores en localStorage
-            localStorage.setItem('selectedScholarshipName', selectedScholarshipNameString);
-            localStorage.setItem('selectedScholarshipValue', selectedScholarshipValueString);
-            localStorage.setItem('selectedSupportValue', selectedSupportValueString);
-
-            // Aquí se muestra cuál fue el porcentaje seleccionado
-            console.log('Porcentaje de beca seleccionado:', percentageSelect.value);
         });
     });
 
@@ -125,8 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const option = document.createElement('option');
                     option.value = scholarship.id;
                     option.textContent = scholarship.tipo;
-                    option.dataset.porcentaje = scholarship.porcentaje; // Agregar el porcentaje como data attribute
-                    option.dataset.fixed = true; // Marcar como beca fija
+                    option.dataset.porcentaje = scholarship.porcentaje;
+                    option.dataset.fixed = true;
                     scholarshipSelect.appendChild(option);
                 });
             }
@@ -136,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const option = document.createElement('option');
                     option.value = scholarship.id;
                     option.textContent = scholarship.tipo;
-                    option.dataset.porcentaje = scholarship.porcentaje; // Agregar el porcentaje como data attribute
+                    option.dataset.porcentaje = scholarship.porcentaje;
                     scholarshipSelect.appendChild(option);
                 });
             }
@@ -150,13 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         percentageSelect2.classList.add('hidden');
                         percentageSelect.innerHTML = '<option value="">Elige</option>';
 
-                        // Obtener el porcentaje de la beca fija seleccionada
                         const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
                         const selectedPercentage = selectedOption.dataset.porcentaje;
-                        console.log('Porcentaje de beca fija seleccionada:', selectedPercentage);
-                        
+
                         localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
-                        
                     } else {
                         percentageSelect.classList.remove('hidden');
                         await updatePercentageOptionsByScholarshipId(selectedScholarshipId);
@@ -203,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 supports.forEach(support => {
                     const option = document.createElement('option');
                     option.value = support.porcentaje;
-                    option.textContent = support.tipo;
+                    option.textContent = support.porcentaje;
                     supportPercentageSelect.appendChild(option);
                 });
             } else {
