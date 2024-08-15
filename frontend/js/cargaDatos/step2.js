@@ -5,6 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const percentageSelect2 = document.getElementById('txt-percentage2');
     const supportPercentageSelect = document.getElementById('txt-support-percentage');
 
+    percentageSelect.addEventListener('change', () => {
+        uptadetSelectedPercentage(percentageSelect.value);
+    });
+
+    scholarshipSelect.addEventListener('change', () => {
+        uptadetSelectedName(scholarshipSelect.options[scholarshipSelect.selectedIndex].text);
+    });
+
     async function fetchInteres(levelId) {
         try {
             const response = await fetch(`http://localhost:3008/api/intereses/nivel/${levelId}`);
@@ -66,6 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return totalConInteres;
     };
+
+    const uptadetSelectedPercentage = (value) => {
+        localStorage.setItem('selectedPercentage', JSON.stringify(value));
+    }
+
+    const uptadetSelectedName = (value) => {
+        localStorage.setItem('selectedScholarshipName', JSON.stringify(value));
+    }
 
     [scholarshipSelect, percentageSelect, supportPercentageSelect, averageInput].forEach(element => {
         element.addEventListener('change', () => {
@@ -130,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const selectedPercentage = selectedOption.dataset.porcentaje;
 
                         localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
+                        await calculateFinalAmount();
                     } else {
                         percentageSelect.classList.remove('hidden');
                         await updatePercentageOptionsByScholarshipId(selectedScholarshipId);

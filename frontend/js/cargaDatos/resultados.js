@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             apoyoFinanciamiento.textContent = `-$${parseFloat(valores.finalAmount.toFixed(2))}`;
         }
         if (totalContado) {
-            totalContado.textContent = `$${valores.totalContado}`;
+            totalContado.textContent = `$${parseFloat(valores.totalContado.toFixed(2))}`;
         }
         if (primerPago) {
             primerPago.textContent = `$${parseFloat(valores.primeraCuota.toFixed(2))}`;
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             beca.textContent =
                 valores.scholarshipValue > 0 ? `${valores.scholarshipValue}%` :
                     valores.retrievedPercentage > 0 ? `${valores.retrievedPercentage}%` :
-                        "0";
+                        "0%";
         }
 
     }
