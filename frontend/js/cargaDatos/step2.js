@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function adjustLoanOptions() {
-        console.log('Should allow max loans of 20%');
         document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
             let isProfessional = isProfessionalSelected();
             let isScolarship = isScolarshipSelected();
@@ -46,9 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let isGT20 = currentValueNumber > 20;
             if(isProfessional && isScolarship && isGT20 ) {
                 //TODO: remover las opciones aquí
-                console.log(Number(optionElement.value.replace('%', '')));
                 optionElement.disabled = 'disabled';
-                console.log(optionElement)
             } else {
                 //TODO: regenerar las opciones acquí
                 optionElement.disabled = '';

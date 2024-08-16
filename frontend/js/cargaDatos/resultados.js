@@ -145,6 +145,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                         "0%";
         }
 
+        hideZeroPercentages();
+    }
+
+    function hideZeroPercentages() {
+        const elementBeca = document.getElementById('beca');
+        const elementLabelBeca = document.getElementById('label-beca');
+
+        const elementApoyo = document.getElementById('apoyoEstudiantil');
+        const elementLabelApoyo = document.getElementById('label-apoyoEstudiantil');
+
+        if(elementBeca.innerText == '0%') {
+            elementBeca.classList.add('hidden');
+            elementLabelBeca.classList.add('hidden');
+        }
+
+        if(elementApoyo.innerText == '0%'){
+            elementApoyo.classList.add('hidden');
+            elementLabelApoyo.classList.add('hidden');
+        }
     }
 
     const valores = recuperarValores();
