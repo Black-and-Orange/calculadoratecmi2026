@@ -31,15 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (selectInsurance.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_accidentes);
+            anuncioPoliza.style.display = "block";
+        } else {
+            anuncioPoliza.style.display = "none";
         }
 
         if (selectCoverage.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
-            anuncioPoliza.style.display = "block";
-        }else{
-            anuncioPoliza.style.display = "none"; 
         }
-
+        
         if (selectVive.value === 'si') {
             totalCost += parseFloat(segurosData.cobertura_vive);
         }

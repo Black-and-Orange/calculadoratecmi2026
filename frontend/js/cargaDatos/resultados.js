@@ -35,15 +35,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchSeguros();
 
+    function formatearPesos(numero) {
+        return parseFloat(numero).toLocaleString('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
     function recuperarValores() {
         const insuranceValue = JSON.parse(localStorage.getItem('insuranceValue'));
         const coverageValue = JSON.parse(localStorage.getItem('coverageValue'));
         const viveValue = JSON.parse(localStorage.getItem('viveValue'));
 
         return {
-            insurance: insuranceValue === 'si' ? `$${segurosData.seguro_accidentes}` : 'No Aplica',
-            coverage: coverageValue === 'si' ? `$${segurosData.seguro_estudiantil}` : 'No Aplica',
-            vive: viveValue === 'si' ? `$${segurosData.cobertura_vive}` : 'No Aplica'
+            insurance: insuranceValue === 'si' ? formatearPesos(segurosData.seguro_accidentes) : 'No Aplica',
+            coverage: coverageValue === 'si' ? formatearPesos(segurosData.seguro_estudiantil) : 'No Aplica',
+            vive: viveValue === 'si' ? formatearPesos(segurosData.cobertura_vive) : 'No Aplica'
         };
     }
 
@@ -70,11 +79,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         return {
-            costoTotal: costoTotalRecuperado,
-            finalAmount: finalAmountRecuperado,
-            totalContado: totalContadoRecuperado,
-            interesDividido: interesDivididoRecuperado,
-            primeraCuota: primeraCuotaRecuperada,
+            costoTotal: formatearPesos(costoTotalRecuperado),
+            finalAmount: formatearPesos(finalAmountRecuperado),
+            totalContado: formatearPesos(totalContadoRecuperado),
+            interesDividido: formatearPesos(interesDivididoRecuperado),
+            primeraCuota: formatearPesos(primeraCuotaRecuperada),
             scholarshipName: selectedScholarshipNameRecuperado,
             scholarshipValue: selectedScholarshipValueRecuperado,
             supportValue: selectedSupportValueRecuperado,
@@ -91,25 +100,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             textoMensualidades = '3 Mensualidades';
         }
 
-        const totalfinanciado = valores.interesDividido * factorMultiplicador + valores.primeraCuota;
+        const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g,"")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g,""));
 
         if (colegiatura) {
-            colegiatura.textContent = `$${valores.costoTotal}`;
+            colegiatura.textContent = valores.costoTotal;
         }
         if (apoyoFinanciamiento) {
-            apoyoFinanciamiento.textContent = `-$${parseFloat(valores.finalAmount.toFixed(2))}`;
+            apoyoFinanciamiento.textContent = `-${valores.finalAmount}`;
         }
         if (totalContado) {
-            totalContado.textContent = `$${parseFloat(valores.totalContado.toFixed(2))}`;
+            totalContado.textContent = valores.totalContado;
         }
         if (primerPago) {
-            primerPago.textContent = `$${parseFloat(valores.primeraCuota.toFixed(2))}`;
+            primerPago.textContent = valores.primeraCuota;
         }
         if (mensualidades) {
-            mensualidades.textContent = `$${parseFloat(valores.interesDividido.toFixed(2))}`;
+            mensualidades.textContent = valores.interesDividido;
         }
         if (totalFinanciado) {
-            totalFinanciado.textContent = `$${parseFloat(totalfinanciado.toFixed(2))}`;
+            totalFinanciado.textContent = formatearPesos(totalfinanciado);
         }
         if (mensualidadesText) {
             mensualidadesText.textContent = textoMensualidades;
@@ -155,12 +164,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const elementApoyo = document.getElementById('apoyoEstudiantil');
         const elementLabelApoyo = document.getElementById('label-apoyoEstudiantil');
 
-        if(elementBeca.innerText == '0%') {
+        if (elementBeca.innerText == '0%') {
             elementBeca.classList.add('hidden');
             elementLabelBeca.classList.add('hidden');
         }
 
-        if(elementApoyo.innerText == '0%'){
+        if (elementApoyo.innerText == '0%') {
             elementApoyo.classList.add('hidden');
             elementLabelApoyo.classList.add('hidden');
         }
@@ -171,13 +180,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     mostrarValores({ ...valores, ...valoresAdicionales });
 
-    
-
     const tituloPorNivel = {
         'Preparatoria Semestral': 'Impulsa tu futuro desde hoy',
         'Preparatoria Tetramestral': 'Avanza con determinación hacia tu futuro profesional',
         'Profesional Semestral': 'Encuentra una carrera pensada para ti'
-    }
+    };
 
     const beneficiosPorNivel = {
         'Preparatoria Semestral': [
@@ -283,13 +290,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         ]
     };
-    
+
 
     function actualizarBeneficios(nivel) {
         const benefitsWrapper = document.getElementById('benefits-wrappers');
-        const titleBenefit= document.getElementById('titleBenefit');
-        benefitsWrapper.innerHTML = '';  
-        titleBenefit.innerText = '';  
+        const titleBenefit = document.getElementById('titleBenefit');
+        benefitsWrapper.innerHTML = '';
+        titleBenefit.innerText = '';
         titleBenefit.innerText = tituloPorNivel[nivel] || 'N/A';
 
         const beneficios = beneficiosPorNivel[nivel] || [];
@@ -297,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         beneficios.forEach(beneficio => {
             const benefitItem = document.createElement('div');
             benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24";
-            
+
             benefitItem.innerHTML = `
                 <div class="border-2 border-solid ${beneficio.colorClass} rounded-[6px] relative px-[20px] py-[30px] h-full benefits-item">
                     <div class="${beneficio.colorClass} w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
@@ -308,13 +315,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>${beneficio.description}</p>
                 </div>
             `;
-            
+
             benefitsWrapper.appendChild(benefitItem);
         });
     }
 
     const nivelSeleccionado = nivel;
     console.log(nivelSeleccionado);
-    
+
     actualizarBeneficios(nivelSeleccionado);
 });
