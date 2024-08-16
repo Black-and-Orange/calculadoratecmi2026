@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     scholarshipSelect.addEventListener('change', () => {
         uptadetSelectedName(scholarshipSelect.options[scholarshipSelect.selectedIndex].text);
+
+        if(isProfessionalSelected() && isScolarshipSelected()){
+            adjustLoanOptions();
+        }
     });
 
     supportPercentageSelect.addEventListener('change', () => {
@@ -24,6 +28,33 @@ document.addEventListener('DOMContentLoaded', () => {
     prestamoPercentageSelect.addEventListener('change', () => {
         uptadetPrestamoPercentage(prestamoPercentageSelect.value);
     });
+
+    function isScolarshipSelected() {
+        return !!localStorage.getItem('selectedScholarshipName')
+    }
+
+    function isProfessionalSelected() {
+        return localStorage.getItem('selectedNivel')==2;
+    }
+
+    function adjustLoanOptions() {
+        console.log('Should allow max loans of 20%');
+        document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
+            let isProfessional = isProfessionalSelected();
+            let isScolarship = isScolarshipSelected();
+            let currentValueNumber = Number(optionElement.value.replace('%', ''));
+            let isGT20 = currentValueNumber > 20;
+            if(isProfessional && isScolarship && isGT20 ) {
+                //TODO: remover las opciones aquí
+                console.log(Number(optionElement.value.replace('%', '')));
+                optionElement.disabled = 'disabled';
+                console.log(optionElement)
+            } else {
+                //TODO: regenerar las opciones acquí
+                optionElement.disabled = '';
+            }
+        })
+    }
 
     async function fetchInteres(levelId) {
         try {
