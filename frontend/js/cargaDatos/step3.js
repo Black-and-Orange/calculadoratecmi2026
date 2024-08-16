@@ -1,16 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
     const selectInsurance = document.getElementById('select-insurance');
     const selectCoverage = document.getElementById('select-coverage');
-    const selectVive = document.getElementById('select-vive'); // Nuevo
+    const selectVive = document.getElementById('select-vive');
 
     let segurosData = {};
+
+    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
 
     async function fetchSeguros() {
         try {
             const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros');
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const data = await response.json();
-            segurosData = data[0]; // Asumiendo que la respuesta es un array con un objeto
+
+            // Asignación de segurosData según el levelId
+            if (levelId === 3) {
+                segurosData = data[1];
+            } else {
+                segurosData = data[0];
+            }
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
@@ -32,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost += parseFloat(segurosData.cobertura_vive);
         }
 
-        const interesDividido = totalConInteres / 5;
+        // Dividir según el levelId
+        const divisor = levelId === 3 ? 4 : 5;
+        const interesDividido = totalConInteres / divisor;
 
         // Sumar el costo de los seguros
         const primeraCuota = interesDividido + totalCost;

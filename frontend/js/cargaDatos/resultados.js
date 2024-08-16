@@ -1,25 +1,45 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+
+    const nombre = params.get('txt-name') || 'N/A';
+    const periodo = params.get('select-period') || 'N/A';
+    const campus = params.get('select-campus') || 'N/A';
+    const nivel = params.get('select-grade') || 'N/A';
+    const materias = params.get('select-subjects') || 'N/A';
+
+    document.getElementById('nombre').textContent = nombre;
+    document.getElementById('periodo').textContent = periodo;
+    document.getElementById('campus').textContent = campus;
+    document.getElementById('nivel').textContent = nivel;
+    document.getElementById('materias').textContent = materias;
+
     let segurosData = {};
+
+    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
 
     async function fetchSeguros() {
         try {
             const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros');
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const data = await response.json();
-            segurosData = data[0];
+
+            if (levelId === 3) {
+                segurosData = data[1];
+            } else {
+                segurosData = data[0];
+            }
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
     }
 
-    await fetchSeguros(); 
+    await fetchSeguros();
+
     function recuperarValores() {
-        // Recuperar los valores de localStorage
         const insuranceValue = JSON.parse(localStorage.getItem('insuranceValue'));
         const coverageValue = JSON.parse(localStorage.getItem('coverageValue'));
         const viveValue = JSON.parse(localStorage.getItem('viveValue'));
 
-        // Procesar los valores recuperados
         return {
             insurance: insuranceValue === 'si' ? `$${segurosData.seguro_accidentes}` : 'No Aplica',
             coverage: coverageValue === 'si' ? `$${segurosData.seguro_estudiantil}` : 'No Aplica',
@@ -28,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function recuperarValoresAdicionales() {
-        // Recuperar valores de localStorage
         const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));
         const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount'));
         const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
@@ -64,8 +83,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function mostrarValores(valores) {
+        let factorMultiplicador = 4;
+        let textoMensualidades = '4 Mensualidades';
 
-        const totalfinanciado = valores.interesDividido * 4 + valores.primeraCuota;
+        if (nivel == 'Preparatoria Tetramestral') {
+            factorMultiplicador = 3;
+            textoMensualidades = '3 Mensualidades';
+        }
+
+        const totalfinanciado = valores.interesDividido * factorMultiplicador + valores.primeraCuota;
 
         if (colegiatura) {
             colegiatura.textContent = `$${valores.costoTotal}`;
@@ -84,6 +110,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (totalFinanciado) {
             totalFinanciado.textContent = `$${parseFloat(totalfinanciado.toFixed(2))}`;
+        }
+        if (mensualidadesText) {
+            mensualidadesText.textContent = textoMensualidades;
         }
         if (apoyoFinanciero) {
             apoyoFinanciero.textContent = `${valores.scholarshipName}`;
@@ -118,42 +147,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     }
 
-    // Recuperar valores
     const valores = recuperarValores();
     const valoresAdicionales = recuperarValoresAdicionales();
 
-    // Mostrar valores en consola
     mostrarValores({ ...valores, ...valoresAdicionales });
 
-    // Actualizar el DOM
-
-    const params = new URLSearchParams(window.location.search);
-
-    const nombre = params.get('txt-name') || 'N/A';
-    const periodo = params.get('select-period') || 'N/A';
-    const campus = params.get('select-campus') || 'N/A';
-    const nivel = params.get('select-grade') || 'N/A';
-    const materias = params.get('select-subjects') || 'N/A';
-
-    document.getElementById('nombre').textContent = nombre;
-    document.getElementById('periodo').textContent = periodo;
-    document.getElementById('campus').textContent = campus;
-    document.getElementById('nivel').textContent = nivel;
-    document.getElementById('materias').textContent = materias;
-
+    
 
     const tituloPorNivel = {
         'Preparatoria Semestral': 'Impulsa tu futuro desde hoy',
         'Preparatoria Tetramestral': 'Avanza con determinación hacia tu futuro profesional',
+        'Profesional Semestral': 'Encuentra una carrera pensada para ti'
     }
 
-
     const beneficiosPorNivel = {
-
         'Preparatoria Semestral': [
             {
                 title: "Certificaciones",
-                description: "Te ofrecemos 3 certificaciones que te preparan con habilidades para el futuro: Tecnología (Python), Creatividad e Innovación y Finanzas personales",
+                description: "Te ofrecemos 3 certificaciones que te preparan con habilidades para el futuro: Tecnología (Python), Creatividad e Innovación y Finanzas personales.",
                 icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-1.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
@@ -176,28 +187,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             }
         ],
-        'Preparatoria Tetramestral': [
+        'Prepa Tetramestral': [
             {
                 title: "Duración",
-                description: "Completarás tu preparatoria tetramestral en dos años.",
+                description: "Completarás tu preparatoria tetramestral en dos años para avanzar con mayor agilidad en tu camino educativo.",
                 icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/duracion.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
             {
                 title: "Certificación en Tecnología",
-                description: "Aprende lenguaje de programación Python.",
+                description: "Aprende lenguaje de programación Python e impulsa tu camino hacia la innovación tecnológica.",
                 icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/certificaci%C3%B3n_tecnolog%C3%ADa.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             },
             {
                 title: "Interculturalidad",
-                description: "Aprende en un entorno global donde te desarrollas junto a una comunidad multicultural por medio de programas como el verano intercultural.",
+                description: "Aprende en un entorno intercultural, donde tendrás la oportunidad de aprender un segundo o tercer idioma.",
                 icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg",
                 colorClass: "border-main-color-2 bg-main-color-2"
             },
             {
                 title: "Vivencia Estudiantil",
-                description: "Participarás en proyectos y eventos que fomentan tu desarrollo académico y personal, como ser parte de una Sociedad Estudiantil donde harás nuevas amigas y amigos, o en la competencia de robótica FIRST, que te brindará la oportunidad para destacar a nivel internacional.",
+                description: "Participarás en proyectos y eventos que fomentan tu desarrollo académico y personal, como las Sociedades Estudiantiles.",
                 icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg",
                 colorClass: "border-secondary-color-1 bg-secondary-color-1"
             },
@@ -207,8 +218,53 @@ document.addEventListener('DOMContentLoaded', async () => {
                 icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-4.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             }
+        ],
+        'Profesional Semestral': [
+            {
+                title: "Personalización",
+                description: "Puedes personalizar hasta el 40% de tu plan de estudios y alinear tus aprendizajes a tus metas profesionales.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/personalizacion.svg",
+                colorClass: "border-secondary-color-3 bg-secondary-color-3"
+            },
+            {
+                title: "Empleabilidad",
+                description: "Recibe una formación integral que te prepara para el éxito profesional con las habilidades técnicas y humanas más demandadas del mercado laboral. Esto a través de herramientas como la Plataforma de Éxito Profesional.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/empleabilidad.svg",
+                colorClass: "border-secondary-color-2 bg-secondary-color-2"
+            },
+            {
+                title: "Acompañamiento",
+                description: "Contarás con una red de apoyo que te guiará a lo largo de tu carrera para desarrollarte como profesionista y persona.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/acompañamiento.svg",
+                colorClass: "border-main-color-2 bg-main-color-2"
+            },
+            {
+                title: "Vivencia Estudiantil",
+                description: "Asiste a eventos nacionales e internacionales e intégrate a grupos estudiantiles, deportivos, artísticos, sociales, como Interhalcones, ARTFEST, entre otros.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg",
+                colorClass: "border-secondary-color-1 bg-secondary-color-1"
+            },
+            {
+                title: "Docentes expertos",
+                description: "Estudia clases impartidas por profesores con relación en la industria.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/profesores.svg",
+                colorClass: "border-secondary-color-3 bg-secondary-color-3"
+            },
+            {
+                title: "Interculturalidad",
+                description: "Vive una experiencia intercultural con más de 75 instituciones con prestigio internacional.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg",
+                colorClass: "border-main-color-2 bg-main-color-2"
+            },
+            {
+                title: "Insignias Digitales",
+                description: "Recibe reconocimientos que validan tus habilidades y conocimientos adquiridos de manera segura y fácil de compartir.",
+                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/certific.svg",
+                colorClass: "border-secondary-color-2 bg-secondary-color-2"
+            }
         ]
     };
+    
 
     function actualizarBeneficios(nivel) {
         const benefitsWrapper = document.getElementById('benefits-wrappers');
@@ -238,8 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Actualizar beneficios basados en el nivel seleccionado
-    const nivelSeleccionado = nivel;  // Obtén el nivel desde los parámetros de URL o variables definidas
+    const nivelSeleccionado = nivel;
     console.log(nivelSeleccionado);
     
     actualizarBeneficios(nivelSeleccionado);
