@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectInsurance = document.getElementById('select-insurance');
     const selectCoverage = document.getElementById('select-coverage');
     const selectVive = document.getElementById('select-vive');
+    const anuncioPoliza = document.getElementById('anuncioPoliza');
 
     let segurosData = {};
 
@@ -34,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (selectCoverage.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
+            anuncioPoliza.style.display = "block";
+        }else{
+            anuncioPoliza.style.display = "none"; 
         }
 
         if (selectVive.value === 'si') {

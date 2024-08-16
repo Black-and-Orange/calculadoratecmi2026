@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 supports.forEach(support => {
                     const option = document.createElement('option');
                     option.value = support.porcentaje;
-                    option.textContent = support.porcentaje;
+                    option.textContent = `${Math.trunc(support.porcentaje)}%`;
                     supportPercentageSelect.appendChild(option);
                 });
             } else {
