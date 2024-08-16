@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             apoyoFinanciero.textContent = `Apoyo Estudiantil`;
         }
         if (apoyoFinanciero.textContent == "null") {
-            apoyoFinanciero.textContent = `Sin Apoyo Estudiantil`;
+            apoyoFinanciero.textContent = `Apoyo Estudiantil`;
         }
         if (seguroAccidentes) {
             seguroAccidentes.textContent = valores.insurance;
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             }
         ],
-        'Prepa Tetramestral': [
+        'Preparatoria Tetramestral': [
             {
                 title: "Duración",
                 description: "Completarás tu preparatoria tetramestral en dos años para avanzar con mayor agilidad en tu camino educativo.",

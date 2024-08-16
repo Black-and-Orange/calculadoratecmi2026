@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
             submenuExtraElem = document.querySelector(".submenu-extra"),
             selectorOpen = "show",
             selectorClose = "close";
-
+            
 
       if(mobileBtn) {
         mobileBtn.forEach(function(elem, index) {
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Getting the width of the browser on load
             let currentWidth = widthResizer();
-
+            
             // Getting the width of the browser whenever the screen resolution changes.
             // window.addEventListener('resize', widthResizer)
 
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(currentWidth < 1024) {
               elem.querySelector('.show').classList.toggle("hidden");
               elem.querySelector('.close').classList.toggle("hidden");
-
+              
               submenuElem.forEach(function(elem2, index) {
                 elem2.classList.toggle("hidden");
               });
@@ -57,12 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             let hash = event.currentTarget.getAttribute('href').replace('#', '');
             console.log(hash);
-
+            
             const id = hash;
             const yOffset = -120; 
             const element = document.getElementById(id);
             const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
+            
             window.scrollTo({top: y, behavior: 'smooth'});
 
           });
@@ -84,23 +84,22 @@ document.addEventListener("DOMContentLoaded", () => {
           selectCampusMsg = document.querySelector("#select-campus-msg"),
           selectGradeMsg = document.querySelector("#select-grade-msg"),
           selectSubjectsMsg = document.querySelector("#select-subjects-msg");
-
+      
 
       /* STEP 2 FIELDS AND MESSAGES */
       let txtAverageMark = document.querySelector("#txt-average-mark"),
           txtScholarship = document.querySelector("#txt-scholarship"),
 
           txtAverageMarkMsg = document.querySelector("#txt-average-mark-msg"),
-          txtScholarshipMsg = document.querySelector("#txt-scholarship-msg"),
-          txtSupportQuantityMsg = document.querySelector("#txt-support-quantity-msg");
-
+          txtScholarshipMsg = document.querySelector("#txt-scholarship-msg");
+      
 
       /* STEP 3 FIELDS AND MESSAGES */
       let txtVive = document.querySelector("#txt-vive"),
           selectInsurance = document.querySelector("#select-insurance"),
           selectInsuranceType = document.querySelector("#select-insurance-type"),
           selectCoverage = document.querySelector("#select-coverage"),
-
+          
           txtViveMsg = document.querySelector("#txt-vive-msg"),
           selectInsuranceMsg = document.querySelector("#select-insurance-msg"),
           selectInsuranceTypeMsg = document.querySelector("#select-insurance-type-msg"),
@@ -110,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let currentStep = 1,
           hasError = false,
           canPass = false,
-          scholarshipGrade = 80, // promedio
+          scholarshipGrade = 80,
 
           stepsContainer = document.querySelector(".steps-container"),
           stepNumber1 = document.querySelector(".step-num-1"),
@@ -120,7 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
           step1 = document.querySelector("#step-1"),
           step2 = document.querySelector("#step-2"),
           step3 = document.querySelector("#step-3"),
-          btnNextStep = document.querySelectorAll(".btn-next-step");
+          btnNextStep = document.querySelectorAll(".btn-next-step"),
+          btnPrevStep = document.querySelectorAll(".btn-prev-step");
 
 
       const canContinue = () => {
@@ -133,6 +133,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
           moveStep();
         }
+      }
+
+      const returnSlide = () => {
+        currentStep --;
+        moveStep();
       }
 
       const moveStep  = () => {
@@ -192,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         elem.addEventListener("click", () => {
           switch(currentStep) {
-              /* ======== STEP 1 ======== */
+            /* ======== STEP 1 ======== */
             case 1:
               if(txtName.value == "") {
                 txtName.classList.add("error");
@@ -206,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasError = false;
               }
 
+                
               if(selectPeriod.value == "") {
                 selectPeriod.classList.add("error");
                 selectPeriodMsg.classList.add("error");
@@ -253,12 +259,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectSubjectsMsg.classList.remove("error");
                 hasError = false;
               }
-
+              
 
               canContinue();
               break;
-
-              /* ======== STEP 2 ======== */
+            
+            /* ======== STEP 2 ======== */
             case 2:
               if(txtAverageMark.value == "") {
                 txtAverageMark.classList.add("error");
@@ -284,15 +290,14 @@ document.addEventListener("DOMContentLoaded", () => {
                   txtScholarshipMsg.classList.remove("error");
                   hasError = false;
                 }
-
               }
 
-
+              
               canContinue();
               break;
-
-
-              /* ======== STEP 3 ======== */
+          
+            
+            /* ======== STEP 3 ======== */
             case 3:
               if(txtVive.value == "") {
                 txtVive.classList.add("error");
@@ -317,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectInsuranceMsg.classList.remove("error");
                 hasError = false;
               }
-
+              
               if(selectInsuranceType.value == "") {
                 selectInsuranceType.classList.add("error");
                 selectInsuranceTypeMsg.classList.add("error");
@@ -342,16 +347,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasError = false;
               }
 
-
+              
               canContinue();
               break;
-
-
+            
+            
           }
         });
       });
 
 
+      btnPrevStep.forEach(function(elem, index) {
+
+        elem.addEventListener("click", () => {
+          switch(currentStep) {
+            /* ======== STEP 1 ======== */
+            case 1:
+              returnSlide();
+              break;
+            
+            /* ======== STEP 2 ======== */
+            case 2:
+              returnSlide();
+              break;
+            
+            /* ======== STEP 3 ======== */
+            case 3:
+              returnSlide();
+              break;
+            
+            
+          }
+        });
+      });
+
+
+      
       let fieldAvg1 = document.querySelectorAll(".field-avg-1"),
         fieldAvg2 = document.querySelectorAll(".field-avg-2"),
         fieldAvg3 = document.querySelectorAll(".field-avg-3");
@@ -391,43 +422,135 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    const printController = () => {
+      window.jsPDF = window.jspdf.jsPDF;
+      const btnPrint = document.querySelector('#btn-print'),
+            contentElem = document.querySelector('#contenido');
+      
+      let viewportElem = document.getElementById('viewportElem');
+
+      if(btnPrint) {
+        btnPrint.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log("PRINT!");
+          
+          
+          viewportElem.setAttribute('content','width=1440');
+          
+
+          const elementosOcultos = document.querySelectorAll('.no-print'); // Asume que los elementos ocultos tienen la clase "hidden"
+          elementosOcultos.forEach(el => {
+            el.dataset.originalDisplay = el.style.display;
+            el.style.display = 'none';
+          });
+
+          const elementosOcultosHbspt = document.querySelectorAll('.hs-tools-menu'); // Asume que los elementos ocultos tienen la clase "hidden"
+          elementosOcultosHbspt.forEach(el => {
+            el.dataset.originalDisplay = el.style.display;
+            el.style.display = 'none';
+          });
+
+          
+          html2canvas(contentElem).then(function(canvas) {
+            var imgData = canvas.toDataURL('image/png');
+            var pdf = new jsPDF({
+                orientation: 'portrait', // o 'landscape' si prefieres
+                unit: 'mm',
+                format: 'a4' // Puedes usar 'letter' u otros tamaños si es necesario
+            });
+
+            var imgWidth = 210; // Ancho en mm para formato A4
+            var pageHeight = 295; // Alto en mm para formato A4
+            var imgHeight = canvas.height * imgWidth / canvas.width;
+            var heightLeft = imgHeight;
+
+            var position = 0;
+
+            // Agregar la imagen al PDF, ajustando el ancho y alto
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
+            heightLeft -= pageHeight;
+
+            // Si la imagen es más alta que una página, añade páginas adicionales
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
+                heightLeft -= pageHeight;
+            }
+
+            // Guarda el PDF
+            pdf.save('documento.pdf');
+
+            viewportElem.setAttribute('content','width=device-width, initial-scale=1.0');
+        });
 
 
-/*
-    const generatePDF = function() {
-      // Selecciona el elemento que deseas convertir a PDF
-      const element = document.body; // O puedes usar document.getElementById('id-del-elemento');
-
-      // Configuración de opciones
-      const opciones = {
-        margin:       1,
-        filename:     'pagina-web.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-
-      // Convierte el contenido HTML a PDF
-      html2pdf().from(element).set(opciones).save();
+          
+        });
+      }
     }
-*/
+
+    const assignColumnsController = () => {
+      const columnsContainer = document.querySelector('.columns-container');
+      
+      if(columnsContainer) {
+        let columnsNumber = 5, // Número total de elementos
+            columnBreak = 3; // Número de quiebre de fila
+        let i = 1;
+        
+        let newRow;
+        
+        while(i <= columnsNumber) {
+          if(i%columnBreak == 1) {
+            newRow = document.createElement("div");
+            newRow.classList.add("flex", "flex-row", "flex-wrap", "justify-center");
+            columnsContainer.append(newRow);
+          }
+
+          console.log(newRow)
+          console.log(i)
+
+          let newColumn = document.createElement("div")
+          newColumn.classList.add("px-4", "w-full", "md:w-1/2", "xl:w-1/4", "relative", "mt-24");
+          newRow.appendChild(newColumn);
+
+          let newImage = document.createElement("img")
+          newImage.classList.add("w-[45px]", "h-[45px]", "absolute", "top-1/2", "left-1/2", "-translate-x-1/2", "-translate-y-1/2");
+          newImage.setAttribute("src", "./img/benefits-icon.svg")
+
+          let imageContainer = document.createElement("div")
+          imageContainer.classList.add("bg-secondary-color-3", "w-[96px]", "h-[96px]", "inline-block", "mx-auto", "absolute", "rounded-full", "-top-[75px]", "left-1/2", "-translate-x-1/2")
+          imageContainer.appendChild(newImage)
+
+          let cardTitle = document.createElement("p")
+          cardTitle.classList.add("font-bold", "text-[18px]", "leading-[26px]");
+          cardTitle.innerHTML = "Certificaciones"
+
+          let cardText = document.createElement("p")
+          cardText.innerHTML = "Te ofrecemos 3 certificaciones que te preparan con habilidades para el futuro: Tecnología (Python), Creatividad e Innovación y Finanzas personales";
+
+          let newCard = document.createElement("div");
+          newCard.classList.add("border-2", "border-solid", "border-secondary-color-3", "rounded-[6px]", "relative", "px-[20px]", "py-[30px]", "h-full")
+          newCard.appendChild(imageContainer)
+          newCard.appendChild(cardTitle)
+          newCard.appendChild(cardText)
+
+          newColumn.appendChild(newCard)
+
+
+
+          i++;
+        }
+      }
+    }
+
     
-    /*
-    const downloadPdfController = function () {
-      const btnDownload = document.querySelector('.btn-download-pdf');
-
-      btnDownload.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.print();
-      });
-    }
-    */
-
     const init = () => {
       mobileMenuController();
       scrollController();
       validateController();
-      // downloadPdfController()
+      // printController();
+      assignColumnsController();
     }
 
     init();
