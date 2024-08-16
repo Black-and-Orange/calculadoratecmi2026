@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     averageInput.addEventListener('input', async () => {
         const average = parseFloat(averageInput.value).toFixed(2);
-    
+
         if (isNaN(average) || average < 70 || average > 100) {
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.innerHTML = '<option value="">Elige</option>';
@@ -153,23 +153,24 @@ document.addEventListener('DOMContentLoaded', () => {
             percentageSelect2.classList.add('hidden');
             return;
         }
-    
+
         try {
             const fixedScholarshipsResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becasFijas/nivel/${levelId}/promedio?promedio=${average}`);
             if (!fixedScholarshipsResponse.ok) throw new Error('Error al obtener becas fijas');
             const fixedScholarships = await fixedScholarshipsResponse.json();
-    
+
             const variableScholarshipsResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becasVariables/nivel/${levelId}/promedio?promedio=${average}`);
             if (!variableScholarshipsResponse.ok) throw new Error('Error al obtener becas variables');
             const variableScholarships = await variableScholarshipsResponse.json();
-    
+
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
-    
+
             const sinBecaOption = document.createElement('option');
             sinBecaOption.value = "0";
             sinBecaOption.textContent = "Sin Beca";
-            scholarshipSelect.insertBefore(sinBecaOption, scholarshipSelect.firstChild);
-    
+            scholarshipSelect.insertBefore(sinBecaOption, scholarshipSelect.children[1]);
+
+
             if (fixedScholarships.length > 0) {
                 fixedScholarships.forEach(scholarship => {
                     const option = document.createElement('option');
@@ -180,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     scholarshipSelect.appendChild(option);
                 });
             }
-    
+
             if (variableScholarships.length > 0) {
                 variableScholarships.forEach(scholarship => {
                     const option = document.createElement('option');
@@ -190,10 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     scholarshipSelect.appendChild(option);
                 });
             }
-    
+
             scholarshipSelect.addEventListener('change', async () => {
                 const selectedScholarshipId = scholarshipSelect.value;
-    
+
                 if (selectedScholarshipId === "0") {
                     // Si se selecciona "Sin Beca", ocultar y deshabilitar los selects de porcentaje
                     percentageSelect.classList.add('hidden');
@@ -209,10 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         percentageSelect.classList.add('hidden');
                         percentageSelect2.classList.add('hidden');
                         percentageSelect.innerHTML = '<option value="">Elige</option>';
-    
+
                         const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
                         const selectedPercentage = selectedOption.dataset.porcentaje;
-    
+
                         localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
                         await calculateFinalAmount();
                     } else {
@@ -225,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     percentageSelect.innerHTML = '<option value="">Elige</option>';
                 }
             });
-    
+
             async function updatePercentageOptionsByScholarshipId(scholarshipId) {
                 try {
                     const response = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becasVariables/rangosPorcentaje/${scholarshipId}`);
@@ -233,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error('Error al obtener los rangos de porcentaje');
                     }
                     const { porcentajeMin, porcentajeMax } = await response.json();
-    
+
                     const fragment = document.createDocumentFragment();
                     percentageSelect.innerHTML = '<option value="">Elige</option>';
                     for (let i = porcentajeMin; i <= porcentajeMax; i += 5) {
@@ -242,22 +243,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         option.textContent = `${i}%`;
                         fragment.appendChild(option);
                     }
-    
+
                     percentageSelect.appendChild(fragment);
                 } catch (error) {
                     percentageSelect.innerHTML = '<option value="">Elige</option>';
                     console.error('Error al actualizar las opciones de porcentaje:', error);
                 }
             }
-    
+
             if (average >= 70 && average <= 79) {
                 const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
                 if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
                 const supports = await supportResponse.json();
-    
+
                 supportPercentageSelect.classList.remove('hidden');
                 supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-    
+
                 supports.forEach(support => {
                     const option = document.createElement('option');
                     option.value = support.porcentaje;
@@ -268,26 +269,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 supportPercentageSelect.classList.add('hidden');
                 supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
             }
-    
+
             console.log("levelId", levelId);
-    
+
             const mostrarPrestamoSelectSiNivel2 = async () => {
                 if (levelId === 2) {
                     try {
                         const prestamoResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/nivel/${levelId}`);
                         if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
                         const prestamos = await prestamoResponse.json();
-    
+
                         prestamoPercentageContainer.classList.remove('hidden');
                         prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-    
+
                         prestamos.forEach(prestamo => {
                             const option = document.createElement('option');
                             option.value = prestamo.prestamo;
                             option.textContent = prestamo.prestamo;
                             prestamoPercentageSelect.appendChild(option);
                         });
-    
+
                     } catch (error) {
                         console.error('Error en la carga de datos de préstamos:', error);
                         prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
@@ -298,9 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
                 }
             };
-    
+
             mostrarPrestamoSelectSiNivel2();
-    
+
         } catch (error) {
             console.error('Error en la carga de datos:', error);
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
@@ -311,5 +312,5 @@ document.addEventListener('DOMContentLoaded', () => {
             percentageSelect2.classList.add('hidden');
         }
     });
-    
+
 });

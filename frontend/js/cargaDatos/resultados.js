@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             textoMensualidades = '3 Mensualidades';
         }
 
-        const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g,"")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g,""));
+        const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, ""));
 
         if (colegiatura) {
             colegiatura.textContent = valores.costoTotal;
@@ -324,4 +324,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(nivelSeleccionado);
 
     actualizarBeneficios(nivelSeleccionado);
+
+
+    // Estilos para el nivel "Profesional Semestral"
+    const linkStyle = {
+        'Profesional Semestral': 'css/style-universidad.css'
+    };
+
+    // Función para agregar el link al head
+    function agregarEstiloProfesionalSemestral() {
+        if (nivelSeleccionado === 'Profesional Semestral') {
+            // Verifica si el estilo ya ha sido agregado para evitar duplicados
+            if (!document.querySelector('link[href="' + linkStyle['Profesional Semestral'] + '"]')) {
+                const linkElement = document.createElement('link');
+                linkElement.rel = 'stylesheet';
+                linkElement.href = linkStyle['Profesional Semestral'];
+                document.head.appendChild(linkElement);
+            }
+        }
+    }
+
+    // Ejecutar la función para agregar el estilo
+    agregarEstiloProfesionalSemestral();
+
+
 });
