@@ -344,8 +344,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Ejecutar la función para agregar el estilo
     agregarEstiloProfesionalSemestral();
+
+    // Obtener la fecha actual
+    const fechaActual = new Date();
+
+    // Crear una copia de la fecha actual para calcular la fecha de vencimiento
+    const fechaVencimiento = new Date(fechaActual);
+
+    // Sumar 5 días a la fecha de vencimiento
+    fechaVencimiento.setDate(fechaVencimiento.getDate() + 5);
+
+    // Formatear la fecha en el formato "dd/mm/yyyy"
+    const opcionesFormato = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    const fechaVencimientoFormateada = fechaVencimiento.toLocaleDateString('es-ES', opcionesFormato);
+
+    // Seleccionar el elemento y actualizar su contenido
+    document.getElementById('fechaVencimiento').textContent = `Vigencia de la propuesta: ${fechaVencimientoFormateada}`;
+
 
 
 });
