@@ -15,6 +15,48 @@ document.addEventListener('DOMContentLoaded', () => {
         period: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/periodo/nivel/', property: 'periodo_descripcion' },
         subjects: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias/nivel/', property: 'numero' }
     };
+  
+    const clearCache = () => {
+          if ('caches' in window) {
+              caches.keys().then((keyList) => {
+                  return Promise.all(keyList.map((key) => caches.delete(key)));
+              }).then(() => {
+                  console.log('Caché limpiado correctamente.');
+              }).catch((error) => {
+                  console.error('Error al limpiar el caché:', error);
+              });
+          }
+      };
+
+    // Función para detectar si un valor es numérico
+    const isNumeric = (value) => {
+        return !isNaN(value) && !isNaN(parseFloat(value));
+    };
+
+    // Función para ordenar el select, diferenciando números y textos
+    const sortOptions = (data, property) => {
+        return data.sort((a, b) => {
+            const valueA = a[property];
+            const valueB = b[property];
+
+            const isANumeric = isNumeric(valueA);
+            const isBNumeric = isNumeric(valueB);
+
+            if (isANumeric && isBNumeric) {
+                // Ordenar números de forma natural
+                return parseFloat(valueA) - parseFloat(valueB);
+            } else if (isANumeric) {
+                // Los números van antes que los textos
+                return -1;
+            } else if (isBNumeric) {
+                // Los textos van después que los números
+                return 1;
+            } else {
+                // Ordenar textos alfabéticamente, ignorando mayúsculas y minúsculas
+                return valueA.toUpperCase().localeCompare(valueB.toUpperCase());
+            }
+        });
+    };
 
     const calcularCostoTotal = (numeroMaterias, costoMateria) => {
         if ([1, 2, 3, 4, 5, 6].includes(numeroMaterias)) {
@@ -100,9 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
+            // Ordenar las opciones diferenciando números y textos
+            const sortedData = sortOptions(data, property);
+
             selectElement.innerHTML = '<option value="">Elige</option>';
 
-            data.forEach(item => {
+            sortedData.forEach(item => {
                 const option = document.createElement('option');
                 option.value = item[property];
                 option.textContent = item[property];
@@ -124,18 +169,62 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             updateCosto();
+            lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
 
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
+    
+
+    const lockSubjectsSelectIfPrepa = (nivelId) => {
+        if (nivelId === 1 || nivelId === 3) { // Preparatoria Semestral o Tetramestral
+            const lastOptionIndex = selectors.subjects.options.length - 1;
+
+            if (lastOptionIndex > 0) { // Verificar que hay opciones disponibles
+                selectors.subjects.selectedIndex = lastOptionIndex;
+            }
+
+            // Desactiva solo el select de materias
+            selectors.subjects.disabled = true;
+        } else {
+            selectors.subjects.disabled = false;
+        }
+    };
+
 
     if (selectors.grade !== null) {
         loadOptions(selectors.grade, apiConfigs.grade.url, apiConfigs.grade.property);
     }
+  
+    const resetFormFields = (formElement) => {
+    // Reset all input fields except for the name field
+    const inputs = formElement.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.type === 'text' || input.type === 'number') {
+            if (input.id !== 'txt-name') { // Excluir el campo de nombre
+                input.value = '';
+            }
+        }
+    });
+
+    // Reset all select fields except for the level select
+    const selects = formElement.querySelectorAll('select');
+    selects.forEach(select => {
+        if (select.id !== 'select-grade' && !select.disabled) { // Excluir el select de nivel y los deshabilitados
+            select.selectedIndex = 0; // Set to the first option ("Elige")
+        }
+    });
+};
+
+
+
+const formElement = document.querySelector('form');
 
     selectors.grade.addEventListener('change', async () => {
+      resetFormFields(formElement);
         localStorage.clear();
+        clearCache();
         const selectedLevel = selectors.grade.value;
         const levelMapping = {
             'Preparatoria Semestral': 1,
@@ -143,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'Preparatoria Tetramestral': 3,
             'Profesional Modelo CIMA': 4
         };
+
         const mappedLevel = levelMapping[selectedLevel];
 
         // Guardar el nivel seleccionado en localStorage cada vez que cambie
@@ -168,13 +258,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            lockSubjectsSelectIfPrepa(mappedLevel);
             updateCosto();
         }
     });
 
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', (event) => {
+            selectors.subjects.disabled = false;
+        });
+    } else {
+        console.error('No se encontró un formulario en la página');
+    }
+
     Object.keys(selectors).forEach(key => {
         if (selectors[key] !== null) {
-            selectors[key].addEventListener('change', updateCosto);
+            selectors[key].addEventListener('change', () => {
+                updateCosto();
+                if (key === 'grade') {
+                    lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
+                }
+            });
         }
     });
 });

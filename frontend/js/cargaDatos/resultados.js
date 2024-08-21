@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedScholarshipNameRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipName'));
         const selectedScholarshipValueRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipValue'));
         const selectedSupportValueRecuperado = JSON.parse(localStorage.getItem('selectedSupportValue'));
+        const prestamoRecuperado = JSON.parse(localStorage.getItem('selectedprestamo'));
         let retrievedPercentage = localStorage.getItem('selectedPercentage');
 
         if (retrievedPercentage) {
@@ -87,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scholarshipName: selectedScholarshipNameRecuperado,
             scholarshipValue: selectedScholarshipValueRecuperado,
             supportValue: selectedSupportValueRecuperado,
+            prestamoRecuperado: prestamoRecuperado,
             retrievedPercentage: retrievedPercentage
         };
     }
@@ -95,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let factorMultiplicador = 4;
         let textoMensualidades = '4 Mensualidades';
 
-        if (nivel == 'Preparatoria Tetramestral') {
+        if (nivel === 'Preparatoria Tetramestral') {
             factorMultiplicador = 3;
             textoMensualidades = '3 Mensualidades';
         }
@@ -123,13 +125,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mensualidadesText) {
             mensualidadesText.textContent = textoMensualidades;
         }
-        if (apoyoFinanciero) {
-            apoyoFinanciero.textContent = `${valores.scholarshipName}`;
+        if (apoyoFinanciero && valores.scholarshipName) {
+            apoyoFinanciero.textContent = valores.scholarshipName;
         }
-        if (apoyoFinanciero.textContent == 'Elige') {
-            apoyoFinanciero.textContent = `Apoyo Estudiantil`;
-        }
-        if (apoyoFinanciero.textContent == "null") {
+
+        if (apoyoFinanciero.textContent === 'Elige' || apoyoFinanciero.textContent === "null") {
             apoyoFinanciero.textContent = `Apoyo Estudiantil`;
         }
         if (seguroAccidentes) {
@@ -144,8 +144,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (apoyoEstudiantil) {
             apoyoEstudiantil.textContent = `${valores.supportValue}%`;
         }
-        if (apoyoEstudiantil.textContent == "null%") {
+        if (prestamoPorcentaje) {
+            prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}`;
+        }
+        if (apoyoEstudiantil.textContent === "null%") {
             apoyoEstudiantil.textContent = `0%`;
+        }
+        if (prestamoPorcentaje.textContent === "null") {
+            prestamoPorcentaje.textContent = `0%`;
         }
         if (beca) {
             beca.textContent =
@@ -163,15 +169,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const elementApoyo = document.getElementById('apoyoEstudiantil');
         const elementLabelApoyo = document.getElementById('label-apoyoEstudiantil');
+      
+        const elementPrestamo = document.getElementById('prestamoPorcentaje');
+        const elementLabelPrestamo = document.getElementById('label-prestamo');
+      
+        const apoyos = document.getElementById('apoyos');
 
-        if (elementBeca.innerText == '0%') {
+        if (elementBeca.innerText === '0%') {
             elementBeca.classList.add('hidden');
             elementLabelBeca.classList.add('hidden');
         }
 
-        if (elementApoyo.innerText == '0%') {
+        if (elementApoyo.innerText === '0%') {
             elementApoyo.classList.add('hidden');
             elementLabelApoyo.classList.add('hidden');
+        }
+      
+        if (elementPrestamo.innerText === '0%') {
+            elementPrestamo.classList.add('hidden');
+            elementLabelPrestamo.classList.add('hidden');
+        }
+      
+        if (elementBeca.innerText === '0%' && elementApoyo.innerText === '0%' && elementPrestamo.innerText === '0%') {
+            apoyos.classList.add('hidden');
         }
     }
 
@@ -179,6 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const valoresAdicionales = recuperarValoresAdicionales();
 
     mostrarValores({ ...valores, ...valoresAdicionales });
+
 
     const tituloPorNivel = {
         'Preparatoria Semestral': 'Impulsa tu futuro desde hoy',
@@ -191,25 +212,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             {
                 title: "Certificaciones",
                 description: "Te ofrecemos 3 certificaciones que te preparan con habilidades para el futuro: Tecnología (Python), Creatividad e Innovación y Finanzas personales.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-1.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-1.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
             {
                 title: "Interculturalidad",
                 description: "Aprende en un entorno global donde te desarrollas junto a una comunidad multicultural por medio de programas como el verano intercultural.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-2.svg",
                 colorClass: "border-main-color-2 bg-main-color-2"
             },
             {
                 title: "Vivencia Estudiantil",
                 description: "Participarás en proyectos y eventos que fomentan tu desarrollo académico y personal, como ser parte de una Sociedad Estudiantil donde harás nuevas amigas y amigos, o en la competencia de robótica FIRST, que te brindará la oportunidad para destacar a nivel internacional.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-3.svg",
                 colorClass: "border-secondary-color-1 bg-secondary-color-1"
             },
             {
                 title: "Propósito de Vida",
                 description: "Descubre tu propósito a través de un acompañamiento apreciativo y el Plan Vocacional Tecmilenio.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-4.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-4.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             }
         ],
@@ -217,31 +238,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             {
                 title: "Duración",
                 description: "Completarás tu preparatoria tetramestral en dos años para avanzar con mayor agilidad en tu camino educativo.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/duracion.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/duracion.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
             {
                 title: "Certificación en Tecnología",
                 description: "Aprende lenguaje de programación Python e impulsa tu camino hacia la innovación tecnológica.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/certificaci%C3%B3n_tecnolog%C3%ADa.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/certificaci%C3%B3n_tecnolog%C3%ADa.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             },
             {
                 title: "Interculturalidad",
                 description: "Aprende en un entorno intercultural, donde tendrás la oportunidad de aprender un segundo o tercer idioma.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-2.svg",
                 colorClass: "border-main-color-2 bg-main-color-2"
             },
             {
                 title: "Vivencia Estudiantil",
                 description: "Participarás en proyectos y eventos que fomentan tu desarrollo académico y personal, como las Sociedades Estudiantiles.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-3.svg",
                 colorClass: "border-secondary-color-1 bg-secondary-color-1"
             },
             {
                 title: "Propósito de Vida",
                 description: "Descubre tu propósito a través de un acompañamiento apreciativo y el Plan Vocacional Tecmilenio.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-4.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-4.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             }
         ],
@@ -249,43 +270,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             {
                 title: "Personalización",
                 description: "Puedes personalizar hasta el 40% de tu plan de estudios y alinear tus aprendizajes a tus metas profesionales.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/personalizacion.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/personalizacion.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
             {
                 title: "Empleabilidad",
                 description: "Recibe una formación integral que te prepara para el éxito profesional con las habilidades técnicas y humanas más demandadas del mercado laboral. Esto a través de herramientas como la Plataforma de Éxito Profesional.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/empleabilidad.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/empleabilidad.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             },
             {
                 title: "Acompañamiento",
                 description: "Contarás con una red de apoyo que te guiará a lo largo de tu carrera para desarrollarte como profesionista y persona.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/acompañamiento.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/acompañamiento.png",
                 colorClass: "border-main-color-2 bg-main-color-2"
             },
             {
                 title: "Vivencia Estudiantil",
                 description: "Asiste a eventos nacionales e internacionales e intégrate a grupos estudiantiles, deportivos, artísticos, sociales, como Interhalcones, ARTFEST, entre otros.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-3.svg",
                 colorClass: "border-secondary-color-1 bg-secondary-color-1"
             },
             {
                 title: "Docentes expertos",
                 description: "Estudia clases impartidas por profesores con relación en la industria.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/profesores.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/profesores.svg",
                 colorClass: "border-secondary-color-3 bg-secondary-color-3"
             },
             {
                 title: "Interculturalidad",
                 description: "Vive una experiencia intercultural con más de 75 instituciones con prestigio internacional.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/benefits-icon-2.svg",
                 colorClass: "border-main-color-2 bg-main-color-2"
             },
             {
                 title: "Insignias Digitales",
                 description: "Recibe reconocimientos que validan tus habilidades y conocimientos adquiridos de manera segura y fácil de compartir.",
-                icon: "https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/certific.svg",
+                icon: "https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/certific.svg",
                 colorClass: "border-secondary-color-2 bg-secondary-color-2"
             }
         ]
@@ -294,16 +315,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function actualizarBeneficios(nivel) {
         const benefitsWrapper = document.getElementById('benefits-wrappers');
+        benefitsWrapper.innerHTML = ''; // Limpiar el contenedor de beneficios
         const titleBenefit = document.getElementById('titleBenefit');
-        benefitsWrapper.innerHTML = '';
-        titleBenefit.innerText = '';
         titleBenefit.innerText = tituloPorNivel[nivel] || 'N/A';
 
         const beneficios = beneficiosPorNivel[nivel] || [];
 
-        beneficios.forEach(beneficio => {
+        beneficios.forEach((beneficio, index) => {
             const benefitItem = document.createElement('div');
-            benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24";
+            benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit-card-elem";
 
             benefitItem.innerHTML = `
                 <div class="border-2 border-solid ${beneficio.colorClass} rounded-[6px] relative px-[20px] py-[30px] h-full benefits-item">
@@ -312,16 +332,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                             src="${beneficio.icon}">
                     </div>
                     <p class="font-bold text-[18px] leading-[26px]">${beneficio.title}</p>
-                    <p>${beneficio.description}</p>
+                    <p class="text-[16px] leading-[24px]">${beneficio.description}</p>
                 </div>
             `;
 
             benefitsWrapper.appendChild(benefitItem);
         });
+
+        // Si hay 5 beneficios, cambiar la disposición
+        if (beneficios.length === 5) {
+            benefitsWrapper.classList.add('benefits-3-2');
+        } else {
+            benefitsWrapper.classList.remove('benefits-3-2');
+        }
     }
 
     const nivelSeleccionado = nivel;
-    console.log(nivelSeleccionado);
 
     actualizarBeneficios(nivelSeleccionado);
 

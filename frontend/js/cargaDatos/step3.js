@@ -31,10 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (selectInsurance.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_accidentes);
-            anuncioPoliza.style.display = "inline";
+            anuncioPoliza.style.display = "none"; 
         } else {
-            anuncioPoliza.style.display = "none";
+            anuncioPoliza.style.display = "flex";
         }
+        
+        
 
         if (selectCoverage.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
@@ -79,5 +81,18 @@ document.addEventListener('DOMContentLoaded', () => {
     selectVive.addEventListener('change', () => {
         calculateInsuranceCost();
     });
+
+    document.getElementById('step-3-next').addEventListener('click', function (event) {
+        var insuranceSelect = document.getElementById('select-insurance');
+        var insuranceMsg = document.getElementById('select-insurance-msg');
+
+        if (insuranceSelect.value === "") {
+            event.preventDefault();  
+            insuranceMsg.style.display = 'block';  
+        } else {
+            insuranceMsg.style.display = 'none';  
+        }
+    });
+
 
 });

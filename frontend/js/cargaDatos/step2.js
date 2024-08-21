@@ -30,28 +30,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function isScolarshipSelected() {
-        return !!localStorage.getItem('selectedScholarshipName')
+        const selectedScholarship = localStorage.getItem('selectedScholarshipName');
+
+        if (selectedScholarship === '0' || selectedScholarship === null) {
+            return null;
+        }
+
+        return !!selectedScholarship;
     }
+
 
     function isProfessionalSelected() {
         return localStorage.getItem('selectedNivel') == 2;
     }
 
     function adjustLoanOptions() {
-        document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
-            let isProfessional = isProfessionalSelected();
-            let isScolarship = isScolarshipSelected();
-            let currentValueNumber = Number(optionElement.value.replace('%', ''));
-            let isGT20 = currentValueNumber > 20;
-            if (isProfessional && isScolarship && isGT20) {
-                //TODO: remover las opciones aquí
-                optionElement.disabled = 'disabled';
-            } else {
-                //TODO: regenerar las opciones acquí
-                optionElement.disabled = '';
-            }
-        })
-    }
+    const selectedScholarship = scholarshipSelect.value;
+
+    document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
+        let isProfessional = isProfessionalSelected();
+        let currentValueNumber = Number(optionElement.value.replace('%', ''));
+        let isGT20 = currentValueNumber > 20;
+
+        if (selectedScholarship === "0") {
+            // Habilitar todas las opciones si se selecciona "Sin Beca"
+            optionElement.disabled = false;
+        } else if (isProfessional && isScolarshipSelected() && isGT20) {
+            optionElement.disabled = true;
+        } else {
+            optionElement.disabled = false;
+        }
+    });
+}
+
 
     async function fetchInteres(levelId) {
         try {
@@ -193,39 +204,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             scholarshipSelect.addEventListener('change', async () => {
-                const selectedScholarshipId = scholarshipSelect.value;
+    const selectedScholarshipId = scholarshipSelect.value;
 
-                if (selectedScholarshipId === "0") {
-                    // Si se selecciona "Sin Beca", ocultar y deshabilitar los selects de porcentaje
-                    percentageSelect.classList.add('hidden');
-                    percentageSelect2.classList.add('hidden');
-                    supportPercentageSelect.classList.add('hidden');
-                    percentageSelect.innerHTML = '<option value="">Elige</option>';
-                    supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-                    localStorage.setItem('selectedPercentage', JSON.stringify(0));
-                    await calculateFinalAmount();
-                } else if (selectedScholarshipId) {
-                    const isFixedScholarship = fixedScholarships.some(scholarship => scholarship.id == selectedScholarshipId);
-                    if (isFixedScholarship) {
-                        percentageSelect.classList.add('hidden');
-                        percentageSelect2.classList.add('hidden');
-                        percentageSelect.innerHTML = '<option value="">Elige</option>';
+    if (selectedScholarshipId === "0") { // Si "Sin Beca" está seleccionado
+        // Ocultar y deshabilitar los selects de porcentaje
+        percentageSelect.classList.add('hidden');
+        percentageSelect2.classList.add('hidden');
+        supportPercentageSelect.classList.add('hidden');
+        percentageSelect.innerHTML = '<option value="">Elige</option>';
+        supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+        localStorage.setItem('selectedPercentage', JSON.stringify(0));
 
-                        const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
-                        const selectedPercentage = selectedOption.dataset.porcentaje;
+        // Habilitar todas las opciones del select de préstamo
+        document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
+            optionElement.disabled = false;
+        });
 
-                        localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
-                        await calculateFinalAmount();
-                    } else {
-                        percentageSelect.classList.remove('hidden');
-                        await updatePercentageOptionsByScholarshipId(selectedScholarshipId);
-                    }
-                } else {
-                    percentageSelect.classList.add('hidden');
-                    percentageSelect2.classList.add('hidden');
-                    percentageSelect.innerHTML = '<option value="">Elige</option>';
-                }
-            });
+        await calculateFinalAmount();
+    } else if (selectedScholarshipId) {
+        const isFixedScholarship = fixedScholarships.some(scholarship => scholarship.id == selectedScholarshipId);
+        if (isFixedScholarship) {
+            percentageSelect.classList.add('hidden');
+            percentageSelect2.classList.add('hidden');
+            percentageSelect.innerHTML = '<option value="">Elige</option>';
+
+            const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
+            const selectedPercentage = selectedOption.dataset.porcentaje;
+
+            localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
+            await calculateFinalAmount();
+        } else {
+            percentageSelect.classList.remove('hidden');
+            await updatePercentageOptionsByScholarshipId(selectedScholarshipId);
+        }
+    } else {
+        percentageSelect.classList.add('hidden');
+        percentageSelect2.classList.add('hidden');
+        percentageSelect.innerHTML = '<option value="">Elige</option>';
+    }
+});
+
 
             async function updatePercentageOptionsByScholarshipId(scholarshipId) {
                 try {

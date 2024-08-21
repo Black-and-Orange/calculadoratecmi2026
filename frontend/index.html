@@ -148,14 +148,14 @@
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
                                         <label class="font-semibold" for="select-campus">Campus:</label>
                                     </div>
-                                    <div class="flex-1">
+                                    <div class="flex-1 mb-6 lg:mb-0">
                                         <select name="select-campus" id="select-campus">
                                             <option value="">Elige</option>
                                             <option value="op1">Opción 1</option>
                                         </select>
                                         <p class="msg" id="select-campus-msg">Este campo es necesario</p>
                                     </div>
-                                    <div class="min-w-[110px] mt-2 sm:ml-[30px] mb-2 md:mb-0" style="min-width: 140px;">
+                                    <div class="min-w-[110px] mt-2 md:ml-[30px] mb-2 md:mb-0" style="min-width: 140px;">
                                         <label class="font-semibold" for="select-period">Periodo:</label>
                                     </div>
                                     <div class="flex-1">
@@ -175,7 +175,7 @@
                                     <div class="flex-1">
                                         <select name="select-subjects" id="select-subjects">
                                             <option value="">Elige</option>
-                                            <option value="op1">Opción 1</option>
+                                            <option value="op1">Elige</option>
                                         </select>
                                         <p class="msg" id="select-subjects-msg">Este campo es necesario</p>
                                     </div>
@@ -217,7 +217,8 @@
                                 </div>
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row hidden field-avg-2">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                                        <label class="font-semibold" for="txt-percentage" id="txt-percentage2">Porcentaje de beca:</label>
+                                        <label class="font-semibold" for="txt-percentage"
+                                            id="txt-percentage2">Porcentaje de beca:</label>
                                     </div>
                                     <div class="flex-1">
                                         <select name="txt-percentage" id="txt-percentage">
@@ -275,8 +276,9 @@
                                                 <option value="si" selected>Sí</option>
                                                 <option value="no">No</option>
                                             </select>
-                                            <div class="tooltip absolute top-[10px] right-[10px]">
-                                                <i class="fa-solid fa-circle-question text-write-color-3"></i>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i
+                                                    class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
                                                 <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
                                                     La Cobertura VIVE permite enriquecer tu experiencia estudiantil
                                                     ofreciéndote una oferta de talleres extracurriculares, vivir eventos
@@ -287,7 +289,7 @@
                                         <p class="msg" id="select-vive-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                            
+
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
                                         <label class="font-semibold" for="select-insurance">Seguro de accidente:</label>
@@ -298,19 +300,26 @@
                                             <option value="si">Sí</option>
                                             <option value="no">No aplica</option>
                                         </select>
-                                        <div class="flex flex-row mt-2" id="anuncioPoliza">
-                                            <i class="fa-solid fa-circle-exclamation text-header-color-1 pr-2 mt-1"></i>
-                                            <p class="text-header-color-1 text-[15px] md:text-[20px] leading-[23px] md:leading-[28px]">
-                                                El alumno deberá presentar una copia de su póliza de seguro de gastos
-                                                médicos mayores vigente.</p>
+                                        <div class="flex flex-row mt-2" id="anuncioPoliza" style="margin-top: 1rem;">
+                                            <div class="pr-2 mt-1">
+                                                <i class="fa-solid fa-circle-exclamation text-header-color-1"></i>
+                                            </div>
+                                            <div>
+                                                <p
+                                                    class="text-header-color-1 text-[15px] md:text-[20px] leading-[23px] md:leading-[28px]">
+                                                    El alumno deberá presentar una copia de su póliza de seguro de
+                                                    gastos
+                                                    médicos mayores vigente.</p>
+                                            </div>
                                         </div>
                                         <p class="msg" id="select-insurance-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                            
+
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                                        <label class="font-semibold" for="select-coverage">Cobertura colegiatura:</label>
+                                        <label class="font-semibold" for="select-coverage">Cobertura
+                                            colegiatura:</label>
                                     </div>
                                     <div class="flex-1">
                                         <select name="select-coverage" id="select-coverage" disabled>
@@ -325,11 +334,12 @@
                                         <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
                                     </div>
                                     <div class="px-4 mb-4">
-                                        <input class="btn btn-main btn-next-step" type="submit" value="Siguiente">
+                                        <input class="btn btn-main btn-next-step" type="submit" id="step-3-next"
+                                            value="Siguiente">
                                     </div>
                                 </div>
                             </div>
-                            
+
                         </form>
                     </div>
                 </div>

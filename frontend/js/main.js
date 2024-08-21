@@ -318,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
               if (selectInsurance.value === "" || selectInsurance.value === "Elige") {
+                event.preventDefault();
                 selectInsurance.classList.add("error");
                 selectInsuranceMsg.classList.add("error");
                 selectInsuranceMsg.textContent = "Debe seleccionar una opción.";
@@ -328,7 +329,6 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               if (!hasError) {
-                // Avanzar al siguiente paso solo si no hay errores
                 canContinue();
               }
 
