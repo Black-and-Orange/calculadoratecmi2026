@@ -7,7 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const prestamoPercentageSelect = document.getElementById('txt-prestamo-percentage');
     const prestamoPercentageContainer = document.querySelector('.field-avg-4');
 
-    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+    // Función para obtener el levelId
+    const getLevelId = () => JSON.parse(localStorage.getItem('selectedNivel'));
+
+    // Función para actualizar el levelId
+    const setLevelId = (id) => localStorage.setItem('selectedNivel', JSON.stringify(id));
 
     percentageSelect.addEventListener('change', () => {
         uptadetSelectedPercentage(percentageSelect.value);
@@ -31,45 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function isScolarshipSelected() {
         const selectedScholarship = localStorage.getItem('selectedScholarshipName');
-
-        if (selectedScholarship === '0' || selectedScholarship === null) {
-            return null;
-        }
-
-        return !!selectedScholarship;
+        return selectedScholarship && selectedScholarship !== '0';
     }
 
-
     function isProfessionalSelected() {
-        return localStorage.getItem('selectedNivel') == 2;
+        return getLevelId() == 2;
     }
 
     function adjustLoanOptions() {
-    const selectedScholarship = scholarshipSelect.value;
+        const selectedScholarship = scholarshipSelect.value;
 
-    document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
-        let isProfessional = isProfessionalSelected();
-        let currentValueNumber = Number(optionElement.value.replace('%', ''));
-        let isGT20 = currentValueNumber > 20;
+        document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
+            let isProfessional = isProfessionalSelected();
+            let currentValueNumber = Number(optionElement.value.replace('%', ''));
+            let isGT20 = currentValueNumber > 20;
 
-        if (selectedScholarship === "0") {
-            // Habilitar todas las opciones si se selecciona "Sin Beca"
-            optionElement.disabled = false;
-        } else if (isProfessional && isScolarshipSelected() && isGT20) {
-            optionElement.disabled = true;
-        } else {
-            optionElement.disabled = false;
-        }
-    });
-}
-
+            if (selectedScholarship === "0") {
+                optionElement.disabled = false;
+            } else if (isProfessional && isScolarshipSelected() && isGT20) {
+                optionElement.disabled = true;
+            } else {
+                optionElement.disabled = false;
+            }
+        });
+    }
 
     async function fetchInteres(levelId) {
         try {
             const response = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/intereses/nivel/${levelId}`);
-            if (!response.ok) {
-                throw new Error('Error al obtener el interés');
-            }
+            if (!response.ok) throw new Error('Error al obtener el interés');
             const data = await response.json();
 
             if (Array.isArray(data) && data.length > 0) {
@@ -102,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (prestamo > 0) {
             finalAmount += (prestamo / 100) * costoTotal;
-
         }
 
         return finalAmount;
@@ -114,6 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFixedScholarshipSelected = document.getElementById('txt-scholarship').querySelector('option:checked[data-fixed="true"]');
         const selectedPercentage = isFixedScholarshipSelected ? parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0 : 0;
         const selectedprestamo = parseFloat(JSON.parse(localStorage.getItem('selectedprestamo'))) || 0;
+
+        const levelId = getLevelId();  // Obtener el levelId cuando sea necesario
 
         const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, selectedprestamo, window.costoTotal);
 
@@ -129,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return totalConInteres;
     };
-
 
     const uptadetSelectedPercentage = (value) => {
         localStorage.setItem('selectedPercentage', JSON.stringify(value));
@@ -165,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const levelId = getLevelId(); // Obtener el levelId cuando sea necesario
+
         try {
             const fixedScholarshipsResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becasFijas/nivel/${levelId}/promedio?promedio=${average}`);
             if (!fixedScholarshipsResponse.ok) throw new Error('Error al obtener becas fijas');
@@ -180,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sinBecaOption.value = "0";
             sinBecaOption.textContent = "Sin Beca";
             scholarshipSelect.insertBefore(sinBecaOption, scholarshipSelect.children[1]);
-
 
             if (fixedScholarships.length > 0) {
                 fixedScholarships.forEach(scholarship => {
@@ -204,53 +199,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             scholarshipSelect.addEventListener('change', async () => {
-    const selectedScholarshipId = scholarshipSelect.value;
+                const selectedScholarshipId = scholarshipSelect.value;
 
-    if (selectedScholarshipId === "0") { // Si "Sin Beca" está seleccionado
-        // Ocultar y deshabilitar los selects de porcentaje
-        percentageSelect.classList.add('hidden');
-        percentageSelect2.classList.add('hidden');
-        supportPercentageSelect.classList.add('hidden');
-        percentageSelect.innerHTML = '<option value="">Elige</option>';
-        supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-        localStorage.setItem('selectedPercentage', JSON.stringify(0));
+                if (selectedScholarshipId === "0") { // Si "Sin Beca" está seleccionado
+                    percentageSelect.classList.add('hidden');
+                    percentageSelect2.classList.add('hidden');
+                    supportPercentageSelect.classList.add('hidden');
+                    percentageSelect.innerHTML = '<option value="">Elige</option>';
+                    supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+                    localStorage.setItem('selectedPercentage', JSON.stringify(0));
 
-        // Habilitar todas las opciones del select de préstamo
-        document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
-            optionElement.disabled = false;
-        });
+                    document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
+                        optionElement.disabled = false;
+                    });
 
-        await calculateFinalAmount();
-    } else if (selectedScholarshipId) {
-        const isFixedScholarship = fixedScholarships.some(scholarship => scholarship.id == selectedScholarshipId);
-        if (isFixedScholarship) {
-            percentageSelect.classList.add('hidden');
-            percentageSelect2.classList.add('hidden');
-            percentageSelect.innerHTML = '<option value="">Elige</option>';
+                    await calculateFinalAmount();
+                } else if (selectedScholarshipId) {
+                    const isFixedScholarship = fixedScholarships.some(scholarship => scholarship.id == selectedScholarshipId);
+                    if (isFixedScholarship) {
+                        percentageSelect.classList.add('hidden');
+                        percentageSelect2.classList.add('hidden');
+                        percentageSelect.innerHTML = '<option value="">Elige</option>';
 
-            const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
-            const selectedPercentage = selectedOption.dataset.porcentaje;
+                        const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
+                        const selectedPercentage = selectedOption.dataset.porcentaje;
 
-            localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
-            await calculateFinalAmount();
-        } else {
-            percentageSelect.classList.remove('hidden');
-            await updatePercentageOptionsByScholarshipId(selectedScholarshipId);
-        }
-    } else {
-        percentageSelect.classList.add('hidden');
-        percentageSelect2.classList.add('hidden');
-        percentageSelect.innerHTML = '<option value="">Elige</option>';
-    }
-});
-
+                        localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
+                        await calculateFinalAmount();
+                    } else {
+                        percentageSelect.classList.remove('hidden');
+                        await updatePercentageOptionsByScholarshipId(selectedScholarshipId);
+                    }
+                } else {
+                    percentageSelect.classList.add('hidden');
+                    percentageSelect2.classList.add('hidden');
+                    percentageSelect.innerHTML = '<option value="">Elige</option>';
+                }
+            });
 
             async function updatePercentageOptionsByScholarshipId(scholarshipId) {
                 try {
                     const response = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becasVariables/rangosPorcentaje/${scholarshipId}`);
-                    if (!response.ok) {
-                        throw new Error('Error al obtener los rangos de porcentaje');
-                    }
+                    if (!response.ok) throw new Error('Error al obtener los rangos de porcentaje');
                     const { porcentajeMin, porcentajeMax } = await response.json();
 
                     const fragment = document.createDocumentFragment();
@@ -288,10 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
             }
 
-            console.log("levelId", levelId);
-
             const mostrarPrestamoSelectSiNivel2 = async () => {
-                if (levelId === 2) {
+                if (getLevelId() === 2) {
                     try {
                         const prestamoResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/nivel/${levelId}`);
                         if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
@@ -330,5 +318,4 @@ document.addEventListener('DOMContentLoaded', () => {
             percentageSelect2.classList.add('hidden');
         }
     });
-
 });

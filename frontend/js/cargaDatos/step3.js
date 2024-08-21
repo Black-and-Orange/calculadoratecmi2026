@@ -36,8 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
             anuncioPoliza.style.display = "flex";
         }
         
-        
-
         if (selectCoverage.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
         }
@@ -58,7 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Almacenar los valores en localStorage
         localStorage.setItem('interesDividido', interesDivididoString);
-        localStorage.setItem('primeraCuota', primeraCuotaString);
+        localStorage.setItem('primeraCuota', primeraCuotaString);        
+        localStorage.setItem('totalCost', totalCost);
 
         // Almacenar el estado de las selecciones en localStorage
         localStorage.setItem('insuranceValue', JSON.stringify(selectInsurance.value));
@@ -96,3 +95,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
+

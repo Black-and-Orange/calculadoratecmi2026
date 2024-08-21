@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
 
@@ -66,6 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedScholarshipValueRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipValue'));
         const selectedSupportValueRecuperado = JSON.parse(localStorage.getItem('selectedSupportValue'));
         const prestamoRecuperado = JSON.parse(localStorage.getItem('selectedprestamo'));
+        const totalCostRecuperado = JSON.parse(localStorage.getItem('totalCost'));
+        
         let retrievedPercentage = localStorage.getItem('selectedPercentage');
 
         if (retrievedPercentage) {
@@ -85,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             totalContado: formatearPesos(totalContadoRecuperado),
             interesDividido: formatearPesos(interesDivididoRecuperado),
             primeraCuota: formatearPesos(primeraCuotaRecuperada),
+            totalCost: totalContadoRecuperado+totalCostRecuperado,
             scholarshipName: selectedScholarshipNameRecuperado,
             scholarshipValue: selectedScholarshipValueRecuperado,
             supportValue: selectedSupportValueRecuperado,
@@ -101,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             factorMultiplicador = 3;
             textoMensualidades = '3 Mensualidades';
         }
-
+        
         const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, ""));
 
         if (colegiatura) {
@@ -111,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             apoyoFinanciamiento.textContent = `-${valores.finalAmount}`;
         }
         if (totalContado) {
-            totalContado.textContent = valores.totalContado;
+            totalContado.textContent = formatearPesos(valores.totalCost);
         }
         if (primerPago) {
             primerPago.textContent = valores.primeraCuota;
@@ -169,10 +173,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const elementApoyo = document.getElementById('apoyoEstudiantil');
         const elementLabelApoyo = document.getElementById('label-apoyoEstudiantil');
-      
+
         const elementPrestamo = document.getElementById('prestamoPorcentaje');
         const elementLabelPrestamo = document.getElementById('label-prestamo');
-      
+
         const apoyos = document.getElementById('apoyos');
 
         if (elementBeca.innerText === '0%') {
@@ -184,14 +188,55 @@ document.addEventListener('DOMContentLoaded', async () => {
             elementApoyo.classList.add('hidden');
             elementLabelApoyo.classList.add('hidden');
         }
-      
+
         if (elementPrestamo.innerText === '0%') {
             elementPrestamo.classList.add('hidden');
             elementLabelPrestamo.classList.add('hidden');
         }
-      
+
         if (elementBeca.innerText === '0%' && elementApoyo.innerText === '0%' && elementPrestamo.innerText === '0%') {
             apoyos.classList.add('hidden');
+        }
+    }
+
+    function actualizarPlanContado(valores) {
+        const bloquePlanContado = document.querySelector('.sub-tables');
+        const apoyoFinanciamiento = document.getElementById('apoyoFinanciamiento');
+
+
+        if (parseFloat(valores.finalAmount.replace(/[^0-9.-]+/g, "")) === 0) {
+            // Ocultar fila de apoyo financiero
+            apoyoFinanciamiento.closest('tr').style.display = 'none';
+            // Modificar el bloque para mostrar solo la colegiatura y total contado
+            bloquePlanContado.innerHTML = `
+            <div
+                class="relative overflow-hidden border-2 border-solid border-secondary-color-3 rounded-[6px] h-full">
+                <table class="w-full">
+                    <tr>
+                        <th class="bg-secondary-color-3 text-white p-[11px]" colspan="2">
+                            <p class="text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
+                                de contado</p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                            <p id="colegiaturaText" class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                Total Contado</p>
+                            <p id="colegiaturaText" class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                Colegiatura 2025</p>
+                        </td>
+                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                            <p id="colegiatura" class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-bold mb-0 text-right">
+                                ${formatearPesos(valores.totalCost)}</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        `;
+        } else {
+            const valores = recuperarValores();
+    const valoresAdicionales = recuperarValoresAdicionales();
+            mostrarValores({ ...valores, ...valoresAdicionales });
         }
     }
 
@@ -199,6 +244,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const valoresAdicionales = recuperarValoresAdicionales();
 
     mostrarValores({ ...valores, ...valoresAdicionales });
+    actualizarPlanContado(valoresAdicionales);
+
 
 
     const tituloPorNivel = {
