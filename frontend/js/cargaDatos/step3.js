@@ -1,14 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const selectInsurance = document.getElementById('select-insurance');
-    const selectCoverage = document.getElementById('select-coverage');
-    const selectVive = document.getElementById('select-vive');
-    const anuncioPoliza = document.getElementById('anuncioPoliza');
 
     let segurosData = {};
 
-    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
-
     async function fetchSeguros() {
+        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+
         try {
             const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros');
             if (!response.ok) throw new Error('Error al obtener los seguros');
@@ -26,16 +22,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateInsuranceCost() {
+        console.log('Calculando costo de seguros...');
+
+        // Obtener elementos del DOM solo cuando sea necesario
+        const selectInsurance = document.getElementById('select-insurance');
+        const selectCoverage = document.getElementById('select-coverage');
+        const selectVive = document.getElementById('select-vive');
+        const anuncioPoliza = document.getElementById('anuncioPoliza');
+
         let totalCost = 0;
         let totalConInteres = window.totalConInteres;
+        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
 
         if (selectInsurance.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_accidentes);
-            anuncioPoliza.style.display = "none"; 
+            anuncioPoliza.style.display = "none";
         } else {
             anuncioPoliza.style.display = "flex";
         }
-        
+
         if (selectCoverage.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
         }
@@ -45,54 +50,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Dividir según el levelId
+        console.log('Level ID:', levelId);
+
         const divisor = levelId === 3 ? 4 : 5;
+        console.log('Divisor:', divisor);
+
         const interesDividido = totalConInteres / divisor;
+        console.log('Interés dividido:', interesDividido);
 
         // Sumar el costo de los seguros
         const primeraCuota = interesDividido + totalCost;
+        console.log('Primera cuota:', primeraCuota);
 
         const interesDivididoString = JSON.stringify(interesDividido);
         const primeraCuotaString = JSON.stringify(primeraCuota);
 
         // Almacenar los valores en localStorage
         localStorage.setItem('interesDividido', interesDivididoString);
-        localStorage.setItem('primeraCuota', primeraCuotaString);        
+        localStorage.setItem('primeraCuota', primeraCuotaString);
         localStorage.setItem('totalCost', totalCost);
 
         // Almacenar el estado de las selecciones en localStorage
         localStorage.setItem('insuranceValue', JSON.stringify(selectInsurance.value));
         localStorage.setItem('coverageValue', JSON.stringify(selectCoverage.value));
         localStorage.setItem('viveValue', JSON.stringify(selectVive.value));
-
-        // Aquí puedes actualizar el DOM o realizar otras acciones con el totalCost
     }
 
     fetchSeguros();
 
-    selectInsurance.addEventListener('change', () => {
+    // Asociar eventos
+    document.getElementById('select-insurance').addEventListener('change', () => {
+        console.log("Insurance selection changed");
         calculateInsuranceCost();
     });
 
-    selectCoverage.addEventListener('change', () => {
+    document.getElementById('select-coverage').addEventListener('change', () => {
+        console.log("Coverage selection changed");
         calculateInsuranceCost();
     });
 
-    selectVive.addEventListener('change', () => {
+    document.getElementById('select-vive').addEventListener('change', () => {
+        console.log("Vive selection changed");
         calculateInsuranceCost();
     });
 
     document.getElementById('step-3-next').addEventListener('click', function (event) {
-        var insuranceSelect = document.getElementById('select-insurance');
-        var insuranceMsg = document.getElementById('select-insurance-msg');
+        const insuranceSelect = document.getElementById('select-insurance');
+        const insuranceMsg = document.getElementById('select-insurance-msg');
 
         if (insuranceSelect.value === "") {
-            event.preventDefault();  
-            insuranceMsg.style.display = 'block';  
+            event.preventDefault();
+            insuranceMsg.style.display = 'block';
         } else {
-            insuranceMsg.style.display = 'none';  
+            insuranceMsg.style.display = 'none';
         }
     });
 
-
 });
-

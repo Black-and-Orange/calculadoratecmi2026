@@ -133,25 +133,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${periodKey}${nivelKey}${planKey}${campusKey}`;
     };
 
-    const loadOptions = async (selectElement, apiUrl, property) => {
+    const loadOptions = async (selectElement, apiUrl, property, sort = true) => {
         try {
             const response = await fetch(apiUrl);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-
-            const data = await response.json();
-
-            // Ordenar las opciones diferenciando números y textos
-            const sortedData = sortOptions(data, property);
-
+    
+            let data = await response.json();
+    
+            // Ordena las opciones diferenciando números y textos si sort es true
+            if (sort) {
+                data = sortOptions(data, property);
+            }
+    
             selectElement.innerHTML = '<option value="">Elige</option>';
-
-            sortedData.forEach(item => {
+    
+            data.forEach(item => {
                 const option = document.createElement('option');
                 option.value = item[property];
                 option.textContent = item[property];
-
+    
                 if (property === 'descripcion') {
                     option.setAttribute('nivel_ed', item.nivel_ed || '');
                 }
@@ -164,17 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (property === 'descripcion') {
                     option.setAttribute('tipo_plan', item.tipo_plan || '');
                 }
-
+    
                 selectElement.appendChild(option);
             });
-
+    
             updateCosto();
             lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
-
+    
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
+    
 
 
     const lockSubjectsSelectIfPrepa = (nivelId) => {
@@ -232,20 +235,20 @@ document.addEventListener('DOMContentLoaded', () => {
             'Preparatoria Tetramestral': 3,
             'Profesional Modelo CIMA': 4
         };
-
+    
         const mappedLevel = levelMapping[selectedLevel];
-
+    
         // Guardar el nivel seleccionado en localStorage cada vez que cambie
         if (mappedLevel) {
             localStorage.setItem('selectedNivel', JSON.stringify(mappedLevel));
         }
-
+    
         if (mappedLevel) {
             Object.keys(apiConfigs).forEach(key => {
                 if (key !== 'grade' && selectors[key] !== null) {
                     let apiUrl = `${apiConfigs[key].baseUrl}${mappedLevel}`;
                     let property = apiConfigs[key].property;
-
+    
                     if (mappedLevel === 2 && key === 'subjects') {
                         apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/2';
                         property = 'credito';
@@ -253,15 +256,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         selectors.subjectsLabel.textContent = 'Materias';
                     }
-
-                    loadOptions(selectors[key], apiUrl, property);
+                    
+                    if (key === 'period') {
+                        loadOptions(selectors.period, apiUrl, property, false); // No ordenar periodos
+                    } else {
+                        loadOptions(selectors[key], apiUrl, property);
+                    }
                 }
             });
-
+    
             lockSubjectsSelectIfPrepa(mappedLevel);
             updateCosto();
         }
     });
+    
 
     const form = document.querySelector('form');
     if (form) {

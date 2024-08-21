@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
         const interesDivididoRecuperado = JSON.parse(localStorage.getItem('interesDividido'));
         const primeraCuotaRecuperada = JSON.parse(localStorage.getItem('primeraCuota'));
+        console.log(primeraCuotaRecuperada);
+        
         const selectedScholarshipNameRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipName'));
         const selectedScholarshipValueRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipValue'));
         const selectedSupportValueRecuperado = JSON.parse(localStorage.getItem('selectedSupportValue'));
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (apoyoFinanciero.textContent === 'Elige' || apoyoFinanciero.textContent === "null") {
-            apoyoFinanciero.textContent = `Apoyo Estudiantil`;
+            apoyoFinanciero.textContent = `Apoyo estudiantil`;
         }
         if (seguroAccidentes) {
             seguroAccidentes.textContent = valores.insurance;
@@ -146,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             vive.textContent = valores.vive;
         }
         if (apoyoEstudiantil) {
-            apoyoEstudiantil.textContent = `${valores.supportValue}%`;
+            apoyoEstudiantil.textContent = `${Math.round(valores.supportValue)}%`;
         }
         if (prestamoPorcentaje) {
             prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}`;
