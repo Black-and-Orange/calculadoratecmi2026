@@ -248,17 +248,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasError = false;
               }
 
-              if (selectSubjects.value == "") {
-                selectSubjects.classList.add("error");
-                selectSubjectsMsg.classList.add("error");
-                hasError = true;
-                canContinue();
-                break;
-              } else {
-                selectSubjects.classList.remove("error");
-                selectSubjectsMsg.classList.remove("error");
-                hasError = false;
-              }
+              // if (selectSubjects.value == "") {
+              //   selectSubjects.classList.add("error");
+              //   selectSubjectsMsg.classList.add("error");
+              //   hasError = true;
+              //   canContinue();
+              //   break;
+              // } else {
+              //   selectSubjects.classList.remove("error");
+              //   selectSubjectsMsg.classList.remove("error");
+              //   hasError = false;
+              // }
 
 
               canContinue();

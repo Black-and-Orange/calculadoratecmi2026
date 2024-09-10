@@ -7,11 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const prestamoPercentageSelect = document.getElementById('txt-prestamo-percentage');
     const prestamoPercentageContainer = document.querySelector('.field-avg-4');
 
-    // Función para obtener el levelId
     const getLevelId = () => JSON.parse(localStorage.getItem('selectedNivel'));
-
-    // Función para actualizar el levelId
-    const setLevelId = (id) => localStorage.setItem('selectedNivel', JSON.stringify(id));
 
     percentageSelect.addEventListener('change', () => {
         uptadetSelectedPercentage(percentageSelect.value);
