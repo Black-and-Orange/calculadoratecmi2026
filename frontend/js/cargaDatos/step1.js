@@ -149,9 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const numeroCertificados = parseInt(selectors.certificado.value);
             const valorCertificado = parseInt(selectors.certificado.options[selectors.certificado.selectedIndex].getAttribute('valor_certificado')) || 10;
             const numeroSemanasSEDI = parseInt(selectors.semanas.value);
-            const valorSemanaSEDI = parseInt(selectors.semanas.options[selectors.semanas.selectedIndex].getAttribute('valor_semana_sedi')) || 10;
+            const valorSemanaSEDI = parseInt(selectors.semanas.options[selectors.semanas.selectedIndex].getAttribute('valor_semana_sedi')) || 2;
             const numeroCursosIngles = parseInt(selectors.ingles.value);
-            const valorCursoIngles = parseInt(selectors.ingles.options[selectors.ingles.selectedIndex].getAttribute('valor_curso_ingles')) || 2;
+            const valorCursoIngles = parseInt(selectors.ingles.options[selectors.ingles.selectedIndex].getAttribute('valor_curso_ingles')) || 10;
             const costoUnidad = parseInt(claveGenerada.costo);
 
             costoTotal = calcularCostoTotalCertificadosSemanasIngles(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad);
@@ -316,10 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         property = 'credito';
                         selectors.subjectsLabel.textContent = 'Créditos:';
                     }
+                    
+                    else if (mappedLevel === 8 || mappedLevel === 9) {
+                        selectors.subjectsLabel.textContent = 'Certificados:';
+                    }
                     // Comportamiento predeterminado
                     else if (key === 'subjects') {
-                        console.log('entre');
-                        
                         selectors.subjectsLabel.textContent = 'Materias:';
                     }
 
@@ -336,8 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCosto();
         }
     });
-
-
 
     // Itera sobre los selectores y añade eventos
     Object.keys(selectors).forEach(key => {

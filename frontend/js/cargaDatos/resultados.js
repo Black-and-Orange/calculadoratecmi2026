@@ -1,5 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
     const params = new URLSearchParams(window.location.search);
 
     const nombre = params.get('txt-name') || 'N/A';
@@ -7,16 +8,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campus = params.get('select-campus') || 'N/A';
     const nivel = params.get('select-grade') || 'N/A';
     const materias = params.get('select-subjects') || 'N/A';
-
+    
     document.getElementById('nombre').textContent = nombre;
     document.getElementById('periodo').textContent = periodo;
     document.getElementById('campus').textContent = campus;
     document.getElementById('nivel').textContent = nivel;
     document.getElementById('materias').textContent = materias;
 
-    let segurosData = {};
+    function setTextSubjects(nivel) {
+        let subjectsText = 'N/A';
 
-    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+        switch (nivel) {
+            case 8,9:
+                subjectsText = 'Cerfificados';
+                break;
+            case 'Profesional Semestral':
+                subjectsText = '5 Materias';
+                break;
+            case 'Universidad Cuatrimestral':
+                subjectsText = '4 Materias';
+                break;
+            case 'Universidad Semestral':
+                subjectsText = '5 Materias';
+                break;
+            case 'Universidad Trimestral':
+                subjectsText = '3 Materias';
+                break;
+            case 'ICBI':
+                subjectsText = '3 Materias';
+                break;
+            default:
+                subjectsText = 'N/A';
+                break;
+        }
+
+        return subjectsText;
+
+    }
+
+    let segurosData = {};
 
     async function fetchSeguros() {
         try {
@@ -251,9 +281,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     const tituloPorNivel = {
-        'Preparatoria Semestral': 'Impulsa tu futuro desde hoy',
-        'Preparatoria Tetramestral': 'Avanza con determinación hacia tu futuro profesional',
-        'Profesional Semestral': 'Encuentra una carrera pensada para ti'
+        1: 'Impulsa tu futuro desde hoy',
+        3: 'Avanza con determinación hacia tu futuro profesional',
+        2: 'Encuentra una carrera pensada para ti',
+        4: 'Encuentra una carrera diseñada para ti',
+        5: 'Logra más con una carrera diseñada para tu desarrollo como profesionista',
+        6: 'Encuentra una carrera ejecutiva diseñada a tu medida',
+        7: 'Invierte en una educación para crecer como persona y como profesionista',
+        8: 'Invierte en una educación para crecer como persona y como profesionista',
+        9: 'Crece como líder para transformar a tu equipo y tu entorno',
+        10: 'Invierte en una educación para crecer como persona y como profesionista',
+        11: 'Crece como líder para transformar a tu equipo y tu entorno',
+        12: 'Invierte en una educación para crecer como persona y como profesionista',
     };
 
     let beneficiosPorNivel = {};
@@ -273,6 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return data;
         } catch (error) {
             console.error('Hubo un problema con la solicitud fetch:', error);
+            return [];
         }
     }
 
@@ -282,6 +322,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const benefitsWrapper = document.getElementById('benefits-wrappers');
         benefitsWrapper.innerHTML = ''; // Limpiar el contenedor de beneficios
         const titleBenefit = document.getElementById('titleBenefit');
+        console.log(tituloPorNivel[nivel]);
+        
+        console.log(nivel);
+        
         titleBenefit.innerText = tituloPorNivel[nivel] || 'N/A';
 
         const beneficios = beneficiosPorNivel || [];
@@ -315,9 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    const nivelSeleccionado = nivel;
-
-    actualizarBeneficios(nivelSeleccionado);
+    actualizarBeneficios(levelId);
 
 
     // Estilos para el nivel "Profesional Semestral"
@@ -331,7 +373,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         8: 'css/style-universidad.css',
         9: 'css/style-icbi.css',
         10: 'css/style-universidad.css',
-        11: 'css/style-universidad.css',
+        11: 'css/style-icbi.css',
         12: 'css/style-universidad.css',
 
     };
