@@ -168,8 +168,7 @@
                     </div>
                 </div>
                 <div class="flex flex-row flex-wrap justify-center">
-                    <div
-                        class="w-full bg-secondary-color-5 px-[20px] lg:px-[50px] py-[20px] rounded-[6px] flex flex-row flex-wrap lg:flex-nowrap justify-center">
+                    <div class="w-full bg-secondary-color-5 px-[20px] lg:px-[50px] py-[20px] rounded-[6px] flex flex-row flex-wrap lg:flex-nowrap justify-center">
                         <div class="px-4 grow lg:w-auto">
                             <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nombre</p>
                             <p id="nombre" class="text-[21px] leading-[29px]">Jerónimo Garza</p>
@@ -186,12 +185,28 @@
                             <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nivel</p>
                             <p id="nivel" class="text-[21px] leading-[29px]">Preparatoria Semestral</p>
                         </div>
-                        <div class="px-4 grow lg:w-auto">
+                        <!-- Contenedor original de materias -->
+                        <div id="materias-container" class="px-4 grow lg:w-auto">
                             <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Materias</p>
                             <p id="materias" class="text-[21px] leading-[29px]">6</p>
                         </div>
+                
+                        <!-- Estos contenedores solo se mostrarán en el nivel 4 -->
+                        <div id="certificados-container" class="px-4 grow lg:w-auto hidden">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Certificados</p>
+                            <p id="certificados" class="text-[21px] leading-[29px]"></p>
+                        </div>
+                        <div id="semanas-container" class="px-4 grow lg:w-auto hidden">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Semanas SEDI</p>
+                            <p id="semanas" class="text-[21px] leading-[29px]"></p>
+                        </div>
+                        <div id="cursos-container" class="px-4 grow lg:w-auto hidden">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Cursos de Inglés</p>
+                            <p id="cursos" class="text-[21px] leading-[29px]"></p>
+                        </div>
                     </div>
                 </div>
+                
             </div>
         </section>
 
@@ -403,7 +418,7 @@
                                                     class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
                                                     $350.00</p>
                                             </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
+                                            <div id="div-vive" class="flex flex-row justify-between subtable-padding">
                                                 <p
                                                     class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
                                                     Cobertura VIVE</p>
@@ -448,8 +463,7 @@
                             <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El seguro de accidentes y la cobertura estudiantil entra en vigor a partir del primer día de clases.</p>
                             <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El precio del seguro de accidentes está sujeto a cambio por tarifas establecidas por la aseguradora.</p>
                             <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El porcentaje de devolución de cuotas se aplicará sobre el costo total de cada materia y 
-                                se determinará de acuerdo con la fecha en que la materia sea dada de baja. También se ajustarán los apoyos financieros que se tengan en el periodo. 
-                                Nota: la base que se considerará para aplicar el porcentaje de devolución será de acuerdo con el monto total de carga de materias inscritas para el periodo escolar.</p>
+                                se determinará de acuerdo con la fecha en que la materia sea dada de baja.</p>
                         </div>
                     </div>
                 </div>

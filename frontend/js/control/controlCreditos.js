@@ -1,7 +1,7 @@
 $(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias';
+    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos';
 
-    // Función genérica para cargar materias de cualquier nivel
+    // Función genérica para cargar creditos de cualquier nivel
     function loadCampus(level, containerId) {
         const container = $(containerId);
 
@@ -18,27 +18,27 @@ $(document).ready(function () {
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.numero - b.numero);
+                    data.sort((a, b) => a.credito - b.credito);
 
                     let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Número de Materias</th>
+                                    <th>Número de Creditos</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>`;
 
-                    data.forEach(materia => {
+                    data.forEach(credito => {
                         tableHtml += `
                             <tr>
-                                <td>${materia.numero}</td>
+                                <td>${credito.credito}</td>
                                 <td>
-                                    <button onclick="deleteCampus(${materia.id_materia}, ${level})" class="btn btn-danger">
+                                    <button onclick="deleteCampus(${credito.id_credito}, ${level})" class="btn btn-danger">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button onclick="editCampus(${materia.id_materia}, ${materia.numero}, ${level})" class="btn btn-warning">
+                                    <button onclick="editCampus(${credito.id_credito}, ${credito.credito}, ${level})" class="btn btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </td>
@@ -51,78 +51,78 @@ $(document).ready(function () {
 
                     container.html(tableHtml).show();
                 } else {
-                    container.html('<p>No se encontraron materias para este nivel.</p>').show();
+                    container.html('<p>No se encontraron creditos para este nivel.</p>').show();
                 }
             })
-            .catch(error => console.error('Error fetching materias:', error));
+            .catch(error => console.error('Error fetching creditos:', error));
     }
 
-    // Función genérica para crear materias
-    function createCampus(level, numeroMaterias, callback) {
+    // Función genérica para crear creditos
+    function createCampus(level, numeroCreditos, callback) {
         fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ numero: numeroMaterias, id_nivel: level }),
+            body: JSON.stringify({ credito: numeroCreditos, id_nivel: level }),
         })
             .then(response => response.json())
             .then(data => callback())
-            .catch(error => console.error('Error creating materias:', error));
+            .catch(error => console.error('Error creating creditos:', error));
     }
 
-    // Función para gestionar la creación de materias para cualquier nivel
+    // Función para gestionar la creación de creditos para cualquier nivel
     function handleCreateCampus(level, formId, numeroInputId, loadCampusBtnId) {
         $(formId).submit(function (event) {
             event.preventDefault();
-            const numeroMaterias = $(numeroInputId).val();
-            createCampus(level, numeroMaterias, function () {
+            const numeroCreditos = $(numeroInputId).val();
+            createCampus(level, numeroCreditos, function () {
                 $(numeroInputId).val('');  // Limpiar el campo de entrada
-                $(loadCampusBtnId).click();  // Recargar la lista de materias
+                $(loadCampusBtnId).click();  // Recargar la lista de creditos
             });
         });
     }
 
-    // Asociar eventos para cargar y crear materias de niveles dinámicos
+    // Asociar eventos para cargar y crear creditos de niveles dinámicos
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
-        $('#loadMateriasNivel' + level).click(function () {
-            loadCampus(level, '#materiasNivel' + level);
+        $('#loadCreditosNivel' + level).click(function () {
+            loadCampus(level, '#creditosNivel' + level);
         });
 
-        handleCreateCampus(level, '#createMateriasNivel' + level + 'Form', '#materiasNivel' + level + 'Materias', '#loadMateriasNivel' + level);
+        handleCreateCampus(level, '#createCreditosNivel' + level + 'Form', '#creditosNivel' + level + 'Creditos', '#loadCreditosNivel' + level);
     }
 });
 
-// Función para eliminar materias
+// Función para eliminar creditos
 function deleteCampus(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/materias/${id}`, {
+    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de materias para el nivel específico
-            $('#loadMateriasNivel' + level).click();
+            // Recargar lista de creditos para el nivel específico
+            $('#loadCreditosNivel' + level).click();
         })
-        .catch(error => console.error('Error deleting materias:', error));
+        .catch(error => console.error('Error deleting creditos:', error));
 }
 
-// Función para editar materias
+// Función para editar creditos
 function editCampus(id, currentNumero, level) {
-    const newNumero = prompt('Nuevo número de materias:', currentNumero);
+    const newNumero = prompt('Nuevo número de creditos:', currentNumero);
     if (newNumero) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/materias/${id}`, {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ numero: newNumero }),
+            body: JSON.stringify({ credito: newNumero }),
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de materias para el nivel específico
-                $('#loadMateriasNivel' + level).click();
+                // Recargar lista de creditos para el nivel específico
+                $('#loadCreditosNivel' + level).click();
             })
-            .catch(error => console.error('Error editing materias:', error));
+            .catch(error => console.error('Error editing creditos:', error));
     }
 }

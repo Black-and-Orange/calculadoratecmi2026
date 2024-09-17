@@ -14,7 +14,7 @@ router.get('/:id', materiasController.getMateriaById);
 router.post('/', materiasController.createMateriaWithNivel);
 
 // Actualizar un campus y su nivel
-router.put('/:id', materiasController.updateMateriaWithNivel);
+router.patch('/:id', materiasController.updateMateriaWithNivel);
 
 // Eliminar un campus y su nivel
 router.delete('/:id', materiasController.deleteMateriaWithNivel);

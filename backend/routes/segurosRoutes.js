@@ -3,7 +3,9 @@ const router = express.Router();
 const segurosController = require('../controllers/segurosController');
 
 // Obtener todos los campus
-router.get('/', segurosController.getAllSeguros);
+router.get('/', segurosController.getAllSeguro);
+
+router.get('/nivel/:nivelId', segurosController.getSegurosByNivel);
 
 // Obtener un campus por ID
 router.get('/:id', segurosController.getSeguroById);
@@ -12,7 +14,7 @@ router.get('/:id', segurosController.getSeguroById);
 router.post('/', segurosController.createSeguroWithNivel);
 
 // Actualizar un campus y su nivel
-router.put('/:id', segurosController.updateSeguroWithNivel);
+router.patch('/:id', segurosController.updateSeguroWithNivel);
 
 // Eliminar un campus y su nivel
 router.delete('/:id', segurosController.deleteSeguroWithNivel);

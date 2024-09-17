@@ -1,43 +1,66 @@
 const db = require('../config/dbConfig');
 
-// Obtener todos los semanas
+// Obtener todas las semanas
 const getAllSemanas = (callback) => {
     db.query('SELECT * FROM semanas', callback);
 };
 
-// Obtener semanas por nivel
 const getSemanasByNivel = (nivelId, callback) => {
     const query = `
         SELECT semanas.id, semanas.num_semanas
         FROM semanas
-        JOIN semanas_nivel ON semanas.id = semanas_nivel.certificado_id
+        JOIN semanas_nivel ON semanas.id = semanas_nivel.id
         WHERE semanas_nivel.nivel_id = ?
     `;
     db.query(query, [nivelId], callback);
 };
 
-const deleteAllSemanas = (callback) => {
-    db.query('DELETE FROM semanas', callback);
+// Obtener una semanas por ID
+const getSemanasById = (id, callback) => {
+    db.query('SELECT * FROM semanas WHERE id = ?', [id], callback);
 };
 
-// Crear un certificado
-const createCertificado = (maxNum, callback) => {
-    db.query('INSERT INTO semanas SET ?', maxNum, callback);
+// Crear una nueva semanas
+const createSemanas = (semanas, callback) => {
+    console.log(semanas);
+    
+    const { num_semanas } = semanas;
+    console.log(num_semanas);
+    
+    if (!num_semanas) {
+        return callback(new Error('El número de semanas es requerido'));
+    }
+    db.query('INSERT INTO semanas (num_semanas) VALUES (?)', [num_semanas], callback);
 };
 
-const getLastInsertId = (callback) => {
-    db.query('SELECT LAST_INSERT_ID()', (err, results) => {
-        if (err) return callback(err);
-        callback(null, results[0].id);
-    });
+// Actualizar una semanas
+const updateSemanas = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
+    }
+
+    queryValues.push(id);
+    const query = `UPDATE semanas SET ${queryParts.join(', ')} WHERE id = ?`;
+
+    db.query(query, queryValues, callback);
 };
 
+// Eliminar una semanas
+const deleteSemanas = (id, callback) => {
+    db.query('DELETE FROM semanas WHERE id = ?', [id], callback);
+};
 
 module.exports = {
     getAllSemanas,
     getSemanasByNivel,
-    deleteAllSemanas,
-    createCertificado,
-    getLastInsertId
-
+    getSemanasById,
+    createSemanas,
+    updateSemanas,
+    deleteSemanas
 };

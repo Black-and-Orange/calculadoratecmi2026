@@ -1,33 +1,44 @@
-// models/SegurosNivel.js
+// models/seguroNivel.js
 const db = require('../config/dbConfig');
 
-const getAllSegurosNiveles = (callback) => {
-    db.query('SELECT * FROM seguros_nivel', callback);
+const getAllSeguroNiveles = (callback) => {
+    db.query('SELECT * FROM seguro_nivel', callback);
 };
 
-const getSegurosNivelById = (id, callback) => {
-    db.query('SELECT * FROM seguros_nivel WHERE id = ?', [id], callback);
+const getSeguroNivelById = (id, callback) => {
+    db.query('SELECT * FROM seguro_nivel WHERE id_seguro = ?', [id], callback);
 };
 
-const createSegurosNivel = (segurosNivel, callback) => {
-    const { id_seguros, id_nivel } = segurosNivel;
-    db.query('INSERT INTO seguros_nivel (id_seguros, id_nivel) VALUES (?, ?)', [id_seguros, id_nivel], callback);
+const createSeguroNivel = (seguroNivel, callback) => {
+    const { id_seguro, id_nivel } = seguroNivel;
+    db.query('INSERT INTO seguro_nivel (id_seguro, id_nivel) VALUES (?, ?)', [id_seguro, id_nivel], callback);
 };
 
-const deleteSegurosNivel = (id, callback) => {
-    db.query('DELETE FROM seguros_nivel WHERE id = ?', [id], callback);
+const deleteSeguroNivel = (id, callback) => {
+    db.query('DELETE FROM seguro_nivel WHERE id_seguro = ?', [id], callback);
 };
 
-const updateSegurosNivel = (id, segurosNivel, callback) => {
-    const { id_nivel } = segurosNivel;
-    console.log(id_nivel);
-    db.query('UPDATE Seguros_nivel SET id_nivel = ? WHERE id = ?', [id_nivel, id], callback);
+const updateSeguroNivel = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
+    }
+
+    queryValues.push(id);
+    const query = `UPDATE seguro_nivel SET ${queryParts.join(', ')} WHERE id_seguro = ?`;
+
+    db.query(query, queryValues, callback);
 };
 
 module.exports = {
-    getAllSegurosNiveles,
-    getSegurosNivelById,
-    createSegurosNivel,
-    deleteSegurosNivel,
-    updateSegurosNivel
+    getAllSeguroNiveles,
+    getSeguroNivelById,
+    createSeguroNivel,
+    deleteSeguroNivel,
+    updateSeguroNivel
 };

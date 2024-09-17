@@ -1,30 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+    const viveDiv = document.getElementById('div-vive');
 
-    let segurosData = {};
+    let segurosData;
 
     async function fetchSeguros() {
-        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
-
+        console.log('levelId:', levelId);
+    
         try {
-            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros');
+            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
             if (!response.ok) throw new Error('Error al obtener los seguros');
-            const data = await response.json();
-
-            // Asignación de segurosData según el levelId
-            if (levelId === 3) {
-                segurosData = data[1];
-            } else {
-                segurosData = data[0];
+            const segurosDataArray = await response.json(); // Recibimos un array
+    
+            console.log('segurosDataArray:', segurosDataArray);
+    
+            // Asegúrate de que no está vacío
+            if (segurosDataArray.length > 0) {
+                segurosData = segurosDataArray[0]; // Tomamos el primer seguro
+    
+                console.log('segurosData:', segurosData);
             }
+    
+            // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
+            if (levelId >= 6 && levelId <= 12) {
+                viveDiv.style.display = 'none'; // Ocultar div
+            } else {
+                viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
+            }
+    
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
     }
-
-    function calculateInsuranceCost() {
-        console.log('Calculando costo de seguros...');
-
-        // Obtener elementos del DOM solo cuando sea necesario
+    
+    async function calculateInsuranceCost() {
         const selectInsurance = document.getElementById('select-insurance');
         const selectCoverage = document.getElementById('select-coverage');
         const selectVive = document.getElementById('select-vive');
@@ -32,7 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let totalCost = 0;
         let totalConInteres = window.totalConInteres;
-        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+
+        // Esperar a que los seguros se carguen
+        await fetchSeguros();
+
+        if (!segurosData) {
+            console.error('No se cargaron los datos de seguros correctamente.');
+            return;
+        }
 
         if (selectInsurance.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_accidentes);
@@ -45,52 +61,33 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
         }
 
-        if (selectVive.value === 'si') {
+        // Solo sumar cobertura "vive" si el nivel no está entre 6 y 12
+        if (selectVive.value === 'si' && !(levelId >= 6 && levelId <= 12)) {
             totalCost += parseFloat(segurosData.cobertura_vive);
         }
 
-        // Dividir según el levelId
-        console.log('Level ID:', levelId);
-
-        const divisor = levelId === 3 ? 4 : 5;
-        console.log('Divisor:', divisor);
-
+        const divisor = (levelId === 3 || levelId === 5) ? 4 : 3;
         const interesDividido = totalConInteres / divisor;
-        console.log('Interés dividido:', interesDividido);
-
-        // Sumar el costo de los seguros
         const primeraCuota = interesDividido + totalCost;
-        console.log('Primera cuota:', primeraCuota);
 
-        const interesDivididoString = JSON.stringify(interesDividido);
-        const primeraCuotaString = JSON.stringify(primeraCuota);
-
-        // Almacenar los valores en localStorage
-        localStorage.setItem('interesDividido', interesDivididoString);
-        localStorage.setItem('primeraCuota', primeraCuotaString);
+        localStorage.setItem('interesDividido', JSON.stringify(interesDividido));
+        localStorage.setItem('primeraCuota', JSON.stringify(primeraCuota));
         localStorage.setItem('totalCost', totalCost);
 
-        // Almacenar el estado de las selecciones en localStorage
         localStorage.setItem('insuranceValue', JSON.stringify(selectInsurance.value));
         localStorage.setItem('coverageValue', JSON.stringify(selectCoverage.value));
         localStorage.setItem('viveValue', JSON.stringify(selectVive.value));
     }
 
-    fetchSeguros();
-
-    // Asociar eventos
     document.getElementById('select-insurance').addEventListener('change', () => {
-        console.log("Insurance selection changed");
         calculateInsuranceCost();
     });
 
     document.getElementById('select-coverage').addEventListener('change', () => {
-        console.log("Coverage selection changed");
         calculateInsuranceCost();
     });
 
     document.getElementById('select-vive').addEventListener('change', () => {
-        console.log("Vive selection changed");
         calculateInsuranceCost();
     });
 
@@ -105,5 +102,4 @@ document.addEventListener('DOMContentLoaded', () => {
             insuranceMsg.style.display = 'none';
         }
     });
-
 });

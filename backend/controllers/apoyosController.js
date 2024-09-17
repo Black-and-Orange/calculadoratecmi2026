@@ -109,17 +109,23 @@ const updateApoyoWithNivel = (req, res) => {
 const deleteApoyoWithNivel = (req, res) => {
     const apoyo_id = req.params.id;
 
-    // Elimina la relación con nivel
+    // Eliminar los registros de la tabla apoyos_nivel que dependen del apoyo_id
     apoyosNivelModel.deleteApoyoNivel(apoyo_id, (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
 
-        // Elimina el apoyo
+        // Una vez eliminados los registros de apoyos_nivel, elimina el apoyo en apoyosestudiantiles
         apoyosModel.deleteApoyo(apoyo_id, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Apoyo y relación eliminados' });
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.status(200).json({ message: 'Apoyo y relaciones de nivel eliminados' });
         });
     });
 };
+
+
 
 module.exports = {
     getApoyos,

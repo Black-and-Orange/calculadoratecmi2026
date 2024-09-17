@@ -28,52 +28,107 @@ const getMateriaById = (req, res) => {
 };
 
 const createMateriaWithNivel = (req, res) => {
-    const { nombre, categoria_coleg, nivel_id } = req.body;
+    const { numero, id_nivel } = req.body;
+    // Validar si los campos están presentes antes de proceder
+    if (!numero || !id_nivel) {
+        return res.status(400).json({ error: 'El número de materia y el nivel son requeridos' });
+    }
 
-    // Crea el Materia
-    materiasModel.createMateria({ nombre, categoria_coleg }, (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
+    // Intentar crear la materia
+    materiasModel.createMateria({ numero }, (err, result) => {
+        if (err) {
+            console.error('Error al crear la materia:', err);  // Log de error para depuración
+            return res.status(500).json({ error: 'Error al crear la materia' });
+        }
+        const id_materia = result.insertId;
+        
+        materiasNivelModel.createMateriasNivel({ id_materia, id_nivel }, (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error al crear la relación materia-nivel' });
+            }
+            // Si todo fue bien, devolver el ID de la materia creada
 
-        const materia_id = result.insertId;
-
-        // Crea la relación con nivel
-        materiasNivelModel.createMateriasNivel({ materia_id, nivel_id }, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ materia_id });
+            res.status(201).json({ id_materia });
         });
     });
 };
 
+
 const updateMateriaWithNivel = (req, res) => {
-    const materia_id = req.params.id;
-    const { nombre, categoria_coleg, nivel_id } = req.body;
+    const id = req.params.id;
+    const updates = req.body;
 
-    // Actualiza el Materia
-    materiasModel.updateMateria(materia_id, { nombre, categoria_coleg }, (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+    // Filtrar solo los campos permitidos para la actualización
+    const allowedMateriaUpdates = ['numero'];
+    const allowedMateriaNivelUpdates = ['id_nivel'];
+    const apoyoFieldsToUpdate = {};
+    const apoyoNivelFieldsToUpdate = {};
 
-        // Actualiza la relación con nivel
-        materiasNivelModel.updateMateriasNivel(materia_id, { nivel_id }, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Materia y relación actualizados' });
-        });
+    allowedMateriaUpdates.forEach(field => {
+        if (updates[field] !== undefined) {
+            apoyoFieldsToUpdate[field] = updates[field];
+        }
     });
+
+    allowedMateriaNivelUpdates.forEach(field => {
+        if (updates[field] !== undefined) {
+            apoyoNivelFieldsToUpdate[field] = updates[field];
+        }
+    });
+
+    const apoyoUpdatePromise = new Promise((resolve, reject) => {
+        if (Object.keys(apoyoFieldsToUpdate).length > 0) {
+            materiasModel.updateMateria(id, apoyoFieldsToUpdate, (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        } else {
+            resolve({ affectedRows: 0 });
+        }
+    });
+
+    const apoyoNivelUpdatePromise = new Promise((resolve, reject) => {
+        if (Object.keys(apoyoNivelFieldsToUpdate).length > 0) {
+            materiasNivelModel.updateMateriaNivel(id, apoyoNivelFieldsToUpdate, (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        } else {
+            resolve({ affectedRows: 0 });
+        }
+    });
+
+    Promise.all([apoyoUpdatePromise, apoyoNivelUpdatePromise])
+        .then(results => {
+            const [apoyoResult, apoyoNivelResult] = results;
+            if (apoyoResult.affectedRows > 0 || apoyoNivelResult.affectedRows > 0) {
+                res.json({ message: 'Materia y/o nivel actualizado' });
+            } else {
+                res.status(404).json({ error: 'Materia y/o nivel no encontrado' });
+            }
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
 };
 
 const deleteMateriaWithNivel = (req, res) => {
-    const materia_id = req.params.id;
+    const id_materia = req.params.id;
 
-    // Elimina la relación con nivel
-    materiasNivelModel.deleteMateriasNivel(materia_id, (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+    // Eliminar los registros de la tabla materias_nivel que dependen del id_materia
+    materiasNivelModel.deleteMateriasNivel(id_materia, (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
 
-        // Elimina el Materia
-        materiasModel.deleteMateria(materia_id, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Materia y relación eliminados' });
+        // Una vez eliminados los registros de materias_nivel, elimina el apoyo en materiasestudiantiles
+        materiasModel.deleteMateria(id_materia, (err) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.status(200).json({ message: 'Materia y relaciones de nivel eliminados' });
         });
     });
 };
+
 
 module.exports = {
     getAllMaterias,

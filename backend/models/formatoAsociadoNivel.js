@@ -1,21 +1,21 @@
-// models/formatoNivel.js
+// models/formatoAsociadoNivel.js
 const db = require('../config/dbConfig');
 
 const getAllFormatoNiveles = (callback) => {
-    db.query('SELECT * FROM formato_nivel', callback);
+    db.query('SELECT * FROM formato_asociado_nivel', callback);
 };
 
 const getFormatoNivelById = (id, callback) => {
-    db.query('SELECT * FROM formato_nivel WHERE id = ?', [id], callback);
+    db.query('SELECT * FROM formato_asociado_nivel WHERE id = ?', [id], callback);
 };
 
-const createFormatoNivel = (formatoNivel, callback) => {
-    const { id_formato, id_nivel } = formatoNivel;
-    db.query('INSERT INTO formato_nivel (id_formato, id_nivel) VALUES (?, ?)', [id_formato, id_nivel], callback);
+const createFormatoNivel = (formato_asociadoNivel, callback) => {
+    const { id_formato_asociado, id_nivel } = formato_asociadoNivel;
+    db.query('INSERT INTO formato_asociado_nivel (id_formato_asociado, id_nivel) VALUES (?, ?)', [id_formato_asociado, id_nivel], callback);
 };
 
 const deleteFormatoNivel = (id, callback) => {
-    db.query('DELETE FROM formato_nivel WHERE id_formato = ?', [id], callback);
+    db.query('DELETE FROM formato_asociado_nivel WHERE id_formato_asociado = ?', [id], callback);
 };
 
 const updateFormatoNivel = (id, updates, callback) => {
@@ -30,7 +30,7 @@ const updateFormatoNivel = (id, updates, callback) => {
     }
 
     queryValues.push(id);
-    const query = `UPDATE formato_nivel SET ${queryParts.join(', ')} WHERE id_formato = ?`;
+    const query = `UPDATE formato_asociado_nivel SET ${queryParts.join(', ')} WHERE id_formato_asociado = ?`;
 
     db.query(query, queryValues, callback);
 };

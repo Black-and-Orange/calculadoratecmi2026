@@ -1,5 +1,5 @@
-const formatoModel = require('../models/formato');
-const formatoNivelModel = require('../models/formatoNivel');
+const formatoModel = require('../models/formatoAsociado');
+const formatoNivelModel = require('../models/formatoAsociadoNivel');
 
 const getAllFormato = (req, res) => {
     formatoModel.getAllFormatos((err, result) => {
@@ -34,10 +34,10 @@ const getFormatoById = (req, res) => {
 };
 
 const createFormatoWithNivel = (req, res) => {
-    const { descripcion, codigo, id_nivel } = req.body;
+    const { descripcion, costo, id_nivel } = req.body;
 
     // Crea el formato
-    formatoModel.createFormato({ descripcion, codigo }, (err, result) => {
+    formatoModel.createFormato({ descripcion, costo }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const id_formato = result.insertId;
@@ -55,7 +55,7 @@ const updateFormatoWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedFormatoUpdates = ['descripcion, codigo'];
+    const allowedFormatoUpdates = ['descripcion, costo'];
     const allowedFormatoNivelUpdates = ['id_nivel'];
     const formatoFieldsToUpdate = {};
     const formatoNivelFieldsToUpdate = {};

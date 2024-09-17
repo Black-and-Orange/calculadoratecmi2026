@@ -1,7 +1,6 @@
 const db = require('../config/dbConfig');
 
-// Obtener todos los costos de materias
-const getAllCostosMateria = (callback) => {
+const getAllCostos = (callback) => {
     db.query('SELECT * FROM costo_materia', callback);
 };
 
@@ -15,47 +14,41 @@ const getCostosByNivel = (nivelId, callback) => {
     db.query(query, [nivelId], callback);
 };
 
-// Obtener un costo de materia por ID
-const getCostoMateriaById = (id, callback) => {
-    db.query('SELECT * FROM costo_materia WHERE id = ?', [id], callback);
+const getCostoById = (id, callback) => {
+    db.query('SELECT * FROM costo_materia WHERE id_costo = ?', [id], callback);
 };
 
-// Crear un nuevo costo de materia
-const createCostoMateria = (costoMateria, callback) => {
-    const { clave, costo } = costoMateria;
-    if (!clave || !costo) {
-        return callback(new Error('Todos los campos son requeridos'));
+const createCosto = (costo_materia, callback) => {
+    const { clave, costo } = costo_materia;
+    db.query('INSERT INTO costo_materia (clave, costo) VALUES (?, ?)', [clave, costo], callback);
+};
+
+const deleteCosto = (id, callback) => {
+    db.query('DELETE FROM costo_materia WHERE id_costo = ?', [id], callback);
+};
+
+const updateCosto = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
     }
-    db.query(
-        'INSERT INTO costo_materia (clave, costo) VALUES (?, ?)',
-        [clave, costo],
-        callback
-    );
-};
 
-// Actualizar un costo de materia
-const updateCostoMateria = (id, costoMateria, callback) => {
-    const { clave, costo } = costoMateria;
-    if (!clave || !costo) {
-        return callback(new Error('Todos los campos son requeridos'));
-    }
-    db.query(
-        'UPDATE costo_materia SET clave = ?, costo = ? WHERE id = ?',
-        [clave, costo, id],
-        callback
-    );
-};
+    queryValues.push(id);
+    const query = `UPDATE costo_materia SET ${queryParts.join(', ')} WHERE id_costo = ?`;
 
-// Eliminar un costo de materia
-const deleteCostoMateria = (id, callback) => {
-    db.query('DELETE FROM costo_materia WHERE id = ?', [id], callback);
+    db.query(query, queryValues, callback);
 };
 
 module.exports = {
-    getAllCostosMateria,
+    getAllCostos,
     getCostosByNivel,
-    getCostoMateriaById,
-    createCostoMateria,
-    updateCostoMateria,
-    deleteCostoMateria
+    getCostoById,
+    createCosto,
+    deleteCosto,
+    updateCosto
 };

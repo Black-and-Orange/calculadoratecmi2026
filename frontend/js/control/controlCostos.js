@@ -1,93 +1,135 @@
 $(document).ready(function () {
-    // Cargar objetos para un nivel o categoría específica
-    function loadObjects(level, containerId) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/nivel/1`)
+    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/costos';  // Cambia la URL de la API
+
+    // Función genérica para cargar costos de materias de cualquier nivel
+    function loadCostos(level, containerId) {
+        const container = $(containerId);
+
+        // Si la tabla ya está visible, ocultarla y salir de la función
+        if (container.is(':visible')) {
+            container.hide();
+            return;
+        }
+
+        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+        container.empty().hide();
+
+        fetch(`${apiUrl}/nivel/${level}`)
             .then(response => response.json())
             .then(data => {
-                $(containerId).empty();
-                if (Array.isArray(data)) {
-                    data.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                    data.forEach(item => {
-                        $(containerId).append(`
-                            <div class="action-buttons">
-                                <p style="margin-top: 15px; margin-right: 25px;">${item.nombre}</p>
-                                <button onclick="deleteObject(${item.id})" class="btn btn-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button onclick="editObject(${item.id}, '${item.nombre}', '${item.categoria}')" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </div>
-                        `);
+                if (Array.isArray(data) && data.length > 0) {
+                    data.sort((a, b) => a.clave.localeCompare(b.clave));
+
+                    let tableHtml = `
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Clave</th>
+                                    <th>Costo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    data.forEach(costoMateria => {
+                        console.log(level);
+                        
+                        tableHtml += `
+                            <tr>
+                                <td>${costoMateria.clave}</td>
+                                <td>${costoMateria.costo}</td>
+                                <td>
+                                    <button onclick="deleteCosto(${costoMateria.id_costo}, ${level})" class="btn btn-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <button onclick="editCosto(${costoMateria.id_costo}, '${costoMateria.clave}', '${costoMateria.costo}', ${level})" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
                     });
+
+                    tableHtml += `
+                            </tbody>
+                        </table>`;
+
+                    container.html(tableHtml).show();
                 } else {
-                    console.error('Expected an array but got:', data);
+                    console.log('No se encontraron costos de materias para mostrar.');
                 }
             })
-            .catch(error => console.error('Error fetching objects:', error));
+            .catch(error => console.error('Error fetching costos de materias:', error));
     }
 
-    // Crear nuevo objeto
-    function createObject(formId, level, containerId) {
+    // Función genérica para crear costos de materias
+    function createCosto(level, clave, costo, callback) {
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ clave: clave, costo: costo, id_nivel: level }),
+        })
+            .then(response => response.json())
+            .then(data => callback())
+            .catch(error => console.error('Error creando costo de materia:', error));
+    }
+
+    // Función para gestionar la creación de costos de materias para cualquier nivel
+    function handleCreateCosto(level, formId, claveInputId, costoInputId, loadCostosBtnId) {
         $(formId).submit(function (event) {
             event.preventDefault();
-            const name = $(`${formId}Name`).val();
-            const category = $(`${formId}Category`).val();
-            fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/objects', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre: name, categoria: category, nivel_id: level }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    $(`${formId}Name`).val('');
-                    $(`${formId}Category`).val('');
-                    loadObjects(level, containerId);
-                });
+            const clave = $(claveInputId).val();
+            const costo = $(costoInputId).val();
+            createCosto(level, clave, costo, function () {
+                $(claveInputId).val('');
+                $(costoInputId).val('');
+                $(loadCostosBtnId).click();
+            });
         });
     }
 
-    // Eliminar objeto
-    window.deleteObject = function(id) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
-            method: 'DELETE',
+    // Asociar eventos para cargar y crear costos de materias de niveles dinámicos
+    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+    for (let level = 1; level <= maxLevel; level++) {
+        $('#loadCostosNivel' + level).click(function () {
+            loadCostos(level, '#costosNivel' + level);
+        });
+
+        handleCreateCosto(level, '#createCostosNivel' + level + 'Form', '#costosNivel' + level + 'Name', '#costosNivel' + level + 'Type', '#loadCostosNivel' + level);
+    }
+});
+
+// Función para eliminar costos de materias
+function deleteCosto(id, level) {
+    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/costos/${id}`, {
+        method: 'DELETE',
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Recargar lista de costos para el nivel específico
+            $('#loadCostosNivel' + level).click();
+        })
+        .catch(error => console.error('Error eliminando costo de materia:', error));
+}
+
+// Función para editar costos de materias
+function editCosto(id, currentClave, currentCosto, level) {
+    const newClave = prompt('Nueva clave de la materia:', currentClave);
+    const newCosto = prompt('Nuevo costo de la materia:', currentCosto);
+    if (newClave && newCosto) {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/costos/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ clave: newClave, costo: newCosto }),
         })
             .then(response => response.json())
             .then(data => {
-                // Actualizar vistas para todos los niveles o categorías
-                loadObjects(1, '#containerNivel1');
-                loadObjects(2, '#containerNivel2');
-            });
-    }
-
-    // Editar objeto
-    window.editObject = function(id, currentName, currentCategory) {
-        const newName = prompt('Nuevo nombre del objeto:', currentName);
-        const newCategory = prompt('Nueva categoría del objeto:', currentCategory);
-        if (newName && newCategory) {
-            fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre: newName, categoria: newCategory }),
+                // Recargar lista de costos para el nivel específico
+                $('#loadCostosNivel' + level).click();
             })
-                .then(response => response.json())
-                .then(data => {
-                    // Actualizar vistas para todos los niveles o categorías
-                    loadObjects(1, '#containerNivel1');
-                    loadObjects(2, '#containerNivel2');
-                });
-        }
+            .catch(error => console.error('Error editando costo de materia:', error));
     }
-
-    // Inicializa carga y creación para nivel 1
-    loadObjects(1, '#containerNivel1');
-    createObject('#createObjectNivel1Form', 1, '#containerNivel1');
-
-    // Inicializa carga y creación para nivel 2
-    loadObjects(2, '#containerNivel2');
-    createObject('#createObjectNivel2Form', 2, '#containerNivel2');
-});
+}

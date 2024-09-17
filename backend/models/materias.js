@@ -22,25 +22,38 @@ const getMateriaById = (id, callback) => {
 
 // Crear una nueva materia
 const createMateria = (materia, callback) => {
-    const { numero_materias } = materia;
-    if (!numero_materias) {
+    console.log(materia);
+    
+    const { numero } = materia;
+    console.log(numero);
+    
+    if (!numero) {
         return callback(new Error('El número de materias es requerido'));
     }
-    db.query('INSERT INTO materias (numero_materias) VALUES (?)', [numero_materias], callback);
+    db.query('INSERT INTO materias (numero) VALUES (?)', [numero], callback);
 };
 
 // Actualizar una materia
-const updateMateria = (id, materia, callback) => {
-    const { numero_materias } = materia;
-    if (!numero_materias) {
-        return callback(new Error('El número de materias es requerido'));
+const updateMateria = (id_materia, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
     }
-    db.query('UPDATE materias SET numero_materias = ? WHERE id = ?', [numero_materias, id], callback);
+
+    queryValues.push(id_materia);
+    const query = `UPDATE materias SET ${queryParts.join(', ')} WHERE id_materia = ?`;
+
+    db.query(query, queryValues, callback);
 };
 
 // Eliminar una materia
-const deleteMateria = (id, callback) => {
-    db.query('DELETE FROM materias WHERE id = ?', [id], callback);
+const deleteMateria = (id_materia, callback) => {
+    db.query('DELETE FROM materias WHERE id_materia = ?', [id_materia], callback);
 };
 
 module.exports = {

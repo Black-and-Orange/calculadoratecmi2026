@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const formatoController = require('../controllers/formatoController');
+const formatoController = require('../controllers/formatoAsociadoController');
 
 // Obtener todos los campus
 router.get('/', formatoController.getAllFormato);

@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', async () => {
     const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
     const params = new URLSearchParams(window.location.search);
@@ -8,7 +7,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campus = params.get('select-campus') || 'N/A';
     const nivel = params.get('select-grade') || 'N/A';
     const materias = params.get('select-subjects') || 'N/A';
-    
+
+    // Asignación de los valores de los parámetros a los elementos del DOM
     document.getElementById('nombre').textContent = nombre;
     document.getElementById('periodo').textContent = periodo;
     document.getElementById('campus').textContent = campus;
@@ -19,46 +19,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         let subjectsText = 'N/A';
 
         switch (nivel) {
-            case 8,9:
-                subjectsText = 'Cerfificados';
+            case 5:
+            case 8:
+            case 9:
+                subjectsText = 'Certificados';
                 break;
-            case 'Profesional Semestral':
-                subjectsText = '5 Materias';
+            case 1:
+            case 3:
+            case 7:
+            case 11:
+            case 12:
+                subjectsText = 'Materias';
                 break;
-            case 'Universidad Cuatrimestral':
-                subjectsText = '4 Materias';
+            case 2:
+            case 6:
+            case 10:
+                subjectsText = 'Créditos';
                 break;
-            case 'Universidad Semestral':
-                subjectsText = '5 Materias';
-                break;
-            case 'Universidad Trimestral':
-                subjectsText = '3 Materias';
-                break;
-            case 'ICBI':
-                subjectsText = '3 Materias';
-                break;
+            case '4': // Asegúrate de que el valor de nivel sea comparado correctamente
+                // Devuelve un array con los 3 textos separados
+                return ['Certificados', 'Semanas SEDI', 'Cursos de Inglés'];
             default:
                 subjectsText = 'N/A';
                 break;
         }
 
         return subjectsText;
-
     }
 
-    let segurosData = {};
+    // Asignación de textos dependiendo del nivel
+    const subjectTexts = setTextSubjects(nivel);
+
+    if (nivel === '4' && Array.isArray(subjectTexts)) {
+        // Asignar cada uno de los textos de forma individual
+        document.getElementById('certificados').textContent = subjectTexts[0];
+        document.getElementById('semanas').textContent = subjectTexts[1];
+        document.getElementById('cursos').textContent = subjectTexts[2];
+
+        // Mostrar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
+        document.getElementById('certificados-container').classList.remove('hidden');
+        document.getElementById('semanas-container').classList.remove('hidden');
+        document.getElementById('cursos-container').classList.remove('hidden');
+        
+        // Ocultar el contenedor de materias
+        document.getElementById('materias-container').classList.add('hidden');
+    } else {
+        // Asignar el texto en 'materias' si no es nivel 4
+        document.getElementById('materias').textContent = subjectTexts;
+
+        // Mostrar el contenedor de materias
+        document.getElementById('materias-container').classList.remove('hidden');
+        
+        // Ocultar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
+        document.getElementById('certificados-container').classList.add('hidden');
+        document.getElementById('semanas-container').classList.add('hidden');
+        document.getElementById('cursos-container').classList.add('hidden');
+    }
+
+    let segurosData;
+    const viveDiv = document.getElementById('div-vive');
 
     async function fetchSeguros() {
+        console.log('levelId:', levelId);
+    
         try {
-            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros');
+            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
             if (!response.ok) throw new Error('Error al obtener los seguros');
-            const data = await response.json();
+            const segurosDataArray = await response.json(); // Recibimos un array
 
-            if (levelId === 3) {
-                segurosData = data[1];
-            } else {
-                segurosData = data[0];
+            // Asegúrate de que no está vacío
+            if (segurosDataArray.length > 0) {
+                segurosData = segurosDataArray[0]; // Tomamos el primer seguro
+    
+                console.log('segurosData:', segurosData);
             }
+    
+            // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
+            if (levelId >= 6 && levelId <= 12) {
+                viveDiv.style.display = 'none'; // Ocultar div
+            } else {
+                viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
+            }
+    
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
@@ -133,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let factorMultiplicador = 4;
         let textoMensualidades = '4 Mensualidades';
 
-        if (nivel === 'Preparatoria Tetramestral') {
+        if (levelId != 3 || levelId != 5) {
             factorMultiplicador = 3;
             textoMensualidades = '3 Mensualidades';
         }
@@ -322,17 +364,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const benefitsWrapper = document.getElementById('benefits-wrappers');
         benefitsWrapper.innerHTML = ''; // Limpiar el contenedor de beneficios
         const titleBenefit = document.getElementById('titleBenefit');
-        console.log(tituloPorNivel[nivel]);
-        
-        console.log(nivel);
-        
         titleBenefit.innerText = tituloPorNivel[nivel] || 'N/A';
-
         const beneficios = beneficiosPorNivel || [];
-
-        console.log(beneficios);
-
-
         beneficios.forEach((beneficio, index) => {
             const benefitItem = document.createElement('div');
             benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit-card-elem";

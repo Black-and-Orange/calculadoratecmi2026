@@ -2,13 +2,21 @@ const express = require('express');
 const router = express.Router();
 const inglesController = require('../controllers/inglesController');
 
-// Obtener todos los ingles
+// Obtener todos los campus
 router.get('/', inglesController.getAllIngles);
 
-// Obtener todos los ingles de un nivel
 router.get('/nivel/:nivelId', inglesController.getInglesByNivel);
 
-// Crear un nuevo ingles con su nivel
-router.post('/', inglesController.resetAndAddIngles);
+// Obtener un campus por ID
+router.get('/:id', inglesController.getInglesById);
+
+// Crear un nuevo campus con su nivel
+router.post('/', inglesController.createInglesWithNivel);
+
+// Actualizar un campus y su nivel
+router.patch('/:id', inglesController.updateInglesWithNivel);
+
+// Eliminar un campus y su nivel
+router.delete('/:id', inglesController.deleteInglesWithNivel);
 
 module.exports = router;

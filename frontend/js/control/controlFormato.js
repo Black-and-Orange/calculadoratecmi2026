@@ -1,93 +1,150 @@
 $(document).ready(function () {
-    // Cargar objetos para un nivel o categoría específica
-    function loadObjects(level, containerId) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/nivel/${level}`) // Cambia la URL según tu API
+    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato';
+
+    // Función genérica para cargar formato de cualquier nivel
+    function loadFormatos(level, containerId) {
+        const container = $(containerId);
+
+        // Si la tabla ya está visible, ocultarla y salir de la función
+        if (container.is(':visible')) {
+            container.hide();
+            return;
+        }
+
+        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+        container.empty().hide();
+
+        fetch(`${apiUrl}/nivel/${level}`)
             .then(response => response.json())
             .then(data => {
-                $(containerId).empty();
-                if (Array.isArray(data)) {
-                    data.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                    data.forEach(item => {
-                        $(containerId).append(`
-                            <div class="action-buttons">
-                                <p style="margin-top: 15px; margin-right: 25px;">${item.nombre}</p>
-                                <button onclick="deleteObject(${item.id})" class="btn btn-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button onclick="editObject(${item.id}, '${item.nombre}', '${item.categoria}')" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </div>
-                        `);
+                if (Array.isArray(data) && data.length > 0) {
+                    data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
+
+                    let tableHtml = `
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Codigo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    data.forEach(formato => {
+                        tableHtml += `
+                            <tr>
+                                <td>${formato.descripcion}</td>
+                                <td>${formato.codigo}</td>
+                                <td>
+                                    <button onclick="deleteFormato(${formato.id_formato}, ${level})" class="btn btn-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <button onclick="editFormato(${formato.id_formato}, '${formato.descripcion}', '${formato.codigo}', ${level})" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
                     });
+
+                    tableHtml += `
+                            </tbody>
+                        </table>`;
+
+                    container.html(tableHtml).show();
                 } else {
-                    console.error('Expected an array but got:', data);
+                    console.log('No se encontraron formatos para mostrar.');
                 }
             })
-            .catch(error => console.error('Error fetching objects:', error));
+            .catch(error => console.error('Error fetching formatos:', error));
     }
 
-    // Crear nuevo objeto
-    function createObject(formId, level, containerId) {
+    // Función genérica para crear un formato
+    function createFormato(level, descripcion, codigo, callback) {
+        console.log("Creando formato con:", { descripcion, codigo, level });  // <-- Agrega esto para depuración
+
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ descripcion: descripcion, codigo: codigo, id_nivel: level }),
+        })
+        .then(response => {
+            console.log("Respuesta del servidor (raw):", response); // <-- Para ver la respuesta en formato bruto
+            return response.json(); // Convertimos a JSON
+        })
+        .then(data => {
+            console.log("Respuesta del servidor (json):", data);  // <-- Para ver la respuesta después de parsearla
+            callback();  // <-- Callback para recargar los formatos
+        })
+        .catch(error => console.error('Error creando formato:', error));
+    }
+    
+
+    // Función para gestionar la creación de formatos para cualquier nivel
+    function handleCreateFormato(level, formId, descripcionInputId, codigoInputId, loadFormatosBtnId) {
         $(formId).submit(function (event) {
             event.preventDefault();
-            const name = $(`${formId}Name`).val();
-            const category = $(`${formId}Category`).val();
-            fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/objects', { // Cambia la URL según tu API
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre: name, categoria: category, nivel_id: level }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    $(`${formId}Name`).val('');
-                    $(`${formId}Category`).val('');
-                    loadObjects(level, containerId);
-                });
+            
+            // Obtenemos los valores de los inputs
+            const descripcion = $(descripcionInputId).val();
+            const codigo = $(codigoInputId).val(); // Eliminar parseFloat aquí para no forzar el formato
+
+            console.log("Datos enviados al crear formato:", { descripcion, codigo, level });  // <-- Debug
+
+            // Crear el formato
+            createFormato(level, descripcion, codigo, function () {
+                // Limpiamos los inputs tras la creación
+                $(descripcionInputId).val('');
+                $(codigoInputId).val('');
+                $(loadFormatosBtnId).click();
+            });
         });
     }
 
-    // Eliminar objeto
-    window.deleteObject = function(id) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
-            method: 'DELETE',
+    // Asociar eventos para cargar y crear formatos de niveles dinámicos
+    const maxLevel = 12;
+    for (let level = 1; level <= maxLevel; level++) {
+        $('#loadFormatoNivel' + level).click(function () {
+            loadFormatos(level, '#formatoNivel' + level);
+        });
+
+        handleCreateFormato(level, '#createFormatoNivel' + level + 'Form', '#formatoNivel' + level + 'Formato', '#formatoNivel' + level + 'Codigo', '#loadFormatoNivel' + level);
+    }
+});
+
+// Función para eliminar formato
+function deleteFormato(id, level) {
+    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/formato/${id}`, {
+        method: 'DELETE',
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Formato eliminado:", data);  // <-- Debug para eliminar
+            $('#loadFormatoNivel' + level).click();
+        })
+        .catch(error => console.error('Error eliminando formato:', error));
+}
+
+// Función para editar formato
+function editFormato(id, currentDescripcion, currentCodigo, level) {
+    const newDescripcion = prompt('Nueva descripción del formato:', currentDescripcion);
+    const newCodigo = prompt('Nuevo codigo del formato:', currentCodigo);
+
+    if (newDescripcion && newCodigo) {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/formato/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ descripcion: newDescripcion, codigo: newCodigo }),
         })
             .then(response => response.json())
             .then(data => {
-                // Actualizar vistas para todos los niveles o categorías
-                loadObjects(1, '#containerNivel1');
-                loadObjects(2, '#containerNivel2');
-            });
-    }
-
-    // Editar objeto
-    window.editObject = function(id, currentName, currentCategory) {
-        const newName = prompt('Nuevo nombre del objeto:', currentName);
-        const newCategory = prompt('Nueva categoría del objeto:', currentCategory);
-        if (newName && newCategory) {
-            fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre: newName, categoria: newCategory }),
+                console.log("Formato editado:", data);  // <-- Debug para editar
+                $('#loadFormatoNivel' + level).click();
             })
-                .then(response => response.json())
-                .then(data => {
-                    // Actualizar vistas para todos los niveles o categorías
-                    loadObjects(1, '#containerNivel1');
-                    loadObjects(2, '#containerNivel2');
-                });
-        }
+            .catch(error => console.error('Error editando formato:', error));
     }
-
-    // Inicializar carga y creación para nivel 1
-    loadObjects(1, '#containerNivel1');
-    createObject('#createObjectNivel1Form', 1, '#containerNivel1');
-
-    // Inicializar carga y creación para nivel 2
-    loadObjects(2, '#containerNivel2');
-    createObject('#createObjectNivel2Form', 2, '#containerNivel2');
-});
+}

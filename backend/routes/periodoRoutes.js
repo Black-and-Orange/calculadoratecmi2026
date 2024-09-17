@@ -14,7 +14,7 @@ router.get('/:id', periodoController.getPeriodoById);
 router.post('/', periodoController.createPeriodoWithNivel);
 
 // Actualizar un campus y su nivel
-router.put('/:id', periodoController.updatePeriodoWithNivel);
+router.patch('/:id', periodoController.updatePeriodoWithNivel);
 
 // Eliminar un campus y su nivel
 router.delete('/:id', periodoController.deletePeriodoWithNivel);

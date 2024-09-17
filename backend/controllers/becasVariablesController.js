@@ -93,12 +93,12 @@ const createBecaVariableWithNivel = (req, res) => {
     becasVariablesModel.createBecaVariable({ tipo, promedio_min, promedio_max, porcentaje_min, porcentaje_max }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        const becaVariable_id = result.insertId;
+        const beca_variable_id = result.insertId;
 
         // Crea la relación con nivel
-        becasVariablesNivelModel.createBecaVariableWithNivel({ becaVariable_id, nivel_id }, (err) => {
+        becasVariablesNivelModel.createBecaVariableNivel({ beca_variable_id, nivel_id }, (err) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ becaVariable_id });
+            res.status(201).json({ beca_variable_id });
         });
     });
 };
@@ -138,7 +138,7 @@ const updateBecaVariableWithNivel = (req, res) => {
 
     const becaVariableNivelUpdatePromise = new Promise((resolve, reject) => {
         if (Object.keys(becaVariableNivelFieldsToUpdate).length > 0) {
-            becasVariablesNivelModel.updateBecaVariableWithNivel(id, becaVariableNivelFieldsToUpdate, (err, result) => {
+            becasVariablesNivelModel.updateBecaVariableNivel(id, becaVariableNivelFieldsToUpdate, (err, result) => {
                 if (err) return reject(err);
                 resolve(result);
             });
@@ -160,14 +160,14 @@ const updateBecaVariableWithNivel = (req, res) => {
 };
 
 const deleteBecaVariableWithNivel = (req, res) => {
-    const becaVariable_id = req.params.id;
+    const beca_variable_id = req.params.id;
 
     // Elimina la relación con nivel
-    becasVariablesNivelModel.deleteBecaVariableWithNivel(becaVariable_id, (err) => {
+    becasVariablesNivelModel.deleteBecaVariableNivel(beca_variable_id, (err) => {
         if (err) return res.status(500).json({ error: err.message });
 
         // Elimina el becaVariable
-        becasVariablesModel.deleteBecaVariable(becaVariable_id, (err) => {
+        becasVariablesModel.deleteBecaVariable(beca_variable_id, (err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(200).json({ message: 'BecaVariable y relación eliminados' });
         });

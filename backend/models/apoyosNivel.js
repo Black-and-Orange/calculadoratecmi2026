@@ -14,8 +14,8 @@ const createApoyoNivel = (apoyoNivel, callback) => {
     db.query('INSERT INTO apoyos_nivel (apoyo_id, nivel_id) VALUES (?, ?)', [apoyo_id, nivel_id], callback);
 };
 
-const deleteApoyoNivel = (id, callback) => {
-    db.query('DELETE FROM apoyos_nivel WHERE id = ?', [id], callback);
+const deleteApoyoNivel = (apoyo_id, callback) => {
+    db.query('DELETE FROM apoyos_nivel WHERE apoyo_id = ?', [apoyo_id], callback);
 };
 
 const updateApoyoNivel = (id, updates, callback) => {

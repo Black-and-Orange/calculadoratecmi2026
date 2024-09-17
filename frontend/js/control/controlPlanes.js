@@ -1,93 +1,137 @@
 $(document).ready(function () {
-    // Cargar objetos para un nivel o categoría específica
-    function loadObjects(level, containerId) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/nivel/${level}`) // Cambia la URL según tu API
+    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/planes';
+
+    // Función genérica para cargar planes de cualquier nivel
+    function loadPlanes(level, containerId) {
+        const container = $(containerId);
+
+        // Si la tabla ya está visible, ocultarla y salir de la función
+        if (container.is(':visible')) {
+            container.hide();
+            return;
+        }
+
+        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+        container.empty().hide();
+
+        fetch(`${apiUrl}/nivel/${level}`)
             .then(response => response.json())
             .then(data => {
-                $(containerId).empty();
-                if (Array.isArray(data)) {
-                    data.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                    data.forEach(item => {
-                        $(containerId).append(`
-                            <div class="action-buttons">
-                                <p style="margin-top: 15px; margin-right: 25px;">${item.nombre}</p>
-                                <button onclick="deleteObject(${item.id})" class="btn btn-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button onclick="editObject(${item.id}, '${item.nombre}', '${item.categoria}')" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </div>
-                        `);
+                if (Array.isArray(data) && data.length > 0) {
+                    data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
+
+                    let tableHtml = `
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    data.forEach(planes => {
+                        console.log(planes.id_plan);
+                        
+                        tableHtml += `
+                            <tr>
+                                <td>${planes.descripcion}</td>
+                                <td>${planes.tipo_plan}</td>
+                                <td>
+                                    <button onclick="deletePlanes(${planes.id_plan}, ${level})" class="btn btn-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <button onclick="editPlanes(${planes.id_plan}, '${planes.descripcion}', '${planes.tipo_plan}', ${level})" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
                     });
+
+                    tableHtml += `
+                            </tbody>
+                        </table>`;
+
+                    container.html(tableHtml).show();
                 } else {
-                    console.error('Expected an array but got:', data);
+                    console.log('No se encontraron planes para mostrar.');
                 }
             })
-            .catch(error => console.error('Error fetching objects:', error));
+            .catch(error => console.error('Error fetching planes:', error));
     }
 
-    // Crear nuevo objeto
-    function createObject(formId, level, containerId) {
+    // Función genérica para crear planes
+    function createPlanes(level, name, category, callback) {
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ descripcion: name, tipo_plan: category, id_nivel: level }),
+        })
+            .then(response => response.json())
+            .then(data => callback())
+            .catch(error => console.error('Error creating planes:', error));
+    }
+
+    // Función para gestionar la creación de planes para cualquier nivel
+    function handleCreatePlanes(level, formId, nameInputId, categoryInputId, loadPlanesBtnId) {
         $(formId).submit(function (event) {
             event.preventDefault();
-            const name = $(`${formId}Name`).val();
-            const category = $(`${formId}Category`).val();
-            fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/objects', { // Cambia la URL según tu API
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre: name, categoria: category, nivel_id: level }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    $(`${formId}Name`).val('');
-                    $(`${formId}Category`).val('');
-                    loadObjects(level, containerId);
-                });
+            const name = $(nameInputId).val();
+            const category = $(categoryInputId).val();
+            console.log('Creating planes:', name, category, level);
+            
+            createPlanes(level, name, category, function () {
+                $(nameInputId).val('');
+                $(categoryInputId).val('');
+                $(loadPlanesBtnId).click();
+            });
         });
     }
 
-    // Eliminar objeto
-    window.deleteObject = function(id) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
-            method: 'DELETE',
+    // Asociar eventos para cargar y crear planes de niveles dinámicos
+    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+    for (let level = 1; level <= maxLevel; level++) {
+        $('#loadPlanesNivel' + level).click(function () {
+            loadPlanes(level, '#planesNivel' + level);
+        });
+
+        handleCreatePlanes(level, '#createPlanesNivel' + level + 'Form', '#planesNivel' + level + 'Name', '#planesNivel' + level + 'Type', '#loadPlanesNivel' + level);
+    }
+});
+
+// Función para eliminar planes
+function deletePlanes(id, level) {
+    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/planes/${id}`, {
+        method: 'DELETE',
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Recargar lista de planes para el nivel específico
+            $('#loadPlanesNivel' + level).click();
+        })
+        .catch(error => console.error('Error deleting planes:', error));
+}
+
+// Función para editar planes
+function editPlanes(id, currentName, currentCategory, level) {
+    const newName = prompt('Nuevo nombre del planes:', currentName);
+    const newCategory = prompt('Nueva categoría del planes:', currentCategory);
+    if (newName && newCategory) {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/planes/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ descripcion: newName, tipo_plan: newCategory }),
         })
             .then(response => response.json())
             .then(data => {
-                // Actualizar vistas para todos los niveles o categorías
-                loadObjects(1, '#containerNivel1');
-                loadObjects(2, '#containerNivel2');
-            });
-    }
-
-    // Editar objeto
-    window.editObject = function(id, currentName, currentCategory) {
-        const newName = prompt('Nuevo nombre del objeto:', currentName);
-        const newCategory = prompt('Nueva categoría del objeto:', currentCategory);
-        if (newName && newCategory) {
-            fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/objects/${id}`, { // Cambia la URL según tu API
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ nombre: newName, categoria: newCategory }),
+                // Recargar lista de planes para el nivel específico
+                $('#loadPlanesNivel' + level).click();
             })
-                .then(response => response.json())
-                .then(data => {
-                    // Actualizar vistas para todos los niveles o categorías
-                    loadObjects(1, '#containerNivel1');
-                    loadObjects(2, '#containerNivel2');
-                });
-        }
+            .catch(error => console.error('Error editing planes:', error));
     }
-
-    // Inicializar carga y creación para nivel 1
-    loadObjects(1, '#containerNivel1');
-    createObject('#createObjectNivel1Form', 1, '#containerNivel1');
-
-    // Inicializar carga y creación para nivel 2
-    loadObjects(2, '#containerNivel2');
-    createObject('#createObjectNivel2Form', 2, '#containerNivel2');
-});
+}

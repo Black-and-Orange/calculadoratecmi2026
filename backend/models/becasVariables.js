@@ -19,8 +19,8 @@ const getBecaVariableById = (id, callback) => {
 };
 
 const createBecaVariable = (beca_variable, callback) => {
-    const { tipo, porcentaje_min, porcentaje_max, promedio_min, promedio_max } = beca;
-    db.query('INSERT INTO Becas (tipo, porcentaje_min, porcentaje_max, promedio_min, promedio_max) VALUES (?, ?, ?, ?, ?)',
+    const { tipo, porcentaje_min, porcentaje_max, promedio_min, promedio_max } = beca_variable;
+    db.query('INSERT INTO beca_variable (tipo, porcentaje_min, porcentaje_max, promedio_min, promedio_max) VALUES (?, ?, ?, ?, ?)',
         [tipo, porcentaje_min, porcentaje_max, promedio_min, promedio_max], callback);
 };
 

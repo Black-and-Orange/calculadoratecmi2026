@@ -1,8 +1,8 @@
 $(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos';
+    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/intereses';
 
-    // Función genérica para cargar apoyos de cualquier nivel
-    function loadCampus(level, containerId) {
+    // Función genérica para cargar interes de cualquier nivel
+    function loadInteres(level, containerId) {
         const container = $(containerId);
 
         // Si la tabla ya está visible, ocultarla y salir de la función
@@ -18,7 +18,7 @@ $(document).ready(function () {
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.porcentaje - b.porcentaje);
+                    data.sort((a, b) => a.interes - b.interes);
 
                     let tableHtml = `
                         <table class="table table-striped">
@@ -30,15 +30,15 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(apoyos => {
+                    data.forEach(interes => {
                         tableHtml += `
                             <tr>
-                                <td>${apoyos.porcentaje}%</td>
+                                <td>${interes.interes}%</td>
                                 <td>
-                                    <button onclick="deleteCampus(${apoyos.id}, ${level})" class="btn btn-danger">
+                                    <button onclick="deleteInteres(${interes.id}, ${level})" class="btn btn-danger">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button onclick="editCampus(${apoyos.id}, '${apoyos.nombre}', ${apoyos.porcentaje}, ${level})" class="btn btn-warning">
+                                    <button onclick="editInteres(${interes.id}, '${interes.nombre}', ${interes.interes}, ${level})" class="btn btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </td>
@@ -51,78 +51,78 @@ $(document).ready(function () {
 
                     container.html(tableHtml).show();
                 } else {
-                    container.html('<p>No se encontraron apoyos para este nivel.</p>').show();
+                    container.html('<p>No se encontraron interes para este nivel.</p>').show();
                 }
             })
-            .catch(error => console.error('Error fetching apoyos:', error));
+            .catch(error => console.error('Error fetching interes:', error));
     }
 
-    // Función genérica para crear apoyos
-    function createCampus(level, percentage, callback) {
+    // Función genérica para crear interes
+    function createInteres(level, percentage, callback) {
         fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ porcentaje: percentage, nivel_id: level }),
+            body: JSON.stringify({ interes: percentage, nivel_id: level }),
         })
             .then(response => response.json())
             .then(data => callback())
-            .catch(error => console.error('Error creating apoyos:', error));
+            .catch(error => console.error('Error creating interes:', error));
     }
 
-    // Función para gestionar la creación de apoyos para cualquier nivel
-    function handleCreateCampus(level, formId, percentageInputId, loadCampusBtnId) {
+    // Función para gestionar la creación de interes para cualquier nivel
+    function handleCreateInteres(level, formId, percentageInputId, loadInteresBtnId) {
         $(formId).submit(function (event) {
             event.preventDefault();
             const percentage = $(percentageInputId).val();
-            createCampus(level, percentage, function () {
+            createInteres(level, percentage, function () {
                 $(percentageInputId).val('');
-                $(loadCampusBtnId).click();
+                $(loadInteresBtnId).click();
             });
         });
     }
 
-    // Asociar eventos para cargar y crear apoyos de niveles dinámicos
+    // Asociar eventos para cargar y crear interes de niveles dinámicos
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
-        $('#loadApoyosNivel' + level).click(function () {
-            loadCampus(level, '#apoyosNivel' + level);
+        $('#loadInteresNivel' + level).click(function () {
+            loadInteres(level, '#interesNivel' + level);
         });
 
-        handleCreateCampus(level, '#createApoyosNivel' + level + 'Form', '#apoyosNivel' + level + 'Porcentaje', '#loadApoyosNivel' + level);
+        handleCreateInteres(level, '#createInteresNivel' + level + 'Form', '#interesNivel' + level + 'Porcentaje', '#loadInteresNivel' + level);
     }
 });
 
-// Función para eliminar apoyos
-function deleteCampus(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/${id}`, {
+// Función para eliminar interes
+function deleteInteres(id, level) {
+    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/intereses/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de apoyos para el nivel específico
-            $('#loadApoyosNivel' + level).click();
+            // Recargar lista de interes para el nivel específico
+            $('#loadInteresNivel' + level).click();
         })
-        .catch(error => console.error('Error deleting apoyos:', error));
+        .catch(error => console.error('Error deleting interes:', error));
 }
 
-// Función para editar apoyos
-function editCampus(id, currentName, currentPercentage, level) {
-    const newPercentage = prompt('Nuevo porcentaje del apoyo:', currentPercentage);
+// Función para editar interes
+function editInteres(id, currentName, currentPercentage, level) {
+    const newPercentage = prompt('Nuevo interes del apoyo:', currentPercentage);
     if (newPercentage) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/${id}`, {
+        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/intereses/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({porcentaje: newPercentage }),
+            body: JSON.stringify({interes: newPercentage }),
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de apoyos para el nivel específico
-                $('#loadApoyosNivel' + level).click();
+                // Recargar lista de interes para el nivel específico
+                $('#loadInteresNivel' + level).click();
             })
-            .catch(error => console.error('Error editing apoyos:', error));
+            .catch(error => console.error('Error editing interes:', error));
     }
 }

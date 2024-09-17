@@ -34,10 +34,10 @@ const getInteresById = (req, res) => {
 };
 
 const createInteresWithNivel = (req, res) => {
-    const { porcentaje, nivel_id } = req.body;
+    const { interes, nivel_id } = req.body;
 
     // Crea el interes
-    interesesModel.createInteres({ porcentaje }, (err, result) => {
+    interesesModel.createInteres({ interes }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const interes_id = result.insertId;
@@ -55,7 +55,7 @@ const updateInteresWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedInteresUpdates = ['porcentaje'];
+    const allowedInteresUpdates = ['interes'];
     const allowedInteresNivelUpdates = ['nivel_id'];
     const interesFieldsToUpdate = {};
     const interesNivelFieldsToUpdate = {};

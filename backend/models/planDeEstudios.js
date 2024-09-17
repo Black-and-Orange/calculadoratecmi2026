@@ -17,30 +17,42 @@ const getPlanesByNivel = (nivelId, callback) => {
 
 // Obtener un plan de estudios por ID
 const getPlanDeEstudiosById = (id, callback) => {
-    db.query('SELECT * FROM plan_estudios WHERE id = ?', [id], callback);
+    db.query('SELECT * FROM plan_estudios WHERE id_plan = ?', [id], callback);
 };
 
 // Crear un nuevo plan de estudios
 const createPlanDeEstudios = (plan, callback) => {
-    const { nombre, nivel_id } = plan;
-    if (!nombre || !nivel_id) {
-        return callback(new Error('Nombre y nivel_id son requeridos'));
+    const { descripcion, tipo_plan } = plan;
+    if (!descripcion || !tipo_plan) {
+        return callback(new Error('Descripción y tipo_plan son requeridos'));
     }
-    db.query('INSERT INTO plan_estudios (nombre, nivel_id) VALUES (?, ?)', [nombre, nivel_id], callback);
+    db.query('INSERT INTO plan_estudios (descripcion, tipo_plan) VALUES (?, ?)', [descripcion, tipo_plan], callback);
 };
 
+
+
 // Actualizar un plan de estudios
-const updatePlanDeEstudios = (id, plan, callback) => {
-    const { nombre, nivel_id } = plan;
-    if (!nombre || !nivel_id) {
-        return callback(new Error('Nombre y nivel_id son requeridos'));
+const updatePlanDeEstudios = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
     }
-    db.query('UPDATE plan_estudios SET nombre = ?, nivel_id = ? WHERE id = ?', [nombre, nivel_id, id], callback);
+
+    queryValues.push(id);
+    const query = `UPDATE plan_estudios SET ${queryParts.join(', ')} WHERE id_plan = ?`;
+
+    db.query(query, queryValues, callback);
 };
+
 
 // Eliminar un plan de estudios
 const deletePlanDeEstudios = (id, callback) => {
-    db.query('DELETE FROM plan_estudios WHERE id = ?', [id], callback);
+    db.query('DELETE FROM plan_estudios WHERE id_plan = ?', [id], callback);
 };
 
 module.exports = {

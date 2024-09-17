@@ -1,50 +1,54 @@
 const db = require('../config/dbConfig');
 
-// Obtener todos los seguros
 const getAllSeguros = (callback) => {
-    db.query('SELECT * FROM seguros', callback);
+    db.query('SELECT * FROM seguro', callback);
 };
 
-// Obtener un seguro por ID
+const getSegurosByNivel = (nivelId, callback) => {
+    const query = `
+        SELECT seguro.id_seguro, seguro.seguro_accidentes, seguro.seguro_estudiantil, seguro.cobertura_vive
+        FROM seguro
+        JOIN seguro_nivel ON seguro.id_seguro = seguro_nivel.id_seguro
+        WHERE seguro_nivel.id_nivel = ?
+    `;
+    db.query(query, [nivelId], callback);
+};
+
 const getSeguroById = (id, callback) => {
-    db.query('SELECT * FROM seguros WHERE id = ?', [id], callback);
+    db.query('SELECT * FROM seguro WHERE id_seguro = ?', [id], callback);
 };
 
-// Crear un nuevo seguro
 const createSeguro = (seguro, callback) => {
     const { seguro_accidentes, seguro_estudiantil, cobertura_vive } = seguro;
-    if (!seguro_accidentes || !seguro_estudiantil || !cobertura_vive) {
-        return callback(new Error('Todos los campos son requeridos'));
-    }
-    db.query(
-        'INSERT INTO seguros (seguro_accidentes, seguro_estudiantil, cobertura_vive) VALUES (?, ?, ?)',
-        [seguro_accidentes, seguro_estudiantil, cobertura_vive],
-        callback
-    );
+    db.query('INSERT INTO seguro (seguro_accidentes, seguro_estudiantil, cobertura_vive) VALUES (?, ?, ?)', [seguro_accidentes, seguro_estudiantil, cobertura_vive], callback);
 };
 
-// Actualizar un seguro
-const updateSeguro = (id, seguro, callback) => {
-    const { seguro_accidentes, seguro_estudiantil, cobertura_vive } = seguro;
-    if (!seguro_accidentes || !seguro_estudiantil || !cobertura_vive) {
-        return callback(new Error('Todos los campos son requeridos'));
-    }
-    db.query(
-        'UPDATE seguros SET seguro_accidentes = ?, seguro_estudiantil = ?, cobertura_vive = ? WHERE id = ?',
-        [seguro_accidentes, seguro_estudiantil, cobertura_vive, id],
-        callback
-    );
-};
-
-// Eliminar un seguro
 const deleteSeguro = (id, callback) => {
-    db.query('DELETE FROM seguros WHERE id = ?', [id], callback);
+    db.query('DELETE FROM seguro WHERE id_seguro = ?', [id], callback);
+};
+
+const updateSeguro = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
+    }
+
+    queryValues.push(id);
+    const query = `UPDATE seguro SET ${queryParts.join(', ')} WHERE id_seguro = ?`;
+
+    db.query(query, queryValues, callback);
 };
 
 module.exports = {
     getAllSeguros,
+    getSegurosByNivel,
     getSeguroById,
     createSeguro,
-    updateSeguro,
-    deleteSeguro
+    deleteSeguro,
+    updateSeguro
 };

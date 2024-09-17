@@ -1,15 +1,25 @@
 $(document).ready(function () {
-    // Cargar campus en una tabla para un nivel específico
+    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/campus';
+
+    // Función genérica para cargar campus de cualquier nivel
     function loadCampus(level, containerId) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/nivel/${level}`)
+        const container = $(containerId);
+
+        // Si la tabla ya está visible, ocultarla y salir de la función
+        if (container.is(':visible')) {
+            container.hide();
+            return;
+        }
+
+        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+        container.empty().hide();
+
+        fetch(`${apiUrl}/nivel/${level}`)
             .then(response => response.json())
             .then(data => {
-                $(containerId).empty();
-                if (Array.isArray(data)) {
-                    // Ordena los datos alfabéticamente por nombre
+                if (Array.isArray(data) && data.length > 0) {
                     data.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                    
-                    // tabla
+
                     let tableHtml = `
                         <table class="table table-striped">
                             <thead>
@@ -19,105 +29,92 @@ $(document).ready(function () {
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                    `;
-                    
+                            <tbody>`;
+
                     data.forEach(campus => {
+                        console.log(level);
+                        
                         tableHtml += `
                             <tr>
                                 <td>${campus.nombre}</td>
                                 <td>${campus.categoria_coleg}</td>
                                 <td>
-                                    <button onclick="deleteCampus(${campus.id})" class="btn btn-danger">
+                                    <button onclick="deleteCampus(${campus.id}, ${level})" class="btn btn-danger">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button onclick="editCampus(${campus.id}, '${campus.nombre}', '${campus.categoria_coleg}')" class="btn btn-warning">
+                                    <button onclick="editCampus(${campus.id}, '${campus.nombre}', '${campus.categoria_coleg}', ${level})" class="btn btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </td>
-                            </tr>
-                        `;
+                            </tr>`;
                     });
-                    
+
                     tableHtml += `
                             </tbody>
-                        </table>
-                    `;
-                    
-                    // Insertar tabla en el contenedor
-                    $(containerId).html(tableHtml);
+                        </table>`;
+
+                    container.html(tableHtml).show();
                 } else {
-                    console.error('Expected an array but got:', data);
+                    console.log('No se encontraron campus para mostrar.');
                 }
             })
             .catch(error => console.error('Error fetching campus:', error));
     }
 
-    // Cargar campus para Preparatoria
-    $('#loadCampusPreparatoria').click(function () {
-        loadCampus(1, '#campusPreparatoria');
-    });
-
-    // Cargar campus para Profesional
-    $('#loadCampusProfesional').click(function () {
-        loadCampus(2, '#campusProfesional');
-    });
-
-    // Crear campus para Preparatoria
-    $('#createCampusPreparatoriaForm').submit(function (event) {
-        event.preventDefault();
-        const name = $('#campusPreparatoriaName').val();
-        const category = $('#campusPreparatoriaCategory').val();
-        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/campus', {
+    // Función genérica para crear campus
+    function createCampus(level, name, category, callback) {
+        fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nombre: name, categoria_coleg: category, nivel_id: 1 }),
+            body: JSON.stringify({ nombre: name, categoria_coleg: category, nivel_id: level }),
         })
             .then(response => response.json())
-            .then(data => {
-                $('#campusPreparatoriaName').val('');
-                $('#campusPreparatoriaCategory').val('');
-                $('#loadCampusPreparatoria').click();
-            });
-    });
+            .then(data => callback())
+            .catch(error => console.error('Error creating campus:', error));
+    }
 
-    // Crear campus para Profesional
-    $('#createCampusProfesionalForm').submit(function (event) {
-        event.preventDefault();
-        const name = $('#campusProfesionalName').val();
-        const category = $('#campusProfesionalCategory').val();
-        fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/campus', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ nombre: name, categoria_coleg: category, nivel_id: 2 }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                $('#campusProfesionalName').val('');
-                $('#campusProfesionalCategory').val('');
-                $('#loadCampusProfesional').click();
+    // Función para gestionar la creación de campus para cualquier nivel
+    function handleCreateCampus(level, formId, nameInputId, categoryInputId, loadCampusBtnId) {
+        $(formId).submit(function (event) {
+            event.preventDefault();
+            const name = $(nameInputId).val();
+            const category = $(categoryInputId).val();
+            createCampus(level, name, category, function () {
+                $(nameInputId).val('');
+                $(categoryInputId).val('');
+                $(loadCampusBtnId).click();
             });
-    });
+        });
+    }
+
+    // Asociar eventos para cargar y crear campus de niveles dinámicos
+    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+    for (let level = 1; level <= maxLevel; level++) {
+        $('#loadCampusNivel' + level).click(function () {
+            loadCampus(level, '#campusNivel' + level);
+        });
+
+        handleCreateCampus(level, '#createCampusNivel' + level + 'Form', '#campusNivel' + level + 'Name', '#campusNivel' + level + 'Category', '#loadCampusNivel' + level);
+    }
 });
 
-// Eliminar campus
-function deleteCampus(id) {
+// Función para eliminar campus
+function deleteCampus(id, level) {
     fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            $('#loadCampusPreparatoria').click();
-            $('#loadCampusProfesional').click();
-        });
+            // Recargar lista de campus para el nivel específico
+            $('#loadCampusNivel' + level).click();
+        })
+        .catch(error => console.error('Error deleting campus:', error));
 }
 
-// Editar campus
-function editCampus(id, currentName, currentCategory) {
+// Función para editar campus
+function editCampus(id, currentName, currentCategory, level) {
     const newName = prompt('Nuevo nombre del campus:', currentName);
     const newCategory = prompt('Nueva categoría del campus:', currentCategory);
     if (newName && newCategory) {
@@ -130,8 +127,9 @@ function editCampus(id, currentName, currentCategory) {
         })
             .then(response => response.json())
             .then(data => {
-                $('#loadCampusPreparatoria').click();
-                $('#loadCampusProfesional').click();
-            });
+                // Recargar lista de campus para el nivel específico
+                $('#loadCampusNivel' + level).click();
+            })
+            .catch(error => console.error('Error editing campus:', error));
     }
 }

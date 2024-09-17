@@ -14,7 +14,7 @@ router.get('/:id', planesController.getPlanById);
 router.post('/', planesController.createPlanWithNivel);
 
 // Actualizar un campus y su nivel
-router.put('/:id', planesController.updatePlanWithNivel);
+router.patch('/:id', planesController.updatePlanWithNivel);
 
 // Eliminar un campus y su nivel
 router.delete('/:id', planesController.deletePlanWithNivel);

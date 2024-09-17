@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
         divCertificado: document.querySelector('#select-certificado').closest('div.flex-wrap'),
         divSemanas: document.querySelector('#select-semanas').closest('div.flex-wrap'),
         divIngles: document.querySelector('#select-ingles').closest('div.flex-wrap'),
-        divMaterias: document.querySelector('#select-subjects').closest('div.flex-wrap')
+        divMaterias: document.querySelector('#select-subjects').closest('div.flex-wrap'),
+        formatoDiv: document.getElementById('div-formato'),
+        formatoSelect: document.getElementById('select-formato')
     };
 
     // Configuración de URLs y propiedades de la API
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let levelMapping = {};
+
 
     // Inicializa el mapeo de niveles obteniendo los datos desde la API
     const initializeLevelMapping = async () => {
@@ -125,6 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Variable para almacenar el costo del formato asociado
+    let costoFormatoAsociado = 0;
+
     // Actualiza el costo total y lo guarda en localStorage
     const updateCosto = async () => {
         const selectedLevel = selectors.grade.value;
@@ -134,18 +140,21 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('selectedNivel', JSON.stringify(mappedLevel));
         }
 
-
         const costosMateria = await fetchCostosMateria(mappedLevel);
         const numeroMaterias = parseInt(selectors.subjects.value);
         const claveGenerada = costosMateria.find(item => item.clave === createKeyFromSelectors()) || { costo: 0 };
         console.log('claveGenerada', claveGenerada);
 
         const costoMateria = claveGenerada.costo;
-
         let costoTotal;
-        if (mappedLevel === 2 || mappedLevel === 6 || mappedLevel === 10 || mappedLevel === 12 || mappedLevel === 11) {
+
+        // Casos específicos de niveles
+        if (mappedLevel === 2 || mappedLevel === 6 || mappedLevel === 10 || mappedLevel === 11 || mappedLevel === 12) {
+            // Cálculo basado en créditos para estos niveles
             costoTotal = calcularCostoCreditos(numeroMaterias, costoMateria);
+
         } else if (mappedLevel === 4) {
+            // Cálculo específico para nivel 4
             const numeroCertificados = parseInt(selectors.certificado.value);
             const valorCertificado = parseInt(selectors.certificado.options[selectors.certificado.selectedIndex].getAttribute('valor_certificado')) || 10;
             const numeroSemanasSEDI = parseInt(selectors.semanas.value);
@@ -155,29 +164,108 @@ document.addEventListener('DOMContentLoaded', () => {
             const costoUnidad = parseInt(claveGenerada.costo);
 
             costoTotal = calcularCostoTotalCertificadosSemanasIngles(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad);
-        } else {
-            console.log('costoMateria', costoMateria);
-            console.log('numeroMaterias', numeroMaterias);
-            costoTotal = calcularCostoTotal(numeroMaterias, costoMateria);
-            console.log(costoTotal);
 
+        } else if (mappedLevel === 5) {
+            // Cálculo para nivel 5 utilizando formato asociado
+            const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].textContent;
+
+            // Busca el costo del formato seleccionado en el array de formatos
+            const formatoAsociado = await fetchCostosFormato();
+            const formato = formatoAsociado.find(item => item.descripcion === formatoSeleccionado);
+
+            if (formato) {
+                costoFormatoAsociado = parseFloat(formato.costo);
+            } else {
+                costoFormatoAsociado = 0;
+            }
+
+            console.log('Costo del formato asociado:', costoFormatoAsociado);
+
+            // Usar el costo del formato en lugar del costo de la materia
+            costoTotal = calcularCostoTotal(numeroMaterias, costoFormatoAsociado);
+
+        } else {
+            // Cálculo estándar para otros niveles
+            costoTotal = calcularCostoTotal(numeroMaterias, costoMateria);
         }
 
+        // Almacena el costo total y el nivel seleccionado en localStorage
         localStorage.setItem('costoTotal', JSON.stringify(costoTotal));
         window.costoTotal = costoTotal;
         window.selectedLevelId = mappedLevel;
     };
+
+    // Función para obtener el costo de los formatos asociados
+    const fetchCostosFormato = async () => {
+        try {
+            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado');
+            if (!response.ok) throw new Error('Error al obtener los costos de formato asociado');
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            return [];
+        }
+    };
+
 
     // Genera una clave única basada en las opciones seleccionadas
     const createKeyFromSelectors = () => {
         const periodKey = selectors.period.options[selectors.period.selectedIndex].getAttribute('periodo_codigo') || '';
         const nivelKey = selectors.grade.options[selectors.grade.selectedIndex].getAttribute('nivel_ed') || '';
         const planKey = selectors.plan.options[selectors.plan.selectedIndex].getAttribute('tipo_plan') || '';
-        const campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
-        console.log(`${periodKey}${nivelKey}${planKey}${campusKey}`);
 
+        // Modificación: Verifica si la opción seleccionada en el formato es "presencial"
+        let campusKey = '';
+        const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].value;
+        console.log('formatoSeleccionado', formatoSeleccionado);
+
+        if (formatoSeleccionado && formatoSeleccionado === 'Presencial') {
+            campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
+        } else if (formatoSeleccionado){
+            campusKey = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].getAttribute('codigo') || '';
+        } else {
+            campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
+        }
+        console.log(`${periodKey}${nivelKey}${planKey}${campusKey}`);
         return `${periodKey}${nivelKey}${planKey}${campusKey}`;
     };
+
+
+    const loadFormatoOptions = async (nivel) => {
+
+        try {
+            console.log('Cargando formatos para nivel', nivel);
+            // Definir la URL del endpoint según el nivel seleccionado
+            let url = nivel == 5
+                ? 'https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado'  // Endpoint para nivel 5
+                : 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato/nivel/'+nivel;  // Endpoint para otros niveles
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al obtener los formatos');
+
+            const data = await response.json();
+            console.log('Formatos:', data);
+
+
+            // Limpiar las opciones anteriores
+            selectors.formatoSelect.innerHTML = '<option value="">Elige</option>';
+
+            // Iterar sobre los datos recibidos para crear las opciones
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.descripcion;
+                option.textContent = item.descripcion;
+                option.setAttribute('codigo', item.codigo || '');
+                selectors.formatoSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar los formatos:', error);
+        }
+    };
+
+
 
     // Carga las opciones en un elemento <select> desde la API y las ordena si es necesario
     const loadOptions = async (selectElement, apiUrl, property, sort = true) => {
@@ -214,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             updateCosto();
-            lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
+            // lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -230,17 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
         selectors.divMaterias.style.display = displayMaterias;
     };
 
-    // Bloquea el campo de materias si el nivel seleccionado es prepa
-    const lockSubjectsSelectIfPrepa = (nivelId) => {
-        if (nivelId === 1 || nivelId === 3) {
-            const lastOptionIndex = selectors.subjects.options.length - 1;
-            if (lastOptionIndex > 0) {
-                selectors.subjects.selectedIndex = lastOptionIndex;
-            }
-            selectors.subjects.disabled = true;
-        } else {
-            selectors.subjects.disabled = false;
-        }
+    const toggleFormatoDiv = (show) => {
+        selectors.formatoDiv.style.display = show ? 'flex' : 'none';
     };
 
     // Resetea los campos del formulario
@@ -271,7 +350,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedLevel = selectors.grade.value;
         const mappedLevel = levelMapping[selectedLevel];
 
+        if (mappedLevel >= 5) {
+            toggleFormatoDiv(true);
+            await loadFormatoOptions(mappedLevel);
+        } else {
+            toggleFormatoDiv(false);
+
+        }
+
         if (mappedLevel === 4) {
+
             toggleAdditionalSelectors(true);
             loadOptions(selectors.certificado, `${apiConfigs.certificado.baseUrl}${mappedLevel}`, apiConfigs.certificado.property);
             loadOptions(selectors.semanas, `${apiConfigs.semanas.baseUrl}${mappedLevel}`, apiConfigs.semanas.property);
@@ -293,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Cambia el API y propiedad si el nivel seleccionado es "Prepa" y el campo es "subjects"
                     if (mappedLevel === 2 && key === 'subjects') {
                         console.log('entre');
-                        
+
                         apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/2';
                         property = 'credito';
                         selectors.subjectsLabel.textContent = 'Créditos:';
@@ -316,8 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         property = 'credito';
                         selectors.subjectsLabel.textContent = 'Créditos:';
                     }
-                    
-                    else if (mappedLevel === 8 || mappedLevel === 9) {
+
+                    else if (mappedLevel === 8 || mappedLevel === 9 || mappedLevel === 5) {
                         selectors.subjectsLabel.textContent = 'Certificados:';
                     }
                     // Comportamiento predeterminado
@@ -334,7 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            lockSubjectsSelectIfPrepa(mappedLevel);
             updateCosto();
         }
     });
@@ -346,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectors[key].addEventListener('change', () => {
                 updateCosto();
                 if (key === 'grade') {
-                    lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
+                    // lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
                 }
             });
         }

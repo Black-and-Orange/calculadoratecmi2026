@@ -20,7 +20,7 @@ const getBeneficioById = (id, callback) => {
 
 const createBeneficio = (beneficio, callback) => {
     const { nombre, descripcion, icono } = beneficio;
-    db.query('INSERT INTO beneficio (nombre, descripcion, icono) VALUES (?, ?)', [nombre, descripcion, icono], callback);
+    db.query('INSERT INTO beneficio (nombre, descripcion, icono) VALUES (?, ?, ?)', [nombre, descripcion, icono], callback);
 };
 
 const deleteBeneficio = (id, callback) => {

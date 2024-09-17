@@ -2,18 +2,14 @@ const semanasModel = require('../models/semanasSEDI');
 const semanasNivelModel = require('../models/semanasSEDINivel');
 
 const getAllSemanas = (req, res) => {
-    semanasModel.getAllSemanas((err, result) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(result);
-        }
+    semanasModel.getAllSemanas((err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(200).json(results);
     });
 };
 
 const getSemanasByNivel = (req, res) => {
     const nivelId = req.params.nivelId;
-    
     semanasModel.getSemanasByNivel(nivelId, (err, result) => {
         if (err) {
             return res.status(500).json({ error: err.message });
@@ -22,69 +18,123 @@ const getSemanasByNivel = (req, res) => {
     });
 };
 
-const resetAndAddSemanas = (req, res) => {
-    const { num_semanas, nivel_id } = req.body;
-
-    // Validaciones de entrada
-    if (isNaN(num_semanas) || num_semanas < 0) {
-        return res.status(400).json({ error: 'Número máximo de semanas inválido' });
-    }
-
-    if (!nivel_id) {
-        return res.status(400).json({ error: 'ID de nivel no proporcionado' });
-    }
-
-    // Primero, eliminar los registros actuales en semanas_nivel
-    semanasNivelModel.deleteAllSemanasNivel((err) => {
+const getSemanasById = (req, res) => {
+    const id = req.params.id;
+    semanasModel.getSemanasById(id, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) return res.status(404).json({ message: 'Semanas no encontrado' });
+        res.status(200).json(results[0]);
+    });
+};
 
-        // Luego, eliminar todos los registros en semanas
-        semanasModel.deleteAllSemanas((err) => {
-            if (err) return res.status(500).json({ error: err.message });
+const createSemanasWithNivel = (req, res) => {
+    const { num_semanas, nivel_id } = req.body;
+    // Validar si los campos están presentes antes de proceder
+    if (!num_semanas || !nivel_id) {
+        return res.status(400).json({ error: 'El número de certificado y el nivel son requeridos' });
+    }
 
-            // Insertar nuevos semanas y sus relaciones con nivel
-            const insertPromises = [];
-            for (let i = 0; i <= num_semanas; i++) { // Inicia desde 0 hasta num_semanas
-                insertPromises.push(new Promise((resolve, reject) => {
-                    // Definir los datos del semana
-                    const semanaData = {
-                        numero: i // Guardar solo el número del semana
-                    };
-
-                    // Crear el semana
-                    semanasModel.createCertificado(semanaData, (err, result) => {
-                        if (err) return reject(err);
-
-                        // Obtener el ID del semana recién insertado
-                        semanasModel.getLastInsertId((err, semanaId) => {
-                            if (err) return reject(err);
-
-                            // Definir los datos para la tabla intermedia semanas_nivel
-                            const semanaNivelData = {
-                                semana_id: semanaId,
-                                nivel_id: nivel_id
-                            };
-
-                            // Crear la relación en semanas_nivel
-                            semanasNivelModel.createCertificadoNivel(semanaNivelData, (err) => {
-                                if (err) return reject(err);
-                                resolve();
-                            });
-                        });
-                    });
-                }));
+    // Intentar crear la certificado
+    semanasModel.createSemanas({ num_semanas }, (err, result) => {
+        if (err) {
+            console.error('Error al crear la certificado:', err);  // Log de error para depuración
+            return res.status(500).json({ error: 'Error al crear la certificado' });
+        }
+        const certificado_id = result.insertId;
+        
+        semanasNivelModel.createSemanasNivel({ certificado_id, nivel_id }, (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Error al crear la relación certificado-nivel' });
             }
+            // Si todo fue bien, devolver el ID de la certificado creada
 
-            // Esperar a que todas las promesas se resuelvan
-            Promise.all(insertPromises)
-                .then(() => res.status(201).json({ message: 'Semanas y relaciones actualizados correctamente' }))
-                .catch(err => res.status(500).json({ error: err.message }));
+            res.status(201).json({ certificado_id });
         });
     });
 };
 
+
+const updateSemanasWithNivel = (req, res) => {
+    const id = req.params.id;
+    const updates = req.body;
+
+    // Filtrar solo los campos permitidos para la actualización
+    const allowedSemanasUpdates = ['num_semanas'];
+    const allowedSemanasNivelUpdates = ['nivel_id'];
+    const apoyoFieldsToUpdate = {};
+    const apoyoNivelFieldsToUpdate = {};
+
+    allowedSemanasUpdates.forEach(field => {
+        if (updates[field] !== undefined) {
+            apoyoFieldsToUpdate[field] = updates[field];
+        }
+    });
+
+    allowedSemanasNivelUpdates.forEach(field => {
+        if (updates[field] !== undefined) {
+            apoyoNivelFieldsToUpdate[field] = updates[field];
+        }
+    });
+
+    const apoyoUpdatePromise = new Promise((resolve, reject) => {
+        if (Object.keys(apoyoFieldsToUpdate).length > 0) {
+            semanasModel.updateSemanas(id, apoyoFieldsToUpdate, (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        } else {
+            resolve({ affectedRows: 0 });
+        }
+    });
+
+    const apoyoNivelUpdatePromise = new Promise((resolve, reject) => {
+        if (Object.keys(apoyoNivelFieldsToUpdate).length > 0) {
+            semanasNivelModel.updateSemanasNivel(id, apoyoNivelFieldsToUpdate, (err, result) => {
+                if (err) return reject(err);
+                resolve(result);
+            });
+        } else {
+            resolve({ affectedRows: 0 });
+        }
+    });
+
+    Promise.all([apoyoUpdatePromise, apoyoNivelUpdatePromise])
+        .then(results => {
+            const [apoyoResult, apoyoNivelResult] = results;
+            if (apoyoResult.affectedRows > 0 || apoyoNivelResult.affectedRows > 0) {
+                res.json({ message: 'Semanas y/o nivel actualizado' });
+            } else {
+                res.status(404).json({ error: 'Semanas y/o nivel no encontrado' });
+            }
+        })
+        .catch(err => res.status(500).json({ error: err.message }));
+};
+
+const deleteSemanasWithNivel = (req, res) => {
+    const certificado_id = req.params.id;
+
+    // Eliminar los registros de la tabla semanas_nivel que dependen del certificado_id
+    semanasNivelModel.deleteSemanasNivel(certificado_id, (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        // Una vez eliminados los registros de semanas_nivel, elimina el apoyo en semanasestudiantiles
+        semanasModel.deleteSemanas(certificado_id, (err) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.status(200).json({ message: 'Semanas y relaciones de nivel eliminados' });
+        });
+    });
+};
+
+
 module.exports = {
     getAllSemanas,
+    getSemanasById,
     getSemanasByNivel,
-    resetAndAddSemanas
+    createSemanasWithNivel,
+    updateSemanasWithNivel,
+    deleteSemanasWithNivel
 };

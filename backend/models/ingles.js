@@ -1,43 +1,66 @@
 const db = require('../config/dbConfig');
 
-// Obtener todos los ingles
+// Obtener todas las ingles
 const getAllIngles = (callback) => {
     db.query('SELECT * FROM ingles', callback);
 };
 
-// Obtener ingles por nivel
 const getInglesByNivel = (nivelId, callback) => {
     const query = `
         SELECT ingles.id, ingles.num_ingles
         FROM ingles
-        JOIN ingles_nivel ON ingles.id = ingles_nivel.certificado_id
+        JOIN ingles_nivel ON ingles.id = ingles_nivel.id
         WHERE ingles_nivel.nivel_id = ?
     `;
     db.query(query, [nivelId], callback);
 };
 
-const deleteAllIngles = (callback) => {
-    db.query('DELETE FROM ingles', callback);
+// Obtener una materia por ID
+const getInglesById = (id, callback) => {
+    db.query('SELECT * FROM ingles WHERE id = ?', [id], callback);
 };
 
-// Crear un certificado
-const createCertificado = (maxNum, callback) => {
-    db.query('INSERT INTO ingles SET ?', maxNum, callback);
+// Crear una nueva materia
+const createIngles = (materia, callback) => {
+    console.log(materia);
+    
+    const { num_ingles } = materia;
+    console.log(num_ingles);
+    
+    if (!num_ingles) {
+        return callback(new Error('El número de ingles es requerido'));
+    }
+    db.query('INSERT INTO ingles (num_ingles) VALUES (?)', [num_ingles], callback);
 };
 
-const getLastInsertId = (callback) => {
-    db.query('SELECT LAST_INSERT_ID()', (err, results) => {
-        if (err) return callback(err);
-        callback(null, results[0].id);
-    });
+// Actualizar una materia
+const updateIngles = (id, updates, callback) => {
+    const queryParts = [];
+    const queryValues = [];
+
+    for (const key in updates) {
+        if (updates.hasOwnProperty(key)) {
+            queryParts.push(`${key} = ?`);
+            queryValues.push(updates[key]);
+        }
+    }
+
+    queryValues.push(id);
+    const query = `UPDATE ingles SET ${queryParts.join(', ')} WHERE id = ?`;
+
+    db.query(query, queryValues, callback);
 };
 
+// Eliminar una materia
+const deleteIngles = (id, callback) => {
+    db.query('DELETE FROM ingles WHERE id = ?', [id], callback);
+};
 
 module.exports = {
     getAllIngles,
     getInglesByNivel,
-    deleteAllIngles,
-    createCertificado,
-    getLastInsertId
-
+    getInglesById,
+    createIngles,
+    updateIngles,
+    deleteIngles
 };

@@ -28,16 +28,22 @@ const getPlanById = (req, res) => {
 };
 
 const createPlanWithNivel = (req, res) => {
-    const { nombre, categoria_coleg, nivel_id } = req.body;
+    const { descripcion, tipo_plan, id_nivel } = req.body;
 
     // Crea el Plan de estudio
-    planModel.createPlanDeEstudios({ nombre, categoria_coleg }, (err, result) => {
+    planModel.createPlanDeEstudios({ descripcion, tipo_plan }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const plan_id = result.insertId;
+        console.log('ID del plan:', plan_id);
+
+        // Verifica los datos antes de pasar a la siguiente función
+        if (!plan_id || !id_nivel) {
+            return res.status(400).json({ error: 'plan_id o id_nivel no válidos' });
+        }
 
         // Crea la relación con nivel
-        planNivelModel.createPlanNivel({ plan_id, nivel_id }, (err) => {
+        planNivelModel.createPlanNivel({ id_plan: plan_id, id_nivel }, (err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ plan_id });
         });
@@ -45,30 +51,84 @@ const createPlanWithNivel = (req, res) => {
 };
 
 const updatePlanWithNivel = (req, res) => {
-    const plan_id = req.params.id;
-    const { nombre, categoria_coleg, nivel_id } = req.body;
+    const id_plan = req.params.id;
+    const updates = req.body;
+    
+    // Filtrar solo los campos permitidos para la actualización
+    const allowedPlanUpdates = ['descripcion', 'tipo_plan'];
+    const allowedPlanNivelUpdates = ['id_nivel'];
+    const planFieldsToUpdate = {};
+    const planNivelFieldsToUpdate = {};
 
-    // Actualiza el Plan de estudio
-    planModel.updatePlanDeEstudios(plan_id, { nombre, categoria_coleg }, (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        // Actualiza la relación con nivel
-        planNivelModel.updatePlanNivel(plan_id, { nivel_id }, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Plan de estudio y relación actualizados' });
-        });
+    allowedPlanUpdates.forEach(field => {
+        if (updates[field] !== undefined) {
+            planFieldsToUpdate[field] = updates[field];
+        }
     });
+
+    allowedPlanNivelUpdates.forEach(field => {
+        if (updates[field] !== undefined) {
+            planNivelFieldsToUpdate[field] = updates[field];
+        }
+    });
+
+    // Promesas para actualizar el plan y el nivel
+    const planUpdatePromise = new Promise((resolve, reject) => {
+        if (Object.keys(planFieldsToUpdate).length > 0) {
+            console.log('Actualizando plan...');
+            planModel.updatePlanDeEstudios(id_plan, planFieldsToUpdate, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        } else {
+            resolve({ affectedRows: 0 });
+        }
+    });
+
+    const planNivelUpdatePromise = new Promise((resolve, reject) => {
+        if (Object.keys(planNivelFieldsToUpdate).length > 0) {
+            console.log('Actualizando plan nivel...');
+            planNivelModel.updatePlanNivel(id_plan, planNivelFieldsToUpdate, (err, result) => {
+                if (err) {
+                    console.error('Error al actualizar plan nivel:', err);
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        } else {
+            resolve({ affectedRows: 0 });
+        }
+    });
+
+    // Ejecutar ambas promesas y manejar los resultados
+    Promise.all([planUpdatePromise, planNivelUpdatePromise])
+        .then(results => {
+            const [planResult, planNivelResult] = results;
+            console.log('Resultados de las actualizaciones:', results);
+            
+            if (planResult.affectedRows > 0 || planNivelResult.affectedRows > 0) {
+                res.json({ message: 'Plan y/o nivel actualizado' });
+            } else {
+                res.status(404).json({ error: 'Plan y/o nivel no encontrado' });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ error: err.message });
+        });
 };
 
+
 const deletePlanWithNivel = (req, res) => {
-    const plan_id = req.params.id;
+    const id_plan = req.params.id;
 
     // Elimina la relación con nivel
-    planNivelModel.deletePlanNivel(plan_id, (err) => {
+    planNivelModel.deletePlanNivel(id_plan, (err) => {
         if (err) return res.status(500).json({ error: err.message });
 
         // Elimina el Plan de estudio
-        planModel.deletePlanDeEstudios(plan_id, (err) => {
+        planModel.deletePlanDeEstudios(id_plan, (err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(200).json({ message: 'Plan de estudio y relación eliminados' });
         });

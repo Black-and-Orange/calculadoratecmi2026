@@ -2,13 +2,21 @@ const express = require('express');
 const router = express.Router();
 const semanasController = require('../controllers/semanasSEDIController');
 
-// Obtener todos los semanas
+// Obtener todos los campus
 router.get('/', semanasController.getAllSemanas);
 
-// Obtener todos los semanas de un nivel
 router.get('/nivel/:nivelId', semanasController.getSemanasByNivel);
 
-// Crear un nuevo semanas con su nivel
-router.post('/', semanasController.resetAndAddSemanas);
+// Obtener un campus por ID
+router.get('/:id', semanasController.getSemanasById);
+
+// Crear un nuevo campus con su nivel
+router.post('/', semanasController.createSemanasWithNivel);
+
+// Actualizar un campus y su nivel
+router.patch('/:id', semanasController.updateSemanasWithNivel);
+
+// Eliminar un campus y su nivel
+router.delete('/:id', semanasController.deleteSemanasWithNivel);
 
 module.exports = router;

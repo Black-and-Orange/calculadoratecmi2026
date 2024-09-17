@@ -12,7 +12,7 @@ router.get('/:id', periodicidadController.getPeriodicidadById);
 router.post('/', periodicidadController.createPeriodicidadWithNivel);
 
 // Actualizar un campus y su nivel
-router.put('/:id', periodicidadController.updatePeriodicidadWithNivel);
+router.patch('/:id', periodicidadController.updatePeriodicidadWithNivel);
 
 // Eliminar un campus y su nivel
 router.delete('/:id', periodicidadController.deletePeriodicidadWithNivel);
