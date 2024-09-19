@@ -13,68 +13,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('periodo').textContent = periodo;
     document.getElementById('campus').textContent = campus;
     document.getElementById('nivel').textContent = nivel;
-    document.getElementById('materias').textContent = materias;
+    document.getElementById('materias').textContent = formatNumber(materias);
 
-    function setTextSubjects(nivel) {
-        let subjectsText = 'N/A';
-
-        switch (nivel) {
-            case 5:
-            case 8:
-            case 9:
-                subjectsText = 'Certificados';
-                break;
-            case 1:
-            case 3:
-            case 7:
-            case 11:
-            case 12:
-                subjectsText = 'Materias';
-                break;
-            case 2:
-            case 6:
-            case 10:
-                subjectsText = 'Créditos';
-                break;
-            case '4': // Asegúrate de que el valor de nivel sea comparado correctamente
-                // Devuelve un array con los 3 textos separados
-                return ['Certificados', 'Semanas SEDI', 'Cursos de Inglés'];
-            default:
-                subjectsText = 'N/A';
-                break;
-        }
-
-        return subjectsText;
+    function formatNumber(num) {
+        return num % 1 === 0 ? parseInt(num) : num.toFixed(2);
     }
 
-    // Asignación de textos dependiendo del nivel
-    const subjectTexts = setTextSubjects(nivel);
+    // function setTextSubjects(nivel) {
+    //     let subjectsText = 'N/A';
 
-    if (nivel === '4' && Array.isArray(subjectTexts)) {
-        // Asignar cada uno de los textos de forma individual
-        document.getElementById('certificados').textContent = subjectTexts[0];
-        document.getElementById('semanas').textContent = subjectTexts[1];
-        document.getElementById('cursos').textContent = subjectTexts[2];
+    //     switch (nivel) {
+    //         case 5:
+    //         case 8:
+    //         case 9:
+    //             subjectsText = 'Certificados';
+    //             break;
+    //         case 1:
+    //         case 3:
+    //         case 7:
+    //         case 11:
+    //         case 12:
+    //             subjectsText = 'Materias';
+    //             break;
+    //         case 2:
+    //         case 6:
+    //         case 10:
+    //             subjectsText = 'Créditos';
+    //             break;
+    //         case '4': // Asegúrate de que el valor de nivel sea comparado correctamente
+    //             // Devuelve un array con los 3 textos separados
+    //             return ['Certificados', 'Semanas SEDI', 'Cursos de Inglés'];
+    //         default:
+    //             subjectsText = 'N/A';
+    //             break;
+    //     }
 
-        // Mostrar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
-        document.getElementById('certificados-container').classList.remove('hidden');
-        document.getElementById('semanas-container').classList.remove('hidden');
-        document.getElementById('cursos-container').classList.remove('hidden');
+    //     return subjectsText;
+    // }
+
+    // // Asignación de textos dependiendo del nivel
+    // const subjectTexts = setTextSubjects(nivel);
+
+    // if (nivel === '4' && Array.isArray(subjectTexts)) {
+    //     // Asignar cada uno de los textos de forma individual
+    //     document.getElementById('certificados').textContent = subjectTexts[0];
+    //     document.getElementById('semanas').textContent = subjectTexts[1];
+    //     document.getElementById('cursos').textContent = subjectTexts[2];
+
+    //     // Mostrar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
+    //     document.getElementById('certificados-container').classList.remove('hidden');
+    //     document.getElementById('semanas-container').classList.remove('hidden');
+    //     document.getElementById('cursos-container').classList.remove('hidden');
         
-        // Ocultar el contenedor de materias
-        document.getElementById('materias-container').classList.add('hidden');
-    } else {
-        // Asignar el texto en 'materias' si no es nivel 4
-        document.getElementById('materias').textContent = subjectTexts;
+    //     // Ocultar el contenedor de materias
+    //     document.getElementById('materias-container').classList.add('hidden');
+    // } else {
+    //     // Asignar el texto en 'materias' si no es nivel 4
+    //     document.getElementById('materias').textContent = subjectTexts;
 
-        // Mostrar el contenedor de materias
-        document.getElementById('materias-container').classList.remove('hidden');
+    //     // Mostrar el contenedor de materias
+    //     document.getElementById('materias-container').classList.remove('hidden');
         
-        // Ocultar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
-        document.getElementById('certificados-container').classList.add('hidden');
-        document.getElementById('semanas-container').classList.add('hidden');
-        document.getElementById('cursos-container').classList.add('hidden');
-    }
+    //     // Ocultar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
+    //     document.getElementById('certificados-container').classList.add('hidden');
+    //     document.getElementById('semanas-container').classList.add('hidden');
+    //     document.getElementById('cursos-container').classList.add('hidden');
+    // }
 
     let segurosData;
     const viveDiv = document.getElementById('div-vive');
@@ -183,6 +187,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             textoMensualidades = '4 Mensualidades';
         }
 
+        console.log('factorMultiplicador:', factorMultiplicador);
+        
+
         const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, ""));
 
         if (colegiatura) {
@@ -228,10 +235,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (prestamoPorcentaje) {
             prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}`;
         }
-        if (apoyoEstudiantil.textContent === "null%") {
+        if (apoyoEstudiantil.textContent === "null%"  || apoyoEstudiantil.textContent === "0") {
             apoyoEstudiantil.textContent = `0%`;
         }
-        if (prestamoPorcentaje.textContent === "null") {
+        if (prestamoPorcentaje.textContent === "null" || prestamoPorcentaje.textContent === "0") {
             prestamoPorcentaje.textContent = `0%`;
         }
         if (beca) {

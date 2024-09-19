@@ -384,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Cambia el API y propiedad si el nivel seleccionado es "Prepa" y el campo es "subjects"
                     if (mappedLevel === 2 && key === 'subjects') {
-                        console.log('entre');
 
                         apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/2';
                         property = 'credito';
@@ -409,7 +408,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         selectors.subjectsLabel.textContent = 'Créditos:';
                     }
 
-                    else if (mappedLevel === 8 || mappedLevel === 9 || mappedLevel === 5) {
+                    else if (mappedLevel === 8 && key === 'subjects') {
+                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/8';
+                        property = 'num_certificados';
+                        selectors.subjectsLabel.textContent = 'Certificados:';
+                    }
+
+                    else if (mappedLevel === 9 && key === 'subjects') {
+                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/9';
+                        property = 'num_certificados';
+                        selectors.subjectsLabel.textContent = 'Certificados:';
+                    }
+
+                    else if (mappedLevel === 5&& key === 'subjects') {
+                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/5';
+                        property = 'num_certificados';
                         selectors.subjectsLabel.textContent = 'Certificados:';
                     }
                     // Comportamiento predeterminado

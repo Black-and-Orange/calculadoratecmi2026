@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         prestamos.forEach(prestamo => {
                             const option = document.createElement('option');
                             option.value = prestamo.prestamo;
-                            option.textContent = prestamo.prestamo;
+                            option.textContent = prestamo.prestamo+'%';
                             prestamoPercentageSelect.appendChild(option);
                         });
 

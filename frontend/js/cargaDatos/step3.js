@@ -1,6 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
     const viveDiv = document.getElementById('div-vive');
+    // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
+    if (levelId >= 6 && levelId <= 12) {
+        viveDiv.style.display = 'none'; // Ocultar div
+    } else {
+        viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
+    }
 
     let segurosData;
 
@@ -21,13 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('segurosData:', segurosData);
             }
     
-            // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
-            if (levelId >= 6 && levelId <= 12) {
-                viveDiv.style.display = 'none'; // Ocultar div
-            } else {
-                viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
-            }
-    
+            
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
@@ -67,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const divisor = (levelId === 3 || levelId === 5 || levelId === 1 || levelId === 4) ? 5 : 4;
+        console.log('divisor:', divisor);
+        
         const interesDividido = totalConInteres / divisor;
         const primeraCuota = interesDividido + totalCost;
 

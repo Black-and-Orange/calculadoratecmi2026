@@ -114,7 +114,7 @@ export const niveles = [
             { id: 'becas', nombre: 'Becas' },
             { id: 'apoyos', nombre: 'Apoyos' },
             { id: 'prestamos', nombre: 'Prestamos' },
-            { id: 'carga-creditos', nombre: 'Creditos' },
+            { id: 'carga-materias', nombre: 'Materias' },
             { id: 'costo-materias', nombre: 'Costos' },
             { id: 'beneficios', nombre: 'Beneficios' },
             { id: 'interes', nombre: 'Interes' },
