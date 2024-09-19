@@ -1,20 +1,19 @@
-$(document).ready(function () {
-    const apiUrlBeneficios = 'https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios';
+const apiUrlBeneficios = 'https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios';
 
-    // Función genérica para cargar beneficios de cualquier nivel
-    function loadBeneficios(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar beneficios de cualquier nivel
+function loadBeneficios(level, containerId) {
+    const container = $(containerId);
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrlBeneficios}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    fetch(`${apiUrlBeneficios}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -26,8 +25,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(beneficio => {
-                        tableHtml += `
+                data.forEach(beneficio => {
+                    tableHtml += `
                             <tr>
                                 <td>${beneficio.nombre}</td>
                                 <td>${beneficio.descripcion}</td>
@@ -41,22 +40,22 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron beneficios para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error fetching beneficios:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                console.log('No se encontraron beneficios para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error fetching beneficios:', error));
+}
 
-    // Asociar eventos para cargar y crear beneficios de niveles dinámicos
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+$(document).ready(function () {
+    const maxLevel = 12;
     for (let level = 1; level <= maxLevel; level++) {
 
         loadBeneficios(level, '#beneficiosNivel' + level);
@@ -110,7 +109,7 @@ $(document).ready(function () {
                 $(nameInputId).val('');
                 $(descriptionInputId).val('');
                 $(iconInputId).val('');
-                $(loadBeneficiosBtnId).click();
+                loadBeneficios(level, '#beneficiosNivel' + level);
             });
         });
     }
@@ -125,7 +124,7 @@ function deleteBeneficio(id, level) {
         .then(response => response.json())
         .then(data => {
             // Recargar lista de beneficios para el nivel específico
-            $('#loadBeneficiosNivel' + level).click();
+            loadBeneficios(level, '#beneficiosNivel' + level);
         })
         .catch(error => console.error('Error deleting beneficio:', error));
 }
@@ -146,7 +145,7 @@ function editBeneficio(id, currentName, currentDescription, currentIcon, level) 
             .then(response => response.json())
             .then(data => {
                 // Recargar lista de beneficios para el nivel específico
-                $('#loadBeneficiosNivel' + level).click();
+                loadBeneficios(level, '#beneficiosNivel' + level);
             })
             .catch(error => console.error('Error editing beneficio:', error));
     }

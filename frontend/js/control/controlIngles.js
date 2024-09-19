@@ -1,21 +1,20 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/ingles';
+const apiUrlIngles = 'https://tecmilenio-calculadora-backend.testingbo.com/api/ingles';
 
-    // Función genérica para cargar ingles de cualquier nivel
-    function loadIngles(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar ingles de cualquier nivel
+function loadIngles(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.num_ingles - b.num_ingles);
+    fetch(`${apiUrlIngles}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.num_ingles - b.num_ingles);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -25,8 +24,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(ingles => {
-                        tableHtml += `
+                data.forEach(ingles => {
+                    tableHtml += `
                             <tr>
                                 <td>${ingles.num_ingles}</td>
                                 <td>
@@ -38,21 +37,21 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron ingles para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching ingles:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron ingles para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching ingles:', error));
+}
 
-    // Asociar eventos para cargar y crear ingles de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
         loadIngles(level, '#inglesNivel' + level);
@@ -62,7 +61,7 @@ $(document).ready(function () {
 
     // Función genérica para crear ingles
     function createIngles(level, numeroIngles, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlIngles, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -81,7 +80,7 @@ $(document).ready(function () {
             const numeroIngles = $(numeroInputId).val();
             createIngles(level, numeroIngles, function () {
                 $(numeroInputId).val('');  // Limpiar el campo de entrada
-                $(loadInglesBtnId).click();  // Recargar la lista de ingles
+                loadIngles(level, '#inglesNivel' + level);
             });
         });
     }
@@ -96,8 +95,7 @@ function deleteIngles(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de ingles para el nivel específico
-            $('#loadInglesNivel' + level).click();
+            loadIngles(level, '#inglesNivel' + level);
         })
         .catch(error => console.error('Error deleting ingles:', error));
 }
@@ -115,8 +113,7 @@ function editIngles(id, currentNumero, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de ingles para el nivel específico
-                $('#loadInglesNivel' + level).click();
+                loadIngles(level, '#inglesNivel' + level);
             })
             .catch(error => console.error('Error editing ingles:', error));
     }

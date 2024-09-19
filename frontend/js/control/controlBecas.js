@@ -1,26 +1,23 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/becasVariables';
-    const maxLevel = 12; // Define el nivel máximo
+const apiUrlBecas = 'https://tecmilenio-calculadora-backend.testingbo.com/api/becasVariables';
+const maxLevel = 12; // Define el nivel máximo
 
-    // Función para cargar becas variables
-    function loadBecaVariable(level, containerId) {
-        const container = $(containerId);
+// Función para cargar becas variables
+function loadBecaVariable(level, containerId) {
+    const container = $(containerId);
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Becas Variables recibidas:', data); // Log de los datos recibidos
-
-                if (Array.isArray(data) && data.length > 0) {
-                    let tableHtml = `
+    fetch(`${apiUrlBecas}/nivel/${level}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -34,8 +31,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(beca => {
-                        tableHtml += `
+                data.forEach(beca => {
+                    tableHtml += `
                             <tr>
                                 <td>${beca.tipo}</td>
                                 <td>${beca.porcentaje_min}</td>
@@ -51,17 +48,17 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `</tbody></table>`;
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron becas variables para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error al cargar las becas variables:', error.message));
-    }
-
+                tableHtml += `</tbody></table>`;
+                container.html(tableHtml);
+            } else {
+                console.log('No se encontraron becas variables para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error al cargar las becas variables:', error.message));
+}
+$(document).ready(function () {
     // Función para crear becas variables
     function createBecaVariable(level, tipo, porcentajeMin, porcentajeMax, promedioMin, promedioMax, callback) {
         console.log('Enviando datos al servidor:', {
@@ -73,7 +70,7 @@ $(document).ready(function () {
             nivel_id: level
         });
 
-        fetch(apiUrl, {
+        fetch(apiUrlBecas, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -140,7 +137,7 @@ $(document).ready(function () {
                 $(porcentajeMaxId).val('');
                 $(promedioMinId).val('');
                 $(promedioMaxId).val('');
-                $(loadBecaVariableBtnId).click();  // Recargar las becas al crear una nueva
+                loadBecaVariable(level, '#becasNivel' + level);
             });
         });
     }
@@ -161,7 +158,7 @@ function deleteBecaVariable(id, level) {
         })
         .then(data => {
             console.log('Beca variable eliminada:', data);
-            $('#loadBecasNivel' + level).click();  // Recargar la lista de becas
+            loadBecaVariable(level, '#becasNivel' + level);
         })
         .catch(error => console.error('Error al eliminar la beca variable:', error.message));
 }
@@ -215,7 +212,7 @@ function editBecaVariable(id, currentTipo, currentPorcentajeMin, currentPorcenta
             .then(data => {
                 if (data) {
                     console.log('Beca variable actualizada:', data);
-                    $('#loadBecasNivel' + level).click();  // Recargar la lista de becas
+                    loadBecaVariable(level, '#becasNivel' + level);
                 }
             })
             .catch(error => console.error('Error al editar la beca variable:', error));

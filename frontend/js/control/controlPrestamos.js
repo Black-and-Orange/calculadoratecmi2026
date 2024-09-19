@@ -1,19 +1,18 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos';
+const apiUrlPrestamos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos';
 
-    // Función genérica para cargar prestamos de cualquier nivel
-    function loadPrestamos(level, containerId) {
-        const container = $(containerId);
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+// Función genérica para cargar prestamos de cualquier nivel
+function loadPrestamos(level, containerId) {
+    const container = $(containerId);
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.prestamo - b.prestamo);
+    fetch(`${apiUrlPrestamos}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.prestamo - b.prestamo);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -23,8 +22,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(prestamos => {
-                        tableHtml += `
+                data.forEach(prestamos => {
+                    tableHtml += `
                             <tr>
                                 <td>${prestamos.prestamo}%</td>
                                 <td>
@@ -36,22 +35,22 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron prestamos para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching prestamos:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron prestamos para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching prestamos:', error));
+}
 
-    // Asociar eventos para cargar y crear prestamos de niveles dinámicos
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+$(document).ready(function () {
+    const maxLevel = 12;
     for (let level = 1; level <= maxLevel; level++) {
         loadPrestamos(level, '#prestamosNivel' + level);
         handleCreatePrestamos(level, '#createPrestamosNivel' + level + 'Form', '#prestamosNivel' + level + 'Porcentaje', '#loadPrestamosNivel' + level);
@@ -59,7 +58,7 @@ $(document).ready(function () {
 
     // Función genérica para crear prestamos
     function createPrestamos(level, percentage, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlPrestamos, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -78,7 +77,7 @@ $(document).ready(function () {
             const percentage = $(percentageInputId).val();
             createPrestamos(level, percentage, function () {
                 $(percentageInputId).val('');
-                $(loadPrestamosBtnId).click();
+                loadPrestamos(level, '#prestamosNivel' + level);
             });
         });
     }
@@ -93,7 +92,7 @@ function deletePrestamos(id, level) {
         .then(response => response.json())
         .then(data => {
             // Recargar lista de prestamos para el nivel específico
-            $('#loadPrestamosNivel' + level).click();
+            loadPrestamos(level, '#prestamosNivel' + level);
         })
         .catch(error => console.error('Error deleting prestamos:', error));
 }
@@ -111,8 +110,7 @@ function editPrestamos(id, currentName, currentPercentage, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de prestamos para el nivel específico
-                $('#loadPrestamosNivel' + level).click();
+                loadPrestamos(level, '#prestamosNivel' + level);
             })
             .catch(error => console.error('Error editing prestamos:', error));
     }

@@ -1,13 +1,11 @@
-const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/campus';
+const apiUrlCampus = 'https://tecmilenio-calculadora-backend.testingbo.com/api/campus';
 
 // Función genérica para cargar campus de cualquier nivel
 function loadCampus(level, containerId) {
     const container = $(containerId);
-
-    // Limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
-    fetch(`${apiUrl}/nivel/${level}`)
+    fetch(`${apiUrlCampus}/nivel/${level}`)
         .then(response => response.json())
         .then(data => {
             if (Array.isArray(data) && data.length > 0) {
@@ -63,7 +61,7 @@ $(document).ready(function () {
 
     // Función genérica para crear campus
     function createCampus(level, name, category, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlCampus, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

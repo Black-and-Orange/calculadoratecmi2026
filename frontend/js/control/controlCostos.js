@@ -1,19 +1,19 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/costos';  // Cambia la URL de la API
 
-    // Función genérica para cargar costos de materias de cualquier nivel
-    function loadCostos(level, containerId) {
-        const container = $(containerId);
+const apiUrlCostos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/costos';  // Cambia la URL de la API
 
-        container.empty();
+// Función genérica para cargar costos de materias de cualquier nivel
+function loadCostos(level, containerId) {
+    const container = $(containerId);
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.clave.localeCompare(b.clave));
+    container.empty();
 
-                    let tableHtml = `
+    fetch(`${apiUrlCostos}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.clave.localeCompare(b.clave));
+
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -24,10 +24,10 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(costoMateria => {
-                        console.log(level);
+                data.forEach(costoMateria => {
+                    console.log(level);
 
-                        tableHtml += `
+                    tableHtml += `
                             <tr>
                                 <td>${costoMateria.clave}</td>
                                 <td>${costoMateria.costo}</td>
@@ -40,21 +40,21 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron costos de materias para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error fetching costos de materias:', error));
-    }
+                container.html(tableHtml).show();
+            } else {
+                console.log('No se encontraron costos de materias para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error fetching costos de materias:', error));
+}
 
-    // Asociar eventos para cargar y crear costos de materias de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
         loadCostos(level, '#costosNivel' + level);
@@ -68,7 +68,7 @@ $(document).ready(function () {
         const requestData = { clave: clave, costo: costo, id_nivel: level };
         console.log('Datos enviados en el body:', requestData);
 
-        fetch(apiUrl, {
+        fetch(apiUrlCostos, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ $(document).ready(function () {
             createCosto(level, clave, costo, function () {
                 $(claveInputId).val('');
                 $(costoInputId).val('');
-                $(loadCostosBtnId).click();
+                loadCostos(level, '#costosNivel' + level);
             });
         });
     }
@@ -123,7 +123,7 @@ function deleteCosto(id, level) {
         .then(response => response.json())
         .then(data => {
             // Recargar lista de costos para el nivel específico
-            $('#loadCostosNivel' + level).click();
+            loadCostos(level, '#costosNivel' + level);
         })
         .catch(error => console.error('Error eliminando costo de materia:', error));
 }
@@ -143,7 +143,7 @@ function editCosto(id, currentClave, currentCosto, level) {
             .then(response => response.json())
             .then(data => {
                 // Recargar lista de costos para el nivel específico
-                $('#loadCostosNivel' + level).click();
+                loadCostos(level, '#costosNivel' + level);
             })
             .catch(error => console.error('Error editando costo de materia:', error));
     }

@@ -1,21 +1,20 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado';
+const apiUrlFormatosAsociado = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado';
 
-    // Función genérica para cargar formato asociado de cualquier nivel
-    function loadFormatoAsociado(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar formato asociado de cualquier nivel
+function loadFormatoAsociado(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
+    fetch(`${apiUrlFormatosAsociado}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -26,8 +25,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(formatoAsociado => {
-                        tableHtml += `
+                data.forEach(formatoAsociado => {
+                    tableHtml += `
                             <tr>
                                 <td>${formatoAsociado.descripcion}</td>
                                 <td>${formatoAsociado.costo}</td>
@@ -40,33 +39,31 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron formatos asociados para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error fetching formato asociado:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                console.log('No se encontraron formatos asociados para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error fetching formato asociado:', error));
+}
 
-    // Asociar eventos para cargar y crear formato asociado de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
-        $('#loadFormatoAsociadoNivel' + level).click(function () {
-            loadFormatoAsociado(level, '#formatoNivel' + level);
-        });
+        loadFormatoAsociado(level, '#formatoNivel' + level);
 
         handleCreateFormatoAsociado(level, '#createFormatoAsociadoNivel' + level + 'Form', '#formatoNivel' + level + 'FormatoAsociado', '#formatoNivel' + level + 'Costo', '#loadFormatoAsociadoNivel' + level);
     }
 
     // Función genérica para crear formato asociado
     function createFormatoAsociado(level, descripcion, costo, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlFormatosAsociado, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -87,7 +84,7 @@ $(document).ready(function () {
             createFormatoAsociado(level, descripcion, costo, function () {
                 $(descripcionInputId).val('');
                 $(costoInputId).val('');
-                $(loadFormatoAsociadoBtnId).click();
+                loadFormatoAsociado(level, '#formatoNivel' + level);
             });
         });
     }
@@ -101,8 +98,7 @@ function deleteFormatoAsociado(id_formato_asociado, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de formatos asociados para el nivel específico
-            $('#loadFormatoAsociadoNivel' + level).click();
+            loadFormatoAsociado(level, '#formatoNivel' + level);
         })
         .catch(error => console.error('Error deleting formato asociado:', error));
 }
@@ -121,8 +117,7 @@ function editFormatoAsociado(id_formato_asociado, currentDescripcion, currentCos
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de formatos asociados para el nivel específico
-                $('#loadFormatoAsociadoNivel' + level).click();
+                loadFormatoAsociado(level, '#formatoNivel' + level);
             })
             .catch(error => console.error('Error editing formato asociado:', error));
     }

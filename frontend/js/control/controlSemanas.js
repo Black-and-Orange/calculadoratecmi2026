@@ -1,20 +1,19 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/semanas';
+const apiUrlSemanas = 'https://tecmilenio-calculadora-backend.testingbo.com/api/semanas';
 
-    // Función genérica para cargar semanas de cualquier nivel
-    function loadSemanas(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar semanas de cualquier nivel
+function loadSemanas(level, containerId) {
+    const container = $(containerId);
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.num_semanas - b.num_semanas);
+    fetch(`${apiUrlSemanas}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.num_semanas - b.num_semanas);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -24,8 +23,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(semana => {
-                        tableHtml += `
+                data.forEach(semana => {
+                    tableHtml += `
                             <tr>
                                 <td>${semana.num_semanas}</td>
                                 <td>
@@ -37,23 +36,22 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron semanas para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching semanas:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron semanas para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching semanas:', error));
+}
 
-
-    // Asociar eventos para cargar y crear semanas de niveles dinámicos
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+$(document).ready(function () {
+    const maxLevel = 12;
     for (let level = 1; level <= maxLevel; level++) {
         loadSemanas(level, '#semanasNivel' + level);
         handleCreateSemanas(level, '#createSemanasNivel' + level + 'Form', '#semanasNivel' + level + 'Semanas', '#loadSemanasNivel' + level);
@@ -62,7 +60,7 @@ $(document).ready(function () {
 
 // Función genérica para crear semanas
 function createSemanas(level, numeroSemanas, callback) {
-    fetch(apiUrl, {
+    fetch(apiUrlSemanas, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -81,7 +79,7 @@ function handleCreateSemanas(level, formId, numeroInputId, loadSemanasBtnId) {
         const numeroSemanas = $(numeroInputId).val();
         createSemanas(level, numeroSemanas, function () {
             $(numeroInputId).val('');  // Limpiar el campo de entrada
-            $(loadSemanasBtnId).click();  // Recargar la lista de semanas
+            loadSemanas(level, '#semanasNivel' + level);
         });
     });
 }
@@ -94,8 +92,7 @@ function deleteSemanas(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de semanas para el nivel específico
-            $('#loadSemanasNivel' + level).click();
+            loadSemanas(level, '#semanasNivel' + level);
         })
         .catch(error => console.error('Error deleting semanas:', error));
 }
@@ -113,8 +110,7 @@ function editSemanas(id, currentNumero, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de semanas para el nivel específico
-                $('#loadSemanasNivel' + level).click();
+                loadSemanas(level, '#semanasNivel' + level);
             })
             .catch(error => console.error('Error editing semanas:', error));
     }

@@ -1,21 +1,21 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato';
 
-    // Función genérica para cargar formato de cualquier nivel
-    function loadFormatos(level, containerId) {
-        const container = $(containerId);
+const apiUrlFormatos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato';
+
+// Función genérica para cargar formato de cualquier nivel
+function loadFormatos(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
+    fetch(`${apiUrlFormatos}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -26,8 +26,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(formato => {
-                        tableHtml += `
+                data.forEach(formato => {
+                    tableHtml += `
                             <tr>
                                 <td>${formato.descripcion}</td>
                                 <td>${formato.codigo}</td>
@@ -40,27 +40,25 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron formatos para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error fetching formatos:', error));
-    }
+                container.html(tableHtml).show();
+            } else {
+                console.log('No se encontraron formatos para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error fetching formatos:', error));
+}
 
-    // Asociar eventos para cargar y crear formatos de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;
     for (let level = 1; level <= maxLevel; level++) {
 
         loadFormatos(level, '#formatoNivel' + level);
-
-
         handleCreateFormato(level, '#createFormatoNivel' + level + 'Form', '#formatoNivel' + level + 'Formato', '#formatoNivel' + level + 'Codigo', '#loadFormatoNivel' + level);
     }
 
@@ -68,7 +66,7 @@ $(document).ready(function () {
     function createFormato(level, descripcion, codigo, callback) {
         console.log("Creando formato con:", { descripcion, codigo, level });  // <-- Agrega esto para depuración
 
-        fetch(apiUrl, {
+        fetch(apiUrlFormatos, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,24 +89,18 @@ $(document).ready(function () {
     function handleCreateFormato(level, formId, descripcionInputId, codigoInputId, loadFormatosBtnId) {
         $(formId).submit(function (event) {
             event.preventDefault();
-
             // Obtenemos los valores de los inputs
             const descripcion = $(descripcionInputId).val();
             const codigo = $(codigoInputId).val(); // Eliminar parseFloat aquí para no forzar el formato
 
-            console.log("Datos enviados al crear formato:", { descripcion, codigo, level });  // <-- Debug
-
-            // Crear el formato
             createFormato(level, descripcion, codigo, function () {
                 // Limpiamos los inputs tras la creación
                 $(descripcionInputId).val('');
                 $(codigoInputId).val('');
-                $(loadFormatosBtnId).click();
+                loadFormatos(level, '#formatoNivel' + level);
             });
         });
     }
-
-
 });
 
 // Función para eliminar formato
@@ -118,8 +110,7 @@ function deleteFormato(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log("Formato eliminado:", data);  // <-- Debug para eliminar
-            $('#loadFormatoNivel' + level).click();
+            loadFormatos(level, '#formatoNivel' + level);
         })
         .catch(error => console.error('Error eliminando formato:', error));
 }
@@ -139,8 +130,7 @@ function editFormato(id, currentDescripcion, currentCodigo, level) {
         })
             .then(response => response.json())
             .then(data => {
-                console.log("Formato editado:", data);  // <-- Debug para editar
-                $('#loadFormatoNivel' + level).click();
+                loadFormatos(level, '#formatoNivel' + level);
             })
             .catch(error => console.error('Error editando formato:', error));
     }

@@ -1,21 +1,21 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/intereses';
 
-    // Función genérica para cargar interes de cualquier nivel
-    function loadInteres(level, containerId) {
-        const container = $(containerId);
+const apiUrlInteres = 'https://tecmilenio-calculadora-backend.testingbo.com/api/intereses';
+
+// Función genérica para cargar interes de cualquier nivel
+function loadInteres(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.interes - b.interes);
+    fetch(`${apiUrlInteres}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.interes - b.interes);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -25,8 +25,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(interes => {
-                        tableHtml += `
+                data.forEach(interes => {
+                    tableHtml += `
                             <tr>
                                 <td>${interes.interes}%</td>
                                 <td>
@@ -38,34 +38,32 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron interes para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching interes:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron interes para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching interes:', error));
+}
 
 
-    // Asociar eventos para cargar y crear interes de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
 
         loadInteres(level, '#interesNivel' + level);
-
-
         handleCreateInteres(level, '#createInteresNivel' + level + 'Form', '#interesNivel' + level + 'Porcentaje', '#loadInteresNivel' + level);
     }
 
     // Función genérica para crear interes
     function createInteres(level, percentage, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlInteres, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,7 +82,7 @@ $(document).ready(function () {
             const percentage = $(percentageInputId).val();
             createInteres(level, percentage, function () {
                 $(percentageInputId).val('');
-                $(loadInteresBtnId).click();
+                loadInteres(level, '#interesNivel' + level);
             });
         });
     }
@@ -98,8 +96,7 @@ function deleteInteres(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de interes para el nivel específico
-            $('#loadInteresNivel' + level).click();
+            loadInteres(level, '#interesNivel' + level);
         })
         .catch(error => console.error('Error deleting interes:', error));
 }
@@ -117,8 +114,7 @@ function editInteres(id, currentName, currentPercentage, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de interes para el nivel específico
-                $('#loadInteresNivel' + level).click();
+                loadInteres(level, '#interesNivel' + level);
             })
             .catch(error => console.error('Error editing interes:', error));
     }

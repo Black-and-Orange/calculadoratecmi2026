@@ -1,21 +1,20 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos';
+const apiUrlCreditos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos';
 
-    // Función genérica para cargar creditos de cualquier nivel
-    function loadCreditos(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar creditos de cualquier nivel
+function loadCreditos(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.credito - b.credito);
+    fetch(`${apiUrlCreditos}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.credito - b.credito);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -25,8 +24,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(credito => {
-                        tableHtml += `
+                data.forEach(credito => {
+                    tableHtml += `
                             <tr>
                                 <td>${credito.credito}</td>
                                 <td>
@@ -38,21 +37,21 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron creditos para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching creditos:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron creditos para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching creditos:', error));
+}
 
-    // Asociar eventos para cargar y crear creditos de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
         loadCreditos(level, '#creditosNivel' + level);
@@ -62,7 +61,7 @@ $(document).ready(function () {
 
     // Función genérica para crear creditos
     function createCreditos(level, numeroCreditos, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlCreditos, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -81,7 +80,7 @@ $(document).ready(function () {
             const numeroCreditos = $(numeroInputId).val();
             createCreditos(level, numeroCreditos, function () {
                 $(numeroInputId).val('');  // Limpiar el campo de entrada
-                $(loadCreditosBtnId).click();  // Recargar la lista de creditos
+                loadCreditos(level, '#creditosNivel' + level);
             });
         });
     }
@@ -97,7 +96,7 @@ function deleteCreditos(id, level) {
         .then(response => response.json())
         .then(data => {
             // Recargar lista de creditos para el nivel específico
-            $('#loadCreditosNivel' + level).click();
+            loadCreditos(level, '#creditosNivel' + level);
         })
         .catch(error => console.error('Error deleting creditos:', error));
 }
@@ -115,8 +114,7 @@ function editCreditos(id, currentNumero, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de creditos para el nivel específico
-                $('#loadCreditosNivel' + level).click();
+                loadCreditos(level, '#creditosNivel' + level);
             })
             .catch(error => console.error('Error editing creditos:', error));
     }

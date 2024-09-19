@@ -1,19 +1,18 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/planes';
+const apiUrlPlanes = 'https://tecmilenio-calculadora-backend.testingbo.com/api/planes';
 
-    // Función genérica para cargar planes de cualquier nivel
-    function loadPlanes(level, containerId) {
-        const container = $(containerId);
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+// Función genérica para cargar planes de cualquier nivel
+function loadPlanes(level, containerId) {
+    const container = $(containerId);
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
+    fetch(`${apiUrlPlanes}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -24,10 +23,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(planes => {
-                        console.log(planes.id_plan);
-
-                        tableHtml += `
+                data.forEach(planes => {
+                    tableHtml += `
                             <tr>
                                 <td>${planes.descripcion}</td>
                                 <td>${planes.tipo_plan}</td>
@@ -40,22 +37,22 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron planes para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error fetching planes:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                console.log('No se encontraron planes para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error fetching planes:', error));
+}
 
-    // Asociar eventos para cargar y crear planes de niveles dinámicos
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+$(document).ready(function () {
+    const maxLevel = 12;
     for (let level = 1; level <= maxLevel; level++) {
         loadPlanes(level, '#planesNivel' + level);
         handleCreatePlanes(level, '#createPlanesNivel' + level + 'Form', '#planesNivel' + level + 'Name', '#planesNivel' + level + 'Type', '#loadPlanesNivel' + level);
@@ -63,7 +60,7 @@ $(document).ready(function () {
 
     // Función genérica para crear planes
     function createPlanes(level, name, category, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlPlanes, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -86,7 +83,7 @@ $(document).ready(function () {
             createPlanes(level, name, category, function () {
                 $(nameInputId).val('');
                 $(categoryInputId).val('');
-                $(loadPlanesBtnId).click();
+                loadPlanes(level, '#planesNivel' + level);
             });
         });
     }
@@ -99,8 +96,7 @@ function deletePlanes(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de planes para el nivel específico
-            $('#loadPlanesNivel' + level).click();
+            loadPlanes(level, '#planesNivel' + level);
         })
         .catch(error => console.error('Error deleting planes:', error));
 }
@@ -119,8 +115,7 @@ function editPlanes(id, currentName, currentCategory, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de planes para el nivel específico
-                $('#loadPlanesNivel' + level).click();
+                loadPlanes(level, '#planesNivel' + level);
             })
             .catch(error => console.error('Error editing planes:', error));
     }

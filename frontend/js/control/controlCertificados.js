@@ -1,21 +1,20 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados';
+const apiUrlCertificados = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados';
 
-    // Función genérica para cargar certificados de cualquier nivel
-    function loadCertificados(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar certificados de cualquier nivel
+function loadCertificados(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.num_certificados - b.num_certificados);
+    fetch(`${apiUrlCertificados}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.num_certificados - b.num_certificados);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -25,10 +24,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(certificado => {
-                        console.log(certificado);
-
-                        tableHtml += `
+                data.forEach(certificado => {
+                    tableHtml += `
                             <tr>
                                 <td>${certificado.num_certificados}</td>
                                 <td>
@@ -40,21 +37,21 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron certificados para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching certificados:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron certificados para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching certificados:', error));
+}
 
-    // Asociar eventos para cargar y crear certificados de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
         loadCertificados(level, '#certificadosNivel' + level);
@@ -64,7 +61,7 @@ $(document).ready(function () {
 
     // Función genérica para crear certificados
     function createCertificados(level, numeroCertificados, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlCertificados, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,8 +79,8 @@ $(document).ready(function () {
             event.preventDefault();
             const numeroCertificados = $(numeroInputId).val();
             createCertificados(level, numeroCertificados, function () {
-                $(numeroInputId).val('');  // Limpiar el campo de entrada
-                $(loadCertificadosBtnId).click();  // Recargar la lista de certificados
+                $(numeroInputId).val('');
+                loadCertificados(level, '#certificadosNivel' + level);
             });
         });
     }
@@ -110,7 +107,7 @@ function deleteCertificados(id, level) {
 
             // Recargar lista de certificados para el nivel específico
             console.log(`Recargando la lista de certificados para el nivel: ${level}`);
-            $('#loadCertificadosNivel' + level).click();
+            loadCertificados(level, '#certificadosNivel' + level);
         })
         .catch(error => {
             console.error('Error al eliminar certificados:', error);
@@ -144,7 +141,7 @@ function editCertificados(id, currentNumero, level) {
 
                 // Recargar lista de certificados para el nivel específico
                 console.log(`Recargando la lista de certificados para el nivel: ${level}`);
-                $('#loadCertificadosNivel' + level).click();
+                loadCertificados(level, '#certificadosNivel' + level);
             })
             .catch(error => {
                 console.error('Error al editar certificados:', error);

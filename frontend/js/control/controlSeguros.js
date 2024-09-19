@@ -1,30 +1,23 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/seguros';
-    const apiChangeHeadersUrl = 'http://localhost:3008/api/seguros/cambiar-nombres';
-    const maxLevel = 12;  // Define el nivel máximo
+const apiUrlSeguros = 'https://tecmilenio-calculadora-backend.testingbo.com/api/seguros';
+const apiChangeHeadersUrl = 'http://localhost:3008/api/seguros/cambiar-nombres';
 
-    // Función para cargar seguros con logs
-    function loadSeguros(level, containerId) {
-        const container = $(containerId);
+// Función para cargar seguros con logs
+function loadSeguros(level, containerId) {
+    const container = $(containerId);
+    container.empty();
 
+    fetch(`${apiUrlSeguros}/nivel/${level}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.seguro_accidentes.localeCompare(b.seguro_accidentes)); // Ordenamos por seguro_accidentes
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
-
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Seguros recibidos:', data);  // Log de los datos recibidos
-
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.seguro_accidentes.localeCompare(b.seguro_accidentes)); // Ordenamos por seguro_accidentes
-
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -36,8 +29,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(seguro => {
-                        tableHtml += `
+                data.forEach(seguro => {
+                    tableHtml += `
                             <tr>
                                 <td>${seguro.seguro_accidentes}</td>
                                 <td>${seguro.seguro_estudiantil}</td>
@@ -51,53 +44,70 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `</tbody></table>`;
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron seguros para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error al cargar los seguros:', error.message));
+                tableHtml += `</tbody></table>`;
+                container.html(tableHtml);
+            } else {
+                console.log('No se encontraron seguros para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error al cargar los seguros:', error.message));
+}
+
+// Función para cambiar los encabezados de la tabla
+// function changeTableHeaders() {
+//     const newAccidentes = prompt('Nuevo nombre para "Seguro Accidentes":', $('#header-accidentes').text());
+//     const newEstudiantil = prompt('Nuevo nombre para "Seguro Estudiantil":', $('#header-estudiantil').text());
+//     const newCobertura = prompt('Nuevo nombre para "Cobertura VIVE":', $('#header-vive').text());
+
+//     if (newAccidentes && newEstudiantil && newCobertura) {
+//         fetch(apiChangeHeadersUrl, {
+//             method: 'PATCH',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({
+//                 seguro_accidentes: newAccidentes,
+//                 seguro_estudiantil: newEstudiantil,
+//                 cobertura_vive: newCobertura,
+//             }),
+//         })
+//             .then(response => {
+//                 if (!response.ok) {
+//                     throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+//                 }
+//                 return response.json();
+//             })
+//             .then(data => {
+//                 console.log('Encabezados cambiados en la base de datos:', data);
+//                 // Actualizar los encabezados en el DOM
+//                 $('#header-accidentes').text(newAccidentes);
+//                 $('#header-estudiantil').text(newEstudiantil);
+//                 $('#header-vive').text(newCobertura);
+//             })
+//             .catch(error => console.error('Error al cambiar los encabezados:', error.message));
+//     }
+// }
+
+$(document).ready(function () {
+    const maxLevel = 12;
+    for (let level = 1; level <= maxLevel; level++) {
+
+        loadSeguros(level, '#segurosNivel' + level);
+        // const changeHeadersBtn = $('<button>').text('Cambiar Encabezados').addClass('btn btn-primary');
+        // changeHeadersBtn.on('click', changeTableHeaders);
+        // $('#segurosNivel' + level).before(changeHeadersBtn);
+
+        handleCreateSeguro(level,
+            '#createSegurosNivel' + level + 'Form',
+            '#segurosNivel' + level + 'Accidentes',
+            '#segurosNivel' + level + 'Cobertura',
+            '#segurosNivel' + level + 'Estudiantil',
+            '#loadSegurosNivel' + level
+        );
     }
 
-    // Función para cambiar los encabezados de la tabla
-    function changeTableHeaders() {
-        const newAccidentes = prompt('Nuevo nombre para "Seguro Accidentes":', $('#header-accidentes').text());
-        const newEstudiantil = prompt('Nuevo nombre para "Seguro Estudiantil":', $('#header-estudiantil').text());
-        const newCobertura = prompt('Nuevo nombre para "Cobertura VIVE":', $('#header-vive').text());
-
-        if (newAccidentes && newEstudiantil && newCobertura) {
-            fetch(apiChangeHeadersUrl, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    seguro_accidentes: newAccidentes,
-                    seguro_estudiantil: newEstudiantil,
-                    cobertura_vive: newCobertura,
-                }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Encabezados cambiados en la base de datos:', data);
-                    // Actualizar los encabezados en el DOM
-                    $('#header-accidentes').text(newAccidentes);
-                    $('#header-estudiantil').text(newEstudiantil);
-                    $('#header-vive').text(newCobertura);
-                })
-                .catch(error => console.error('Error al cambiar los encabezados:', error.message));
-        }
-    }
-
-    // Función para crear seguros con logs
     function createSeguro(level, accidentes, cobertura, estudiantil, callback) {
         console.log('Enviando datos al servidor:', {
             seguro_accidentes: accidentes,
@@ -106,7 +116,7 @@ $(document).ready(function () {
             nivel_id: level
         });
 
-        fetch(apiUrl, {
+        fetch(apiUrlSeguros, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -131,23 +141,6 @@ $(document).ready(function () {
             .catch(error => console.error('Error al crear el seguro:', error.message));
     }
 
-    // Asociar eventos para cargar y crear seguros de niveles dinámicos
-    for (let level = 1; level <= maxLevel; level++) {
-
-        loadSeguros(level, '#segurosNivel' + level);
-        // Manejar la creación de seguros para cada nivel
-        const changeHeadersBtn = $('<button>').text('Cambiar Encabezados').addClass('btn btn-primary');
-        changeHeadersBtn.on('click', changeTableHeaders);
-        $('#segurosNivel' + level).before(changeHeadersBtn);
-
-        handleCreateSeguro(level,
-            '#createSegurosNivel' + level + 'Form',
-            '#segurosNivel' + level + 'Accidentes',
-            '#segurosNivel' + level + 'Cobertura',
-            '#segurosNivel' + level + 'Estudiantil',
-            '#loadSegurosNivel' + level
-        );
-    }
 
     // Función para gestionar la creación del seguro con logs
     function handleCreateSeguro(level, formId, accidentesId, coberturaId, estudiantilId, loadSegurosBtnId) {
@@ -168,7 +161,7 @@ $(document).ready(function () {
                 $(accidentesId).val('');
                 $(coberturaId).val('');
                 $(estudiantilId).val('');
-                $(loadSegurosBtnId).click();  // Recargar los seguros al crear uno nuevo
+                loadSeguros(level, '#segurosNivel' + level);
             });
         });
     }
@@ -188,8 +181,7 @@ function deleteSeguro(id_seguro, level) {
             return response.json();
         })
         .then(data => {
-            console.log('Seguro eliminado:', data);
-            $('#loadSegurosNivel' + level).click();  // Recargar la lista de seguros
+            loadSeguros(level, '#segurosNivel' + level);
         })
         .catch(error => console.error('Error al eliminar el seguro:', error.message));
 }
@@ -219,8 +211,7 @@ function editSeguro(id_seguro, currentAccidentes, currentEstudiantil, currentCob
                 return response.json();
             })
             .then(data => {
-                console.log('Seguro editado:', data);
-                $('#loadSegurosNivel' + level).click();  // Recargar la lista de seguros
+                loadSeguros(level, '#segurosNivel' + level);
             })
             .catch(error => console.error('Error al editar el seguro:', error.message));
     }

@@ -1,20 +1,19 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/periodo';
+const apiUrlPeriodo = 'https://tecmilenio-calculadora-backend.testingbo.com/api/periodo';
 
-    // Función genérica para cargar periodos de cualquier nivel
-    function loadPeriodo(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar periodos de cualquier nivel
+function loadPeriodo(level, containerId) {
+    const container = $(containerId);
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.periodo_descripcion.localeCompare(b.periodo_descripcion));
+    fetch(`${apiUrlPeriodo}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.periodo_descripcion.localeCompare(b.periodo_descripcion));
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -25,8 +24,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(periodo => {
-                        tableHtml += `
+                data.forEach(periodo => {
+                    tableHtml += `
                             <tr>
                                 <td>${periodo.periodo_descripcion}</td>
                                 <td>${periodo.periodo_codigo}</td>
@@ -39,21 +38,21 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    console.log('No se encontraron periodos para mostrar.');
-                }
-            })
-            .catch(error => console.error('Error fetching periodos:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                console.log('No se encontraron periodos para mostrar.');
+            }
+        })
+        .catch(error => console.error('Error fetching periodos:', error));
+}
 
-    // Asociar eventos para cargar y crear periodos de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
         loadPeriodo(level, '#periodoNivel' + level);
@@ -63,7 +62,7 @@ $(document).ready(function () {
     // Función genérica para crear periodo
     function createPeriodo(level, name, codigo, callback) {
 
-        fetch(apiUrl, {
+        fetch(apiUrlPeriodo, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -96,7 +95,7 @@ $(document).ready(function () {
             createPeriodo(level, name, codigo, function () {
                 $(nameInputId).val('');
                 $(codigoInputId).val('');
-                $(loadPeriodoBtnId).click();
+                loadPeriodo(level, '#periodoNivel' + level);
             });
         });
     }
@@ -109,8 +108,7 @@ function deletePeriodo(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de periodos para el nivel específico
-            $('#loadPeriodoNivel' + level).click();
+            loadPeriodo(level, '#periodoNivel' + level);
         })
         .catch(error => console.error('Error deleting periodo:', error));
 }
@@ -129,8 +127,7 @@ function editPeriodo(id, currentName, currentCodigo, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de periodos para el nivel específico
-                $('#loadPeriodoNivel' + level).click();
+                loadPeriodo(level, '#periodoNivel' + level);
             })
             .catch(error => console.error('Error editing periodo:', error));
     }

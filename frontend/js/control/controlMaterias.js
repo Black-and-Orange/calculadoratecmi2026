@@ -1,20 +1,19 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias';
+const apiUrlMaterias = 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias';
 
-    // Función genérica para cargar materias de cualquier nivel
-    function loadMaterias(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar materias de cualquier nivel
+function loadMaterias(level, containerId) {
+    const container = $(containerId);
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.numero - b.numero);
+    fetch(`${apiUrlMaterias}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.numero - b.numero);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -24,8 +23,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(materia => {
-                        tableHtml += `
+                data.forEach(materia => {
+                    tableHtml += `
                             <tr>
                                 <td>${materia.numero}</td>
                                 <td>
@@ -37,25 +36,25 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron materias para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching materias:', error));
-    }
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron materias para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching materias:', error));
+}
 
-    // Asociar eventos para cargar y crear materias de niveles dinámicos
+$(document).ready(function () {
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
 
-            loadMaterias(level, '#materiasNivel' + level);
+        loadMaterias(level, '#materiasNivel' + level);
 
         handleCreateMaterias(level, '#createMateriasNivel' + level + 'Form', '#materiasNivel' + level + 'Materias', '#loadMateriasNivel' + level);
     }
@@ -66,7 +65,7 @@ $(document).ready(function () {
         const bodyData = { numero: numeroMaterias, id_nivel: level };
         console.log('Datos enviados en el body:', bodyData);
 
-        fetch(apiUrl, {
+        fetch(apiUrlMaterias, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -99,7 +98,7 @@ $(document).ready(function () {
 
             createMaterias(level, numeroMaterias, function () {
                 $(numeroInputId).val('');  // Limpiar el campo de entrada
-                $(loadMateriasBtnId).click();  // Recargar la lista de materias
+                loadMaterias(level, '#materiasNivel' + level);
             });
         });
     }
@@ -114,8 +113,7 @@ function deleteMaterias(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de materias para el nivel específico
-            $('#loadMateriasNivel' + level).click();
+            loadMaterias(level, '#materiasNivel' + level);
         })
         .catch(error => console.error('Error deleting materias:', error));
 }
@@ -133,8 +131,7 @@ function editMaterias(id, currentNumero, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de materias para el nivel específico
-                $('#loadMateriasNivel' + level).click();
+                loadMaterias(level, '#materiasNivel' + level);
             })
             .catch(error => console.error('Error editing materias:', error));
     }

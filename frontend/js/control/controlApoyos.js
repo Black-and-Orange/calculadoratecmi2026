@@ -1,21 +1,20 @@
-$(document).ready(function () {
-    const apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos';
+const apiUrlApoyos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos';
 
-    // Función genérica para cargar apoyos de cualquier nivel
-    function loadApoyos(level, containerId) {
-        const container = $(containerId);
+// Función genérica para cargar apoyos de cualquier nivel
+function loadApoyos(level, containerId) {
+    const container = $(containerId);
 
 
-        // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
-        container.empty();
+    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
+    container.empty();
 
-        fetch(`${apiUrl}/nivel/${level}`)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    data.sort((a, b) => a.porcentaje - b.porcentaje);
+    fetch(`${apiUrlApoyos}/nivel/${level}`)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                data.sort((a, b) => a.porcentaje - b.porcentaje);
 
-                    let tableHtml = `
+                let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -25,8 +24,8 @@ $(document).ready(function () {
                             </thead>
                             <tbody>`;
 
-                    data.forEach(apoyos => {
-                        tableHtml += `
+                data.forEach(apoyos => {
+                    tableHtml += `
                             <tr>
                                 <td>${apoyos.porcentaje}%</td>
                                 <td>
@@ -38,20 +37,20 @@ $(document).ready(function () {
                                     </button>
                                 </td>
                             </tr>`;
-                    });
+                });
 
-                    tableHtml += `
+                tableHtml += `
                             </tbody>
                         </table>`;
 
-                    container.html(tableHtml).show();
-                } else {
-                    container.html('<p>No se encontraron apoyos para este nivel.</p>').show();
-                }
-            })
-            .catch(error => console.error('Error fetching apoyos:', error));
-    }
-
+                container.html(tableHtml);
+            } else {
+                container.html('<p>No se encontraron apoyos para este nivel.</p>');
+            }
+        })
+        .catch(error => console.error('Error fetching apoyos:', error));
+}
+$(document).ready(function () {
     const maxLevel = 12;
     for (let level = 1; level <= maxLevel; level++) {
         loadApoyos(level, '#apoyosNivel' + level);
@@ -62,7 +61,7 @@ $(document).ready(function () {
 
     // Función genérica para crear apoyos
     function createApoyos(level, percentage, callback) {
-        fetch(apiUrl, {
+        fetch(apiUrlApoyos, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -81,7 +80,7 @@ $(document).ready(function () {
             const percentage = $(percentageInputId).val();
             createApoyos(level, percentage, function () {
                 $(percentageInputId).val('');
-                $(loadApoyosBtnId).click();
+                loadApoyos(level, '#apoyosNivel' + level);
             });
         });
     }
@@ -96,8 +95,7 @@ function deleteApoyos(id, level) {
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de apoyos para el nivel específico
-            $('#loadApoyosNivel' + level).click();
+            loadApoyos(level, '#apoyosNivel' + level);
         })
         .catch(error => console.error('Error deleting apoyos:', error));
 }
@@ -115,8 +113,7 @@ function editApoyos(id, currentName, currentPercentage, level) {
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de apoyos para el nivel específico
-                $('#loadApoyosNivel' + level).click();
+                loadApoyos(level, '#apoyosNivel' + level);
             })
             .catch(error => console.error('Error editing apoyos:', error));
     }
