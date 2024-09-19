@@ -172,12 +172,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function mostrarValores(valores) {
-        let factorMultiplicador = 4;
-        let textoMensualidades = '4 Mensualidades';
 
-        if (levelId != 3 || levelId != 5) {
-            factorMultiplicador = 3;
-            textoMensualidades = '3 Mensualidades';
+        console.log(levelId);
+        
+        let factorMultiplicador = 3;
+        let textoMensualidades = '3 Mensualidades';
+
+        if (levelId === 1 || levelId === 2 || levelId === 4 ||levelId === 5) {
+            factorMultiplicador = 4;
+            textoMensualidades = '4 Mensualidades';
         }
 
         const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, ""));

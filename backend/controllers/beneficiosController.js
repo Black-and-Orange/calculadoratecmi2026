@@ -55,7 +55,7 @@ const updateBeneficioWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedBeneficioUpdates = ['nombre, descripcion, icono'];
+    const allowedBeneficioUpdates = ['nombre', 'descripcion', 'icono'];
     const allowedBeneficioNivelUpdates = ['nivel_id'];
     const beneficioFieldsToUpdate = {};
     const beneficioNivelFieldsToUpdate = {};

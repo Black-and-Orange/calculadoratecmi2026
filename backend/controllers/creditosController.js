@@ -34,16 +34,16 @@ const getCreditoById = (req, res) => {
 };
 
 const createCreditoWithNivel = (req, res) => {
-    const { porcentaje, nivel_id } = req.body;
+    const { credito, id_nivel } = req.body;
 
     // Crea el credito
-    creditosModel.createCredito({ porcentaje }, (err, result) => {
+    creditosModel.createCredito({ credito }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const credito_id = result.insertId;
 
         // Crea la relación con nivel
-        creditosNivelModel.createCreditoNivel({ credito_id, nivel_id }, (err) => {
+        creditosNivelModel.createCreditoNivel({ credito_id, id_nivel }, (err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ credito_id });
         });
@@ -55,8 +55,8 @@ const updateCreditoWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedCreditoUpdates = ['porcentaje'];
-    const allowedCreditoNivelUpdates = ['nivel_id'];
+    const allowedCreditoUpdates = ['credito'];
+    const allowedCreditoNivelUpdates = ['id_nivel'];
     const creditoFieldsToUpdate = {};
     const creditoNivelFieldsToUpdate = {};
 

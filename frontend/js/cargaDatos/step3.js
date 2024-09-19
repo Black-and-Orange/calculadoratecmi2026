@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost += parseFloat(segurosData.cobertura_vive);
         }
 
-        const divisor = (levelId === 3 || levelId === 5) ? 4 : 3;
+        const divisor = (levelId === 3 || levelId === 5 || levelId === 1 || levelId === 4) ? 5 : 4;
         const interesDividido = totalConInteres / divisor;
         const primeraCuota = interesDividido + totalCost;
 

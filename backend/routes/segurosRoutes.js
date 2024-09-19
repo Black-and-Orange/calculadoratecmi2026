@@ -13,10 +13,13 @@ router.get('/:id', segurosController.getSeguroById);
 // Crear un nuevo campus con su nivel
 router.post('/', segurosController.createSeguroWithNivel);
 
-// Actualizar un campus y su nivel
-router.patch('/:id', segurosController.updateSeguroWithNivel);
-
 // Eliminar un campus y su nivel
 router.delete('/:id', segurosController.deleteSeguroWithNivel);
+
+// Actualizar nombre de los seguros
+router.patch('/cambiar-nombres', segurosController.changeColumnNames);
+
+// Actualizar un campus y su nivel
+router.patch('/:id', segurosController.updateSeguroWithNivel);
 
 module.exports = router;

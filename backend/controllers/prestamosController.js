@@ -22,8 +22,6 @@ const getPrestamosByNivel = (req, res) => {
     });
 };
 
-
-
 const getPrestamoById = (req, res) => {
     const id = req.params.id;
     prestamosModel.getPrestamoById(id, (err, results) => {
@@ -34,10 +32,10 @@ const getPrestamoById = (req, res) => {
 };
 
 const createPrestamoWithNivel = (req, res) => {
-    const { porcentaje, nivel_id } = req.body;
+    const { prestamo, nivel_id } = req.body;
 
     // Crea el prestamo
-    prestamosModel.createPrestamo({ porcentaje }, (err, result) => {
+    prestamosModel.createPrestamo({ prestamo }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const prestamo_id = result.insertId;
@@ -55,7 +53,7 @@ const updatePrestamoWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedPrestamoUpdates = ['porcentaje'];
+    const allowedPrestamoUpdates = ['prestamo'];
     const allowedPrestamoNivelUpdates = ['nivel_id'];
     const prestamoFieldsToUpdate = {};
     const prestamoNivelFieldsToUpdate = {};

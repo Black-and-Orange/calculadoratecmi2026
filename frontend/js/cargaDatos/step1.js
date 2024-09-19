@@ -219,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Modificación: Verifica si la opción seleccionada en el formato es "presencial"
         let campusKey = '';
         const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].value;
-        console.log('formatoSeleccionado', formatoSeleccionado);
 
         if (formatoSeleccionado && formatoSeleccionado === 'Presencial') {
             campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
@@ -274,7 +273,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Network response was not ok');
 
             let data = await response.json();
-            if (sort) data = sortOptions(data, property);
+
+            if (selectElement !== selectors.grade && sort) {
+                data = sortOptions(data, property);
+            }
+
+            // if (sort) data = sortOptions(data, property);
 
             selectElement.innerHTML = '<option value="">Elige</option>';
             data.forEach(item => {
@@ -412,8 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (key === 'subjects') {
                         selectors.subjectsLabel.textContent = 'Materias:';
                     }
-
-                    // Carga las opciones de periodos sin ordenarlas
+                    
                     if (key === 'period') {
                         loadOptions(selectors.period, apiUrl, property, false);
                     } else {

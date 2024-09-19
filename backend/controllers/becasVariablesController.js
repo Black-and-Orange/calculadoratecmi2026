@@ -107,57 +107,81 @@ const updateBecaVariableWithNivel = (req, res) => {
     const id = req.params.id;
     const updates = req.body;
 
-    // Filtrar solo los campos permitidos para la actualización
-    const allowedBecaVariableUpdates = ['tipo, promedio_min, promedio_max, porcentaje_min, porcentaje_max'];
-    const allowedBecaVariableNivelUpdates = ['nivel_id'];
-    const becaVariableFieldsToUpdate = {};
-    const becaVariableNivelFieldsToUpdate = {};
+    console.log('ID de beca:', id);  // Verifica si el ID es correcto
 
-    allowedBecaVariableUpdates.forEach(field => {
-        if (updates[field] !== undefined) {
-            becaVariableFieldsToUpdate[field] = updates[field];
+    // Verifica si la beca existe antes de actualizar
+    becasVariablesModel.getBecaVariableById(id, (err, beca) => {
+        if (err || !beca) {
+            return res.status(404).json({ error: 'Beca no encontrada' });
         }
-    });
 
-    allowedBecaVariableNivelUpdates.forEach(field => {
-        if (updates[field] !== undefined) {
-            becaVariableNivelFieldsToUpdate[field] = updates[field];
-        }
-    });
+        // Filtrar solo los campos permitidos para la actualización
+        const allowedBecaVariableUpdates = ['tipo', 'promedio_min', 'promedio_max', 'porcentaje_min', 'porcentaje_max'];
+        const allowedBecaVariableNivelUpdates = ['nivel_id'];
+        const becaVariableFieldsToUpdate = {};
+        const becaVariableNivelFieldsToUpdate = {};
 
-    const becaVariableUpdatePromise = new Promise((resolve, reject) => {
-        if (Object.keys(becaVariableFieldsToUpdate).length > 0) {
-            becasVariablesModel.updateBecaVariable(id, becaVariableFieldsToUpdate, (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
-        } else {
-            resolve({ affectedRows: 0 });
-        }
-    });
-
-    const becaVariableNivelUpdatePromise = new Promise((resolve, reject) => {
-        if (Object.keys(becaVariableNivelFieldsToUpdate).length > 0) {
-            becasVariablesNivelModel.updateBecaVariableNivel(id, becaVariableNivelFieldsToUpdate, (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
-        } else {
-            resolve({ affectedRows: 0 });
-        }
-    });
-
-    Promise.all([becaVariableUpdatePromise, becaVariableNivelUpdatePromise])
-        .then(results => {
-            const [becaVariableResult, becaVariableNivelResult] = results;
-            if (becaVariableResult.affectedRows > 0 || becaVariableNivelResult.affectedRows > 0) {
-                res.json({ message: 'BecaVariable y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'BecaVariable y/o nivel no encontrado' });
+        allowedBecaVariableUpdates.forEach(field => {
+            if (updates[field] !== undefined) {
+                becaVariableFieldsToUpdate[field] = updates[field];
             }
-        })
-        .catch(err => res.status(500).json({ error: err.message }));
+        });
+
+        allowedBecaVariableNivelUpdates.forEach(field => {
+            if (updates[field] !== undefined) {
+                becaVariableNivelFieldsToUpdate[field] = updates[field];
+            }
+        });
+
+        // Actualización de becaVariable
+        const becaVariableUpdatePromise = new Promise((resolve, reject) => {
+            console.log('Campos de beca a actualizar:', becaVariableFieldsToUpdate);
+            
+            if (Object.keys(becaVariableFieldsToUpdate).length > 0) {
+                becasVariablesModel.updateBecaVariable(id, becaVariableFieldsToUpdate, (err, result) => {
+                    if (err) {
+                        console.error('Error en updateBecaVariable:', err);
+                        return reject(err);
+                    }
+                    resolve(result);
+                });
+            } else {
+                resolve({ affectedRows: 0 });
+            }
+        });
+
+        // Actualización de nivel de beca
+        const becaVariableNivelUpdatePromise = new Promise((resolve, reject) => {
+            console.log('Campos de nivel a actualizar:', becaVariableNivelFieldsToUpdate);
+            
+            if (Object.keys(becaVariableNivelFieldsToUpdate).length > 0) {
+                becasVariablesNivelModel.updateBecaVariableNivel(id, becaVariableNivelFieldsToUpdate, (err, result) => {
+                    if (err) {
+                        console.error('Error en updateBecaVariableNivel:', err);
+                        return reject(err);
+                    }
+                    resolve(result);
+                });
+            } else {
+                resolve({ affectedRows: 0 });
+            }
+        });
+
+        Promise.all([becaVariableUpdatePromise, becaVariableNivelUpdatePromise])
+            .then(results => {
+                const [becaVariableResult, becaVariableNivelResult] = results;
+                console.log('Resultados de actualización:', becaVariableResult, becaVariableNivelResult);
+                
+                if (becaVariableResult.affectedRows > 0 || becaVariableNivelResult.affectedRows > 0) {
+                    res.json({ message: 'BecaVariable y/o nivel actualizado' });
+                } else {
+                    res.status(404).json({ error: 'BecaVariable y/o nivel no encontrado' });
+                }
+            })
+            .catch(err => res.status(500).json({ error: err.message }));
+    });
 };
+
 
 const deleteBecaVariableWithNivel = (req, res) => {
     const beca_variable_id = req.params.id;

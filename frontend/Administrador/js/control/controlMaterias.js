@@ -54,8 +54,9 @@ $(document).ready(function () {
     // Asociar eventos para cargar y crear materias de niveles dinámicos
     const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
     for (let level = 1; level <= maxLevel; level++) {
-
+        $('#loadMateriasNivel' + level).click(function () {
             loadMaterias(level, '#materiasNivel' + level);
+        });
 
         handleCreateMaterias(level, '#createMateriasNivel' + level + 'Form', '#materiasNivel' + level + 'Materias', '#loadMateriasNivel' + level);
     }

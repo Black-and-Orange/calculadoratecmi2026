@@ -44,11 +44,23 @@ const updateSeguro = (id, updates, callback) => {
     db.query(query, queryValues, callback);
 };
 
+const changeColumnNames = (columnChanges, callback) => {
+    const alterStatements = Object.entries(columnChanges).map(([oldName, newName]) => {
+        return `CHANGE ${oldName} ${newName} DECIMAL(10,2)`; 
+    });
+
+    const query = `ALTER TABLE seguro ${alterStatements.join(', ')};`;
+
+    db.query(query, callback);
+};
+
+
 module.exports = {
     getAllSeguros,
     getSegurosByNivel,
     getSeguroById,
     createSeguro,
     deleteSeguro,
-    updateSeguro
+    updateSeguro,
+    changeColumnNames
 };

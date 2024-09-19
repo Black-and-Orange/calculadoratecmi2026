@@ -22,11 +22,13 @@ const semanasSEDIRoutes = require('./routes/semanasSEDIRoutes');
 const interesesRoutes = require('./routes/interesesRoutes');
 const creditosRoutes = require('./routes/creditosRoutes');
 const prestamosRoutes = require('./routes/prestamosRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use('/api/auth', authRoutes);
 app.use('/api/apoyos', apoyosRoutes);
 app.use('/api/becasFijas', becasFijasRoutes);
 app.use('/api/becasVariables', becasVariablesRoutes);
