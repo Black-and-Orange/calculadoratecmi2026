@@ -6,7 +6,7 @@ const getAllFormatos = (callback) => {
 
 const getFormatosByNivel = (nivelId, callback) => {
     const query = `
-        SELECT formato_asociado.id_formato_asociado, formato_asociado.descripcion, foramto.costo
+        SELECT formato_asociado.id_formato_asociado, formato_asociado.descripcion, formato_asociado.costo
         FROM formato_asociado
         JOIN formato_asociado_nivel ON formato_asociado.id_formato_asociado = formato_asociado_nivel.id_formato_asociado
         WHERE formato_asociado_nivel.id_nivel = ?

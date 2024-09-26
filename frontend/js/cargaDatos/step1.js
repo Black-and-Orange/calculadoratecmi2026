@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+
     // Verifica si un valor es numérico
     const isNumeric = (value) => !isNaN(value) && !isNaN(parseFloat(value));
 
@@ -222,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (formatoSeleccionado && formatoSeleccionado === 'Presencial') {
             campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
-        } else if (formatoSeleccionado){
+        } else if (formatoSeleccionado) {
             campusKey = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].getAttribute('codigo') || '';
         } else {
             campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
@@ -239,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Definir la URL del endpoint según el nivel seleccionado
             let url = nivel == 5
                 ? 'https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado'  // Endpoint para nivel 5
-                : 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato/nivel/'+nivel;  // Endpoint para otros niveles
+                : 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato/nivel/' + nivel;  // Endpoint para otros niveles
 
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error al obtener los formatos');
@@ -264,6 +265,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Función para intercambiar las opciones 2 y 3 del select
+    const swapOptions = (selectElement) => {
+        if (selectElement.options.length >= 3) {
+
+            const option2 = selectElement.options[2];
+            const option3 = selectElement.options[3];
+
+            selectElement.insertBefore(option3, option2);
+        }
+    };
+
+    // Cargar las opciones del select de nivel
+    const loadGradeOptions = async () => {
+        try {
+            await loadOptions(selectors.grade, apiConfigs.grade.url, apiConfigs.grade.property);
+
+            // Una vez cargadas las opciones, intercambia la posición de las opciones 2 y 3
+            swapOptions(selectors.grade);
+
+        } catch (error) {
+            console.error('Error cargando las opciones del nivel:', error);
+        }
+    };
+
 
 
     // Carga las opciones en un elemento <select> desde la API y las ordena si es necesario
@@ -274,11 +299,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let data = await response.json();
 
-            if (selectElement !== selectors.grade && sort) {
-                data = sortOptions(data, property);
+            // Si es el select de periodos, ordenar por el primer mes
+            if (selectElement === selectors.period) {
+                data = data.sort((a, b) => {
+                    const getFirstMonth = (periodo) => {
+                        const meses = periodo[property].split(' - ');
+                        return new Date(`01 ${meses[0]} 2000`).getMonth(); // Convierte el mes a número (0-11)
+                    };
+                    return getFirstMonth(a) - getFirstMonth(b); // Ordena por el primer mes
+                });
             }
-
-            // if (sort) data = sortOptions(data, property);
+            if (selectElement !== selectors.grade && sort) {
+                data = sortOptions(data, property); 
+            }
 
             selectElement.innerHTML = '<option value="">Elige</option>';
             data.forEach(item => {
@@ -420,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         selectors.subjectsLabel.textContent = 'Certificados:';
                     }
 
-                    else if (mappedLevel === 5&& key === 'subjects') {
+                    else if (mappedLevel === 5 && key === 'subjects') {
                         apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/5';
                         property = 'num_certificados';
                         selectors.subjectsLabel.textContent = 'Certificados:';
@@ -429,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (key === 'subjects') {
                         selectors.subjectsLabel.textContent = 'Materias:';
                     }
-                    
+
                     if (key === 'period') {
                         loadOptions(selectors.period, apiUrl, property, false);
                     } else {
@@ -455,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     // Inicializa el formulario y carga el mapeo de niveles al cargar la página y enlaza eventos
-    initializeLevelMapping()
+    initializeLevelMapping().then(loadGradeOptions);
 
     // Selecciona el formulario y agrega el evento de reseteo
     const formElement = document.querySelector('form');

@@ -1,14 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
+
 <body>
+    <section class="header">
+        <div class="container py-3">
+            <div class="row">
+                <div class="col-12">
+                    <img src="https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/tecmilenio-logo.svg">
+                </div>
+            </div>
+        </div>
+    </section>
+
     <div class="container">
-        <h2 class="mt-5">Iniciar Sesión</h2>
+        <h2 class="mt-5">CALCULADORA DE BECAS</h2>
         <form id="loginForm">
             <div class="form-group">
                 <label for="nombre_usuario">Usuario</label>
@@ -20,18 +33,52 @@
             </div>
             <button type="submit" class="btn btn-primary">Ingresar</button>
         </form>
+        
     </div>
 
+    <!-- Modal para el registro -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Registro de Usuario</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="register_usuario">Usuario</label>
+                            <input type="text" class="form-control" id="register_usuario" name="register_usuario"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register_contrasena">Contraseña</label>
+                            <input type="password" class="form-control" id="register_contrasena"
+                                name="register_contrasena" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Registrarse</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
+        // Manejar el formulario de inicio de sesión
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
             event.preventDefault(); // Previene el envío del formulario
 
             const username = document.getElementById('nombre_usuario').value;
             const password = document.getElementById('contrasena').value;
-            
 
             try {
-                const response = await fetch('http://localhost:3008/api/auth/login', {
+                const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -42,11 +89,9 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Maneja el éxito, por ejemplo, guardando el token en localStorage
                     localStorage.setItem('token', data.token);
                     alert('Inicio de sesión exitoso');
-                    // Redirige o realiza alguna acción adicional
-                    window.location.href = 'panel.html'; // Redirige a una página protegida
+                    window.location.href = 'panel.html';
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -55,6 +100,9 @@
                 alert('Hubo un problema con la solicitud');
             }
         });
+
+        
     </script>
 </body>
+
 </html>

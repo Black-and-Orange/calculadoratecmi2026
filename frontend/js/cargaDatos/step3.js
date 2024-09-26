@@ -1,18 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+    
     const viveDiv = document.getElementById('div-vive');
-    // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
-    if (levelId >= 6 && levelId <= 12) {
-        viveDiv.style.display = 'none'; // Ocultar div
-    } else {
-        viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
-    }
 
     let segurosData;
 
     async function fetchSeguros() {
+        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
         console.log('levelId:', levelId);
     
+        // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
+        if (levelId >= 6 && levelId <= 12) {
+            viveDiv.style.display = 'none'; // Ocultar div
+        } else {
+            viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
+        }
+
         try {
             const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
             if (!response.ok) throw new Error('Error al obtener los seguros');
@@ -27,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('segurosData:', segurosData);
             }
     
-            
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
@@ -50,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+
         if (selectInsurance.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_accidentes);
             anuncioPoliza.style.display = "none";
@@ -66,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost += parseFloat(segurosData.cobertura_vive);
         }
 
-        const divisor = (levelId === 3 || levelId === 5 || levelId === 1 || levelId === 4) ? 5 : 4;
+        const divisor = (levelId === 1 || levelId === 2 || levelId === 4) ? 5 : 4;
         console.log('divisor:', divisor);
         
         const interesDividido = totalConInteres / divisor;

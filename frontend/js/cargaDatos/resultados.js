@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('periodo').textContent = periodo;
     document.getElementById('campus').textContent = campus;
     document.getElementById('nivel').textContent = nivel;
-    document.getElementById('materias').textContent = formatNumber(materias);
+    document.getElementById('materias').textContent = materias;
 
     function formatNumber(num) {
         return num % 1 === 0 ? parseInt(num) : num.toFixed(2);
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let factorMultiplicador = 3;
         let textoMensualidades = '3 Mensualidades';
 
-        if (levelId === 1 || levelId === 2 || levelId === 4 ||levelId === 5) {
+        if (levelId === 1 || levelId === 2 || levelId === 4) {
             factorMultiplicador = 4;
             textoMensualidades = '4 Mensualidades';
         }
