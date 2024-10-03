@@ -7,24 +7,20 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchSeguros() {
         const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
         console.log('levelId:', levelId);
-    
-        // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
+
         if (levelId >= 6 && levelId <= 12) {
-            viveDiv.style.display = 'none'; // Ocultar div
-        } else {
-            viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
+            viveDiv.style.display = 'none'; 
         }
 
         try {
             const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
             if (!response.ok) throw new Error('Error al obtener los seguros');
-            const segurosDataArray = await response.json(); // Recibimos un array
+            const segurosDataArray = await response.json(); 
     
             console.log('segurosDataArray:', segurosDataArray);
-    
-            // Asegúrate de que no está vacío
+
             if (segurosDataArray.length > 0) {
-                segurosData = segurosDataArray[0]; // Tomamos el primer seguro
+                segurosData = segurosDataArray[0];
     
                 console.log('segurosData:', segurosData);
             }
@@ -43,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalCost = 0;
         let totalConInteres = window.totalConInteres;
 
-        // Esperar a que los seguros se carguen
         await fetchSeguros();
 
         if (!segurosData) {

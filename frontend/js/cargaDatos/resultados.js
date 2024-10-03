@@ -7,104 +7,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campus = params.get('select-campus') || 'N/A';
     const nivel = params.get('select-grade') || 'N/A';
     const materias = params.get('select-subjects') || 'N/A';
+    const certificados = params.get('select-certificado') || 'N/A';
+    const semanas = params.get('select-semanas') || 'N/A';
+    const ingles = params.get('select-ingles') || 'N/A';
 
-    // Asignación de los valores de los parámetros a los elementos del DOM
     document.getElementById('nombre').textContent = nombre;
     document.getElementById('periodo').textContent = periodo;
     document.getElementById('campus').textContent = campus;
     document.getElementById('nivel').textContent = nivel;
-    document.getElementById('materias').textContent = materias;
+    document.getElementById('materias').textContent = formatNumber(materias);
+    document.getElementById('certificados').textContent = formatNumber(certificados);
+    document.getElementById('semanas').textContent = formatNumber(semanas);
+    document.getElementById('ingles').textContent = formatNumber(ingles);
 
     function formatNumber(num) {
-        return num % 1 === 0 ? parseInt(num) : num.toFixed(2);
+        return num % 1 === 0 ? parseInt(num) : parseFloat(num).toFixed(1);
     }
 
-    // function setTextSubjects(nivel) {
-    //     let subjectsText = 'N/A';
+    const materiasPorNivel = {
+        1: 'Materias',
+        2: 'Créditos',
+        3: 'Materias',
+        5: 'Certificados',
+        6: 'Créditos',
+        7: 'Materias',
+        8: 'Certificados',
+        9: 'Certificados',
+        10: 'Créditos',
+        11: 'Materias',
+        12: 'Materias'
+    };
 
-    //     switch (nivel) {
-    //         case 5:
-    //         case 8:
-    //         case 9:
-    //             subjectsText = 'Certificados';
-    //             break;
-    //         case 1:
-    //         case 3:
-    //         case 7:
-    //         case 11:
-    //         case 12:
-    //             subjectsText = 'Materias';
-    //             break;
-    //         case 2:
-    //         case 6:
-    //         case 10:
-    //             subjectsText = 'Créditos';
-    //             break;
-    //         case '4': // Asegúrate de que el valor de nivel sea comparado correctamente
-    //             // Devuelve un array con los 3 textos separados
-    //             return ['Certificados', 'Semanas SEDI', 'Cursos de Inglés'];
-    //         default:
-    //             subjectsText = 'N/A';
-    //             break;
-    //     }
+    if (materiasPorNivel[levelId]) {
+        document.getElementById('text-materias').textContent = materiasPorNivel[levelId];
+    } 
 
-    //     return subjectsText;
-    // }
+    if (levelId == 4) {
+        document.getElementById('materias-container').style.display = 'none';
+        document.getElementById('certificados-container').classList.remove('hidden');
+        document.getElementById('semanas-container').classList.remove('hidden');
+        document.getElementById('ingles-container').classList.remove('hidden');
+    }
 
-    // // Asignación de textos dependiendo del nivel
-    // const subjectTexts = setTextSubjects(nivel);
-
-    // if (nivel === '4' && Array.isArray(subjectTexts)) {
-    //     // Asignar cada uno de los textos de forma individual
-    //     document.getElementById('certificados').textContent = subjectTexts[0];
-    //     document.getElementById('semanas').textContent = subjectTexts[1];
-    //     document.getElementById('cursos').textContent = subjectTexts[2];
-
-    //     // Mostrar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
-    //     document.getElementById('certificados-container').classList.remove('hidden');
-    //     document.getElementById('semanas-container').classList.remove('hidden');
-    //     document.getElementById('cursos-container').classList.remove('hidden');
-        
-    //     // Ocultar el contenedor de materias
-    //     document.getElementById('materias-container').classList.add('hidden');
-    // } else {
-    //     // Asignar el texto en 'materias' si no es nivel 4
-    //     document.getElementById('materias').textContent = subjectTexts;
-
-    //     // Mostrar el contenedor de materias
-    //     document.getElementById('materias-container').classList.remove('hidden');
-        
-    //     // Ocultar los contenedores de Certificados, Semanas SEDI, y Cursos de Inglés
-    //     document.getElementById('certificados-container').classList.add('hidden');
-    //     document.getElementById('semanas-container').classList.add('hidden');
-    //     document.getElementById('cursos-container').classList.add('hidden');
-    // }
 
     let segurosData;
     const viveDiv = document.getElementById('div-vive');
+    const seguros = document.getElementById('seguros');
 
     async function fetchSeguros() {
         console.log('levelId:', levelId);
-    
+
         try {
             const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const segurosDataArray = await response.json(); // Recibimos un array
 
-            // Asegúrate de que no está vacío
             if (segurosDataArray.length > 0) {
-                segurosData = segurosDataArray[0]; // Tomamos el primer seguro
-    
+                segurosData = segurosDataArray[0];
+
                 console.log('segurosData:', segurosData);
             }
-    
-            // Verificar si el nivel está entre 6 y 12 para ocultar "viveDiv"
+
             if (levelId >= 6 && levelId <= 12) {
-                viveDiv.style.display = 'none'; // Ocultar div
+                viveDiv.style.display = 'none';
             } else {
-                viveDiv.style.display = 'flex'; // Mostrar div si no está en ese rango
+                viveDiv.style.display = 'flex';
             }
-    
+
+            if (levelId == 5 || levelId == 9) {
+                seguros.style.display = 'none';
+            }
+
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
         }
@@ -178,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function mostrarValores(valores) {
 
         console.log(levelId);
-        
+
         let factorMultiplicador = 3;
         let textoMensualidades = '3 Mensualidades';
 
@@ -188,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         console.log('factorMultiplicador:', factorMultiplicador);
-        
+
 
         const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, ""));
 
@@ -233,12 +206,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             apoyoEstudiantil.textContent = `${Math.round(valores.supportValue)}%`;
         }
         if (prestamoPorcentaje) {
-            prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}`;
+            prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}%`;
         }
-        if (apoyoEstudiantil.textContent === "null%"  || apoyoEstudiantil.textContent === "0") {
+        if (apoyoEstudiantil.textContent.includes("null") || apoyoEstudiantil.textContent === "0") {
             apoyoEstudiantil.textContent = `0%`;
         }
-        if (prestamoPorcentaje.textContent === "null" || prestamoPorcentaje.textContent === "0") {
+        if (prestamoPorcentaje.textContent.includes("null") || prestamoPorcentaje.textContent === "0") {
             prestamoPorcentaje.textContent = `0%`;
         }
         if (beca) {
@@ -279,7 +252,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (elementBeca.innerText === '0%' && elementApoyo.innerText === '0%' && elementPrestamo.innerText === '0%') {
-            apoyos.classList.add('hidden');
+            apoyos.style.display = 'none';
+        }
+
+        const plan = document.getElementById('plan');
+
+        if (getComputedStyle(apoyos).display === 'none' && getComputedStyle(seguros).display === 'none') {
+            plan.style.display = 'none';
+        } else {
+            plan.style.display = 'flex';
         }
     }
 
@@ -287,11 +268,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bloquePlanContado = document.querySelector('.sub-tables');
         const apoyoFinanciamiento = document.getElementById('apoyoFinanciamiento');
 
-
         if (parseFloat(valores.finalAmount.replace(/[^0-9.-]+/g, "")) === 0) {
-            // Ocultar fila de apoyo financiero
             apoyoFinanciamiento.closest('tr').style.display = 'none';
-            // Modificar el bloque para mostrar solo la colegiatura y total contado
             bloquePlanContado.innerHTML = `
             <div
                 class="relative overflow-hidden border-2 border-solid border-secondary-color-3 rounded-[6px] h-full">
@@ -330,8 +308,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     mostrarValores({ ...valores, ...valoresAdicionales });
     actualizarPlanContado(valoresAdicionales);
 
-
-
     const tituloPorNivel = {
         1: 'Impulsa tu futuro desde hoy',
         3: 'Avanza con determinación hacia tu futuro profesional',
@@ -346,12 +322,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         11: 'Crece como líder para transformar a tu equipo y tu entorno',
         12: 'Invierte en una educación para crecer como persona y como profesionista',
     };
-
     let beneficiosPorNivel = {};
-
     async function obtenerBeneficios(nivel) {
         const url = `https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios/nivel/${nivel}`;
-
         try {
             const response = await fetch(url);
 
@@ -367,9 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return [];
         }
     }
-
     await obtenerBeneficios(levelId);
-
     function actualizarBeneficios(nivel) {
         const benefitsWrapper = document.getElementById('benefits-wrappers');
         benefitsWrapper.innerHTML = ''; // Limpiar el contenedor de beneficios
@@ -379,7 +350,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         beneficios.forEach((beneficio, index) => {
             const benefitItem = document.createElement('div');
             benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit-card-elem";
-
             benefitItem.innerHTML = `
                 <div class="border-2 border-solid border-secondary-color-2 rounded-[6px] relative px-[20px] py-[30px] h-full benefits-item">
                     <div class="bg-secondary-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
@@ -390,11 +360,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p class="text-[16px] leading-[24px]">${beneficio.descripcion}</p>
                 </div>
             `;
-
             benefitsWrapper.appendChild(benefitItem);
         });
 
-        // Si hay 5 beneficios, cambiar la disposición
         if (beneficios.length === 5) {
             benefitsWrapper.classList.add('benefits-3-2');
         } else {
@@ -404,9 +372,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     actualizarBeneficios(levelId);
 
-
-    // Estilos para el nivel "Profesional Semestral"
-    // Mapeo de levelId a los archivos CSS correspondientes
     const styleMap = {
         2: 'css/style-universidad.css',
         4: 'css/style-universidad.css',
@@ -421,13 +386,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     };
 
-    // Función para agregar el link al head
     function agregarEstiloPorNivel() {
-        // Verificar si hay un estilo asociado con el levelId
         if (styleMap[levelId]) {
             const estiloHref = styleMap[levelId];
 
-            // Verifica si el estilo ya ha sido agregado para evitar duplicados
             if (!document.querySelector('link[href="' + estiloHref + '"]')) {
                 const linkElement = document.createElement('link');
                 linkElement.rel = 'stylesheet';
@@ -436,25 +398,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     }
-
-    // Llamar a la función para agregar el estilo según el levelId
     agregarEstiloPorNivel();
-
-
-    // Obtener la fecha actual
     const fechaActual = new Date();
-
-    // Crear una copia de la fecha actual para calcular la fecha de vencimiento
     const fechaVencimiento = new Date(fechaActual);
-
-    // Sumar 5 días a la fecha de vencimiento
     fechaVencimiento.setDate(fechaVencimiento.getDate() + 5);
-
-    // Formatear la fecha en el formato "dd/mm/yyyy"
     const opcionesFormato = { year: 'numeric', month: '2-digit', day: '2-digit' };
     const fechaVencimientoFormateada = fechaVencimiento.toLocaleDateString('es-ES', opcionesFormato);
-
-    // Seleccionar el elemento y actualizar su contenido
     document.getElementById('fechaVencimiento').textContent = `Vigencia de la propuesta: ${fechaVencimientoFormateada}`;
-
 });
