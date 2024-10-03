@@ -1,15 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     const viveDiv = document.getElementById('div-vive');
+    const selectInsurance = document.getElementById('select-insurance');
+    const selectCoverage = document.getElementById('select-coverage');
+    const selectVive = document.getElementById('select-vive');
 
     let segurosData;
 
     async function fetchSeguros() {
-        const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+        const levelId = JSON.parse(localStorage.getItem('selectedNivel'));
         console.log('levelId:', levelId);
 
         if (levelId >= 6 && levelId <= 12) {
             viveDiv.style.display = 'none'; 
+        }
+
+        if (levelId === 5 || levelId === 9) {
+            bloquearSelects();
+        } else {
+            desbloquearSelects();
         }
 
         try {
@@ -21,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (segurosDataArray.length > 0) {
                 segurosData = segurosDataArray[0];
-    
                 console.log('segurosData:', segurosData);
             }
     
@@ -30,12 +38,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    async function calculateInsuranceCost() {
-        const selectInsurance = document.getElementById('select-insurance');
-        const selectCoverage = document.getElementById('select-coverage');
-        const selectVive = document.getElementById('select-vive');
-        const anuncioPoliza = document.getElementById('anuncioPoliza');
+    function bloquearSelects() {
+        selectInsurance.value = "no";
+        selectInsurance.disabled = true;
+        
+        selectCoverage.value = "no";
+        selectCoverage.disabled = true;
+        
+        selectVive.value = "no";
+        selectVive.disabled = true;
+    }
 
+    function desbloquearSelects() {
+        selectInsurance.disabled = false;
+        selectCoverage.disabled = false;
+        selectVive.disabled = false;
+    }
+
+    async function calculateInsuranceCost() {
+        console.log('Calculando costo de seguros...');
+        
+        const anuncioPoliza = document.getElementById('anuncioPoliza');
         let totalCost = 0;
         let totalConInteres = window.totalConInteres;
 
@@ -53,21 +76,27 @@ document.addEventListener('DOMContentLoaded', () => {
             anuncioPoliza.style.display = "none";
         } else {
             anuncioPoliza.style.display = "flex";
+            totalCost += 0;
         }
 
         if (selectCoverage.value === 'si') {
             totalCost += parseFloat(segurosData.seguro_estudiantil);
+        }else {
+            totalCost += 0;
         }
 
-        // Solo sumar cobertura "vive" si el nivel no está entre 6 y 12
         if (selectVive.value === 'si' && !(levelId >= 6 && levelId <= 12)) {
             totalCost += parseFloat(segurosData.cobertura_vive);
+        } else {
+            totalCost += 0;
         }
 
         const divisor = (levelId === 1 || levelId === 2 || levelId === 4) ? 5 : 4;
         console.log('divisor:', divisor);
         
         const interesDividido = totalConInteres / divisor;
+        console.log(totalCost);
+        
         const primeraCuota = interesDividido + totalCost;
 
         localStorage.setItem('interesDividido', JSON.stringify(interesDividido));
@@ -102,4 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             insuranceMsg.style.display = 'none';
         }
     });
+
+    // calculateInsuranceCost();
+
 });
