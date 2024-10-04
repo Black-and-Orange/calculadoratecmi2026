@@ -80,7 +80,7 @@ const updateBecaFijaWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedBecaFijaUpdates = ['tipo, promedio, porcentaje'];
+    const allowedBecaFijaUpdates = ['tipo', 'promedio', 'porcentaje'];
     const allowedBecaFijaNivelUpdates = ['nivel_id'];
     const becaFijaFieldsToUpdate = {};
     const becaFijaNivelFieldsToUpdate = {};

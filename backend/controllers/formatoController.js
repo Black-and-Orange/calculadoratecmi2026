@@ -55,7 +55,7 @@ const updateFormatoWithNivel = (req, res) => {
     const updates = req.body;
 
     // Filtrar solo los campos permitidos para la actualización
-    const allowedFormatoUpdates = ['descripcion, codigo'];
+    const allowedFormatoUpdates = ['descripcion', 'codigo'];
     const allowedFormatoNivelUpdates = ['id_nivel'];
     const formatoFieldsToUpdate = {};
     const formatoNivelFieldsToUpdate = {};

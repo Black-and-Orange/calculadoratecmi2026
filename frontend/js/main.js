@@ -278,21 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasError = false;
               }
 
-              if (txtAverageMark.value >= scholarshipGrade) {
-                if (txtScholarship.value == "") {
-                  txtScholarship.classList.add("error");
-                  txtScholarshipMsg.classList.add("error");
-                  hasError = true;
-                  canContinue();
-                  break;
-                } else {
-                  txtScholarship.classList.remove("error");
-                  txtScholarshipMsg.classList.remove("error");
-                  hasError = false;
-                }
-              }
-
-
               canContinue();
               break;
 

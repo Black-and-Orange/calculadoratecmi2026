@@ -182,6 +182,7 @@ export const niveles = [
             { id: 'periodo', nombre: 'Periodo' },
             { id: 'seguros', nombre: 'Seguros' },
             { id: 'becas', nombre: 'Becas' },
+            { id: 'apoyos', nombre: 'Apoyos' },
             { id: 'carga-materias', nombre: 'Materias' },
             { id: 'costo-materias', nombre: 'Costos' },
             { id: 'beneficios', nombre: 'Beneficios' },
