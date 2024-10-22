@@ -154,11 +154,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let factorMultiplicador = 3;
         let textoMensualidades = '3 Mensualidades';
-
+        
         if (levelId === 1 || levelId === 2 || levelId === 4) {
             factorMultiplicador = 4;
             textoMensualidades = '4 Mensualidades';
+        } else if (levelId === 10) {
+            factorMultiplicador = 2;
+            textoMensualidades = '2 Mensualidades';
         }
+        
 
         console.log('factorMultiplicador:', factorMultiplicador);
 

@@ -65,6 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Escucha los cambios en el selector de formato y guarda el código en localStorage
+    selectors.formatoSelect.addEventListener('change', () => {
+        const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex];
+        const codigoFormato = formatoSeleccionado.getAttribute('codigo') || '';   
+        localStorage.setItem('codigoFormato', codigoFormato);
+    });
+
+
 
     // Verifica si un valor es numérico
     const isNumeric = (value) => !isNaN(value) && !isNaN(parseFloat(value));
@@ -221,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let campusKey = '';
         const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].value;
 
-        if (formatoSeleccionado && formatoSeleccionado === 'Presencial') {
+        if (formatoSeleccionado && formatoSeleccionado.includes('Presencial')) {
             campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
         } else if (formatoSeleccionado) {
             campusKey = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].getAttribute('codigo') || '';
@@ -310,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             if (selectElement !== selectors.grade && sort) {
-                data = sortOptions(data, property); 
+                data = sortOptions(data, property);
             }
 
             selectElement.innerHTML = '<option value="">Elige</option>';

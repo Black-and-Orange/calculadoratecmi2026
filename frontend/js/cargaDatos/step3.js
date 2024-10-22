@@ -9,16 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchSeguros() {
         const levelId = JSON.parse(localStorage.getItem('selectedNivel'));
-        console.log('levelId:', levelId);
-
+        const selectedFormatCode = localStorage.getItem('codigoFormato');
+        console.log('levelId:', levelId, 'selectedFormatCode:', selectedFormatCode);
         if (levelId >= 6 && levelId <= 12) {
             viveDiv.style.display = 'none'; 
         }
 
-        if (levelId === 5 || levelId === 9) {
-            bloquearSelects();
-        } else {
+        if (
+            (levelId === 1 || levelId === 2 || levelId === 3 || levelId === 4 || levelId === 6 || levelId === 7 || levelId === 12) 
+            && (selectedFormatCode === 'P' || selectedFormatCode === null)
+        ) {
             desbloquearSelects();
+        } else {
+            bloquearSelects();
         }
 
         try {
@@ -51,8 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function desbloquearSelects() {
         selectInsurance.disabled = false;
-        selectCoverage.disabled = false;
-        selectVive.disabled = false;
+        // selectCoverage.disabled = false;
+        // selectVive.disabled = false;
     }
 
     async function calculateInsuranceCost() {
@@ -68,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('No se cargaron los datos de seguros correctamente.');
             return;
         }
+        
 
         const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
 
@@ -91,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost += 0;
         }
 
-        const divisor = (levelId === 1 || levelId === 2 || levelId === 4) ? 5 : 4;
+        const divisor = (levelId === 1 || levelId === 2 || levelId === 4) ? 5 : (levelId === 10) ? 3 : 4;
         console.log('divisor:', divisor);
         
         const interesDividido = totalConInteres / divisor;

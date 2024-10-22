@@ -372,24 +372,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       txtAverageMark.addEventListener('keyup', () => {
         if (txtAverageMark.value != "") {
-          if (parseFloat(txtAverageMark.value) >= scholarshipGrade) {
+
             fieldAvg1.forEach(function (elem, index) {
               elem.classList.remove("hidden");
             });
             fieldAvg2.forEach(function (elem, index) {
               elem.classList.remove("hidden");
             });
-          } else if (parseFloat(txtAverageMark.value) >= 70 && parseFloat(txtAverageMark.value) < 80) {
-            fieldAvg1.forEach(function (elem, index) {
-              elem.classList.add("hidden");
-            });
-            fieldAvg2.forEach(function (elem, index) {
-              elem.classList.add("hidden");
-            });
-            fieldAvg3.forEach(function (elem, index) {
-              elem.classList.remove("hidden");
-            });
-          }
+          
         } else {
           console.log("No se ingresó promedio");
           fieldAvg1.forEach(function (elem, index) {
