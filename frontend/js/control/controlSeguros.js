@@ -15,14 +15,14 @@ function loadSeguros(level, containerId) {
         })
         .then(data => {
             if (Array.isArray(data) && data.length > 0) {
-                data.sort((a, b) => a.seguro_accidentes.localeCompare(b.seguro_accidentes)); // Ordenamos por seguro_accidentes
+                data.sort((a, b) => a.seguro_accidentes.localeCompare(b.seguro_accidentes)); 
 
                 let tableHtml = `
                         <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>Seguro Accidentes</th>
-                                    <th>Seguro Estudiantil</th>
+                                    <th>Cobertura Estudiantil</th>
                                     <th>Cobertura VIVE</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -113,7 +113,7 @@ $(document).ready(function () {
             seguro_accidentes: accidentes,
             cobertura_vive: cobertura,
             seguro_estudiantil: estudiantil,
-            nivel_id: level
+            id_nivel: level
         });
 
         fetch(apiUrlSeguros, {
@@ -125,7 +125,7 @@ $(document).ready(function () {
                 seguro_accidentes: accidentes,
                 cobertura_vive: cobertura,
                 seguro_estudiantil: estudiantil,
-                nivel_id: level
+                id_nivel: level
             }),
         })
             .then(response => {

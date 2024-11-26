@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 viveDiv.style.display = 'flex';
             }
-
-            if (levelId == 5 || levelId == 9) {
+            
+            if (recuperarValores().insurance == 'No Aplica' && recuperarValores().coverage == 'No Aplica' && recuperarValores().vive == 'No Aplica') {
                 seguros.style.display = 'none';
             }
 

@@ -78,6 +78,20 @@ document.addEventListener("DOMContentLoaded", () => {
         selectCampus = document.querySelector("#select-campus"),
         selectGrade = document.querySelector("#select-grade"),
         selectSubjects = document.querySelector("#select-subjects"),
+        divMateriales = document.getElementById("div-materiales"),
+        tipoBeca = document.getElementById("tipo-beca"),
+        porcentajeBeca = document.getElementById("porcentaje-beca"),
+        divCertificado = document.getElementById("div-certificado"),
+        divSemanas = document.getElementById("div-semanas"),
+        divIngles = document.getElementById("div-ingles"),
+        selectPorcentaje = document.getElementById("txt-percentage"),
+        selectCertificado = document.getElementById("select-certificado"),
+        selectSemanas = document.getElementById("select-semanas"),
+        selectIngles = document.getElementById("select-ingles"),
+        porcentajeBecaMsg = document.getElementById("select-porcentaje-msg"),
+        selectCertificadoMsg = document.getElementById("select-certificado-msg"),
+        selectSemanasMsg = document.getElementById("select-semanas-msg"),
+        selectInglesMsg = document.getElementById("select-ingles-msg"),
 
         txtNameMsg = document.querySelector("#txt-name-msg"),
         selectPeriodMsg = document.querySelector("#select-period-msg"),
@@ -248,17 +262,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasError = false;
               }
 
-              // if (selectSubjects.value == "") {
-              //   selectSubjects.classList.add("error");
-              //   selectSubjectsMsg.classList.add("error");
-              //   hasError = true;
-              //   canContinue();
-              //   break;
-              // } else {
-              //   selectSubjects.classList.remove("error");
-              //   selectSubjectsMsg.classList.remove("error");
-              //   hasError = false;
-              // }
+              if (divMateriales.style.display !== "none") {
+                console.log("pasa en materias");
+                
+                if (selectSubjects.value == "") {
+                  selectSubjects.classList.add("error");
+                  selectSubjectsMsg.classList.add("error");
+                  hasError = true;
+                  canContinue();
+                  break;
+                } else {
+                  selectSubjects.classList.remove("error");
+                  selectSubjectsMsg.classList.remove("error");
+                  hasError = false;
+                }
+              }
+              
 
 
               canContinue();

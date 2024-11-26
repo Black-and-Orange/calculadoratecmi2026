@@ -422,8 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (key !== 'grade' && selectors[key] !== null) {
                     let apiUrl = `${apiConfigs[key].baseUrl}${mappedLevel}`;
                     let property = apiConfigs[key].property;
-
-                    // Cambia el API y propiedad si el nivel seleccionado es "Prepa" y el campo es "subjects"
                     if (mappedLevel === 2 && key === 'subjects') {
 
                         apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/2';

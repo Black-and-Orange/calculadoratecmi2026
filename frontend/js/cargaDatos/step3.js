@@ -16,11 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (
-            (levelId === 1 || levelId === 2 || levelId === 3 || levelId === 4 || levelId === 6 || levelId === 7 || levelId === 12) 
+            (levelId === 1 || levelId === 2 || levelId === 3 || levelId === 4 || levelId === 7 || levelId === 12) 
             && (selectedFormatCode === 'P' || selectedFormatCode === null)
         ) {
             desbloquearSelects();
-        } else {
+        } else if (levelId === 6 && selectedFormatCode === 'P') {
+            selectVive.value = "no";
+            selectInsurance.disabled = false;
+            selectCoverage.disabled = false;
+        }else {
             bloquearSelects();
         }
 

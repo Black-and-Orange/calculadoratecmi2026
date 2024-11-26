@@ -6,6 +6,7 @@ const becasFijasRoutes = require('./routes/becasFijasRoutes');
 const becasVariablesRoutes = require('./routes/becasVariablesRoutes');
 const beneficiosRoutes = require('./routes/beneficiosRoutes');
 const apoyosRoutes = require('./routes/apoyosRoutes');
+const apoyosFijosRoutes = require('./routes/apoyosFijosRoutes');
 const campusRoutes = require('./routes/campusRoutes');
 const costoMateriaRoutes = require('./routes/costoMateriaRoutes');
 const formatoRoutes = require('./routes/formatoRoutes');
@@ -30,6 +31,7 @@ app.use(cors());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/apoyos', apoyosRoutes);
+app.use('/api/apoyosFijos', apoyosFijosRoutes);
 app.use('/api/becasFijas', becasFijasRoutes);
 app.use('/api/becasVariables', becasVariablesRoutes);
 app.use('/api/beneficios', beneficiosRoutes);

@@ -18,10 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const tipoBeca = document.getElementById('tipo-beca');
     const supportPercentageSelect = document.getElementById('txt-support-percentage');
     const support = document.getElementById('support');
+    const supportFixSelect = document.getElementById('txt-support-fix');
+    const supportFix = document.getElementById('support-fix');
     const prestamoPercentageSelect = document.getElementById('txt-prestamo-percentage');
     const prestamoPercentageContainer = document.querySelector('.field-avg-4');
 
     const getLevelId = () => JSON.parse(localStorage.getItem('selectedNivel'));
+
 
     percentageSelect.addEventListener('change', () => {
         uptadetSelectedPercentage(percentageSelect.value);
@@ -33,10 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isProfessionalSelected() && isScolarshipSelected()) {
             adjustLoanOptions();
         }
+
+        const textoSeleccionado = scholarshipSelect.options[scholarshipSelect.selectedIndex].text.toLowerCase();
+
+        document.getElementById('w-vive').classList.toggle('hidden', !textoSeleccionado.includes("vive"));
+        document.getElementById('w-steam').classList.toggle('hidden', !textoSeleccionado.includes("steam"));
+        document.getElementById('w-socioeconomica').classList.toggle('hidden', !textoSeleccionado.includes("socioeco"));
     });
 
     supportPercentageSelect.addEventListener('change', () => {
         uptadetSuportPercentage(supportPercentageSelect.value);
+    });
+
+    supportFixSelect.addEventListener('change', () => {
+        uptadetSuportFix(supportFixSelect.value);
     });
 
     prestamoPercentageSelect.addEventListener('change', () => {
@@ -56,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedScholarship = scholarshipSelect.value;
 
         sortSelectOptions(supportPercentageSelect);
+        sortSelectOptions(supportFixSelect);
         sortSelectOptions(prestamoPercentageSelect);
         sortSelectOptions(percentageSelect);
 
@@ -97,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, prestamo, costoTotal) => {
+    const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, prestamo, supportFix, costoTotal) => {
         let finalAmount = 0;
 
         if (scholarshipPercentage > 0) {
@@ -106,8 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
             finalAmount = (selectedPercentage / 100) * costoTotal;
         } else if (supportPercentage > 0) {
             finalAmount = (supportPercentage / 100) * costoTotal;
+        } 
+        if (supportFix > 0) {
+            finalAmount += supportFix;
         }
-
         if (prestamo > 0) {
             finalAmount += (prestamo / 100) * costoTotal;
         }
@@ -117,14 +133,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calculateFinalAmount = async () => {
         const scholarshipPercentage = parseFloat(document.getElementById('txt-percentage').value) || 0;
-        const supportPercentage = parseFloat(document.getElementById('txt-support-percentage').value) || 0;
         const isFixedScholarshipSelected = document.getElementById('txt-scholarship').querySelector('option:checked[data-fixed="true"]');
+        const supportPercentage = parseFloat(document.getElementById('txt-support-percentage').value) || 0;
+        const supportFix = parseFloat(document.getElementById('txt-support-fix').value) || 0;
         const selectedPercentage = isFixedScholarshipSelected ? parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0 : 0;
         const selectedprestamo = parseFloat(JSON.parse(localStorage.getItem('selectedprestamo'))) || 0;
 
-        const levelId = getLevelId();  // Obtener el levelId cuando sea necesario
+        const levelId = getLevelId();
 
-        const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, selectedprestamo, window.costoTotal);
+        const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, selectedprestamo, supportFix, window.costoTotal);
 
         localStorage.setItem('finalAmount', JSON.stringify(finalAmount));
 
@@ -151,11 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('selectedSupportValue', JSON.stringify(value));
     }
 
+    const uptadetSuportFix = (value) => {
+        localStorage.setItem('selectedSupportFixValue', JSON.stringify(value));
+    }
+
     const uptadetPrestamoPercentage = (value) => {
         localStorage.setItem('selectedprestamo', JSON.stringify(value));
     }
 
-    [scholarshipSelect, percentageSelect, supportPercentageSelect, prestamoPercentageSelect, averageInput].forEach(element => {
+    [scholarshipSelect, percentageSelect, supportPercentageSelect, supportFixSelect, prestamoPercentageSelect, averageInput].forEach(element => {
         element.addEventListener('change', () => {
             calculateFinalAmount();
         });
@@ -168,9 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.innerHTML = '<option value="">Elige</option>';
             supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+            supportFixSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.classList.add('hidden');
             percentageSelect2.classList.add('hidden');
-            return;
         }
 
         const levelId = getLevelId();
@@ -182,14 +203,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const fixedScholarships = await fixedScholarshipsResponse.json();
 
             const variableScholarshipsResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/becasVariables/nivel/${levelId}/promedio?promedio=${average}`);
-            console.log('variableScholarshipsResponse:', variableScholarshipsResponse);
-            
             if (!variableScholarshipsResponse.ok) throw new Error('Error al obtener becas variables');
             const variableScholarships = await variableScholarshipsResponse.json();
 
             // Muestra el select si hay becas disponibles (fijas o variables)
-            if (fixedScholarships.length > 0 || variableScholarships.length > 0) {
-                scholarshipSelect.classList.remove('hidden'); // Muestra el select si hay becas
+            console.log(variableScholarships.length);
+
+            if (variableScholarships.length > 0) {
+                console.log("si hay becas");
+
+                scholarshipSelect.classList.remove('hidden');
+                tipoBeca.classList.remove('hidden');
                 scholarshipSelect.innerHTML = '<option value="">Elige</option>';
 
                 const sinBecaOption = document.createElement('option');
@@ -217,10 +241,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } else {
-                scholarshipSelect.classList.add('hidden'); // Oculta el select si no hay becas
+                console.log("no hay becas");
+                scholarshipSelect.classList.add('hidden');
+                tipoBeca.classList.add('hidden');
             }
             scholarshipSelect.addEventListener('change', async () => {
                 const selectedScholarshipId = scholarshipSelect.value;
+
+                console.log("selectedScholarshipId", selectedScholarshipId);
+                
 
                 if (selectedScholarshipId === "0") {
                     percentageSelect.classList.add('hidden');
@@ -228,7 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     supportPercentageSelect.classList.add('hidden');
                     support.classList.add('hidden');
                     percentageSelect.innerHTML = '<option value="">Elige</option>';
-                    supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+                    //supportFixSelect.classList.add('hidden');
+                    //supportFix.classList.add('hidden');
+                    //supportFixSelect.innerHTML = '<option value="">Elige</option>';
                     localStorage.setItem('selectedPercentage', JSON.stringify(0));
 
                     document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
@@ -264,8 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const levelId = getLevelId();
                 if (levelId == 5) {
                     tipoBeca.classList.add('hidden');
-                } else {
-                    tipoBeca.classList.remove('hidden');
                 }
             };
 
@@ -292,46 +321,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (average >= 70 && average <= 79 && levelId != 5) {
-
-                const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
-                if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
-                const supports = await supportResponse.json();
-
-                supportPercentageSelect.classList.remove('hidden');
-                support.classList.remove('hidden');
-                supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-                supports.forEach(support => {
-                    const option = document.createElement('option');
-                    option.value = support.porcentaje;
-                    option.textContent = `${Math.trunc(support.porcentaje)}%`;
-                    supportPercentageSelect.appendChild(option);
-                });
-            } else if (average >= 70 && average <= 100 && levelId == 5) {
-
-                const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
-                if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
-                const supports = await supportResponse.json();
-
-                supportPercentageSelect.classList.remove('hidden');
-                support.classList.remove('hidden');
-                supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-                supports.forEach(support => {
-                    const option = document.createElement('option');
-                    option.value = support.porcentaje;
-                    option.textContent = `${Math.trunc(support.porcentaje)}%`;
-                    supportPercentageSelect.appendChild(option);
-                });
-            } else {
-                supportPercentageSelect.classList.add('hidden');
-                supportPercentageSelect.classList.add('hidden');
-                supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-            }
-
             const mostrarPrestamoSelectSiNivel2 = async () => {
-                if (getLevelId() === 2 || getLevelId() === 4) {
+                if (getLevelId() === 2 || getLevelId() === 4 || getLevelId() == 6 || getLevelId() == 7) {
                     try {
                         const prestamoResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/nivel/${levelId}`);
                         if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
@@ -368,9 +359,79 @@ document.addEventListener('DOMContentLoaded', () => {
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.innerHTML = '<option value="">Elige</option>';
             supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+            supportFixSelect.innerHTML = '<option value="">Elige</option>';
             prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.classList.add('hidden');
             percentageSelect2.classList.add('hidden');
+            scholarshipSelect.classList.add('hidden');
+            tipoBeca.classList.add('hidden');
+        }
+
+        if (average >= 70 && average <= 100) {
+            console.log("apoyos fijos............................................");
+
+            const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
+            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
+            const supports = await supportResponse.json();
+
+            supports.sort((a, b) => a.porcentaje - b.porcentaje);
+
+            supportFixSelect.classList.remove('hidden');
+            supportFix.classList.remove('hidden');
+            supportFixSelect.innerHTML = '<option value="">Elige</option>';
+
+            supports.forEach(supportFix => {
+                const option = document.createElement('option');
+                option.value = supportFix.porcentaje;
+                option.textContent = `${Math.trunc(supportFix.porcentaje)}`;
+                supportFixSelect.appendChild(option);
+            });
+        } 
+        if (average >= 70 && average <= 100 && levelId == 5) {
+            const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
+            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
+            const supports = await supportResponse.json();
+
+            supports.sort((a, b) => a.porcentaje - b.porcentaje);
+
+            supportPercentageSelect.classList.remove('hidden');
+            support.classList.remove('hidden');
+            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+
+            supports.forEach(support => {
+                const option = document.createElement('option');
+                option.value = support.porcentaje;
+                option.textContent = `${Math.trunc(support.porcentaje)}%`;
+                supportPercentageSelect.appendChild(option);
+            });
+        } 
+        if (average >= 70 && average <= 79 && levelId != 5) {
+            const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
+            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
+            const supports = await supportResponse.json();
+
+            // Ordenar los apoyos de menor a mayor porcentaje
+            supports.sort((a, b) => a.porcentaje - b.porcentaje);
+
+            supportPercentageSelect.classList.remove('hidden');
+            support.classList.remove('hidden');
+            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+
+            supports.forEach(support => {
+                const option = document.createElement('option');
+                option.value = support.porcentaje;
+                option.textContent = `${Math.trunc(support.porcentaje)}%`;
+                supportPercentageSelect.appendChild(option);
+            });
+        } if (average < 70 || average > 100) {
+            supportPercentageSelect.classList.add('hidden');
+            support.classList.add('hidden');
+            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+            supportFixSelect.classList.add('hidden');
+            supportFix.classList.add('hidden');
+            supportFixSelect.innerHTML = '<option value="">Elige</option>';
         }
     });
+
+
 });
