@@ -260,25 +260,25 @@
                                             <option value="">Elige</option>
                                         </select>
                                         <p class="msg" id="txt-scholarship-msg">Este campo es necesario</p>
-                                        <div id="w-socioeconomica" class="tooltip absolute top-[10px] right-[10px] hidden" style="right: 5px;">
+                                        <div id="w-socioeconomica" class="tooltip absolute top-[10px] right-[10px] hidden2" style="right: 5px;">
                                             <i
                                                 class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
                                             <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                                Para brindar esta beca además de llenar el formato ISO necesitarás autorización de tu líder.
+                                                {{ module.nota_2 }}
                                             </span>
                                         </div>
-                                        <div id="w-vive" class="tooltip absolute top-[10px] right-[10px] hidden" style="right: 5px;">
+                                        <div id="w-vive" class="tooltip absolute top-[10px] right-[10px] hidden2" style="right: 5px;">
                                             <i
                                                 class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
                                             <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                                Para brindar esta beca se require que el prospecto pase un proceso de selección como tryouts, audiciones y/o entrevistas.
+                                                {{ module.nota_3 }}
                                             </span>
                                         </div>
-                                        <div id="w-steam" class="tooltip absolute top-[10px] right-[10px] hidden" style="right: 5px;">
+                                        <div id="w-steam" class="tooltip absolute top-[10px] right-[10px] hidden2" style="right: 5px;">
                                             <i
                                                 class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
                                             <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                                Para brindar esta beca se require que el prospecto pase un proceso de selección del comité de beca STEAM.
+                                                {{ module.nota_4 }}
                                             </span>
                                         </div>
                                     </div>
@@ -310,7 +310,7 @@
                                 <div id="support-fix" class="flex flex-wrap mb-6 flex-col md:flex-row hidden field-avg-3">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
                                         <label class="font-semibold" for="txt-support-fix">Apoyo estudiantil
-                                            fijo:</label>
+                                            $:</label>
                                     </div>
                                     <div class="flex-1">
                                         <select name="txt-support-fix" id="txt-support-fix">

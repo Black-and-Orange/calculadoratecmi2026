@@ -28,20 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     percentageSelect.addEventListener('change', () => {
         uptadetSelectedPercentage(percentageSelect.value);
+
+        const numericPercentage = parseFloat(percentageSelect.value);
+        const currentLevel = getLevelId();
+            if (numericPercentage > 30 && [1, 2, 3, 4].includes(currentLevel)) {
+                supportFix.classList.add('hidden');
+                supportFixSelect.classList.add('hidden');
+            } else if (numericPercentage > 35 && [6, 7, 8, 9, 10].includes(currentLevel)) {
+                supportFix.classList.add('hidden');
+                supportFixSelect.classList.add('hidden');
+            }
+            else {
+                supportFix.classList.remove('hidden');
+                supportFixSelect.classList.remove('hidden');
+            }
+        
     });
 
     scholarshipSelect.addEventListener('change', () => {
         uptadetSelectedName(scholarshipSelect.options[scholarshipSelect.selectedIndex].text);
-
+    
         if (isProfessionalSelected() && isScolarshipSelected()) {
             adjustLoanOptions();
         }
-
-        const textoSeleccionado = scholarshipSelect.options[scholarshipSelect.selectedIndex].text.toLowerCase();
-
-        document.getElementById('w-vive').classList.toggle('hidden', !textoSeleccionado.includes("vive"));
-        document.getElementById('w-steam').classList.toggle('hidden', !textoSeleccionado.includes("steam"));
-        document.getElementById('w-socioeconomica').classList.toggle('hidden', !textoSeleccionado.includes("socioeco"));
+    
+        // Obtener el texto seleccionado
+        const textoSeleccionado = scholarshipSelect.options[scholarshipSelect.selectedIndex]?.text?.toLowerCase() || '';
+        console.log("textoSeleccionado", textoSeleccionado);
+    
+        // Controlar la visibilidad de cada tooltip según el texto seleccionado
+        document.getElementById('w-vive').classList.toggle('hidden2', !textoSeleccionado.includes("vive"));
+        document.getElementById('w-socioeconomica').classList.toggle('hidden2', !textoSeleccionado.includes("socioeco"));
+        document.getElementById('w-steam').classList.toggle('hidden2', !textoSeleccionado.includes("steam"));
     });
 
     supportPercentageSelect.addEventListener('change', () => {
@@ -267,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     await calculateFinalAmount();
-                } else if (selectedScholarshipId) {
+                } else if (selectedScholarshipId) {                    
                     const isFixedScholarship = fixedScholarships.some(scholarship => scholarship.id == selectedScholarshipId);
                     if (isFixedScholarship) {
                         percentageSelect.classList.add('hidden');
@@ -276,8 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
                         const selectedPercentage = selectedOption.dataset.porcentaje;
+                        const numericPercentage = parseFloat(selectedPercentage);                        
 
                         localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
+                        localStorage.setItem('numericPercentage', JSON.stringify(numericPercentage));
                         await calculateFinalAmount();
                     } else {
                         percentageSelect.classList.remove('hidden');
@@ -367,14 +387,15 @@ document.addEventListener('DOMContentLoaded', () => {
             tipoBeca.classList.add('hidden');
         }
 
-        if (average >= 70 && average <= 100) {
-            console.log("apoyos fijos............................................");
-
-            const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyos/nivel/${levelId}`);
+        if (average >= 70 && average <= 100 && levelId != 5) {
+            const supportResponse = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyosFijos/nivel/${levelId}`);
             if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
             const supports = await supportResponse.json();
 
-            supports.sort((a, b) => a.porcentaje - b.porcentaje);
+            console.log(supports);
+            
+
+            supports.sort((a, b) => a.valor - b.valor);
 
             supportFixSelect.classList.remove('hidden');
             supportFix.classList.remove('hidden');
@@ -382,8 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             supports.forEach(supportFix => {
                 const option = document.createElement('option');
-                option.value = supportFix.porcentaje;
-                option.textContent = `${Math.trunc(supportFix.porcentaje)}`;
+                option.value = supportFix.valor;
+                option.textContent = `${Math.trunc(supportFix.valor)}`;
                 supportFixSelect.appendChild(option);
             });
         } 

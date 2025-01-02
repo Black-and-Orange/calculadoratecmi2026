@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedScholarshipNameRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipName'));
         const selectedScholarshipValueRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipValue'));
         const selectedSupportValueRecuperado = JSON.parse(localStorage.getItem('selectedSupportValue'));
+        const selectedSupportValueFijoRecuperado = JSON.parse(localStorage.getItem('selectedSupportFixValue'));
         const prestamoRecuperado = JSON.parse(localStorage.getItem('selectedprestamo'));
         const totalCostRecuperado = JSON.parse(localStorage.getItem('totalCost'));
 
@@ -143,6 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             scholarshipName: selectedScholarshipNameRecuperado,
             scholarshipValue: selectedScholarshipValueRecuperado,
             supportValue: selectedSupportValueRecuperado,
+            supportValueFix: formatearPesos(parseInt(selectedSupportValueFijoRecuperado)),
             prestamoRecuperado: prestamoRecuperado,
             retrievedPercentage: retrievedPercentage
         };
@@ -209,11 +211,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (apoyoEstudiantil) {
             apoyoEstudiantil.textContent = `${Math.round(valores.supportValue)}%`;
         }
+        if (apoyoEstudiantilFijo) {
+            console.log('valores.supportValueFix:', valores.supportValueFix);
+            apoyoEstudiantilFijo.textContent = valores.supportValueFix;
+            console.log(apoyoEstudiantilFijo.textContent);
+            
+        }
         if (prestamoPorcentaje) {
             prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}%`;
         }
         if (apoyoEstudiantil.textContent.includes("null") || apoyoEstudiantil.textContent === "0") {
             apoyoEstudiantil.textContent = `0%`;
+        }
+        if (apoyoEstudiantilFijo.textContent.includes("null") || apoyoEstudiantilFijo.textContent === "$0.00" || apoyoEstudiantilFijo.textContent === "$NaN") {
+            apoyoEstudiantilFijo.textContent = `0`;
         }
         if (prestamoPorcentaje.textContent.includes("null") || prestamoPorcentaje.textContent === "0") {
             prestamoPorcentaje.textContent = `0%`;
@@ -235,6 +246,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const elementApoyo = document.getElementById('apoyoEstudiantil');
         const elementLabelApoyo = document.getElementById('label-apoyoEstudiantil');
 
+        const elementApoyoFijo = document.getElementById('apoyoEstudiantilFijo');
+        const elementLabelApoyoFijo = document.getElementById('label-apoyoEstudiantilFijo');
+
         const elementPrestamo = document.getElementById('prestamoPorcentaje');
         const elementLabelPrestamo = document.getElementById('label-prestamo');
 
@@ -250,12 +264,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             elementLabelApoyo.classList.add('hidden');
         }
 
+        if (elementApoyoFijo.innerText === '0') {
+            elementApoyoFijo.classList.add('hidden');
+            elementLabelApoyoFijo.classList.add('hidden');
+        }
+
         if (elementPrestamo.innerText === '0%') {
             elementPrestamo.classList.add('hidden');
             elementLabelPrestamo.classList.add('hidden');
         }
 
-        if (elementBeca.innerText === '0%' && elementApoyo.innerText === '0%' && elementPrestamo.innerText === '0%') {
+        if (elementBeca.innerText === '0%' && elementApoyo.innerText === '0%' && elementPrestamo.innerText === '0%' && elementApoyoFijo.innerText === '0') {
             apoyos.style.display = 'none';
         }
 
