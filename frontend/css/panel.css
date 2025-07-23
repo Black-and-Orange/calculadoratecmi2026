@@ -103,3 +103,28 @@
     border-color: #00A499;
 }
 
+/* Forzar que los tabs hagan wrap y no se desborden del card */
+.nav-tabs {
+    flex-wrap: wrap !important;
+    overflow-x: auto;
+    white-space: normal;
+    border-bottom: none;
+}
+
+.card-body {
+    overflow-x: auto;
+}
+
+.nav-tabs .nav-item {
+    min-width: 180px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Separación visible entre los tabs de niveles y los tabs secundarios */
+.tab-content > .tab-pane > .nav {
+    margin-top: 18px;
+    border-top: 2px solid #e0e0e0;
+    padding-top: 6px;
+}
+

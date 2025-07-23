@@ -22,10 +22,8 @@ const getMateriaById = (id, callback) => {
 
 // Crear una nueva materia
 const createMateria = (materia, callback) => {
-    console.log(materia);
     
     const { numero } = materia;
-    console.log(numero);
     
     if (!numero) {
         return callback(new Error('El número de materias es requerido'));

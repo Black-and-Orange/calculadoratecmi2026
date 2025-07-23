@@ -1,10 +1,10 @@
-const apiUrlMaterias = 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias';
+import { API_BASE_URL } from '../apiConfig.js';
+
+const apiUrlMaterias = `${API_BASE_URL}/materias`;
 
 // Función genérica para cargar materias de cualquier nivel
 function loadMaterias(level, containerId) {
     const container = $(containerId);
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
     fetch(`${apiUrlMaterias}/nivel/${level}`)
@@ -14,34 +14,31 @@ function loadMaterias(level, containerId) {
                 data.sort((a, b) => a.numero - b.numero);
 
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Número de Materias</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Número de Materias</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                 data.forEach(materia => {
                     tableHtml += `
-                            <tr>
-                                <td>${materia.numero}</td>
-                                <td>
-                                    <button onclick="deleteMaterias(${materia.id_materia}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editMaterias(${materia.id_materia}, ${materia.numero}, ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                        <tr>
+                            <td>${materia.numero}</td>
+                            <td>
+                                <button onclick="deleteMaterias(${materia.id_materia}, ${level})" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button onclick="editMaterias(${materia.id_materia}, ${materia.numero}, ${level})" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                 });
 
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
+                tableHtml += `</tbody></table>`;
                 container.html(tableHtml);
             } else {
                 container.html('<p>No se encontraron materias para este nivel.</p>');
@@ -51,20 +48,37 @@ function loadMaterias(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
-
-        loadMaterias(level, '#materiasNivel' + level);
-
-        handleCreateMaterias(level, '#createMateriasNivel' + level + 'Form', '#materiasNivel' + level + 'Materias', '#loadMateriasNivel' + level);
+        loadMaterias(level, '#cargamateriasNivel' + level);
     }
+
+    // Delegación de eventos para formularios de creación de materias
+    $(document).on('submit', 'form[id^="createcargamateriasNivel"][id$="Form"]', function(event) {
+        event.preventDefault();
+        const formId = $(this).attr('id');
+        const nivelMatch = formId.match(/createcargamateriasNivel(\d+)Form/);
+        if (!nivelMatch) return;
+        const level = parseInt(nivelMatch[1]);
+        const numeroMaterias = $(`#cargamateriasNivel${level}Materias`).val();
+        createMaterias(level, numeroMaterias, function () {
+            $(`#cargamateriasNivel${level}Materias`).val('');
+            loadMaterias(level, '#cargamateriasNivel' + level);
+        });
+    });
+
+    // Recargar la tabla al hacer clic en la pestaña de materias
+    $(document).on('click', 'a[id^="cargamaterias-"][id$="-tab"]', function() {
+        const nivelMatch = $(this).attr('id').match(/cargamaterias-(\d+)-tab/);
+        if (nivelMatch) {
+            const nivelId = parseInt(nivelMatch[1]);
+            loadMaterias(nivelId, '#cargamateriasNivel' + nivelId);
+        }
+    });
 
     // Función genérica para crear materias
     function createMaterias(level, numeroMaterias, callback) {
-        // Verificar los datos que estás enviando
         const bodyData = { numero: numeroMaterias, id_nivel: level };
-        console.log('Datos enviados en el body:', bodyData);
-
         fetch(apiUrlMaterias, {
             method: 'POST',
             headers: {
@@ -72,48 +86,20 @@ $(document).ready(function () {
             },
             body: JSON.stringify(bodyData),
         })
-            .then(response => {
-                // Verificar el estado de la respuesta del servidor
-                console.log('Estado de la respuesta:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                // Verificar los datos que recibes en la respuesta
-                console.log('Datos recibidos en la respuesta:', data);
-                callback();
-            })
-            .catch(error => {
-                // Capturar errores y mostrarlos
-                console.error('Error creating materias:', error);
-            });
+            .then(response => response.json())
+            .then(data => callback())
+            .catch(error => console.error('Error creating materias:', error));
     }
-
-
-    // Función para gestionar la creación de materias para cualquier nivel
-    function handleCreateMaterias(level, formId, numeroInputId, loadMateriasBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const numeroMaterias = $(numeroInputId).val();
-            console.log('Número de materias a crear:', numeroMaterias);
-
-            createMaterias(level, numeroMaterias, function () {
-                $(numeroInputId).val('');  // Limpiar el campo de entrada
-                loadMaterias(level, '#materiasNivel' + level);
-            });
-        });
-    }
-
-
 });
 
 // Función para eliminar materias
 function deleteMaterias(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/materias/${id}`, {
+    fetch(`${apiUrlMaterias}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            loadMaterias(level, '#materiasNivel' + level);
+            loadMaterias(level, '#cargamateriasNivel' + level);
         })
         .catch(error => console.error('Error deleting materias:', error));
 }
@@ -122,7 +108,7 @@ function deleteMaterias(id, level) {
 function editMaterias(id, currentNumero, level) {
     const newNumero = prompt('Nuevo número de materias:', currentNumero);
     if (newNumero) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/materias/${id}`, {
+        fetch(`${apiUrlMaterias}/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -131,8 +117,12 @@ function editMaterias(id, currentNumero, level) {
         })
             .then(response => response.json())
             .then(data => {
-                loadMaterias(level, '#materiasNivel' + level);
+                loadMaterias(level, '#cargamateriasNivel' + level);
             })
             .catch(error => console.error('Error editing materias:', error));
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteMaterias = deleteMaterias;
+window.editMaterias = editMaterias;

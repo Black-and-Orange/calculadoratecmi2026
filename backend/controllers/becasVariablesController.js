@@ -107,7 +107,6 @@ const updateBecaVariableWithNivel = (req, res) => {
     const id = req.params.id;
     const updates = req.body;
 
-    console.log('ID de beca:', id);  // Verifica si el ID es correcto
 
     // Verifica si la beca existe antes de actualizar
     becasVariablesModel.getBecaVariableById(id, (err, beca) => {
@@ -135,7 +134,6 @@ const updateBecaVariableWithNivel = (req, res) => {
 
         // Actualización de becaVariable
         const becaVariableUpdatePromise = new Promise((resolve, reject) => {
-            console.log('Campos de beca a actualizar:', becaVariableFieldsToUpdate);
             
             if (Object.keys(becaVariableFieldsToUpdate).length > 0) {
                 becasVariablesModel.updateBecaVariable(id, becaVariableFieldsToUpdate, (err, result) => {
@@ -152,7 +150,6 @@ const updateBecaVariableWithNivel = (req, res) => {
 
         // Actualización de nivel de beca
         const becaVariableNivelUpdatePromise = new Promise((resolve, reject) => {
-            console.log('Campos de nivel a actualizar:', becaVariableNivelFieldsToUpdate);
             
             if (Object.keys(becaVariableNivelFieldsToUpdate).length > 0) {
                 becasVariablesNivelModel.updateBecaVariableNivel(id, becaVariableNivelFieldsToUpdate, (err, result) => {
@@ -170,7 +167,6 @@ const updateBecaVariableWithNivel = (req, res) => {
         Promise.all([becaVariableUpdatePromise, becaVariableNivelUpdatePromise])
             .then(results => {
                 const [becaVariableResult, becaVariableNivelResult] = results;
-                console.log('Resultados de actualización:', becaVariableResult, becaVariableNivelResult);
                 
                 if (becaVariableResult.affectedRows > 0 || becaVariableNivelResult.affectedRows > 0) {
                     res.json({ message: 'BecaVariable y/o nivel actualizado' });

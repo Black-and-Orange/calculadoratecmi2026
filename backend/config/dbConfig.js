@@ -4,7 +4,8 @@ const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'database_calculadora',
+    database: 'database_calculadora_prueba',
+    // database: 'database_calculadora',
     connectionLimit: 10
 
 });

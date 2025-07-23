@@ -1,12 +1,10 @@
+import { API_BASE_URL } from '../apiConfig.js';
 
-const apiUrlFormatos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato';
+const apiUrlFormatos = `${API_BASE_URL}/formato`;
 
 // Función genérica para cargar formato de cualquier nivel
 function loadFormatos(level, containerId) {
     const container = $(containerId);
-
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
     fetch(`${apiUrlFormatos}/nivel/${level}`)
@@ -16,56 +14,68 @@ function loadFormatos(level, containerId) {
                 data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Descripción</th>
-                                    <th>Codigo</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Código</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                 data.forEach(formato => {
                     tableHtml += `
-                            <tr>
-                                <td>${formato.descripcion}</td>
-                                <td>${formato.codigo}</td>
-                                <td>
-                                    <button onclick="deleteFormato(${formato.id_formato}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editFormato(${formato.id_formato}, '${formato.descripcion}', '${formato.codigo}', ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                        <tr>
+                            <td>${formato.descripcion}</td>
+                            <td>${formato.codigo}</td>
+                            <td>
+                                <button onclick="deleteFormato(${formato.id_formato}, ${level})" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button onclick="editFormato(${formato.id_formato}, '${formato.descripcion}', '${formato.codigo}', ${level})" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                 });
 
                 tableHtml += `
-                            </tbody>
-                        </table>`;
+                        </tbody>
+                    </table>`;
 
-                container.html(tableHtml).show();
+                container.html(tableHtml);
             } else {
-                console.log('No se encontraron formatos para mostrar.');
+                container.html('<p>No se encontraron formatos para mostrar.</p>');
             }
         })
         .catch(error => console.error('Error fetching formatos:', error));
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
-
         loadFormatos(level, '#formatoNivel' + level);
-        handleCreateFormato(level, '#createFormatoNivel' + level + 'Form', '#formatoNivel' + level + 'Formato', '#formatoNivel' + level + 'Codigo', '#loadFormatoNivel' + level);
     }
+
+    // Delegación de eventos para formularios de creación de formatos
+    $(document).on('submit', 'form[id^="createformatoNivel"][id$="Form"]', function(event) {
+        event.preventDefault();
+        const formId = $(this).attr('id');
+        const nivelMatch = formId.match(/createformatoNivel(\d+)Form/);
+        if (!nivelMatch) return;
+        const level = parseInt(nivelMatch[1]);
+        const descripcion = $(`#formatoNivel${level}Formato`).val();
+        const codigo = $(`#formatoNivel${level}Codigo`).val();
+        createFormato(level, descripcion, codigo, function () {
+            $(`#formatoNivel${level}Formato`).val('');
+            $(`#formatoNivel${level}Codigo`).val('');
+            loadFormatos(level, '#formatoNivel' + level);
+        });
+    });
 
     // Función genérica para crear un formato
     function createFormato(level, descripcion, codigo, callback) {
-        console.log("Creando formato con:", { descripcion, codigo, level });  // <-- Agrega esto para depuración
-
         fetch(apiUrlFormatos, {
             method: 'POST',
             headers: {
@@ -73,65 +83,51 @@ $(document).ready(function () {
             },
             body: JSON.stringify({ descripcion: descripcion, codigo: codigo, id_nivel: level }),
         })
-            .then(response => {
-                console.log("Respuesta del servidor (raw):", response); // <-- Para ver la respuesta en formato bruto
-                return response.json(); // Convertimos a JSON
-            })
-            .then(data => {
-                console.log("Respuesta del servidor (json):", data);  // <-- Para ver la respuesta después de parsearla
-                callback();  // <-- Callback para recargar los formatos
-            })
-            .catch(error => console.error('Error creando formato:', error));
-    }
-
-
-    // Función para gestionar la creación de formatos para cualquier nivel
-    function handleCreateFormato(level, formId, descripcionInputId, codigoInputId, loadFormatosBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            // Obtenemos los valores de los inputs
-            const descripcion = $(descripcionInputId).val();
-            const codigo = $(codigoInputId).val(); // Eliminar parseFloat aquí para no forzar el formato
-
-            createFormato(level, descripcion, codigo, function () {
-                // Limpiamos los inputs tras la creación
-                $(descripcionInputId).val('');
-                $(codigoInputId).val('');
-                loadFormatos(level, '#formatoNivel' + level);
-            });
-        });
+            .then(response => response.json())
+            .then(data => callback())
+            .catch(error => console.error('Error creating formato:', error));
     }
 });
 
 // Función para eliminar formato
 function deleteFormato(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/formato/${id}`, {
+    fetch(`${API_BASE_URL}/formato/${id}`, {
         method: 'DELETE',
     })
-        .then(response => response.json())
-        .then(data => {
-            loadFormatos(level, '#formatoNivel' + level);
+        .then(response => {
+            if (response.ok) {
+                loadFormatos(level, '#formatoNivel' + level);
+            } else {
+                return response.json().then(err => { throw new Error(err.message); });
+            }
         })
-        .catch(error => console.error('Error eliminando formato:', error));
+        .catch(error => console.error('Error deleting formato:', error));
 }
 
 // Función para editar formato
 function editFormato(id, currentDescripcion, currentCodigo, level) {
     const newDescripcion = prompt('Nueva descripción del formato:', currentDescripcion);
-    const newCodigo = prompt('Nuevo codigo del formato:', currentCodigo);
+    const newCodigo = prompt('Nuevo código del formato:', currentCodigo);
 
     if (newDescripcion && newCodigo) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/formato/${id}`, {
+        fetch(`${API_BASE_URL}/formato/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ descripcion: newDescripcion, codigo: newCodigo }),
         })
-            .then(response => response.json())
-            .then(data => {
-                loadFormatos(level, '#formatoNivel' + level);
+            .then(response => {
+                if (response.ok) {
+                    loadFormatos(level, '#formatoNivel' + level);
+                } else {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
             })
-            .catch(error => console.error('Error editando formato:', error));
+            .catch(error => console.error('Error editing formato:', error));
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteFormato = deleteFormato;
+window.editFormato = editFormato;

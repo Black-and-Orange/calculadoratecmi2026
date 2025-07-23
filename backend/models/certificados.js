@@ -9,7 +9,7 @@ const getCertificadosByNivel = (nivelId, callback) => {
     const query = `
         SELECT certificados.id, certificados.num_certificados
         FROM certificados
-        JOIN certificados_nivel ON certificados.id = certificados_nivel.id
+        JOIN certificados_nivel ON certificados.id = certificados_nivel.certificado_id
         WHERE certificados_nivel.nivel_id = ?
     `;
     db.query(query, [nivelId], callback);
@@ -22,10 +22,8 @@ const getCertificadoById = (id, callback) => {
 
 // Crear una nueva materia
 const createCertificado = (materia, callback) => {
-    console.log(materia);
     
     const { num_certificados } = materia;
-    console.log(num_certificados);
     
     if (!num_certificados) {
         return callback(new Error('El número de certificados es requerido'));

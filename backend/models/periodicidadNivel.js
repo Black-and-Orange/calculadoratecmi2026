@@ -20,7 +20,6 @@ const deletePeriodicidadNivel = (id, callback) => {
 
 const updatePeriodicidadNivel = (id, periodicidadNivel, callback) => {
     const { id_nivel } = periodicidadNivel;
-    console.log(id_nivel);
     db.query('UPDATE periodicidad_nivel SET id_nivel = ? WHERE id = ?', [id_nivel, id], callback);
 };
 

@@ -1,10 +1,10 @@
-const apiUrlBeneficios = 'https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios';
+import { API_BASE_URL } from '../apiConfig.js';
+
+const apiUrlBeneficios = `${API_BASE_URL}/beneficios`;
 
 // Función genérica para cargar beneficios de cualquier nivel
 function loadBeneficios(level, containerId) {
     const container = $(containerId);
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
     fetch(`${apiUrlBeneficios}/nivel/${level}`)
@@ -42,88 +42,71 @@ function loadBeneficios(level, containerId) {
                             </tr>`;
                 });
 
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
+                tableHtml += `</tbody></table>`;
                 container.html(tableHtml);
             } else {
-                console.log('No se encontraron beneficios para mostrar.');
+                container.html('<p>No se encontraron beneficios para mostrar.</p>');
             }
         })
         .catch(error => console.error('Error fetching beneficios:', error));
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
-
         loadBeneficios(level, '#beneficiosNivel' + level);
-        handleCreateBeneficio(level, '#createBeneficiosNivel' + level + 'Form', '#beneficiosNivel' + level + 'Nombre', '#beneficiosNivel' + level + 'Descripcion', '#beneficiosNivel' + level + 'Icono', '#loadBeneficiosNivel' + level);
     }
+
+    // Delegación de eventos para formularios de creación de beneficios
+    $(document).on('submit', 'form[id^="createbeneficiosNivel"][id$="Form"]', function(event) {
+        event.preventDefault();
+        const formId = $(this).attr('id');
+        const nivelMatch = formId.match(/createbeneficiosNivel(\d+)Form/);
+        if (!nivelMatch) return;
+        const level = parseInt(nivelMatch[1]);
+        const name = $(`#beneficiosNivel${level}Nombre`).val();
+        const description = $(`#beneficiosNivel${level}Descripcion`).val();
+        const icon = $(`#beneficiosNivel${level}Icono`).val();
+        createBeneficio(level, name, description, icon, function () {
+            $(`#beneficiosNivel${level}Nombre`).val('');
+            $(`#beneficiosNivel${level}Descripcion`).val('');
+            $(`#beneficiosNivel${level}Icono`).val('');
+            loadBeneficios(level, '#beneficiosNivel' + level);
+        });
+    });
 
     // Función genérica para crear beneficios
     function createBeneficio(level, name, description, icon, callback) {
-        // Datos que se enviarán en la solicitud
-        const requestData = { nombre: name, descripcion: description, icono: icon, nivel_id: level };
-        console.log('Datos enviados en el body:', requestData);
-
         fetch(apiUrlBeneficios, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(requestData),
+            body: JSON.stringify({ 
+                nombre: name, 
+                descripcion: description, 
+                icono: icon, 
+                nivel_id: level 
+            }),
         })
             .then(response => {
-                // Verificar el estado de la respuesta
-                console.log('Estado de la respuesta:', response.status);
                 if (!response.ok) {
-                    // Si la respuesta no es OK, se lanza un error
-                    return response.text().then(text => {
-                        throw new Error(`Respuesta del servidor: ${response.status} ${text}`);
-                    });
+                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
                 }
                 return response.json();
             })
-            .then(data => {
-                // Verificar los datos recibidos
-                console.log('Datos recibidos en la respuesta:', data);
-                callback();
-            })
-            .catch(error => {
-                // Capturar errores
-                console.error('Error creando beneficio:', error);
-            });
+            .then(data => callback())
+            .catch(error => console.error('Error creando beneficio:', error));
     }
-
-
-    // Función para gestionar la creación de beneficios para cualquier nivel
-    function handleCreateBeneficio(level, formId, nameInputId, descriptionInputId, iconInputId, loadBeneficiosBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const name = $(nameInputId).val();
-            const description = $(descriptionInputId).val();
-            const icon = $(iconInputId).val();
-            createBeneficio(level, name, description, icon, function () {
-                $(nameInputId).val('');
-                $(descriptionInputId).val('');
-                $(iconInputId).val('');
-                loadBeneficios(level, '#beneficiosNivel' + level);
-            });
-        });
-    }
-
 });
 
 // Función para eliminar beneficio
 function deleteBeneficio(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios/${id}`, {
+    fetch(`${apiUrlBeneficios}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de beneficios para el nivel específico
             loadBeneficios(level, '#beneficiosNivel' + level);
         })
         .catch(error => console.error('Error deleting beneficio:', error));
@@ -135,18 +118,25 @@ function editBeneficio(id, currentName, currentDescription, currentIcon, level) 
     const newDescription = prompt('Nueva descripción del beneficio:', currentDescription);
     const newIcon = prompt('Nuevo link del icono:', currentIcon);
     if (newName && newDescription && newIcon) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios/${id}`, {
+        fetch(`${apiUrlBeneficios}/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nombre: newName, descripcion: newDescription, icono: newIcon }),
+            body: JSON.stringify({ 
+                nombre: newName, 
+                descripcion: newDescription, 
+                icono: newIcon 
+            }),
         })
             .then(response => response.json())
             .then(data => {
-                // Recargar lista de beneficios para el nivel específico
                 loadBeneficios(level, '#beneficiosNivel' + level);
             })
             .catch(error => console.error('Error editing beneficio:', error));
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteBeneficio = deleteBeneficio;
+window.editBeneficio = editBeneficio;

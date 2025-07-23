@@ -9,7 +9,7 @@ const getSemanasByNivel = (nivelId, callback) => {
     const query = `
         SELECT semanas.id, semanas.num_semanas
         FROM semanas
-        JOIN semanas_nivel ON semanas.id = semanas_nivel.id
+        JOIN semanas_nivel ON semanas.id = semanas_nivel.semanas_id
         WHERE semanas_nivel.nivel_id = ?
     `;
     db.query(query, [nivelId], callback);
@@ -22,10 +22,8 @@ const getSemanasById = (id, callback) => {
 
 // Crear una nueva semanas
 const createSemanas = (semanas, callback) => {
-    console.log(semanas);
     
     const { num_semanas } = semanas;
-    console.log(num_semanas);
     
     if (!num_semanas) {
         return callback(new Error('El número de semanas es requerido'));

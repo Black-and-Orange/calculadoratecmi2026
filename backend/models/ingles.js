@@ -22,10 +22,8 @@ const getInglesById = (id, callback) => {
 
 // Crear una nueva materia
 const createIngles = (materia, callback) => {
-    console.log(materia);
-    
+
     const { num_ingles } = materia;
-    console.log(num_ingles);
     
     if (!num_ingles) {
         return callback(new Error('El número de ingles es requerido'));

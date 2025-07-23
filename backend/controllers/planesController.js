@@ -35,7 +35,6 @@ const createPlanWithNivel = (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const plan_id = result.insertId;
-        console.log('ID del plan:', plan_id);
 
         // Verifica los datos antes de pasar a la siguiente función
         if (!plan_id || !id_nivel) {
@@ -75,7 +74,6 @@ const updatePlanWithNivel = (req, res) => {
     // Promesas para actualizar el plan y el nivel
     const planUpdatePromise = new Promise((resolve, reject) => {
         if (Object.keys(planFieldsToUpdate).length > 0) {
-            console.log('Actualizando plan...');
             planModel.updatePlanDeEstudios(id_plan, planFieldsToUpdate, (err, result) => {
                 if (err) {
                     return reject(err);
@@ -89,7 +87,6 @@ const updatePlanWithNivel = (req, res) => {
 
     const planNivelUpdatePromise = new Promise((resolve, reject) => {
         if (Object.keys(planNivelFieldsToUpdate).length > 0) {
-            console.log('Actualizando plan nivel...');
             planNivelModel.updatePlanNivel(id_plan, planNivelFieldsToUpdate, (err, result) => {
                 if (err) {
                     console.error('Error al actualizar plan nivel:', err);
@@ -106,7 +103,6 @@ const updatePlanWithNivel = (req, res) => {
     Promise.all([planUpdatePromise, planNivelUpdatePromise])
         .then(results => {
             const [planResult, planNivelResult] = results;
-            console.log('Resultados de las actualizaciones:', results);
             
             if (planResult.affectedRows > 0 || planNivelResult.affectedRows > 0) {
                 res.json({ message: 'Plan y/o nivel actualizado' });

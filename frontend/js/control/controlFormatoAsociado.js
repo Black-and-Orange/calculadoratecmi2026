@@ -1,11 +1,10 @@
-const apiUrlFormatosAsociado = 'https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado';
+import { API_BASE_URL } from '../apiConfig.js';
+
+const apiUrlFormatosAsociado = `${API_BASE_URL}/formatoAsociado`;
 
 // Función genérica para cargar formato asociado de cualquier nivel
 function loadFormatoAsociado(level, containerId) {
     const container = $(containerId);
-
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
     fetch(`${apiUrlFormatosAsociado}/nivel/${level}`)
@@ -15,51 +14,71 @@ function loadFormatoAsociado(level, containerId) {
                 data.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Descripción</th>
-                                    <th>Costo</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Costo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                 data.forEach(formatoAsociado => {
                     tableHtml += `
-                            <tr>
-                                <td>${formatoAsociado.descripcion}</td>
-                                <td>${formatoAsociado.costo}</td>
-                                <td>
-                                    <button onclick="deleteFormatoAsociado(${formatoAsociado.id_formato_asociado}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editFormatoAsociado(${formatoAsociado.id_formato_asociado}, '${formatoAsociado.descripcion}', ${formatoAsociado.costo}, ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                        <tr>
+                            <td>${formatoAsociado.descripcion}</td>
+                            <td>${formatoAsociado.costo}</td>
+                            <td>
+                                <button onclick="deleteFormatoAsociado(${formatoAsociado.id_formato_asociado}, ${level})" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button onclick="editFormatoAsociado(${formatoAsociado.id_formato_asociado}, '${formatoAsociado.descripcion}', ${formatoAsociado.costo}, ${level})" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                 });
 
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
+                tableHtml += `</tbody></table>`;
                 container.html(tableHtml);
             } else {
-                console.log('No se encontraron formatos asociados para mostrar.');
+                container.html('<p>No se encontraron formatos asociados para mostrar.</p>');
             }
         })
         .catch(error => console.error('Error fetching formato asociado:', error));
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
-        loadFormatoAsociado(level, '#formatoNivel' + level);
-
-        handleCreateFormatoAsociado(level, '#createFormatoAsociadoNivel' + level + 'Form', '#formatoNivel' + level + 'FormatoAsociado', '#formatoNivel' + level + 'Costo', '#loadFormatoAsociadoNivel' + level);
+        loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
     }
+
+    // Delegación de eventos para formularios de creación de formato asociado
+    $(document).on('submit', 'form[id^="createformatoasociadoNivel"][id$="Form"]', function(event) {
+        event.preventDefault();
+        const formId = $(this).attr('id');
+        const nivelMatch = formId.match(/createformatoasociadoNivel(\d+)Form/);
+        if (!nivelMatch) return;
+        const level = parseInt(nivelMatch[1]);
+        const descripcion = $(`#formatoasociadoNivel${level}Formato`).val();
+        const costo = $(`#formatoasociadoNivel${level}Costo`).val();
+        createFormatoAsociado(level, descripcion, costo, function () {
+            $(`#formatoasociadoNivel${level}Formato`).val('');
+            $(`#formatoasociadoNivel${level}Costo`).val('');
+            loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
+        });
+    });
+
+    // Recargar la tabla al hacer clic en la pestaña de formato asociado
+    $(document).on('click', 'a[id^="formatoasociado-"][id$="-tab"]', function() {
+        const nivelMatch = $(this).attr('id').match(/formatoasociado-(\d+)-tab/);
+        if (nivelMatch) {
+            const nivelId = parseInt(nivelMatch[1]);
+            loadFormatoAsociado(nivelId, '#formatoasociadoNivel' + nivelId);
+        }
+    });
 
     // Función genérica para crear formato asociado
     function createFormatoAsociado(level, descripcion, costo, callback) {
@@ -74,31 +93,16 @@ $(document).ready(function () {
             .then(data => callback())
             .catch(error => console.error('Error creating formato asociado:', error));
     }
-
-    // Función para gestionar la creación de formato asociado para cualquier nivel
-    function handleCreateFormatoAsociado(level, formId, descripcionInputId, costoInputId, loadFormatoAsociadoBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const descripcion = $(descripcionInputId).val();
-            const costo = $(costoInputId).val();
-            createFormatoAsociado(level, descripcion, costo, function () {
-                $(descripcionInputId).val('');
-                $(costoInputId).val('');
-                loadFormatoAsociado(level, '#formatoNivel' + level);
-            });
-        });
-    }
-
 });
 
 // Función para eliminar formato asociado
 function deleteFormatoAsociado(id_formato_asociado, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado/${id_formato_asociado}`, {
+    fetch(`${apiUrlFormatosAsociado}/${id_formato_asociado}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            loadFormatoAsociado(level, '#formatoNivel' + level);
+            loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
         })
         .catch(error => console.error('Error deleting formato asociado:', error));
 }
@@ -108,7 +112,7 @@ function editFormatoAsociado(id_formato_asociado, currentDescripcion, currentCos
     const newDescripcion = prompt('Nueva descripción del formato asociado:', currentDescripcion);
     const newCosto = prompt('Nuevo costo del formato asociado:', currentCosto);
     if (newDescripcion && newCosto) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado/${id_formato_asociado}`, {
+        fetch(`${apiUrlFormatosAsociado}/${id_formato_asociado}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -117,8 +121,12 @@ function editFormatoAsociado(id_formato_asociado, currentDescripcion, currentCos
         })
             .then(response => response.json())
             .then(data => {
-                loadFormatoAsociado(level, '#formatoNivel' + level);
+                loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
             })
             .catch(error => console.error('Error editing formato asociado:', error));
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteFormatoAsociado = deleteFormatoAsociado;
+window.editFormatoAsociado = editFormatoAsociado;

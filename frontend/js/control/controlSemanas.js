@@ -1,10 +1,10 @@
-const apiUrlSemanas = 'https://tecmilenio-calculadora-backend.testingbo.com/api/semanas';
+import { API_BASE_URL } from '../apiConfig.js';
+
+const apiUrlSemanas = `${API_BASE_URL}/semanas`;
 
 // Función genérica para cargar semanas de cualquier nivel
 function loadSemanas(level, containerId) {
     const container = $(containerId);
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
     fetch(`${apiUrlSemanas}/nivel/${level}`)
@@ -14,34 +14,31 @@ function loadSemanas(level, containerId) {
                 data.sort((a, b) => a.num_semanas - b.num_semanas);
 
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Número de Semanas</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Número de Semanas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                 data.forEach(semana => {
                     tableHtml += `
-                            <tr>
-                                <td>${semana.num_semanas}</td>
-                                <td>
-                                    <button onclick="deleteSemanas(${semana.id}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editSemanas(${semana.id}, ${semana.num_semanas}, ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                        <tr>
+                            <td>${semana.num_semanas}</td>
+                            <td>
+                                <button onclick="deleteSemanas(${semana.id}, ${level})" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button onclick="editSemanas(${semana.id}, ${semana.num_semanas}, ${level})" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                 });
 
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
+                tableHtml += `</tbody></table>`;
                 container.html(tableHtml);
             } else {
                 container.html('<p>No se encontraron semanas para este nivel.</p>');
@@ -51,67 +48,115 @@ function loadSemanas(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
         loadSemanas(level, '#semanasNivel' + level);
-        handleCreateSemanas(level, '#createSemanasNivel' + level + 'Form', '#semanasNivel' + level + 'Semanas', '#loadSemanasNivel' + level);
     }
-});
 
-// Función genérica para crear semanas
-function createSemanas(level, numeroSemanas, callback) {
-    fetch(apiUrlSemanas, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ num_semanas: numeroSemanas, nivel_id: level }),
-    })
-        .then(response => response.json())
-        .then(data => callback())
-        .catch(error => console.error('Error creating semanas:', error));
-}
-
-// Función para gestionar la creación de semanas para cualquier nivel
-function handleCreateSemanas(level, formId, numeroInputId, loadSemanasBtnId) {
-    $(formId).submit(function (event) {
+    // Delegación de eventos para formularios de creación de semanas
+    $(document).on('submit', 'form[id^="createsemanasNivel"][id$="Form"]', function(event) {
         event.preventDefault();
-        const numeroSemanas = $(numeroInputId).val();
+        
+        const formId = $(this).attr('id');
+        
+        const nivelMatch = formId.match(/createsemanasNivel(\d+)Form/);
+        if (!nivelMatch) {
+            console.error('No se pudo extraer el nivel del form ID:', formId);
+            return;
+        }
+        
+        const level = parseInt(nivelMatch[1]);
+        
+        const numeroSemanas = $(`#semanasNivel${level}Semanas`).val();
+        
+        if (!numeroSemanas) {
+            console.error('No se ingresó número de semanas');
+            return;
+        }
+        
         createSemanas(level, numeroSemanas, function () {
-            $(numeroInputId).val('');  // Limpiar el campo de entrada
+            $(`#semanasNivel${level}Semanas`).val('');
             loadSemanas(level, '#semanasNivel' + level);
         });
     });
-}
 
+    // Función genérica para crear semanas
+    function createSemanas(level, numeroSemanas, callback) {
+        
+        const requestData = { num_semanas: numeroSemanas, nivel_id: level };
+        
+        fetch(apiUrlSemanas, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating semanas:', error);
+                alert('Error al crear las semanas: ' + error.message);
+            });
+    }
+});
 
 // Función para eliminar semanas
 function deleteSemanas(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/semanas/${id}`, {
+    
+    fetch(`${apiUrlSemanas}/${id}`, {
         method: 'DELETE',
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
             loadSemanas(level, '#semanasNivel' + level);
         })
-        .catch(error => console.error('Error deleting semanas:', error));
+        .catch(error => {
+            console.error('Error deleting semanas:', error);
+            alert('Error al eliminar la semana: ' + error.message);
+        });
 }
 
 // Función para editar semanas
 function editSemanas(id, currentNumero, level) {
+    
     const newNumero = prompt('Nuevo número de semanas:', currentNumero);
     if (newNumero) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/semanas/${id}`, {
+        fetch(`${apiUrlSemanas}/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ num_semanas: newNumero }),
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 loadSemanas(level, '#semanasNivel' + level);
             })
-            .catch(error => console.error('Error editing semanas:', error));
+            .catch(error => {
+                console.error('Error editing semanas:', error);
+                alert('Error al editar la semana: ' + error.message);
+            });
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteSemanas = deleteSemanas;
+window.editSemanas = editSemanas;

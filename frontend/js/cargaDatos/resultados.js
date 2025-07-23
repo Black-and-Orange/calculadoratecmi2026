@@ -1,15 +1,50 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
-    const params = new URLSearchParams(window.location.search);
+import { API_BASE_URL } from '../apiConfig.js';
+import {
+  formatearPesos,
+  formatNumber,
+  toIntIfPossible,
+  mostrarEnteroSiEsDecimal,
+  hideZeroPercentages,
+  calcularTotalFinanciado,
+  agregarEstiloPorNivel
+} from '../utils/shared-utils.js';
 
-    const nombre = params.get('txt-name') || 'N/A';
-    const periodo = params.get('select-period') || 'N/A';
-    const campus = params.get('select-campus') || 'N/A';
-    const nivel = params.get('select-grade') || 'N/A';
-    const materias = params.get('select-subjects') || 'N/A';
-    const certificados = params.get('select-certificado') || 'N/A';
-    const semanas = params.get('select-semanas') || 'N/A';
-    const ingles = params.get('select-ingles') || 'N/A';
+document.addEventListener('DOMContentLoaded', async () => {
+    // Verificar si es una cotización compartida (con ID en URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const cotizacionId = urlParams.get('id');
+    
+    if (cotizacionId) {
+        // Redirigir a la página dedicada para cotizaciones compartidas
+        window.location.href = `cotizacion-compartida.html?id=${cotizacionId}`;
+        return;
+    }
+    const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
+    // Controlar overlay de loading solo para nivel 13
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const financiamientoContent = document.getElementById('financiamiento-content');
+    if (levelId == 13) {
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+        if (financiamientoContent) financiamientoContent.style.display = 'none';
+    } else {
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+        if (financiamientoContent) financiamientoContent.style.display = 'block';
+    }
+    const nombre = urlParams.get('txt-name') || 'N/A';
+    const periodo = urlParams.get('select-period') || 'N/A';
+    const campus = urlParams.get('select-campus') || 'N/A';
+    const nivel = urlParams.get('select-grade') || 'N/A';
+    const materias = urlParams.get('select-subjects') || 'N/A';
+    const certificados = urlParams.get('select-certificado') || 'N/A';
+    const semanas = urlParams.get('select-semanas') || 'N/A';
+    const ingles = urlParams.get('select-ingles') || 'N/A';
+    const programa = urlParams.get('select-plan') || 'N/A';
+    const formato = urlParams.get('select-formato') || '';
+
+    // Guardar siempre los datos clave en localStorage para el flujo de guardado
+    localStorage.setItem('nombre', nombre);
+    localStorage.setItem('campus', campus);
+    localStorage.setItem('programa', programa);
 
     document.getElementById('nombre').textContent = nombre;
     document.getElementById('periodo').textContent = periodo;
@@ -19,9 +54,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('certificados').textContent = formatNumber(certificados);
     document.getElementById('semanas').textContent = formatNumber(semanas);
     document.getElementById('ingles').textContent = formatNumber(ingles);
-
-    function formatNumber(num) {
-        return num % 1 === 0 ? parseInt(num) : parseFloat(num).toFixed(1);
+    if(document.getElementById('formato')) {
+        if (formato && formato !== 'N/A') {
+            document.getElementById('formato').textContent = formato;
+            document.getElementById('formato').parentElement.style.display = '';
+        } else {
+            document.getElementById('formato').parentElement.style.display = 'none';
+        }
     }
 
     const materiasPorNivel = {
@@ -49,23 +88,262 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('ingles-container').classList.remove('hidden');
     }
 
+    // --- AJUSTE PARA NIVEL 13 ---
+    if (levelId == 13) {
+        // Mostrar overlay de loading y ocultar contenido al inicio
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const financiamientoContent = document.getElementById('financiamiento-content');
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+        if (financiamientoContent) financiamientoContent.style.display = 'none';
+        // Ocultar cualquier posible valor residual
+        const mensualidadesDiv = document.getElementById('mensualidades');
+        const mensualidadesTextElem = document.getElementById('mensualidadesText');
+        const primerPagoElem = document.getElementById('primerPago');
+        const totalFinanciadoElem = document.getElementById('totalFinanciado');
+        if (mensualidadesDiv) mensualidadesDiv.style.display = 'none';
+        if (mensualidadesTextElem) mensualidadesTextElem.style.display = 'none';
+        if (primerPagoElem) primerPagoElem.style.display = 'none';
+        if (totalFinanciadoElem) totalFinanciadoElem.style.display = 'none';
+        // Definir codigosBimestres antes de usarla
+        let codigosBimestres = [];
+        // Obtener períodos seleccionados desde localStorage
+        const periodosSeleccionados = JSON.parse(localStorage.getItem('periodosSeleccionados') || '[]');
+        
+        if (periodosSeleccionados.length > 0) {
+            // Mostrar múltiples períodos
+            const periodosTexto = periodosSeleccionados.map(p => p.mes).join(', ');
+            document.getElementById('periodo').textContent = periodosTexto;
+            codigosBimestres = periodosSeleccionados.map(p => p.codigo);
+        } else {
+            // Fallback al comportamiento anterior
+            let mesBimestre = periodo;
+            const bimestreLocal = localStorage.getItem('bimestreSeleccionado');
+            if (bimestreLocal) {
+                const bimestreTexto = JSON.parse(bimestreLocal);
+                if (bimestreTexto && bimestreTexto !== periodo) {
+                    mesBimestre = bimestreTexto;
+                }
+            }
+            document.getElementById('periodo').textContent = mesBimestre;
+            const codigoBimestre = params.get('select-period') || '';
+            if (codigoBimestre) codigosBimestres = [codigoBimestre];
+        }
+        document.getElementById('materias-container').style.display = 'none';
+        document.getElementById('certificados-container').classList.remove('hidden');
+        document.getElementById('semanas-container').classList.remove('hidden');
+        document.getElementById('certificados').textContent = certificados;
+        document.getElementById('semanas').textContent = semanas;
+
+        // OCULTAR EL BLOQUE TRADICIONAL DE PLAN DE FINANCIAMIENTO
+        const planFinanciamientoTrad = document.querySelector('.plan-financiamiento-tradicional');
+        if (planFinanciamientoTrad) {
+            planFinanciamientoTrad.style.display = 'none';
+        }
+        // Mostrar solo el desglose de pagos bimestrales financiados para nivel 13
+        fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`)
+            .then(res => res.json())
+            .then(pagos => {
+                // Filtrar pagos para todos los períodos seleccionados
+                const pagosBimestres = pagos.filter(p => codigosBimestres.includes(p.codigo));
+                if (pagosBimestres.length === 0) {
+                    const mensualidadesDiv = document.getElementById('mensualidades');
+                    const mensualidadesTextElem = document.getElementById('mensualidadesText');
+                    const primerPagoElem = document.getElementById('primerPago');
+                    const totalFinanciadoElem = document.getElementById('totalFinanciado');
+                    if (mensualidadesDiv) {
+                        mensualidadesDiv.innerHTML = '<p style="color: red;">No hay pagos bimestrales para los períodos seleccionados. Por favor, regresa y realiza el cálculo nuevamente.</p>';
+                        if (mensualidadesTextElem) mensualidadesTextElem.innerHTML = '';
+                        if (primerPagoElem) primerPagoElem.textContent = '';
+                        if (totalFinanciadoElem) totalFinanciadoElem.textContent = '';
+                    }
+                    setTimeout(() => { window.location.href = 'index.html'; }, 3500);
+                    return;
+                }
+                // Agrupar pagos por bimestre (código)
+                const pagosPorBimestre = {};
+                pagosBimestres.forEach(pago => {
+                    if (!pagosPorBimestre[pago.codigo]) {
+                        pagosPorBimestre[pago.codigo] = [];
+                    }
+                    pagosPorBimestre[pago.codigo].push(pago);
+                });
+                // Ordenar los pagos dentro de cada bimestre por orden de pago
+                Object.keys(pagosPorBimestre).forEach(codigo => {
+                    pagosPorBimestre[codigo].sort((a, b) => a.pago_orden - b.pago_orden);
+                });
+                // Ordenar los códigos de bimestre según el orden de selección
+                let codigosBimestresOrdenados = codigosBimestres.slice();
+                if (periodosSeleccionados.length > 0) {
+                    codigosBimestresOrdenados = periodosSeleccionados.map(p => p.codigo);
+                }
+                // Procesar pagos por bimestre en el orden correcto
+                let pagosArray = [];
+                let totalPagos = 0;
+                let pagoGlobalIndex = 1;
+                let totalSeguros = 0;
+                try {
+                    totalSeguros = parseFloat(JSON.parse(localStorage.getItem('totalCost'))) || 0;
+                } catch (e) { totalSeguros = 0; }
+                let totalContado = parseFloat(JSON.parse(localStorage.getItem('totalContado')) || 0);
+                const cantidadBimestres = codigosBimestresOrdenados.length;
+                
+                // Array auxiliar para pagos con fecha
+                const pagosConFechas = [];
+                
+                // Obtener el descuento total para aplicarlo proporcionalmente
+                const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount')) || 0;
+                const descuentoPorBimestre = cantidadBimestres > 0 ? finalAmountRecuperado / cantidadBimestres : 0;
+                
+                console.log(`Descuento total: ${finalAmountRecuperado}, descuento por bimestre: ${descuentoPorBimestre}`);
+                
+                codigosBimestresOrdenados.forEach((codigo, bimestreIdx) => {
+                    // Obtener el costo total del bimestre específico desde localStorage
+                    const costoBimestreKey = `totalContado_${codigo}`;
+                    let costoBimestre = parseFloat(JSON.parse(localStorage.getItem(costoBimestreKey)) || 0);
+                    
+                    // Si no hay costo específico del bimestre, usar el total dividido
+                    if (costoBimestre === 0) {
+                        costoBimestre = cantidadBimestres > 0 ? totalContado / cantidadBimestres : 0;
+                    }
+                    
+                    // APLICAR DESCUENTO AL COSTO DEL BIMESTRE
+                    const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoPorBimestre);
+                    
+                    console.log(`Bimestre ${codigo}: costo original = ${costoBimestre}, descuento aplicado = ${descuentoPorBimestre}, costo final = ${costoBimestreConDescuento}`);
+                    
+                    const pagosBimestre = pagosPorBimestre[codigo] || [];
+                    pagosBimestre.forEach((pago, idx) => {
+                        const porcentaje = parseFloat(pago.porcentaje_parcialidad) / 100;
+                        let parcialidad = costoBimestreConDescuento * porcentaje;
+                        let interes = 0;
+                        let totalParcialidad = parcialidad;
+                        
+                        // Aplicar interés solo al primer pago del bimestre (idx === 0)
+                        if (idx === 0 && parseFloat(pago.porcentaje_interes) > 0) {
+                            // El interés se calcula sobre el costo total del bimestre CON DESCUENTO
+                            interes = costoBimestreConDescuento * (parseFloat(pago.porcentaje_interes) / 100);
+                            totalParcialidad += interes;
+                            console.log(`Bimestre ${codigo}, Pago ${idx + 1}: parcialidad=${parcialidad}, interés=${interes}, total=${totalParcialidad}`);
+                        } else {
+                            console.log(`Bimestre ${codigo}, Pago ${idx + 1}: parcialidad=${parcialidad}, sin interés`);
+                        }
+                        
+                        // Agregar seguros completos al primer pago de cada bimestre (idx === 0)
+                        if (idx === 0 && totalSeguros > 0) {
+                            totalParcialidad += totalSeguros;
+                            console.log(`Bimestre ${codigo}, Pago ${idx + 1}: agregando TODOS los seguros=${totalSeguros}, total final=${totalParcialidad}`);
+                        }
+                        
+                        // Asignar la fecha correcta a cada pago
+                        if (pago.fecha_vencimiento) {
+                            const fecha = new Date(pago.fecha_vencimiento);
+                            const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                            pagosConFechas.push({ fecha: fechaFormateada, valor: totalParcialidad });
+                        } else {
+                            pagosConFechas.push({ fecha: `Pago ${pago.pago_orden}`, valor: totalParcialidad });
+                        }
+                        totalPagos += totalParcialidad;
+                    });
+                });
+                // Agrupar pagos por fecha
+                const pagosAgrupados = {};
+                pagosConFechas.forEach(pago => {
+                    if (!pagosAgrupados[pago.fecha]) {
+                        pagosAgrupados[pago.fecha] = 0;
+                    }
+                    pagosAgrupados[pago.fecha] += pago.valor;
+                });
+                // Para nivel 13: cambiar "Primer pago" por la primera fecha y mostrar fechas restantes
+                const primerPagoElem = document.getElementById('primerPago');
+                
+                // Obtener las fechas ordenadas cronológicamente
+                const fechasOrdenadas = Object.keys(pagosAgrupados).sort((a, b) => {
+                    // Convertir fechas de formato DD/MM/YYYY a objetos Date para comparación
+                    const fechaA = new Date(a.split('/').reverse().join('-'));
+                    const fechaB = new Date(b.split('/').reverse().join('-'));
+                    return fechaA - fechaB;
+                });
+                const primeraFecha = fechasOrdenadas[0];
+                const fechasRestantes = fechasOrdenadas.slice(1);
+                
+                // Cambiar el texto "Primer pago" por la primera fecha
+                // Buscar el elemento que contiene "Primer pago" en la misma fila que primerPagoElem
+                if (primerPagoElem) {
+                    const primerPagoRow = primerPagoElem.closest('tr');
+                    if (primerPagoRow) {
+                        const primerPagoLabel = primerPagoRow.querySelector('td:first-child p');
+                        if (primerPagoLabel && primerPagoLabel.textContent.includes('Primer pago')) {
+                            primerPagoLabel.textContent = primeraFecha;
+                        }
+                    }
+                }
+                
+                // Mostrar el valor del primer pago
+                if (primerPagoElem && pagosConFechas.length > 0) {
+                    primerPagoElem.textContent = formatearPesos(pagosConFechas[0].valor || 0);
+                }
+                
+                // Mostrar solo las fechas restantes en mensualidades
+                let pagosTextHtml = '';
+                let pagosValorHtml = '';
+                fechasRestantes.forEach(fecha => {
+                    pagosTextHtml += `<span>${fecha}</span><br>`;
+                    pagosValorHtml += `<b>${formatearPesos(pagosAgrupados[fecha])}</b><br>`;
+                });
+                const mensualidadesTextElem = document.getElementById('mensualidadesText');
+                const mensualidadesValorElem = document.getElementById('mensualidades');
+                if (mensualidadesTextElem) mensualidadesTextElem.innerHTML = pagosTextHtml;
+                if (mensualidadesValorElem) mensualidadesValorElem.innerHTML = pagosValorHtml;
+                
+                // Guardar totalPagos en localStorage después de calcular todos los pagos (fuera de los ciclos)
+                localStorage.setItem('totalPagos', JSON.stringify(totalPagos));
+                const totalFinanciadoElem = document.getElementById('totalFinanciado');
+                if (totalFinanciadoElem) {
+                    totalFinanciadoElem.textContent = formatearPesos(totalPagos);
+                }
+                // Al terminar de procesar y mostrar los pagos:
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                if (financiamientoContent) financiamientoContent.style.display = 'block';
+                if (mensualidadesDiv) mensualidadesDiv.style.display = '';
+                if (mensualidadesTextElem) mensualidadesTextElem.style.display = '';
+                if (primerPagoElem) primerPagoElem.style.display = '';
+                if (totalFinanciadoElem) totalFinanciadoElem.style.display = '';
+                // Mostrar el total contado explícitamente para nivel 13
+                const totalContadoElem = document.getElementById('colegiatura');
+                if (totalContadoElem) {
+                    const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
+                    const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount'));
+                    const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));
+                    
+                    let totalContadoFinal = totalContadoRecuperado;
+                    if (finalAmountRecuperado === 0 || finalAmountRecuperado === null || finalAmountRecuperado === undefined) {
+                        totalContadoFinal = costoTotalRecuperado;
+                    }
+                    
+                    if (totalContadoFinal !== undefined && totalContadoFinal !== null) {
+                        totalContadoElem.textContent = formatearPesos(totalContadoFinal);
+                    }
+                }
+            });
+    }
 
     let segurosData;
     const viveDiv = document.getElementById('div-vive');
     const seguros = document.getElementById('seguros');
 
     async function fetchSeguros() {
-        console.log('levelId:', levelId);
 
         try {
-            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
+            const response = await fetch(`${API_BASE_URL}/seguros/nivel/${levelId}`);
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const segurosDataArray = await response.json(); // Recibimos un array
 
             if (segurosDataArray.length > 0) {
                 segurosData = segurosDataArray[0];
-
-                console.log('segurosData:', segurosData);
             }
 
             if (levelId >= 6 && levelId <= 12) {
@@ -85,15 +363,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchSeguros();
 
-    function formatearPesos(numero) {
-        return parseFloat(numero).toLocaleString('es-MX', {
-            style: 'currency',
-            currency: 'MXN',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
-
     function recuperarValores() {
         const insuranceValue = JSON.parse(localStorage.getItem('insuranceValue'));
         const coverageValue = JSON.parse(localStorage.getItem('coverageValue'));
@@ -112,7 +381,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
         const interesDivididoRecuperado = JSON.parse(localStorage.getItem('interesDividido'));
         const primeraCuotaRecuperada = JSON.parse(localStorage.getItem('primeraCuota'));
-        console.log(primeraCuotaRecuperada);
 
         const selectedScholarshipNameRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipName'));
         const selectedScholarshipValueRecuperado = JSON.parse(localStorage.getItem('selectedScholarshipValue'));
@@ -133,14 +401,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             retrievedPercentage = null;
         }
-
+        
+        // Asegurar que totalContado sea correcto cuando no hay descuento
+        let totalContadoFinal = totalContadoRecuperado;
+        if (finalAmountRecuperado === 0 || finalAmountRecuperado === null || finalAmountRecuperado === undefined) {
+            totalContadoFinal = costoTotalRecuperado;
+        }
+        
         return {
             costoTotal: formatearPesos(costoTotalRecuperado),
             finalAmount: formatearPesos(finalAmountRecuperado),
-            totalContado: formatearPesos(totalContadoRecuperado),
+            totalContado: formatearPesos(totalContadoFinal),
             interesDividido: formatearPesos(interesDivididoRecuperado),
             primeraCuota: formatearPesos(primeraCuotaRecuperada),
-            totalCost: totalContadoRecuperado + totalCostRecuperado,
+            totalCost: totalCostRecuperado, // <-- solo el valor de seguros
             scholarshipName: selectedScholarshipNameRecuperado,
             scholarshipValue: selectedScholarshipValueRecuperado,
             supportValue: selectedSupportValueRecuperado,
@@ -150,10 +424,126 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
+    // Refuerzo: para nivel 13, bloquear sobrescritura de totalContado en el DOM
+    const originalMostrarValores = mostrarValores;
+    mostrarValores = function(valores) {
+        // Verificar si los datos vienen del backend
+        const datosDesdeBackend = localStorage.getItem('datosDesdeBackend') === 'true';
+        
+        if (levelId == 13) {
+            
+            // No actualizar totalContado en el DOM para nivel 13
+            originalMostrarValores({ ...valores, skipTotalContado: true });
+            // Refuerzo: mostrar el valor de localStorage en el DOM
+            const totalContadoElem = document.getElementById('totalContado');
+            const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
+            if (totalContadoElem && totalContadoRecuperado !== undefined && totalContadoRecuperado !== null) {
+                
+                totalContadoElem.textContent = formatearPesos(totalContadoRecuperado);
+            }
+        } else {
+            originalMostrarValores(valores);
+        }
+        
+        // Si los datos vienen del backend, limpiar la marca para futuras actualizaciones
+        if (datosDesdeBackend) {
+            localStorage.removeItem('datosDesdeBackend');
+        }
+    };
+
+    // FUNCIÓN PRINCIPAL CENTRALIZADA PARA MOSTRAR VALORES
     function mostrarValores(valores) {
 
-        console.log(levelId);
+        // DETERMINAR QUÉ FUNCIÓN USAR SEGÚN EL NIVEL
+        if (levelId === 13) {
+            mostrarValoresNivel13(valores);
+        } else {
+            mostrarValoresOtrosNiveles(valores);
+        }
+    }
 
+    // FUNCIÓN ESPECÍFICA PARA NIVEL 13
+    function mostrarValoresNivel13(valores) {
+        
+        // Verificar si hay descuento real
+        const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount'));
+        const hayDescuento = finalAmountRecuperado && finalAmountRecuperado > 0;
+        
+        // 1trar/ocultar colegiatura según si hay descuento
+        if (colegiatura) {
+            if (hayDescuento) {
+                // Mostrar el valor SIN descuento en colegiatura
+                const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));
+                colegiatura.textContent = formatearPesos(costoTotalRecuperado);
+                colegiatura.closest('tr').style.display = '';
+                
+                // REFUERZO: Asegurar que el valor se mantenga después de cualquier sobrescritura
+                setTimeout(() => {
+                    const valorActual = colegiatura.textContent;
+                    const valorEsperado = formatearPesos(costoTotalRecuperado);
+                    if (valorActual !== valorEsperado) {
+                        colegiatura.textContent = valorEsperado;
+                    }
+                }, 10);
+            } else {
+                colegiatura.closest('tr').style.display = 'none';
+            }
+        } 
+        
+        // 2trar/ocultar apoyo financiamiento según si hay descuento
+        if (apoyoFinanciamiento) {
+            if (hayDescuento) {
+                apoyoFinanciamiento.textContent = `-${valores.finalAmount}`;
+                apoyoFinanciamiento.closest('tr').style.display = '';
+            } else {
+                apoyoFinanciamiento.closest('tr').style.display = 'none';
+            }
+        }
+        
+        // 3. Mostrar total contado con el valor correcto del localStorage
+        const totalContadoElem = document.getElementById('totalContado');
+
+        if (totalContadoElem) {
+            const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
+            const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));      
+            
+            let totalContadoFinal = totalContadoRecuperado;
+            if (!hayDescuento) {
+                totalContadoFinal = costoTotalRecuperado;
+            }
+            
+            if (totalContadoFinal !== undefined && totalContadoFinal !== null) {
+                totalContadoElem.textContent = formatearPesos(totalContadoFinal);
+            }
+            
+            // 4. Cambiar el texto del label según si hay descuento
+            const totalContadoText = document.getElementById('totalContadoText');
+            
+            if (totalContadoText) {
+                if (!hayDescuento) {
+                    // Cuando NO hay descuento: mostrar "Total Contado Colegiatura 2025"
+                    totalContadoText.innerHTML = 'Total Contado<br>Colegiatura 2025';
+                } else {
+                    // Cuando SÍ hay descuento: mostrar solo "Total Contado"
+                    totalContadoText.innerHTML = 'Total Contado';
+                }
+                
+                // Forzar actualización visual
+                totalContadoText.style.display = 'none';
+                setTimeout(() => {
+                    totalContadoText.style.display = '';
+                }, 10);
+            }
+        }
+
+        //5. Mostrar apoyos y seguros
+        mostrarApoyosYSeguros(valores);
+    }
+
+    // FUNCIÓN PARA OTROS NIVELES (1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+    function mostrarValoresOtrosNiveles(valores) {
+
+        // Calcular factor multiplicador según el nivel
         let factorMultiplicador = 3;
         let textoMensualidades = '3 Mensualidades';
         
@@ -164,21 +554,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             factorMultiplicador = 2;
             textoMensualidades = '2 Mensualidades';
         }
-        
 
-        console.log('factorMultiplicador:', factorMultiplicador);
+        const totalfinanciado = calcularTotalFinanciado(valores, levelId);
 
-
-        const totalfinanciado = parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) * factorMultiplicador + parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, ""));
-
+        // Mostrar todos los campos para otros niveles
         if (colegiatura) {
             colegiatura.textContent = valores.costoTotal;
-        }
+        } 
         if (apoyoFinanciamiento) {
             apoyoFinanciamiento.textContent = `-${valores.finalAmount}`;
         }
         if (totalContado) {
-            totalContado.textContent = formatearPesos(valores.totalCost);
+            totalContado.textContent = valores.totalContado;
         }
         if (primerPago) {
             primerPago.textContent = valores.primeraCuota;
@@ -192,11 +579,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mensualidadesText) {
             mensualidadesText.textContent = textoMensualidades;
         }
+        
+        // Mostrar apoyos y seguros
+        mostrarApoyosYSeguros(valores);
+    }
+
+    // FUNCIÓN AUXILIAR PARA APOYOS Y SEGUROS (común para todos los niveles)
+    function mostrarApoyosYSeguros(valores) {
         if (apoyoFinanciero && valores.scholarshipName) {
             apoyoFinanciero.textContent = valores.scholarshipName;
         }
-
-        if (apoyoFinanciero.textContent === 'Elige' || apoyoFinanciero.textContent === "null") {
+        if (apoyoFinanciero && (apoyoFinanciero.textContent === 'Elige' || apoyoFinanciero.textContent === 'null')) {
             apoyoFinanciero.textContent = `Apoyo estudiantil`;
         }
         if (seguroAccidentes) {
@@ -209,31 +602,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             vive.textContent = valores.vive;
         }
         if (apoyoEstudiantil) {
-            apoyoEstudiantil.textContent = `${Math.round(valores.supportValue)}%`;
+            apoyoEstudiantil.textContent = `${valores.supportValue}%`;
         }
         if (apoyoEstudiantilFijo) {
-            console.log('valores.supportValueFix:', valores.supportValueFix);
             apoyoEstudiantilFijo.textContent = valores.supportValueFix;
-            console.log(apoyoEstudiantilFijo.textContent);
-            
         }
         if (prestamoPorcentaje) {
             prestamoPorcentaje.textContent = `${valores.prestamoRecuperado}%`;
-        }
-        if (apoyoEstudiantil.textContent.includes("null") || apoyoEstudiantil.textContent === "0") {
-            apoyoEstudiantil.textContent = `0%`;
-        }
-        if (apoyoEstudiantilFijo.textContent.includes("null") || apoyoEstudiantilFijo.textContent === "$0.00" || apoyoEstudiantilFijo.textContent === "$NaN") {
-            apoyoEstudiantilFijo.textContent = `0`;
-        }
-        if (prestamoPorcentaje.textContent.includes("null") || prestamoPorcentaje.textContent === "0") {
-            prestamoPorcentaje.textContent = `0%`;
         }
         if (beca) {
             beca.textContent =
                 valores.scholarshipValue > 0 ? `${valores.scholarshipValue}%` :
                     valores.retrievedPercentage > 0 ? `${valores.retrievedPercentage}%` :
                         "0%";
+        }
+
+        // Limpiar valores nulos o inválidos
+        if (apoyoEstudiantil && (apoyoEstudiantil.textContent.includes("null") || apoyoEstudiantil.textContent === "0")) {
+            apoyoEstudiantil.textContent = `0%`;
+        }
+        if (apoyoEstudiantilFijo && (apoyoEstudiantilFijo.textContent.includes("null") || apoyoEstudiantilFijo.textContent === "$0.00" || apoyoEstudiantilFijo.textContent === "$NaN")) {
+            apoyoEstudiantilFijo.textContent = `0`;
+        }
+        if (prestamoPorcentaje && (prestamoPorcentaje.textContent.includes("null") || prestamoPorcentaje.textContent === "0")) {
+            prestamoPorcentaje.textContent = `0%`;
         }
 
         hideZeroPercentages();
@@ -287,49 +679,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function actualizarPlanContado(valores) {
-        const bloquePlanContado = document.querySelector('.sub-tables');
-        const apoyoFinanciamiento = document.getElementById('apoyoFinanciamiento');
-
-        if (parseFloat(valores.finalAmount.replace(/[^0-9.-]+/g, "")) === 0) {
-            apoyoFinanciamiento.closest('tr').style.display = 'none';
-            bloquePlanContado.innerHTML = `
-            <div
-                class="relative overflow-hidden border-2 border-solid border-secondary-color-3 rounded-[6px] h-full">
-                <table class="w-full">
-                    <tr>
-                        <th class="bg-secondary-color-3 text-white p-[11px]" colspan="2">
-                            <p class="text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
-                                de contado</p>
-                        </th>
-                    </tr>
-                    <tr>
-                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                            <p id="colegiaturaText" class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                Total Contado</p>
-                            <p id="colegiaturaText" class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                Colegiatura 2025</p>
-                        </td>
-                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                            <p id="colegiatura" class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-bold mb-0 text-right">
-                                ${formatearPesos(valores.totalCost)}</p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        `;
-        } else {
-            const valores = recuperarValores();
-            const valoresAdicionales = recuperarValoresAdicionales();
-            mostrarValores({ ...valores, ...valoresAdicionales });
-        }
-    }
+    // ELIMINAR FUNCIÓN REDUNDANTE actualizarPlanContado - YA NO SE NECESITA
+    // function actualizarPlanContado(valores) { ... }
 
     const valores = recuperarValores();
     const valoresAdicionales = recuperarValoresAdicionales();
 
+    // USAR LA FUNCIÓN PRINCIPAL CENTRALIZADA PARA TODOS LOS NIVELES
+    // Esta función automáticamente determina si es nivel 13no y usa la lógica apropiada
     mostrarValores({ ...valores, ...valoresAdicionales });
-    actualizarPlanContado(valoresAdicionales);
 
     const tituloPorNivel = {
         1: 'Impulsa tu futuro desde hoy',
@@ -344,10 +702,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         10: 'Invierte en una educación para crecer como persona y como profesionista',
         11: 'Crece como líder para transformar a tu equipo y tu entorno',
         12: 'Invierte en una educación para crecer como persona y como profesionista',
+        13: 'Encuentra una carrera ejecutiva diseñada a tu medida',
     };
     let beneficiosPorNivel = {};
     async function obtenerBeneficios(nivel) {
-        const url = `https://tecmilenio-calculadora-backend.testingbo.com/api/beneficios/nivel/${nivel}`;
+        const url = `${API_BASE_URL}/beneficios/nivel/${nivel}`;
         try {
             const response = await fetch(url);
 
@@ -375,7 +734,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             benefitItem.className = "px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit-card-elem";
             benefitItem.innerHTML = `
                 <div class="border-2 border-solid border-secondary-color-2 rounded-[6px] relative px-[20px] py-[30px] h-full benefits-item">
-                    <div class="bg-secondary-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
+                    <div class="bg-secondary-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2 -translate-y-1/2">
                         <img class="w-[45px] h-[45px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                             src="${beneficio.icono}">
                     </div>
@@ -406,7 +765,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         10: 'css/style-universidad.css',
         11: 'css/style-icbi.css',
         12: 'css/style-universidad.css',
-
+        13: 'css/style-universidad.css',
+        // 2: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
+        // 4: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
+        // 5: `{{ get_asset_url('/calculadora-ago24/assets/css/style-profesional-asociado.css') }}`,
+        // 6: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
+        // 7: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
+        // 8: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
+        // 9: `{{ get_asset_url('/calculadora-ago24/assets/css/style-icbi.css') }}`,
+        // 10: `{{ get_asset_url('/calculadora-ago24/assets/css/style-icbi.css') }}`,
+        // 11: `{{ get_asset_url('/calculadora-ago24/assets/css/style-icbi.css') }}`,
+        // 12: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
+        // 13: `{{ get_asset_url('/calculadora-ago24/assets/css/style-universidad.css') }}`,
     };
 
     function agregarEstiloPorNivel() {
@@ -422,10 +792,351 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     agregarEstiloPorNivel();
+    
+    async function obtenerYMostrarVigencia() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/configuracion-vigencia/dias-vigencia`);
+            const data = await response.json();
+            
+            const fechaActual = new Date();
+            const fechaVencimiento = new Date(fechaActual);
+            fechaVencimiento.setDate(fechaVencimiento.getDate() + data.dias_vigencia);
+            
+            const opcionesFormato = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            const fechaVencimientoFormateada = fechaVencimiento.toLocaleDateString('es-ES', opcionesFormato);
+            
+            document.getElementById('fechaVencimiento').textContent = `Vigencia de la propuesta: ${fechaVencimientoFormateada}`;
+        } catch (error) {
+            // Fallback a 5 días si hay error
     const fechaActual = new Date();
     const fechaVencimiento = new Date(fechaActual);
     fechaVencimiento.setDate(fechaVencimiento.getDate() + 5);
     const opcionesFormato = { year: 'numeric', month: '2-digit', day: '2-digit' };
     const fechaVencimientoFormateada = fechaVencimiento.toLocaleDateString('es-ES', opcionesFormato);
     document.getElementById('fechaVencimiento').textContent = `Vigencia de la propuesta: ${fechaVencimientoFormateada}`;
+        }
+    }
+
+    await obtenerYMostrarVigencia();
+
+    // Guardar cotización en la base de datos siempre que haya datos válidos
+    // (ELIMINADO: ahora el guardado solo se hace al presionar el último Siguiente del formulario)
+
+    const programaFila1 = document.getElementById('programa-fila1');
+    const programaFila2 = document.getElementById('programa-fila2');
+    const formatoFila1 = document.getElementById('formato-fila1');
+    const formatoFila2 = document.getElementById('formato-fila2');
+
+    // Mostrar el valor en ambos bloques solo si existen
+    if (programaFila1) {
+        if (!programaFila1.textContent || programaFila1.textContent === 'N/A') {
+            programaFila1.textContent = programa;
+        }
+    }
+    if (programaFila2) programaFila2.textContent = programa;
+    if (formatoFila1) formatoFila1.textContent = formato;
+    if (formatoFila2) formatoFila2.textContent = formato;
+
+    const certificadosContainer = document.getElementById('certificados-container');
+    const semanasContainer = document.getElementById('semanas-container');
+    const inglesContainer = document.getElementById('ingles-container');
+    const materiasContainer = document.getElementById('materias-container');
+
+    const infoProgramaFila1 = document.querySelector('.info-programa-fila1');
+    const infoProgramaFila2 = document.querySelector('.info-programa-fila2');
+    const infoFormatoFila1 = document.querySelector('.info-formato-fila1');
+    const infoFormatoFila2 = document.querySelector('.info-formato-fila2');
+
+    // Verifica si hay algún campo visible en la segunda fila (excluyendo Programa y Materias)
+    const hayAcompananteSegundaFila = [
+        certificadosContainer,
+        semanasContainer,
+        inglesContainer
+    ].some(el => el && !el.classList.contains('hidden'));
+
+    // Verifica si Formato tiene valor
+    const formatoVisible = (formato && formato !== 'N/A');
+
+    // Solo baja Programa si hay acompañante o formato visible
+    if (hayAcompananteSegundaFila || formatoVisible) {
+        if (infoProgramaFila1) infoProgramaFila1.classList.add('hidden');
+        if (infoProgramaFila2) infoProgramaFila2.classList.remove('hidden');
+        if (formatoVisible) {
+            if (infoFormatoFila1) infoFormatoFila1.classList.add('hidden');
+            if (infoFormatoFila2) infoFormatoFila2.classList.remove('hidden');
+        } else {
+            if (infoFormatoFila1) infoFormatoFila1.classList.add('hidden');
+            if (infoFormatoFila2) infoFormatoFila2.classList.add('hidden');
+        }
+    } else {
+        if (infoProgramaFila1) infoProgramaFila1.classList.remove('hidden');
+        if (infoProgramaFila2) infoProgramaFila2.classList.add('hidden');
+        if (infoFormatoFila1) infoFormatoFila1.classList.add('hidden');
+        if (infoFormatoFila2) infoFormatoFila2.classList.add('hidden');
+    }
+
+    // El resto del código (apoyos, becas, seguros, totales, etc.) se ejecuta siempre
+    // Pero la lógica genérica de pagos (mensualidades, primerPago, totalFinanciado, etc.) solo se ejecuta si NO es nivel 13
+    if (levelId != 13) {
+        // ... (lógica genérica de actualización de pagos)
+    }
+
+    // Función utilitaria para calcular el total financiado según el nivel
+    function calcularTotalFinanciado(valores, levelId) {
+        let factorMultiplicador = 3;
+        if (levelId === 1 || levelId === 2 || levelId === 4) {
+            factorMultiplicador = 4;
+        } else if (levelId === 10) {
+            factorMultiplicador = 2;
+        }
+        return (
+            (parseFloat(valores.interesDividido.replace(/[^0-9.-]+/g, "")) || 0) * factorMultiplicador +
+            (parseFloat(valores.primeraCuota.replace(/[^0-9.-]+/g, "")) || 0)
+        );
+    }
+
+    // Función para convertir a entero si termina en .00
+    function toIntIfPossible(num) {
+        return (typeof num === 'number' && num % 1 === 0) ? parseInt(num) : num;
+    }
+
+    function mostrarEnteroSiEsDecimal(valor) {
+        if (typeof valor === 'string') valor = parseFloat(valor);
+        return (typeof valor === 'number' && valor % 1 === 0) ? valor.toString() : valor;
+    }
+
+    // Función para guardar la cotización en la base de datos
+    async function guardarCotizacion() {
+        try {
+            const valores = recuperarValores();
+            const valoresAdicionales = recuperarValoresAdicionales();
+            
+            // Determinar qué campos mostrar según el nivel
+            let materiasValue = 0;
+            let creditosValue = 0;
+            let certificadosValue = 0;
+            let semanasSediValue = 0;
+            let inglesValue = 0;
+
+            const nivelesConCreditos = [8, 9]; // Ajusta según tus niveles de créditos
+
+            if (levelId === 4) {
+                // Nivel 4: certificados, semanas SEDI e inglés
+                certificadosValue = parseFloat(certificados) || 0;
+                semanasSediValue = parseFloat(semanas) || 0;
+                inglesValue = parseFloat(ingles) || 0;
+                materiasValue = 0;
+                creditosValue = 0;
+            } else if (levelId === 13) {
+                // Nivel 13: certificados y semanas SEDI
+                certificadosValue = parseFloat(certificados) || 0;
+                semanasSediValue = parseFloat(semanas) || 0;
+                inglesValue = 0;
+                materiasValue = 0;
+                creditosValue = 0;
+            } else if (nivelesConCreditos.includes(levelId)) {
+                // Niveles de créditos
+                const creditos = typeof window.creditos !== 'undefined' ? window.creditos : (typeof materias !== 'undefined' ? materias : 0);
+                creditosValue = parseFloat(creditos) || 0;
+                materiasValue = 0;
+                certificadosValue = 0;
+                semanasSediValue = 0;
+                inglesValue = 0;
+            } else {
+                // Resto: solo materias
+                materiasValue = parseFloat(materias) || 0;
+                creditosValue = 0;
+                certificadosValue = 0;
+                semanasSediValue = 0;
+                inglesValue = 0;
+            }
+            
+            // Preparar datos de la cotización
+            let totalFinanciadoFinal = 0;
+            let totalPagosRecuperado = 0;
+            if (levelId === 13) {
+                // Recuperar el total de pagos desde localStorage
+                const totalPagosLS = localStorage.getItem('totalPagos');
+                if (totalPagosLS !== null && totalPagosLS !== undefined) {
+                    try {
+                        totalPagosRecuperado = JSON.parse(totalPagosLS);
+                    } catch (e) {
+                        totalPagosRecuperado = totalPagosLS;
+                    }
+                }
+                totalFinanciadoFinal = parseFloat(totalPagosRecuperado) || 0;
+            } else {
+                totalFinanciadoFinal = calcularTotalFinanciado(valoresAdicionales, levelId);
+            }
+            let periodoGuardar = periodo;
+            let costosPorBimestre = {};
+            if (levelId === 13) {
+                // Guardar los meses seleccionados separados por comas en el campo periodo
+                try {
+                    const periodosSeleccionados = JSON.parse(localStorage.getItem('periodosSeleccionados'));
+                    if (Array.isArray(periodosSeleccionados)) {
+                        const meses = periodosSeleccionados.map(p => p.mes).join(', ');
+                        periodoGuardar = meses || 'N/A';
+                        
+                        // Guardar los costos específicos por bimestre
+                        periodosSeleccionados.forEach(periodo => {
+                            const costoKey = `totalContado_${periodo.codigo}`;
+                            const costoBimestre = JSON.parse(localStorage.getItem(costoKey)) || 0;
+                            costosPorBimestre[periodo.codigo] = costoBimestre;
+                        });
+                    }
+                } catch (e) {
+                    periodoGuardar = periodo;
+                }
+            }
+            const cotizacionData = {
+                nombre_estudiante: nombre,
+                nivel_id: levelId,
+                periodo: periodoGuardar,
+                campus: campus,
+                materias: toIntIfPossible(materiasValue),
+                certificados: toIntIfPossible(certificadosValue),
+                semanas_sedi: toIntIfPossible(semanasSediValue),
+                ingles: toIntIfPossible(inglesValue),
+                creditos: toIntIfPossible(creditosValue),
+                programa: programa,
+                formato: formato,
+                costo_total: parseFloat(valoresAdicionales.costoTotal.replace(/[^0-9.-]+/g, "")) || 0,
+                total_contado: parseFloat(valoresAdicionales.totalContado.replace(/[^0-9.-]+/g, "")) || 0,
+                total_financiado: totalFinanciadoFinal,
+                primera_cuota: parseFloat(valoresAdicionales.primeraCuota.replace(/[^0-9.-]+/g, "")) || 0,
+                mensualidades: parseFloat(valoresAdicionales.interesDividido.replace(/[^0-9.-]+/g, "")) || 0,
+                beca_nombre: valoresAdicionales.scholarshipName || 'N/A',
+                beca_porcentaje: parseFloat(valoresAdicionales.retrievedPercentage) || 0,
+                apoyo_estudiantil_porcentaje: parseFloat(valoresAdicionales.supportValue) || 0,
+                apoyo_estudiantil_fijo: parseFloat(valoresAdicionales.supportValueFix.replace(/[^0-9.-]+/g, "")) || 0,
+                prestamo_porcentaje: parseFloat(valoresAdicionales.prestamoRecuperado) || 0,
+                seguro_accidentes: valores.insurance !== 'No Aplica' ? parseFloat(valores.insurance.replace(/[^0-9.-]+/g, "")) : 0,
+                seguro_estudiantil: valores.coverage !== 'No Aplica' ? parseFloat(valores.coverage.replace(/[^0-9.-]+/g, "")) : 0,
+                cobertura_vive: valores.vive !== 'No Aplica' ? parseFloat(valores.vive.replace(/[^0-9.-]+/g, "")) : 0,
+                total_seguros: parseFloat(valoresAdicionales.totalCost) || 0,
+                costos_por_bimestre: levelId === 13 ? JSON.stringify(costosPorBimestre) : null
+            };
+
+            // Enviar datos al backend
+            const response = await fetch(`${API_BASE_URL}/cotizaciones`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cotizacionData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error en la respuesta:', errorText);
+                throw new Error(`Error HTTP: ${response.status} - ${errorText}`);
+            }
+
+            const result = await response.json();
+            
+            // Guardar el ID de la cotización para usar en WhatsApp
+            if (result.success && result.data && result.data.id) {
+                localStorage.setItem('cotizacionId', result.data.id);
+                alert('¡Cotización guardada exitosamente!\nID: ' + result.data.id);
+            }
+            
+        } catch (error) {
+            console.error('Error al guardar la cotización:', error);
+            // No mostrar error al usuario para no interrumpir la experiencia
+        }
+    }
+    window.guardarCotizacion = guardarCotizacion;
+
+    // Función para asegurar que siempre haya un ID de cotización
+    async function asegurarCotizacionId() {
+        let cotizacionId = localStorage.getItem('cotizacionId');
+        
+        // Si no hay ID, intentar guardar la cotización
+        if (!cotizacionId) {
+            try {
+                await guardarCotizacion();
+                cotizacionId = localStorage.getItem('cotizacionId');
+            } catch (error) {
+                console.error('Error al guardar cotización:', error);
+            }
+        }
+        
+        return cotizacionId;
+    }
+
+    // Función para forzar el guardado de cotización (para depuración)
+    window.forzarGuardado = async function() {
+        try {
+            await guardarCotizacion();
+            alert('Cotización guardada exitosamente. Revisa la consola para más detalles.');
+        } catch (error) {
+            console.error('Error al forzar guardado:', error);
+            alert('Error al guardar la cotización. Revisa la consola para más detalles.');
+        }
+    };
+
+    // Función para enviar cotización por WhatsApp
+    window.enviarWhatsApp = async function() {
+        // Asegurar que siempre haya un ID antes de enviar
+        const cotizacionId = await asegurarCotizacionId();
+        
+        // Mostrar el modal personalizado
+        const modal = document.getElementById('modal-whatsapp');
+        const input = document.getElementById('input-numero-whatsapp');
+        const error = document.getElementById('error-numero-whatsapp');
+        modal.classList.add('visible');
+        input.value = '';
+        error.classList.add('hidden');
+        input.focus();
+    };
+
+    // Listeners para el modal de WhatsApp 
+    document.getElementById('btn-cerrar-whatsapp').onclick = function() {
+        document.getElementById('modal-whatsapp').classList.remove('visible');
+    };
+    
+    document.getElementById('btn-enviar-whatsapp').onclick = async function() {
+        const input = document.getElementById('input-numero-whatsapp');
+        const error = document.getElementById('error-numero-whatsapp');
+        let numeroUsuario = input.value.replace(/\D/g, '');
+        if (numeroUsuario.length !== 10) {
+            error.classList.remove('hidden');
+            return;
+        }
+        error.classList.add('hidden');
+        const numeroWhatsApp = '57'+numeroUsuario;
+        
+        // Asegurar que siempre haya un ID de cotización
+        const cotizacionId = await asegurarCotizacionId();
+        let mensaje;
+        
+        if (cotizacionId) {
+            // Crear URL de la cotización compartible usando resultado.html
+            const urlCotizacion = `${window.location.origin}/Calculadora/frontend/cotizacion-compartida.html?id=${cotizacionId}`;
+            mensaje = `Hola, aquí tienes tu cotización de Tecmilenio: ${urlCotizacion}`;
+        } else {
+            // Fallback si no hay ID de cotización
+            mensaje = 'Hola, aquí tienes tu cotización de Tecmilenio.';
+        }
+        
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
+        window.open(urlWhatsApp, '_blank');
+        document.getElementById('modal-whatsapp').classList.remove('visible');
+    };
+
+    // Guardado automático solo si no hay cotización guardada
+    if (!localStorage.getItem('cotizacionId')) {
+        await guardarCotizacion();
+    }
+
+    // Si tienes un botón para guardar una nueva cotización, puedes agregar esto:
+    const btnGuardar = document.getElementById('btn-guardar-cotizacion');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', async function() {
+            localStorage.removeItem('cotizacionId');
+            await guardarCotizacion();
+        });
+    }
 });

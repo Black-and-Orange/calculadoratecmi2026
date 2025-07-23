@@ -1,4 +1,6 @@
-const apiUrlCampus = 'https://tecmilenio-calculadora-backend.testingbo.com/api/campus';
+import { API_BASE_URL } from '../apiConfig.js';
+
+const apiUrlCampus = `${API_BASE_URL}/campus`;
 
 // Función genérica para cargar campus de cualquier nivel
 function loadCampus(level, containerId) {
@@ -51,13 +53,28 @@ function loadCampus(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;
+    
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
         loadCampus(level, '#campusNivel' + level);
-
-        // Asociar eventos para crear campus de niveles dinámicos
-        handleCreateCampus(level, '#createCampusNivel' + level + 'Form', '#campusNivel' + level + 'Name', '#campusNivel' + level + 'Category', '#loadCampusNivel' + level);
     }
+
+    // Delegación de eventos para formularios de creación de campus
+    $(document).on('submit', 'form[id^="createcampusNivel"][id$="Form"]', function(event) {
+        event.preventDefault();
+        const formId = $(this).attr('id');
+        // Extraer el número de nivel del id del formulario
+        const nivelMatch = formId.match(/createcampusNivel(\d+)Form/);
+        if (!nivelMatch) return;
+        const level = parseInt(nivelMatch[1]);
+        const name = $(`#campusNivel${level}Name`).val();
+        const category = $(`#campusNivel${level}Category`).val();
+        createCampus(level, name, category, function () {
+            $(`#campusNivel${level}Name`).val('');
+            $(`#campusNivel${level}Category`).val('');
+            loadCampus(level, '#campusNivel' + level);
+        });
+    });
 
     // Función genérica para crear campus
     function createCampus(level, name, category, callback) {
@@ -72,27 +89,11 @@ $(document).ready(function () {
             .then(data => callback())
             .catch(error => console.error('Error creating campus:', error));
     }
-
-    // Función para gestionar la creación de campus para cualquier nivel
-    function handleCreateCampus(level, formId, nameInputId, categoryInputId, loadCampusBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const name = $(nameInputId).val();
-            const category = $(categoryInputId).val();
-            createCampus(level, name, category, function () {
-                $(nameInputId).val('');
-                $(categoryInputId).val('');
-                loadCampus(level, '#campusNivel' + level);
-            });
-        });
-    }
 });
 
 // Función para eliminar campus
 function deleteCampus(id, level) {
-    console.log(`Intentando eliminar campus con id: ${id}, nivel: ${level}`);
-
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/${id}`, {
+    fetch(`${API_BASE_URL}/campus/${id}`, {
         method: 'DELETE',
     })
         .then(response => {
@@ -111,7 +112,7 @@ function editCampus(id, currentName, currentCategory, level) {
     const newName = prompt('Nuevo nombre del campus:', currentName);
     const newCategory = prompt('Nueva categoría del campus:', currentCategory);
     if (newName && newCategory) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/campus/${id}`, {
+        fetch(`${API_BASE_URL}/campus/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -129,3 +130,7 @@ function editCampus(id, currentName, currentCategory, level) {
             .catch(error => console.error('Error editing campus:', error));
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteCampus = deleteCampus;
+window.editCampus = editCampus;

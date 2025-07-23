@@ -25,8 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Getting the width of the browser whenever the screen resolution changes.
             // window.addEventListener('resize', widthResizer)
-
-            // console.log(currentWidth)
             if (currentWidth < 1024) {
               elem.querySelector('.show').classList.toggle("hidden");
               elem.querySelector('.close').classList.toggle("hidden");
@@ -56,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
           elem.addEventListener('click', (event) => {
             event.preventDefault();
             let hash = event.currentTarget.getAttribute('href').replace('#', '');
-            console.log(hash);
 
             const id = hash;
             const yOffset = -120;
@@ -225,17 +222,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 hasError = false;
               }
 
-
-              if (selectPeriod.value == "") {
-                selectPeriod.classList.add("error");
-                selectPeriodMsg.classList.add("error");
-                hasError = true;
-                canContinue();
-                break;
+              // --- VALIDACIÓN DE PERÍODOS SEGÚN NIVEL ---
+              const nivelSelect = document.getElementById('select-grade');
+              let nivelValue = nivelSelect ? nivelSelect.value : '';
+              let isNivel13 = false;
+              if (nivelValue) {
+                // Buscar el texto del nivel seleccionado
+                const selectedOption = nivelSelect.options[nivelSelect.selectedIndex];
+                if (selectedOption && selectedOption.textContent.toLowerCase().includes('ejecutivo maps bimestral')) {
+                  isNivel13 = true;
+                }
+              }
+              if (isNivel13) {
+                // Validar el select múltiple
+                const selectMultiple = document.getElementById('select-periodos-multiple');
+                const selectedOptions = selectMultiple ? Array.from(selectMultiple.selectedOptions) : [];
+                const selectedIndexes = selectedOptions.map(opt => parseInt(opt.getAttribute('data-index'))).sort((a, b) => a - b);
+                let sonConsecutivos = true;
+                for (let i = 1; i < selectedIndexes.length; i++) {
+                  if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
+                    sonConsecutivos = false;
+                    break;
+                  }
+                }
+                if (selectedIndexes.length === 0 || !sonConsecutivos) {
+                  selectMultiple.classList.add('error');
+                  // Mensaje de error visual
+                  let errorMsg = document.getElementById('periodos-error-msg');
+                  if (!errorMsg) {
+                    errorMsg = document.createElement('p');
+                    errorMsg.id = 'periodos-error-msg';
+                    errorMsg.className = 'text-sm text-red-600 mt-2';
+                    errorMsg.textContent = selectedIndexes.length === 0 ? 'Este campo es necesario' : 'Solo puedes seleccionar períodos consecutivos';
+                    selectMultiple.parentElement.appendChild(errorMsg);
+                  } else {
+                    errorMsg.textContent = selectedIndexes.length === 0 ? 'Este campo es necesario' : 'Solo puedes seleccionar períodos consecutivos';
+                  }
+                  hasError = true;
+                  canContinue();
+                  break;
+                } else {
+                  selectMultiple.classList.remove('error');
+                  let errorMsg = document.getElementById('periodos-error-msg');
+                  if (errorMsg) errorMsg.remove();
+                  hasError = false;
+                }
               } else {
-                selectPeriod.classList.remove("error");
-                selectPeriodMsg.classList.remove("error");
-                hasError = false;
+                // Validación tradicional para otros niveles
+                if (selectPeriod.value == "") {
+                  selectPeriod.classList.add("error");
+                  selectPeriodMsg.classList.add("error");
+                  hasError = true;
+                  canContinue();
+                  break;
+                } else {
+                  selectPeriod.classList.remove("error");
+                  selectPeriodMsg.classList.remove("error");
+                  hasError = false;
+                }
               }
 
               if (selectCampus.value == "") {
@@ -263,7 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               if (divMateriales.style.display !== "none") {
-                console.log("pasa en materias");
                 
                 if (selectSubjects.value == "") {
                   selectSubjects.classList.add("error");
@@ -313,7 +356,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 canContinue();
                 break;
               } else {
-                console.log("pasa en vive");
                 txtVive.classList.remove("error");
                 txtViveMsg.classList.remove("error");
                 hasError = false;
@@ -345,7 +387,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 canContinue();
                 break;
               } else {
-                console.log("pasa en cobertura estudiantil");
 
                 selectCoverage.classList.remove("error");
                 selectCoverageMsg.classList.remove("error");
@@ -389,18 +430,16 @@ document.addEventListener("DOMContentLoaded", () => {
         fieldAvg2 = document.querySelectorAll(".field-avg-2"),
         fieldAvg3 = document.querySelectorAll(".field-avg-3");
 
+      if (txtAverageMark) {
       txtAverageMark.addEventListener('keyup', () => {
         if (txtAverageMark.value != "") {
-
             fieldAvg1.forEach(function (elem, index) {
               elem.classList.remove("hidden");
             });
             fieldAvg2.forEach(function (elem, index) {
               elem.classList.remove("hidden");
             });
-          
         } else {
-          console.log("No se ingresó promedio");
           fieldAvg1.forEach(function (elem, index) {
             elem.classList.add("hidden");
           });
@@ -412,6 +451,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
       });
+      }
     }
 
     const printController = () => {
@@ -424,7 +464,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btnPrint) {
         btnPrint.addEventListener('click', function (e) {
           e.preventDefault();
-          console.log("PRINT!");
 
 
           viewportElem.setAttribute('content', 'width=1440');
@@ -498,9 +537,6 @@ document.addEventListener("DOMContentLoaded", () => {
             newRow.classList.add("flex", "flex-row", "flex-wrap", "justify-center");
             columnsContainer.append(newRow);
           }
-
-          console.log(newRow)
-          console.log(i)
 
           let newColumn = document.createElement("div")
           newColumn.classList.add("px-4", "w-full", "md:w-1/2", "xl:w-1/4", "relative", "mt-24");

@@ -24,10 +24,21 @@ const interesesRoutes = require('./routes/interesesRoutes');
 const creditosRoutes = require('./routes/creditosRoutes');
 const prestamosRoutes = require('./routes/prestamosRoutes');
 const authRoutes = require('./routes/authRoutes');
+const pagosBimestralesRoutes = require('./routes/pagosBimestralesRoutes');
+const configuracionVigenciaRoutes = require('./routes/configuracionVigenciaRoutes');
+const cotizacionesRoutes = require('./routes/cotizacionesRoutes');
 
 const app = express();
+
+// Configuración CORS más específica
+app.use(cors({
+    origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000', 'http://127.0.0.1:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true
+}));
+
 app.use(bodyParser.json());
-app.use(cors());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/apoyos', apoyosRoutes);
@@ -51,6 +62,9 @@ app.use('/api/semanas', semanasSEDIRoutes);
 app.use('/api/intereses', interesesRoutes);
 app.use('/api/creditos', creditosRoutes);
 app.use('/api/prestamos', prestamosRoutes);
+app.use('/api/pagos-bimestrales', pagosBimestralesRoutes);
+app.use('/api/configuracion-vigencia', configuracionVigenciaRoutes);
+app.use('/api/cotizaciones', cotizacionesRoutes);
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {

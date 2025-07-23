@@ -1,11 +1,10 @@
-const apiUrlIngles = 'https://tecmilenio-calculadora-backend.testingbo.com/api/ingles';
+import { API_BASE_URL } from '../apiConfig.js';
+
+const apiUrlIngles = `${API_BASE_URL}/ingles`;
 
 // Función genérica para cargar ingles de cualquier nivel
 function loadIngles(level, containerId) {
     const container = $(containerId);
-
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
     fetch(`${apiUrlIngles}/nivel/${level}`)
@@ -15,34 +14,31 @@ function loadIngles(level, containerId) {
                 data.sort((a, b) => a.num_ingles - b.num_ingles);
 
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Número de Ingles</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Número de Ingles</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                 data.forEach(ingles => {
                     tableHtml += `
-                            <tr>
-                                <td>${ingles.num_ingles}</td>
-                                <td>
-                                    <button onclick="deleteIngles(${ingles.id}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editIngles(${ingles.id}, ${ingles.num_ingles}, ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                        <tr>
+                            <td>${ingles.num_ingles}</td>
+                            <td>
+                                <button onclick="deleteIngles(${ingles.id}, ${level})" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button onclick="editIngles(${ingles.id}, ${ingles.num_ingles}, ${level})" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>`;
                 });
 
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
+                tableHtml += `</tbody></table>`;
                 container.html(tableHtml);
             } else {
                 container.html('<p>No se encontraron ingles para este nivel.</p>');
@@ -52,12 +48,33 @@ function loadIngles(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 12;  // Definir el nivel máximo dinámicamente si cambia en el futuro
+    const maxLevel = 13;
     for (let level = 1; level <= maxLevel; level++) {
         loadIngles(level, '#inglesNivel' + level);
-
-        handleCreateIngles(level, '#createInglesNivel' + level + 'Form', '#inglesNivel' + level + 'Ingles', '#loadInglesNivel' + level);
     }
+
+    // Delegación de eventos para formularios de creación de inglés
+    $(document).on('submit', 'form[id^="createInglesNivel"][id$="Form"]', function(event) {
+        event.preventDefault();
+        const formId = $(this).attr('id');
+        const nivelMatch = formId.match(/createInglesNivel(\d+)Form/);
+        if (!nivelMatch) return;
+        const level = parseInt(nivelMatch[1]);
+        const numeroIngles = $(`#inglesNivel${level}Ingles`).val();
+        createIngles(level, numeroIngles, function () {
+            $(`#inglesNivel${level}Ingles`).val('');
+            loadIngles(level, '#inglesNivel' + level);
+        });
+    });
+
+    // Recargar la tabla al hacer clic en la pestaña de inglés
+    $(document).on('click', 'a[id^="ingles-"][id$="-tab"]', function() {
+        const nivelMatch = $(this).attr('id').match(/ingles-(\d+)-tab/);
+        if (nivelMatch) {
+            const nivelId = parseInt(nivelMatch[1]);
+            loadIngles(nivelId, '#inglesNivel' + nivelId);
+        }
+    });
 
     // Función genérica para crear ingles
     function createIngles(level, numeroIngles, callback) {
@@ -72,25 +89,11 @@ $(document).ready(function () {
             .then(data => callback())
             .catch(error => console.error('Error creating ingles:', error));
     }
-
-    // Función para gestionar la creación de ingles para cualquier nivel
-    function handleCreateIngles(level, formId, numeroInputId, loadInglesBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const numeroIngles = $(numeroInputId).val();
-            createIngles(level, numeroIngles, function () {
-                $(numeroInputId).val('');  // Limpiar el campo de entrada
-                loadIngles(level, '#inglesNivel' + level);
-            });
-        });
-    }
-
-
 });
 
 // Función para eliminar ingles
 function deleteIngles(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/ingles/${id}`, {
+    fetch(`${apiUrlIngles}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
@@ -104,7 +107,7 @@ function deleteIngles(id, level) {
 function editIngles(id, currentNumero, level) {
     const newNumero = prompt('Nuevo número de ingles:', currentNumero);
     if (newNumero) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/ingles/${id}`, {
+        fetch(`${apiUrlIngles}/${id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -118,3 +121,7 @@ function editIngles(id, currentNumero, level) {
             .catch(error => console.error('Error editing ingles:', error));
     }
 }
+
+// Exponer funciones al ámbito global para los botones onclick
+window.deleteIngles = deleteIngles;
+window.editIngles = editIngles;

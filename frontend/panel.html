@@ -55,13 +55,126 @@
         </div>
     </section>
 
+    <section class="configuracion-vigencia">
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Configuración de Vigencia</h3>
+                            <button id="toggleVigenciaBtn" class="btn btn-sm btn-outline-secondary" title="Mostrar/Ocultar">
+                                <i id="toggleVigenciaIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="vigenciaConfigSection" style="display:none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label id="labelDiasActuales" class="font-weight-bold mb-2">Días actuales de vigencia: ...</label>
+                                        <label for="diasVigencia">Días de vigencia de la propuesta:</label>
+                                        <input type="number" class="form-control" id="diasVigencia" min="1" max="365" value="" placeholder="Nuevo valor">
+                                        <small class="form-text text-muted">Número de días que será válida la propuesta desde la fecha actual.</small>
+                                    </div>
+                                    <label id="labelFechaVigencia" class="font-weight-bold mb-2">Fecha de vigencia actual: ...</label>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <button class="btn btn-primary" onclick="actualizarDiasVigencia()">
+                                        <i class="fas fa-save"></i> Actualizar Días de Vigencia
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section>
         <div class="container mt-4">
             <div class="row">
-
                 <div class="col-12">
-                    <ul class="nav nav-tabs align-middle" id="myTab" role="tablist"></ul>
-                    <div class="tab-content" id="myTabContent"></div>
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Gestión de Niveles</h3>
+                            <button id="toggleNivelesBtn" class="btn btn-sm btn-outline-secondary" title="Mostrar/Ocultar">
+                                <i id="toggleNivelesIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="nivelesSection" style="display:none;">
+                            <ul class="nav nav-tabs align-middle" id="myTab" role="tablist"></ul>
+                            <div class="tab-content" id="myTabContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">Administración de Cotizaciones</h3>
+                            <button id="toggleCotizacionesBtn" class="btn btn-sm btn-outline-secondary" title="Mostrar/Ocultar">
+                                <i id="toggleCotizacionesIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="cotizacionesSection" style="display:none;">
+                            
+                            <div class="row mb-4 align-items-center justify-content-between">
+                                <div class="col-md-8 d-flex justify-content-md-start justify-content-center mb-2 mb-md-0">
+                                    <button id="btnRefresh" class="btn btn-secondary mr-3">
+                                        <i class="fas fa-sync-alt"></i> Actualizar
+                                    </button>
+                                    <button id="btnExportCSV" class="btn btn-success">
+                                        <i class="fas fa-download"></i> Exportar CSV
+                                    </button>
+                                </div>
+                                <div class="col-md-4 d-flex justify-content-md-end justify-content-center">
+                                    <div class="card bg-primary text-white" style="min-width: 180px;">
+                                        <div class="card-body text-center p-3">
+                                            <h4 id="totalCotizaciones" class="mb-0">0</h4>
+                                            <small>Total Cotizaciones</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla de Cotizaciones -->
+                            <div class="table-responsive">
+                                <table id="tablaCotizaciones" class="table table-striped table-hover">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Estudiante</th>
+                                            <th>Nivel</th>
+                                            <th>Campus</th>
+                                            <th>Programa</th>
+                                            <th>Total Contado</th>
+                                            <th>Total Financiado</th>
+                                            <th>Fecha</th>
+                                            <th>Detalle</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cotizacionesTableBody">
+                                        <!-- Los datos se cargarán dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="loading" class="text-center" style="display:none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Cargando cotizaciones...</p>
+                            </div>
+                            <div id="noData" class="text-center text-muted" style="display:none;">
+                                <p>No se encontraron cotizaciones</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,16 +183,40 @@
 
     <script type="module">
         import { niveles } from './js/control/tabs.js';
+        import { API_BASE_URL } from './js/apiConfig.js';
+
+        // Función utilitaria para generar el id del div de cada pestaña
+        function getTabDivId(pestaña, nivel) {
+            let base = pestaña.id ? pestaña.id : pestaña.nombre;
+            return base.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() + 'Nivel' + nivel.id;
+        }
 
         const createForm = (nivel, pestaña, fields) => {
-
+            // Si es pagos-bimestrales, usar los IDs exactos que busca el JS
+            if (pestaña.id === 'pagos-bimestrales') {
+                const pagosFields = [
+                    { id: `createpagosbimestralesNivel${nivel.id}Codigo`, name: 'codigo', placeholder: 'Código' },
+                    { id: `createpagosbimestralesNivel${nivel.id}Bimestre`, name: 'bimestre', placeholder: 'Bimestre (número)' },
+                    { id: `createpagosbimestralesNivel${nivel.id}Mes`, name: 'mes', placeholder: 'Mes (ej: Agosto, Octubre)' },
+                    { id: `createpagosbimestralesNivel${nivel.id}Orden`, name: 'pago_orden', placeholder: 'Orden de pago (número)' },
+                    { id: `createpagosbimestralesNivel${nivel.id}PorcentajeParcialidad`, name: 'porcentaje_parcialidad', placeholder: '% Parcialidad' },
+                    { id: `createpagosbimestralesNivel${nivel.id}PorcentajeInteres`, name: 'porcentaje_interes', placeholder: '% Interés Financiero' }
+                ];
+                return `
+                <div id="pagosbimestralesNivel${nivel.id}"></div>
+                    <form id="createpagosbimestralesNivel${nivel.id}Form">
+                    ${pagosFields.map(field => `
+                    <input type="text" class="form-control" id="${field.id}" name="${field.name}" placeholder="${field.placeholder}" required>`).join('')}
+                        <button type="submit" class="btn btn-success">Crear ${pestaña.nombre}</button>
+                    </form>
+                `;
+            }
+            // Para los demás, poner name igual al id del campo
             return `
-            
-            <div id="${pestaña.nombre.toLowerCase()}Nivel${nivel.id}"></div>
-                <form id="create${pestaña.nombre}Nivel${nivel.id}Form">
-
+            <div id="${getTabDivId(pestaña, nivel)}"></div>
+                <form id="create${getTabDivId(pestaña, nivel)}Form">
                 ${fields.map(field => `
-                <input type="text" class="form-control" id="${pestaña.nombre.toLowerCase()}Nivel${nivel.id}${field.id}" placeholder="${field.placeholder}" required>`).join('')}
+                <input type="text" class="form-control" id="${getTabDivId(pestaña, nivel)}${field.id}" name="${field.id}" placeholder="${field.placeholder}" required>`).join('')}
                     <button type="submit" class="btn btn-success">Crear ${pestaña.nombre}</button>
                 </form>
             `;
@@ -131,10 +268,10 @@
                     { id: 'Certificados', placeholder: 'Número de certificados' }
                 ],
                 'ingles': [
-                    { id: 'Ingles', placeholder: 'Número de cursos de inglés' }
+                    { id: 'Ingles', placeholder: 'Número de certificados de inglés' }
                 ],
                 'semanas': [
-                    { id: 'Semanas', placeholder: 'Número de semanas SEDI' }
+                    { id: 'Semanas', placeholder: 'Número de semanas de desarrollo integral' }
                 ],
                 'carga-creditos': [
                     { id: 'Creditos', placeholder: 'Número de créditos' }
@@ -155,6 +292,15 @@
                 'formato_asociado': [
                     { id: 'Formato', placeholder: 'Formato Asociado' },
                     { id: 'Costo', placeholder: 'Costo' }
+                ],
+                'pagos-bimestrales': [
+                    { id: 'Codigo', placeholder: 'Código' },
+                    { id: 'Bimestre', placeholder: 'Bimestre (número)' },
+                    { id: 'Mes', placeholder: 'Mes (ej: Agosto, Octubre)' },
+                    { id: 'Orden', placeholder: 'Orden de pago (número)' },
+                    { id: 'PorcentajeParcialidad', placeholder: '% Parcialidad' },
+                    { id: 'PorcentajeInteres', placeholder: '% Interés Financiero' },
+                    { id: 'FechaVencimiento', placeholder: 'Fecha de vencimiento (YYYY-MM-DD)' }
                 ]
             };
 
@@ -223,8 +369,7 @@
         checkSession();
 
         // Función de cierre de sesión
-        document.getElementById('logoutButton').addEventListener('click', () => {
-            console.log('Cerrando sesión');
+        document.getElementById('logoutButton').addEventListener('click', () => {  
             
             // Eliminar el token de la sesión
             localStorage.removeItem('token');
@@ -233,7 +378,7 @@
         });
     </script>
 
-    <script>
+    <script type="module">
         // Manejar el formulario de registro
         document.getElementById('registerForm').addEventListener('submit', async (event) => {
             event.preventDefault(); // Previene el envío del formulario
@@ -242,7 +387,7 @@
             const password = document.getElementById('register_contrasena').value;
 
             try {
-                const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/auth/register', {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -268,24 +413,130 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="js/control/controlCampus.js"></script>
-    <script src="js/control/controlBecas.js"></script>
-    <script src="js/control/controlBeneficios.js"></script>
-    <script src="js/control/controlPlanes.js"></script>
-    <script src="js/control/controlApoyos.js"></script>
-    <script src="js/control/controlApoyosFijos.js"></script>
-    <script src="js/control/controlCreditos.js"></script>
-    <script src="js/control/controlPrestamos.js"></script>
-    <script src="js/control/controlInteres.js"></script>
-    <script src="js/control/controlCostos.js"></script>
-    <script src="js/control/controlFormato.js"></script>
-    <script src="js/control/controlFormatoAsociado.js"></script>
-    <script src="js/control/controlMaterias.js"></script>
-    <script src="js/control/controlCertificados.js"></script>
-    <script src="js/control/controlIngles.js"></script>
-    <script src="js/control/controlSemanas.js"></script>
-    <script src="js/control/controlPeriodo.js"></script>
-    <script src="js/control/controlSeguros.js"></script>
+    <script type="module" src="js/control/controlCampus.js"></script>
+    <script type="module" src="js/control/controlBecas.js"></script>
+    <script type="module" src="js/control/controlBeneficios.js"></script>
+    <script type="module" src="js/control/controlPlanes.js"></script>
+    <script type="module" src="js/control/controlApoyos.js"></script>
+    <script type="module" src="js/control/controlApoyosFijos.js"></script>
+    <script type="module" src="js/control/controlCreditos.js"></script>
+    <script type="module" src="js/control/controlPrestamos.js"></script>
+    <script type="module" src="js/control/controlInteres.js"></script>
+    <script type="module" src="js/control/controlCostos.js"></script>
+    <script type="module" src="js/control/controlFormato.js"></script>
+    <script type="module" src="js/control/controlFormatoAsociado.js"></script>
+    <script type="module" src="js/control/controlMaterias.js"></script>
+    <script type="module" src="js/control/controlCertificados.js"></script>
+    <script type="module" src="js/control/controlIngles.js"></script>
+    <script type="module" src="js/control/controlSemanas.js"></script>
+    <script type="module" src="js/control/controlPeriodo.js"></script>
+    <script type="module" src="js/control/controlSeguros.js"></script>
+    <script type="module" src="js/control/controlPagosBimestrales.js"></script>
+    <script type="module" src="js/admin.js"></script>
+    <script type="module" src="js/admin-cotizaciones-panel.js"></script>
 
 
     </script>
+
+    <!-- Script de prueba para debug -->
+    <script type="module">
+        import { API_BASE_URL } from './js/apiConfig.js';
+        
+        // Prueba simple de conexión
+        fetch(`${API_BASE_URL}/nivel`)
+            .then(response => {
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error en la conexión:', error);
+            });
+    </script>
+
+    <script type="module">
+    // Script para mostrar/ocultar la sección de vigencia
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('toggleVigenciaBtn');
+        const section = document.getElementById('vigenciaConfigSection');
+        const icon = document.getElementById('toggleVigenciaIcon');
+        if (btn && section && icon) {
+            btn.addEventListener('click', () => {
+                if (section.style.display === 'none') {
+                    section.style.display = '';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    section.style.display = 'none';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Script para mostrar/ocultar la sección de niveles
+        const btnNiveles = document.getElementById('toggleNivelesBtn');
+        const sectionNiveles = document.getElementById('nivelesSection');
+        const iconNiveles = document.getElementById('toggleNivelesIcon');
+        if (btnNiveles && sectionNiveles && iconNiveles) {
+            btnNiveles.addEventListener('click', () => {
+                if (sectionNiveles.style.display === 'none') {
+                    sectionNiveles.style.display = '';
+                    iconNiveles.classList.remove('fa-eye');
+                    iconNiveles.classList.add('fa-eye-slash');
+                } else {
+                    sectionNiveles.style.display = 'none';
+                    iconNiveles.classList.remove('fa-eye-slash');
+                    iconNiveles.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Script para mostrar/ocultar la sección de cotizaciones
+        const btnCotizaciones = document.getElementById('toggleCotizacionesBtn');
+        const sectionCotizaciones = document.getElementById('cotizacionesSection');
+        const iconCotizaciones = document.getElementById('toggleCotizacionesIcon');
+        if (btnCotizaciones && sectionCotizaciones && iconCotizaciones) {
+            btnCotizaciones.addEventListener('click', () => {
+                if (sectionCotizaciones.style.display === 'none') {
+                    sectionCotizaciones.style.display = '';
+                    iconCotizaciones.classList.remove('fa-eye');
+                    iconCotizaciones.classList.add('fa-eye-slash');
+                    // Cargar datos cuando se abre la sección
+                    if (typeof cargarCotizaciones === 'function') {
+                        cargarCotizaciones();
+                    }
+                } else {
+                    sectionCotizaciones.style.display = 'none';
+                    iconCotizaciones.classList.remove('fa-eye-slash');
+                    iconCotizaciones.classList.add('fa-eye');
+                }
+            });
+        }
+    });
+    </script>
+
+    <!-- Modal para detalle de cotización -->
+    <div class="modal fade" id="detalleCotizacionModal" tabindex="-1" role="dialog" aria-labelledby="detalleCotizacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalleCotizacionModalLabel">Detalle de Cotización</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleCotizacionContent">
+                        <!-- El contenido se llenará dinámicamente -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnVerCotizacion">Ver Cotización Completa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</div>

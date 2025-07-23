@@ -1,121 +1,131 @@
-const apiUrlApoyosFijos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/apoyosFijos';
+import { API_BASE_URL } from '../apiConfig.js';
 
-// Función genérica para cargar apoyos de cualquier nivel
-function loadApoyosFijos(level, containerId) {
-
+// Función para cargar apoyos fijos por nivel (scope global)
+function loadApoyosFijos(nivelId, containerId) {
     const container = $(containerId);
-
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
-    console.log(`${apiUrlApoyosFijos}/nivel/${level}`);
-    fetch(`${apiUrlApoyosFijos}/nivel/${level}`)
+    fetch(`${API_BASE_URL}/apoyosFijos/nivel/${nivelId}`)
         .then(response => response.json())
         .then(data => {
-
             if (Array.isArray(data) && data.length > 0) {
                 data.sort((a, b) => a.valor - b.valor);
-
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Valor</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-                data.forEach(apoyos => {
-                    tableHtml += `
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td>${Math.floor(apoyos.valor)}</td>
-                                <td>
-                                    <button onclick="deleteApoyosFijos(${apoyos.id}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editApoyosFijos(${apoyos.id}, '${apoyos.nombre}', ${apoyos.valor}, ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                                <th>Valor</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                data.forEach(apoyo => {
+                    tableHtml += `
+                        <tr>
+                            <td>${Math.floor(apoyo.valor)}</td>
+                            <td>
+                                <button onclick="deleteApoyosFijos(${apoyo.id}, ${nivelId})" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+                                <button onclick="editApoyosFijos(${apoyo.id}, ${nivelId})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>`;
                 });
-
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
-                container.html(tableHtml);
+                tableHtml += `</tbody></table>`;
+                container.html(tableHtml).show();
             } else {
-                container.html('<p>No se encontraron apoyos para este nivel.</p>');
+                container.html('<p>No se encontraron apoyos fijos para este nivel.</p>').show();
             }
         })
-        .catch(error => console.error('Error fetching apoyos:', error));
+        .catch(error => console.error('Error fetching apoyos fijos:', error));
 }
-$(document).ready(function () {
-    const maxLevel = 12;
-    for (let level = 1; level <= maxLevel; level++) {
-        loadApoyosFijos(level, '#apoyosfijosNivel' + level);
+window.loadApoyosFijos = loadApoyosFijos;
 
-        // Asociar eventos para crear apoyos de niveles dinámicos
-        handleCreateApoyosFijos(level, '#createApoyosFijosNivel' + level + 'Form', '#apoyosfijosNivel' + level + 'Valor');
-    }
-
-    // Función genérica para crear apoyos
-    function createApoyosFijos(level, percentage, callback) {
-        fetch(apiUrlApoyosFijos, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ valor: percentage, nivel_id: level }),
-        })
-            .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating apoyos:', error));
-    }
-
-    // Función para gestionar la creación de apoyos para cualquier nivel
-    function handleCreateApoyosFijos(level, formId, percentageInputId, loadApoyosFijosBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const percentage = $(percentageInputId).val();
-            createApoyosFijos(level, percentage, function () {
-                $(percentageInputId).val('');
-                loadApoyosFijos(level, '#apoyosfijosNivel' + level);
-            });
-        });
-    }
-
-});
-
-// Función para eliminar apoyos
-function deleteApoyosFijos(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyosFijos/${id}`, {
+// Función para eliminar un apoyo fijo (scope global)
+function deleteApoyosFijos(id, nivelId) {
+    fetch(`${API_BASE_URL}/apoyosFijos/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            loadApoyosFijos(level, '#apoyosfijosNivel' + level);
+            $(`#apoyosfijosNivel${nivelId}`).empty();
+            loadApoyosFijos(nivelId, `#apoyosfijosNivel${nivelId}`);
         })
-        .catch(error => console.error('Error deleting apoyos:', error));
+        .catch(error => console.error('Error deleting apoyo fijo:', error));
 }
+window.deleteApoyosFijos = deleteApoyosFijos;
 
-// Función para editar apoyos
-function editApoyosFijos(id, currentName, currentPercentage, level) {
-    const newPercentage = prompt('Nuevo valor del apoyo:', currentPercentage);
-    if (newPercentage) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/apoyosFijos/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ valor: newPercentage }),
+// Función para editar un apoyo fijo (scope global)
+function editApoyosFijos(id, nivelId) {
+    fetch(`${API_BASE_URL}/apoyosFijos/${id}`)
+        .then(response => response.json())
+        .then(apoyo => {
+            const valor = prompt('Nuevo valor del apoyo fijo:', apoyo.valor);
+            if (valor !== null && valor !== '') {
+                fetch(`${API_BASE_URL}/apoyosFijos/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ valor: parseFloat(valor), nivel_id: nivelId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        $(`#apoyosfijosNivel${nivelId}`).empty();
+                        loadApoyosFijos(nivelId, `#apoyosfijosNivel${nivelId}`);
+                    })
+                    .catch(error => console.error('Error editing apoyo fijo:', error));
+            }
+        })
+        .catch(error => console.error('Error fetching apoyo fijo:', error));
+}
+window.editApoyosFijos = editApoyosFijos;
+
+// Inicialización y binds de eventos
+$(document).ready(function () {
+    const apiUrl = `${API_BASE_URL}/apoyosFijos`;
+    const nivelesApoyosFijos = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+
+    // Cargar datos iniciales
+    nivelesApoyosFijos.forEach(nivelId => {
+        loadApoyosFijos(nivelId, '#apoyosfijosNivel' + nivelId);
+    });
+
+    // Cargar datos cuando se hace clic en la pestaña de apoyos fijos
+    $(document).on('click', 'a[id^="apoyos-fijos-"][id$="-tab"]', function() {
+        const nivelMatch = $(this).attr('id').match(/apoyos-fijos-(\d+)-tab/);
+        if (nivelMatch) {
+            const nivelId = parseInt(nivelMatch[1]);
+            loadApoyosFijos(nivelId, '#apoyosfijosNivel' + nivelId);
+        }
+    });
+
+    // Configurar formularios de creación
+    nivelesApoyosFijos.forEach(nivelId => {
+        handleCreateApoyosFijos(
+            nivelId,
+            '#createapoyosfijosNivel' + nivelId + 'Form',
+            '#apoyosfijosNivel' + nivelId + 'Valor'
+        );
+    });
+
+    // Función para crear un apoyo fijo
+    function createApoyosFijos(nivelId, valor, callback) {
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ valor: parseFloat(valor), nivel_id: nivelId })
         })
             .then(response => response.json())
-            .then(data => {
-                loadApoyosFijos(level, '#apoyosfijosNivel' + level);
-            })
-            .catch(error => console.error('Error editing apoyos:', error));
+            .then(data => callback())
+            .catch(error => console.error('Error creating apoyo fijo:', error));
     }
-}
+
+    // Manejar el formulario de creación
+    function handleCreateApoyosFijos(nivelId, formId, valorId) {
+        $(formId).submit(function (event) {
+            event.preventDefault();
+            const valor = $(valorId).val();
+            createApoyosFijos(nivelId, valor, function () {
+                $(formId)[0].reset();
+                loadApoyosFijos(nivelId, '#apoyosfijosNivel' + nivelId);
+            });
+        });
+    }
+});

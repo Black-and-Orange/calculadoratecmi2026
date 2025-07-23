@@ -1,15 +1,16 @@
+import { API_BASE_URL } from '../apiConfig.js';
+
 // Espera a que el DOM se haya cargado completamente
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Selectores de elementos del DOM
+    // Selectores de elementos del DOM (todos en plural para coincidir con los endpoints y apiConfigs)
     const selectors = {
         grade: document.getElementById('select-grade'),
-        plan: document.getElementById('select-plan'),
+        planes: document.getElementById('select-plan'),
         campus: document.getElementById('select-campus'),
-        period: document.getElementById('select-period'),
-        subjects: document.getElementById('select-subjects'),
-        subjectsLabel: document.querySelector('label[for="select-subjects"]'),
-        certificado: document.getElementById('select-certificado'),
+        periodo: document.getElementById('select-period'),
+        materias: document.getElementById('select-subjects'),
+        certificados: document.getElementById('select-certificado'),
         semanas: document.getElementById('select-semanas'),
         ingles: document.getElementById('select-ingles'),
         divCertificado: document.querySelector('#select-certificado').closest('div.flex-wrap'),
@@ -20,16 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         formatoSelect: document.getElementById('select-formato')
     };
 
-    // Configuración de URLs y propiedades de la API
+    // Configuración de URLs y propiedades de la API (todas las claves en plural)
     const apiConfigs = {
-        grade: { url: 'https://tecmilenio-calculadora-backend.testingbo.com/api/nivel', property: 'descripcion' },
-        plan: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/planes/nivel/', property: 'descripcion' },
-        campus: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/campus/nivel/', property: 'nombre' },
-        period: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/periodo/nivel/', property: 'periodo_descripcion' },
-        subjects: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/materias/nivel/', property: 'numero' },
-        certificado: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/', property: 'num_certificados' },
-        semanas: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/semanas/nivel/', property: 'num_semanas' },
-        ingles: { baseUrl: 'https://tecmilenio-calculadora-backend.testingbo.com/api/ingles/nivel/', property: 'num_ingles' }
+        grade: { url: `${API_BASE_URL}/nivel`, property: 'descripcion' },
+        planes: { baseUrl: `${API_BASE_URL}/planes/nivel/`, property: 'descripcion' },
+        campus: { baseUrl: `${API_BASE_URL}/campus/nivel/`, property: 'nombre' },
+        periodo: { baseUrl: `${API_BASE_URL}/periodo/nivel/`, property: 'periodo_descripcion' },
+        materias: { baseUrl: `${API_BASE_URL}/materias/nivel/`, property: 'numero' },
+        certificados: { baseUrl: `${API_BASE_URL}/certificados/nivel/`, property: 'num_certificados' },
+        semanas: { baseUrl: `${API_BASE_URL}/semanas/nivel/`, property: 'num_semanas' },
+        ingles: { baseUrl: `${API_BASE_URL}/ingles/nivel/`, property: 'num_ingles' }
     };
 
     let levelMapping = {};
@@ -57,8 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if ('caches' in window) {
             caches.keys().then((keyList) => {
                 return Promise.all(keyList.map((key) => caches.delete(key)));
-            }).then(() => {
-                console.log('Caché limpiado correctamente.');
             }).catch((error) => {
                 console.error('Error al limpiar el caché:', error);
             });
@@ -114,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Calcula el costo total basado en el número de certificados, semanas SEDI y cursos de inglés
     const calcularCostoTotalCertificadosSemanasIngles = (numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad) => {
-        console.log(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad);
 
         const costoCertificados = (numeroCertificados * valorCertificado) * costoUnidad;
         const costoSemanasSEDI = (numeroSemanasSEDI * valorSemanaSEDI) * costoUnidad;
@@ -126,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Obtiene los costos de materia desde la API
     const fetchCostosMateria = async (nivelId) => {
         try {
-            const response = await fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/costos/nivel/${nivelId}`);
+            const response = await fetch(`${API_BASE_URL}/costos/nivel/${nivelId}`);
             if (!response.ok) throw new Error('Error al obtener los costos de materia');
 
             const data = await response.json();
@@ -150,64 +148,201 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const costosMateria = await fetchCostosMateria(mappedLevel);
-        const numeroMaterias = parseInt(selectors.subjects.value);
+        const numeroMaterias = parseFloat(selectors.materias.value);
         const claveGenerada = costosMateria.find(item => item.clave === createKeyFromSelectors()) || { costo: 0 };
-        console.log('claveGenerada', claveGenerada);
-
         const costoMateria = claveGenerada.costo;
         let costoTotal;
 
-        // Casos específicos de niveles
-        if (mappedLevel === 2 || mappedLevel === 6 || mappedLevel === 10 || mappedLevel === 11 || mappedLevel === 12) {
-            // Cálculo basado en créditos para estos niveles
+        // --- CORRECCIÓN NIVEL 13 ---
+        if (mappedLevel === 13) {
+            // Obtener períodos seleccionados del select múltiple
+            const selectMultiple = document.getElementById('select-periodos-multiple');
+            let periodosSeleccionados = [];
+            if (selectMultiple) {
+                periodosSeleccionados = Array.from(selectMultiple.selectedOptions).map(opt => ({
+                    codigo: opt.value,
+                    mes: opt.textContent,
+                    index: parseInt(opt.getAttribute('data-index'))
+                }));
+            }
+            // Si no hay selección, costo 0
+            if (periodosSeleccionados.length === 0) {
+                costoTotal = 0;
+            } else {
+                // Sumar el costo de cada período seleccionado
+                costoTotal = 0;
+                periodosSeleccionados.forEach(periodo => {
+                    // Generar clave para cada período
+                    let periodKey = periodo.codigo;
+                    const nivelKey = selectors.grade.options[selectors.grade.selectedIndex].getAttribute('nivel_ed') || '';
+                    const planKey = selectors.planes.options[selectors.planes.selectedIndex].getAttribute('tipo_plan') || '';
+                    let campusKey = '';
+                    const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].value;
+                    if (formatoSeleccionado && formatoSeleccionado.includes('Presencial')) {
+                        campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
+                    } else if (formatoSeleccionado) {
+                        campusKey = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].getAttribute('codigo') || '';
+                    } else {
+                        campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
+                    }
+                    const claveFinal = `${periodKey}${nivelKey}${planKey}${campusKey}`;
+                    const costoPeriodo = (costosMateria.find(item => item.clave === claveFinal) || { costo: 0 }).costo;
+                    // Calcular créditos para este período
+                    const numeroCertificados = parseInt(selectors.certificados.value) || 0;
+                    const numeroSemanasSEDI = parseInt(selectors.semanas.value) || 0;
+                    const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
+                    // Sumar el costo de los créditos de este período
+                    const totalContadoBimestre = totalCreditos * costoPeriodo;
+                    costoTotal += totalContadoBimestre;
+                    // Guardar el total contado de este bimestre en localStorage
+                    localStorage.setItem('totalContado_' + periodKey, JSON.stringify(totalContadoBimestre));
+                });
+            }
+        } else if (mappedLevel === 2 || mappedLevel === 6 || mappedLevel === 10 || mappedLevel === 11 || mappedLevel === 12) {
             costoTotal = calcularCostoCreditos(numeroMaterias, costoMateria);
-
         } else if (mappedLevel === 4) {
-            // Cálculo específico para nivel 4
-            const numeroCertificados = parseInt(selectors.certificado.value);
-            const valorCertificado = parseInt(selectors.certificado.options[selectors.certificado.selectedIndex].getAttribute('valor_certificado')) || 10;
+            const numeroCertificados = parseInt(selectors.certificados.value);
+            const valorCertificado = parseInt(selectors.certificados.options[selectors.certificados.selectedIndex].getAttribute('valor_certificado')) || 10;
             const numeroSemanasSEDI = parseInt(selectors.semanas.value);
             const valorSemanaSEDI = parseInt(selectors.semanas.options[selectors.semanas.selectedIndex].getAttribute('valor_semana_sedi')) || 2;
             const numeroCursosIngles = parseInt(selectors.ingles.value);
             const valorCursoIngles = parseInt(selectors.ingles.options[selectors.ingles.selectedIndex].getAttribute('valor_curso_ingles')) || 10;
             const costoUnidad = parseInt(claveGenerada.costo);
-
             costoTotal = calcularCostoTotalCertificadosSemanasIngles(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad);
-
         } else if (mappedLevel === 5) {
-            // Cálculo para nivel 5 utilizando formato asociado
             const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].textContent;
-
-            // Busca el costo del formato seleccionado en el array de formatos
             const formatoAsociado = await fetchCostosFormato();
             const formato = formatoAsociado.find(item => item.descripcion === formatoSeleccionado);
-
             if (formato) {
                 costoFormatoAsociado = parseFloat(formato.costo);
             } else {
                 costoFormatoAsociado = 0;
             }
-
-            console.log('Costo del formato asociado:', costoFormatoAsociado);
-
-            // Usar el costo del formato en lugar del costo de la materia
             costoTotal = calcularCostoTotal(numeroMaterias, costoFormatoAsociado);
-
         } else {
-            // Cálculo estándar para otros niveles
             costoTotal = calcularCostoTotal(numeroMaterias, costoMateria);
         }
 
-        // Almacena el costo total y el nivel seleccionado en localStorage
+        // Guardar el costo total y el nivel seleccionado en localStorage
         localStorage.setItem('costoTotal', JSON.stringify(costoTotal));
         window.costoTotal = costoTotal;
         window.selectedLevelId = mappedLevel;
     };
 
+    // Función para validar que los períodos seleccionados sean consecutivos
+    const validarPeriodosConsecutivos = () => {
+        const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+        const selectedIndexes = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
+        
+        if (selectedIndexes.length === 0) {
+            // No hay períodos seleccionados, limpiar mensaje de error
+            const errorMsg = document.getElementById('periodos-error-msg');
+            if (errorMsg) errorMsg.remove();
+            return true;
+        }
+        
+        // Verificar que sean consecutivos
+        let sonConsecutivos = true;
+        for (let i = 1; i < selectedIndexes.length; i++) {
+            if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
+                sonConsecutivos = false;
+                break;
+            }
+        }
+        
+        // Mostrar o ocultar mensaje de error
+        let errorMsg = document.getElementById('periodos-error-msg');
+        if (!sonConsecutivos) {
+            if (!errorMsg) {
+                errorMsg = document.createElement('p');
+                errorMsg.id = 'periodos-error-msg';
+                errorMsg.className = 'text-sm text-red-600 mt-2';
+                errorMsg.textContent = 'Solo puedes seleccionar períodos consecutivos';
+                const container = document.getElementById('periodos-checkbox-container');
+                if (container) container.appendChild(errorMsg);
+            }
+        } else {
+            if (errorMsg) errorMsg.remove();
+        }
+        
+        return sonConsecutivos;
+    };
+
+    // Función para obtener los períodos seleccionados
+    const obtenerPeriodosSeleccionados = () => {
+        const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+        return Array.from(checkboxes).map(cb => ({
+            codigo: cb.value,
+            mes: cb.getAttribute('data-mes'),
+            index: parseInt(cb.getAttribute('data-index'))
+        })).sort((a, b) => a.index - b.index);
+    };
+
+    // Función para crear la interfaz de selección múltiple de períodos
+    const crearInterfazPeriodosMultiples = (bimestresUnicos) => {
+        const periodoContainer = selectors.periodo.parentElement;
+        const periodoLabel = periodoContainer.previousElementSibling.querySelector('label');
+        
+        // Cambiar el label
+        if (periodoLabel) periodoLabel.textContent = 'Períodos:';
+        
+        // Ocultar el select original
+        selectors.periodo.style.display = 'none';
+        
+        // Crear contenedor para checkboxes si no existe
+        let checkboxContainer = document.getElementById('periodos-checkbox-container');
+        if (!checkboxContainer) {
+            checkboxContainer = document.createElement('div');
+            checkboxContainer.id = 'periodos-checkbox-container';
+            checkboxContainer.className = 'flex flex-wrap gap-4 mt-2';
+            periodoContainer.appendChild(checkboxContainer);
+        }
+        
+        // Limpiar contenedor y crear checkboxes
+        checkboxContainer.innerHTML = '';
+        bimestresUnicos.forEach((bim, index) => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'flex items-center';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `periodo-${bim.codigo}`;
+            checkbox.value = bim.codigo;
+            checkbox.setAttribute('data-mes', bim.mes);
+            checkbox.setAttribute('data-index', index);
+            checkbox.className = 'mr-2';
+            
+            const label = document.createElement('label');
+            label.htmlFor = `periodo-${bim.codigo}`;
+            label.textContent = bim.mes;
+            label.className = 'text-sm cursor-pointer';
+            
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+            checkboxContainer.appendChild(checkboxDiv);
+            
+            // Agregar evento para validar períodos consecutivos
+            checkbox.addEventListener('change', () => {
+                validarPeriodosConsecutivos();
+                updateCosto();
+            });
+        });
+        
+        // Agregar mensaje de ayuda
+        let helpText = document.getElementById('periodos-help-text');
+        if (!helpText) {
+            helpText = document.createElement('p');
+            helpText.id = 'periodos-help-text';
+            helpText.className = 'text-sm text-gray-600 mt-2';
+            helpText.textContent = 'Selecciona períodos consecutivos únicamente';
+            checkboxContainer.appendChild(helpText);
+        }
+    };
+
     // Función para obtener el costo de los formatos asociados
     const fetchCostosFormato = async () => {
         try {
-            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado');
+            const response = await fetch(`${API_BASE_URL}/formatoAsociado`);
             if (!response.ok) throw new Error('Error al obtener los costos de formato asociado');
 
             const data = await response.json();
@@ -221,14 +356,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Genera una clave única basada en las opciones seleccionadas
     const createKeyFromSelectors = () => {
-        const periodKey = selectors.period.options[selectors.period.selectedIndex].getAttribute('periodo_codigo') || '';
+        let periodKey = '';
         const nivelKey = selectors.grade.options[selectors.grade.selectedIndex].getAttribute('nivel_ed') || '';
-        const planKey = selectors.plan.options[selectors.plan.selectedIndex].getAttribute('tipo_plan') || '';
+        const planKey = selectors.planes.options[selectors.planes.selectedIndex].getAttribute('tipo_plan') || '';
 
-        // Modificación: Verifica si la opción seleccionada en el formato es "presencial"
+        if (parseInt(localStorage.getItem('selectedNivel')) === 13) {
+            // Para nivel 13, usar el primer período seleccionado como clave
+            const periodosSeleccionados = obtenerPeriodosSeleccionados();
+            if (periodosSeleccionados.length > 0) {
+                periodKey = periodosSeleccionados[0].codigo;
+            } else {
+                periodKey = selectors.periodo.value;
+            }
+        } else {
+            periodKey = selectors.periodo.options[selectors.periodo.selectedIndex].getAttribute('periodo_codigo') || '';
+        }
+
         let campusKey = '';
         const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].value;
-
         if (formatoSeleccionado && formatoSeleccionado.includes('Presencial')) {
             campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
         } else if (formatoSeleccionado) {
@@ -236,27 +381,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
         }
-        console.log(`${periodKey}${nivelKey}${planKey}${campusKey}`);
-        return `${periodKey}${nivelKey}${planKey}${campusKey}`;
+
+        const claveFinal = `${periodKey}${nivelKey}${planKey}${campusKey}`;
+        return claveFinal;
     };
 
 
     const loadFormatoOptions = async (nivel) => {
 
         try {
-            console.log('Cargando formatos para nivel', nivel);
             // Definir la URL del endpoint según el nivel seleccionado
             let url = nivel == 5
-                ? 'https://tecmilenio-calculadora-backend.testingbo.com/api/formatoAsociado'  // Endpoint para nivel 5
-                : 'https://tecmilenio-calculadora-backend.testingbo.com/api/formato/nivel/' + nivel;  // Endpoint para otros niveles
+                ? `${API_BASE_URL}/formatoAsociado`  // Endpoint para nivel 5
+                : `${API_BASE_URL}/formato/nivel/${nivel}`;  // Endpoint para otros niveles
 
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error al obtener los formatos');
 
             const data = await response.json();
-            console.log('Formatos:', data);
-
-
             // Limpiar las opciones anteriores
             selectors.formatoSelect.innerHTML = '<option value="">Elige</option>';
 
@@ -300,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Carga las opciones en un elemento <select> desde la API y las ordena si es necesario
-    const loadOptions = async (selectElement, apiUrl, property, sort = true) => {
+    const loadOptions = async (selectElement, apiUrl, property, sort = true, skipUpdateCosto = false) => {
         try {
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error('Network response was not ok');
@@ -308,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let data = await response.json();
 
             // Si es el select de periodos, ordenar por el primer mes
-            if (selectElement === selectors.period) {
+            if (selectElement === selectors.periodo) {
                 data = data.sort((a, b) => {
                     const getFirstMonth = (periodo) => {
                         const meses = periodo[property].split(' - ');
@@ -346,20 +488,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectElement.appendChild(option);
             });
 
-            updateCosto();
-            // lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
+            // Solo actualizar costo si no se especifica skipUpdateCosto
+            if (!skipUpdateCosto) {
+                updateCosto();
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
 
-    const toggleAdditionalSelectors = (show) => {
+    const toggleAdditionalSelectors = (show, nivel = null) => {
         const display = show ? 'flex' : 'none';
         const displayMaterias = show ? 'none' : 'flex';
         selectors.divCertificado.style.display = display;
         selectors.divSemanas.style.display = display;
-        selectors.divIngles.style.display = display;
+        // Solo mostrar inglés si no es nivel 13
+        selectors.divIngles.style.display = (show && nivel !== 13) ? 'flex' : 'none';
         selectors.divMaterias.style.display = displayMaterias;
     };
 
@@ -386,7 +531,95 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Evento que se dispara al cambiar la selección del grado
+    // 1. Crear el select múltiple de períodos para nivel 13
+    function crearSelectPeriodosMultiples(bimestresUnicos) {
+        const periodoContainer = selectors.periodo.parentElement;
+        const periodoLabel = periodoContainer.previousElementSibling.querySelector('label');
+        if (periodoLabel) periodoLabel.textContent = 'Períodos:';
+        selectors.periodo.style.display = 'none';
+
+        // Eliminar el select múltiple anterior si existe
+        let selectMultiple = document.getElementById('select-periodos-multiple');
+        if (selectMultiple) selectMultiple.remove();
+        // Eliminar mensaje de ayuda/error anterior
+        let helpText = document.getElementById('periodos-help-text');
+        if (helpText) helpText.remove();
+        let errorMsg = document.getElementById('periodos-error-msg');
+        if (errorMsg) errorMsg.remove();
+
+        // Crear el select múltiple
+        selectMultiple = document.createElement('select');
+        selectMultiple.id = 'select-periodos-multiple';
+        selectMultiple.multiple = true;
+        selectMultiple.size = 2; // Compacto, parece dropdown
+        selectMultiple.className = 'select-multiple-periodos';
+        selectMultiple.style.width = '100%';
+        selectMultiple.style.minHeight = '100px';
+        selectMultiple.style.maxHeight = '100px';
+        selectMultiple.style.marginTop = '0.5rem';
+        selectMultiple.style.overflowY = 'auto';
+
+        bimestresUnicos.forEach((bim, index) => {
+            const option = document.createElement('option');
+            option.value = bim.codigo;
+            option.textContent = bim.mes;
+            option.setAttribute('data-index', index);
+            selectMultiple.appendChild(option);
+        });
+        periodoContainer.appendChild(selectMultiple);
+
+        // Ya NO agregar mensaje de ayuda
+
+        // Evento de validación
+        selectMultiple.addEventListener('change', () => {
+            validarPeriodosConsecutivosSelect();
+            updateCosto();
+        });
+    }
+
+    // 2. Validar consecutividad en el select múltiple
+    function validarPeriodosConsecutivosSelect() {
+        const selectMultiple = document.getElementById('select-periodos-multiple');
+        const selectedOptions = Array.from(selectMultiple.selectedOptions);
+        const selectedIndexes = selectedOptions.map(opt => parseInt(opt.getAttribute('data-index'))).sort((a, b) => a - b);
+        let sonConsecutivos = true;
+        for (let i = 1; i < selectedIndexes.length; i++) {
+            if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
+                sonConsecutivos = false;
+                break;
+            }
+        }
+        // Mensaje de error
+        let errorMsg = document.getElementById('periodos-error-msg');
+        if (!sonConsecutivos && selectedIndexes.length > 1) {
+            if (!errorMsg) {
+                errorMsg = document.createElement('p');
+                errorMsg.id = 'periodos-error-msg';
+                errorMsg.className = 'text-sm text-red-600 mt-2';
+                errorMsg.textContent = 'Solo puedes seleccionar períodos consecutivos';
+                selectMultiple.parentElement.appendChild(errorMsg);
+            }
+        } else {
+            if (errorMsg) errorMsg.remove();
+        }
+        // Deshabilitar botón siguiente si no es válido
+        const btnSiguiente = document.getElementById('step-1-next');
+        if (btnSiguiente) btnSiguiente.disabled = (!sonConsecutivos || selectedIndexes.length === 0);
+        return sonConsecutivos && selectedIndexes.length > 0;
+    }
+
+    // 3. Obtener períodos seleccionados del select múltiple
+    function obtenerPeriodosSeleccionadosSelect() {
+        const selectMultiple = document.getElementById('select-periodos-multiple');
+        if (!selectMultiple) return [];
+        return Array.from(selectMultiple.selectedOptions).map(opt => ({
+            codigo: opt.value,
+            mes: opt.textContent,
+            index: parseInt(opt.getAttribute('data-index'))
+        })).sort((a, b) => a.index - b.index);
+    }
+
+    // Reemplazar la creación de checkboxes por el select múltiple en el evento de cambio de nivel
     selectors.grade.addEventListener('change', async () => {
         resetFormFields(formElement);
         localStorage.clear();
@@ -394,21 +627,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const selectedLevel = selectors.grade.value;
         const mappedLevel = levelMapping[selectedLevel];
+        const periodoLabel = selectors.periodo.parentElement.previousElementSibling.querySelector('label') || document.querySelector('label[for="select-period"]');
+
+        // Siempre deja el label en 'Periodo:'
+        if (periodoLabel) periodoLabel.textContent = 'Periodo:';
+
+        // Eliminar el select múltiple si existe (al cambiar a cualquier nivel)
+        let selectMultiple = document.getElementById('select-periodos-multiple');
+        if (selectMultiple) selectMultiple.remove();
+        let helpText = document.getElementById('periodos-help-text');
+        if (helpText) helpText.remove();
+        let errorMsg = document.getElementById('periodos-error-msg');
+        if (errorMsg) errorMsg.remove();
+
+        if (mappedLevel === 13) {
+            fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`)
+                .then(res => res.json())
+                .then(pagos => {
+                    const bimestresUnicos = [];
+                    const codigosVistos = new Set();
+                    pagos.forEach(pago => {
+                        if (!codigosVistos.has(pago.codigo)) {
+                            bimestresUnicos.push({ mes: pago.mes, codigo: pago.codigo });
+                            codigosVistos.add(pago.codigo);
+                        }
+                    });
+                    const ordenMeses = [
+                        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                    ];
+                    bimestresUnicos.sort((a, b) => ordenMeses.indexOf(a.mes) - ordenMeses.indexOf(b.mes));
+                    crearSelectPeriodosMultiples(bimestresUnicos);
+                    validarPeriodosConsecutivosSelect();
+                });
+            selectors.periodo.style.display = 'none';
+            // Mostrar selects de semanas y certificados, ocultar materias e inglés
+            toggleAdditionalSelectors(true, 13);
+            loadOptions(selectors.certificados, `${API_BASE_URL}/certificados/nivel/13`, 'num_certificados', true, true);
+            loadOptions(selectors.semanas, `${API_BASE_URL}/semanas/nivel/13`, 'num_semanas', true, true);
+            selectors.divMaterias.style.display = 'none';
+            // Cargar otros selects necesarios para nivel 13
+            loadOptions(selectors.planes, `${API_BASE_URL}/planes/nivel/13`, 'descripcion', true, true);
+            loadOptions(selectors.campus, `${API_BASE_URL}/campus/nivel/13`, 'nombre', true, true);
+            // Mostrar y cargar opciones de formato para nivel 13
+            toggleFormatoDiv(true);
+            await loadFormatoOptions(13);
+            // Actualizar costo al final
+            updateCosto();
+            return;
+        } else {
+            // Restaurar el select original para otros niveles
+            selectors.periodo.style.display = 'block';
+            const periodoLabel = selectors.periodo.parentElement.previousElementSibling.querySelector('label');
+            if (periodoLabel) periodoLabel.textContent = 'Periodo:';
+            selectors.periodo.parentElement.style.display = 'block';
+            const bimestreSelect = document.getElementById('select-bimestre');
+            if (bimestreSelect) bimestreSelect.style.display = 'none';
+            toggleAdditionalSelectors(false);
+        }
 
         if (mappedLevel >= 5) {
             toggleFormatoDiv(true);
             await loadFormatoOptions(mappedLevel);
         } else {
             toggleFormatoDiv(false);
-
         }
 
         if (mappedLevel === 4) {
-
-            toggleAdditionalSelectors(true);
-            loadOptions(selectors.certificado, `${apiConfigs.certificado.baseUrl}${mappedLevel}`, apiConfigs.certificado.property);
-            loadOptions(selectors.semanas, `${apiConfigs.semanas.baseUrl}${mappedLevel}`, apiConfigs.semanas.property);
-            loadOptions(selectors.ingles, `${apiConfigs.ingles.baseUrl}${mappedLevel}`, apiConfigs.ingles.property);
+            toggleAdditionalSelectors(true, 4);
+            loadOptions(selectors.certificados, `${API_BASE_URL}/certificados/nivel/${mappedLevel}`, 'num_certificados', true, true);
+            loadOptions(selectors.semanas, `${API_BASE_URL}/semanas/nivel/${mappedLevel}`, 'num_semanas', true, true);
+            loadOptions(selectors.ingles, `${API_BASE_URL}/ingles/nivel/${mappedLevel}`, 'num_ingles', true, true);
         } else {
             toggleAdditionalSelectors(false);
         }
@@ -420,59 +708,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mappedLevel) {
             Object.keys(apiConfigs).forEach(key => {
                 if (key !== 'grade' && selectors[key] !== null) {
-                    let apiUrl = `${apiConfigs[key].baseUrl}${mappedLevel}`;
+                    let apiUrl = apiConfigs[key].baseUrl + mappedLevel;
                     let property = apiConfigs[key].property;
-                    if (mappedLevel === 2 && key === 'subjects') {
-
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/2';
-                        property = 'credito';
-                        selectors.subjectsLabel.textContent = 'Créditos:';
+                    // Lógica especial para créditos/certificados según el nivel
+                    if (key === 'materias') {
+                        if ([2, 6, 10, 12].includes(mappedLevel)) {
+                            apiUrl = `${API_BASE_URL}/creditos/nivel/${mappedLevel}`;
+                            property = 'credito';
+                            selectors.divMaterias.querySelector('label').textContent = 'Créditos:';
+                        } else if ([5, 8, 9].includes(mappedLevel)) {
+                            apiUrl = `${API_BASE_URL}/certificados/nivel/${mappedLevel}`;
+                            property = 'num_certificados';
+                            selectors.divMaterias.querySelector('label').textContent = 'Certificados:';
+                        } else {
+                            selectors.divMaterias.querySelector('label').textContent = 'Materias:';
+                        }
                     }
-
-                    else if (mappedLevel === 6 && key === 'subjects') {
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/6';
-                        property = 'credito';
-                        selectors.subjectsLabel.textContent = 'Créditos:';
-                    }
-
-                    else if (mappedLevel === 10 && key === 'subjects') {
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/10';
-                        property = 'credito';
-                        selectors.subjectsLabel.textContent = 'Créditos:';
-                    }
-
-                    else if (mappedLevel === 12 && key === 'subjects') {
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/creditos/nivel/12';
-                        property = 'credito';
-                        selectors.subjectsLabel.textContent = 'Créditos:';
-                    }
-
-                    else if (mappedLevel === 8 && key === 'subjects') {
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/8';
-                        property = 'num_certificados';
-                        selectors.subjectsLabel.textContent = 'Certificados:';
-                    }
-
-                    else if (mappedLevel === 9 && key === 'subjects') {
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/9';
-                        property = 'num_certificados';
-                        selectors.subjectsLabel.textContent = 'Certificados:';
-                    }
-
-                    else if (mappedLevel === 5 && key === 'subjects') {
-                        apiUrl = 'https://tecmilenio-calculadora-backend.testingbo.com/api/certificados/nivel/5';
-                        property = 'num_certificados';
-                        selectors.subjectsLabel.textContent = 'Certificados:';
-                    }
-                    // Comportamiento predeterminado
-                    else if (key === 'subjects') {
-                        selectors.subjectsLabel.textContent = 'Materias:';
-                    }
-
-                    if (key === 'period') {
-                        loadOptions(selectors.period, apiUrl, property, false);
+                    if (key === 'periodo') {
+                        loadOptions(selectors.periodo, apiUrl, property, false, true);
                     } else {
-                        loadOptions(selectors[key], apiUrl, property);
+                        loadOptions(selectors[key], apiUrl, property, true, true);
                     }
                 }
             });
@@ -502,6 +757,29 @@ document.addEventListener('DOMContentLoaded', () => {
         formElement.addEventListener('reset', () => {
             resetFormFields(formElement);
             localStorage.clear();
+        });
+    }
+
+    // Cuando el usuario seleccione un bimestre, guarda el mes (texto) en localStorage para mostrarlo en resultados
+    const bimestreSelect = document.getElementById('select-bimestre');
+    if (bimestreSelect) {
+        bimestreSelect.addEventListener('change', () => {
+            // Guarda el texto visible (mes) en localStorage
+            const mesSeleccionado = bimestreSelect.options[bimestreSelect.selectedIndex].textContent;
+            localStorage.setItem('bimestreSeleccionado', JSON.stringify(mesSeleccionado));
+            updateCosto();
+        });
+    }
+
+    // Cambiar la función de obtención de períodos seleccionados en el submit
+    if (formElement) {
+        formElement.addEventListener('submit', (event) => {
+            if (parseInt(localStorage.getItem('selectedNivel')) === 13) {
+                const periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
+                if (periodosSeleccionados.length > 0) {
+                    localStorage.setItem('periodosSeleccionados', JSON.stringify(periodosSeleccionados));
+                }
+            }
         });
     }
 });

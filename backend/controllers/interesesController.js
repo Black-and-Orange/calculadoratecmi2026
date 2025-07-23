@@ -40,12 +40,12 @@ const createInteresWithNivel = (req, res) => {
     interesesModel.createInteres({ interes }, (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        const interes_id = result.insertId;
+        const intereses_id = result.insertId;
 
         // Crea la relación con nivel
-        interesesNivelModel.createInteresNivel({ interes_id, nivel_id }, (err) => {
+        interesesNivelModel.createInteresNivel({ intereses_id, nivel_id }, (err) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ interes_id });
+            res.status(201).json({ intereses_id });
         });
     });
 };

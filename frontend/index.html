@@ -192,7 +192,7 @@
                                 </div>
 
                                 <div id="div-certificado" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
-                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
                                         <label class="font-semibold" for="select-certificado">Certificados:</label>
                                     </div>
                                     <div class="flex-1">
@@ -204,8 +204,8 @@
                                     </div>
                                 </div>
                                 <div id="div-semanas" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
-                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-semanas">Semanas SEDI:</label>
+                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
+                                        <label class="font-semibold" for="select-semanas">Semanas de Desarrollo Integral:</label>
                                     </div>
                                     <div class="flex-1">
                                         <select name="select-semanas" id="select-semanas">
@@ -216,8 +216,8 @@
                                     </div>
                                 </div>
                                 <div id="div-ingles" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
-                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-ingles">Cursos de inglés:</label>
+                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
+                                        <label class="font-semibold" for="select-ingles">Certificados de inglés:</label>
                                     </div>
                                     <div class="flex-1">
                                         <select name="select-ingles" id="select-ingles">
@@ -441,10 +441,11 @@
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/cargaDatos/step1.js"></script>
-    <script src="js/cargaDatos/step2.js"></script>
-    <script src="js/cargaDatos/step3.js"></script>
-
+    <!-- SCRIPTS DE LA CALCULADORA COMO MÓDULOS -->
+    <script type="module" src="js/apiConfig.js"></script>
+    <script type="module" src="js/cargaDatos/step1.js"></script>
+    <script type="module" src="js/cargaDatos/step2.js"></script>
+    <script type="module" src="js/cargaDatos/step3.js"></script>
     <!-- <script src="js/calculations.js"></script> -->
 </body>
 

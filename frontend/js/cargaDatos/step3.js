@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../apiConfig.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     
     const viveDiv = document.getElementById('div-vive');
@@ -10,8 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchSeguros() {
         const levelId = JSON.parse(localStorage.getItem('selectedNivel'));
         const selectedFormatCode = localStorage.getItem('codigoFormato');
-        console.log('levelId:', levelId, 'selectedFormatCode:', selectedFormatCode);
-        if (levelId >= 6 && levelId <= 12) {
+        if (levelId >= 6 && levelId <= 13) {
             viveDiv.style.display = 'none'; 
         }
 
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             && (selectedFormatCode === 'P' || selectedFormatCode === null)
         ) {
             desbloquearSelects();
-        } else if (levelId === 6 && selectedFormatCode === 'P') {
+        } else if ((levelId === 6 || levelId === 13) && selectedFormatCode === 'P') {
             selectVive.value = "no";
             selectInsurance.disabled = false;
             selectCoverage.disabled = false;
@@ -29,15 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('https://tecmilenio-calculadora-backend.testingbo.com/api/seguros/nivel/' + levelId);
+            const response = await fetch(`${API_BASE_URL}/seguros/nivel/` + levelId);
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const segurosDataArray = await response.json(); 
     
-            console.log('segurosDataArray:', segurosDataArray);
-
             if (segurosDataArray.length > 0) {
                 segurosData = segurosDataArray[0];
-                console.log('segurosData:', segurosData);
             }
     
         } catch (error) {
@@ -63,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function calculateInsuranceCost() {
-        console.log('Calculando costo de seguros...');
         
         const anuncioPoliza = document.getElementById('anuncioPoliza');
         let totalCost = 0;
@@ -93,17 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost += 0;
         }
 
-        if (selectVive.value === 'si' && !(levelId >= 6 && levelId <= 12)) {
+        if (selectVive.value === 'si' && !(levelId >= 6 && levelId <= 13)) {
             totalCost += parseFloat(segurosData.cobertura_vive);
         } else {
             totalCost += 0;
         }
 
         const divisor = (levelId === 1 || levelId === 2 || levelId === 4) ? 5 : (levelId === 10) ? 3 : 4;
-        console.log('divisor:', divisor);
         
         const interesDividido = totalConInteres / divisor;
-        console.log(totalCost);
         
         const primeraCuota = interesDividido + totalCost;
 

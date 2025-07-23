@@ -176,7 +176,7 @@
                         </div>
                         <div class="px-4 grow lg:w-auto">
                             <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Periodo</p>
-                            <p id="periodo" class="text-[21px] leading-[29px]">Verano 2024</p>
+                            <p id="periodo" class="text-[21px] leading-[29px]">Verano 2025</p>
                         </div>
                         <div class="px-4 grow lg:w-auto">
                             <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Campus</p>
@@ -185,6 +185,14 @@
                         <div class="px-4 grow lg:w-auto">
                             <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nivel</p>
                             <p id="nivel" class="text-[21px] leading-[29px]">Preparatoria Semestral</p>
+                        </div>
+                        <div class="min-w-0 info-programa info-programa-fila1">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Programa</p>
+                            <p id="programa-fila1" class="text-[21px] leading-[29px]"></p>
+                        </div>
+                        <div class="min-w-0 info-formato info-formato-fila1">
+                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Formato</p>
+                            <p id="formato-fila1" class="text-[21px] leading-[29px]"></p>
                         </div>
                         <!-- Contenedor original de materias -->
                         <div id="materias-container" class="px-4 grow lg:w-auto">
@@ -195,23 +203,29 @@
 
                         <!-- Estos contenedores solo se mostrarán en el nivel 4 -->
                         <div class="w-full flex flex-row flex-wrap justify-center mt-4">
+                            <div class="px-4 grow lg:w-auto min-w-0 info-programa info-programa-fila2 hidden">
+                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Programa</p>
+                                <p id="programa-fila2" class="text-[21px] leading-[29px]"></p>
+                            </div>
+                            <div class="px-4 grow lg:w-auto min-w-0 info-formato info-formato-fila2 hidden">
+                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Formato</p>
+                                <p id="formato-fila2" class="text-[21px] leading-[29px]"></p>
+                            </div>
                             <div id="certificados-container" class="px-4 grow lg:w-auto hidden">
                                 <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Certificados
                                 </p>
                                 <p id="certificados" class="text-[21px] leading-[29px]"></p>
                             </div>
                             <div id="semanas-container" class="px-4 grow lg:w-auto hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Semanas SEDI
+                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Semanas de Desarrollo Integral
                                 </p>
                                 <p id="semanas" class="text-[21px] leading-[29px]"></p>
                             </div>
                             <div id="ingles-container" class="px-4 grow lg:w-auto hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Cursos de
-                                    Inglés</p>
+                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Certificados de inglés</p>
                                 <p id="ingles" class="text-[21px] leading-[29px]"></p>
                             </div>
                         </div>
-
 
                     </div>
                 </div>
@@ -242,7 +256,7 @@
                                     <td class="px-[10px] md:px-[20px] py-[10px]">
                                         <p id="colegiaturaText"
                                             class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            Colegiatura 2024</p>
+                                            {{ module.t_tulo_colegiatura }}</p>
                                     </td>
                                     <td class="px-[10px] md:px-[20px] py-[10px]">
                                         <p id="colegiatura"
@@ -284,57 +298,62 @@
                     </div>
 
                     <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables">
-                        <div
-                            class="relative overflow-hidden border-2 border-solid border-secondary-color-2 rounded-[6px] h-full">
-                            <table class="w-full">
-                                <tr>
-                                    <th class="bg-secondary-color-2 text-white p-[11px]" colspan="2">
-                                        <p class="text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
-                                            de financiamiento</p>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p
-                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-secondary-color-2">
-                                            Primer pago</p>
-                                    </td>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="primerPago"
-                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right text-secondary-color-2">
-                                            $0</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="mensualidadesText"
-                                            class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            4 Mensualidades</p>
-                                    </td>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="mensualidades"
-                                            class="text-[18px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
-                                            $0</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]" colspan="2">
-                                        <hr class="border-t border-solid border-[#E6E6E6]">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p
-                                            class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            Total financiado</p>
-                                    </td>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="totalFinanciado"
-                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right">
-                                            $0</p>
-                                    </td>
-                                </tr>
-                            </table>
+                        <div class="relative overflow-hidden border-2 border-solid border-secondary-color-2 rounded-[6px] h-full">
+                            <!-- Overlay de loading para plan de financiamiento -->
+                            <div id="loading-overlay" style="display:flex; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); z-index:1000; justify-content:center; align-items:center; font-size:2rem; color:#ff9800; font-weight:bold;">
+                                Cargando pagos...
+                            </div>
+                            <div id="financiamiento-content" style="display:none;">
+                                <table class="w-full">
+                                    <tr>
+                                        <th class="bg-secondary-color-2 text-white p-[11px]" colspan="2">
+                                            <p class="text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
+                                                de financiamiento</p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                                            <p
+                                                class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-secondary-color-2">
+                                                Primer pago</p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                                            <p id="primerPago"
+                                                class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right text-secondary-color-2">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                                            <p id="mensualidadesText"
+                                                class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                                4 Mensualidades</p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                                            <p id="mensualidades"
+                                                class="text-[18px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]" colspan="2">
+                                            <hr class="border-t border-solid border-[#E6E6E6]">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                                            <p
+                                                class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                                Total financiado</p>
+                                        </td>
+                                        <td class="px-[10px] md:px-[20px] py-[10px]">
+                                            <p id="totalFinanciado"
+                                                class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right">
+                                                $0</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -497,6 +516,15 @@
                                     class="btn btn-main">Imprimir</button></div>
                             <div class="px-4 mb-4"><a class="btn btn-main" href="index.html">Hacer otro cálculo</a>
                             </div>
+                            <div class="px-4 mb-4">
+                                <button onclick="enviarWhatsApp()" class="btn btn-whatsapp">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                                    </svg>
+                                    Enviar por WhatsApp
+                                </button>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -505,8 +533,32 @@
 
         </div>
         <script src="js/main.js"></script>
-        <script src="js/cargaDatos/resultados.js"></script>
+        <script type="module" src="js/cargaDatos/resultados.js"></script>
+        <script type="module" src="js/cotizacion.js"></script>
 
+<!-- Modal para ingresar número de WhatsApp (estilo moderno, solo input y botón) -->
+<div id="modal-whatsapp" class="modal-whatsapp-custom">
+  <div class="modal-whatsapp-content">
+    <div class="modal-whatsapp-header">
+      <span class="modal-whatsapp-title">Llena los datos de la persona que recibirá el whatsapp</span>
+      <button id="btn-cerrar-whatsapp" class="modal-whatsapp-close">&times;</button>
+    </div>
+    <div class="modal-whatsapp-body">
+      <input id="input-numero-whatsapp" type="tel" maxlength="10" pattern="[0-9]{10}" class="modal-whatsapp-input" placeholder="Ejemplo: 4446625080">
+      <div id="error-numero-whatsapp" class="modal-whatsapp-error hidden">El número debe tener 10 dígitos.</div>
+      <button id="btn-enviar-whatsapp" class="modal-whatsapp-send">
+        ENVIAR
+        <span class="modal-whatsapp-arrow">&#8594;</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+    <!-- Librerías necesarias para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="js/descargarPDF.js"></script>
 </body>
 
 </html>

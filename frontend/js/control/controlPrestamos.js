@@ -1,117 +1,132 @@
-const apiUrlPrestamos = 'https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos';
+import { API_BASE_URL } from '../apiConfig.js';
 
-// Función genérica para cargar prestamos de cualquier nivel
-function loadPrestamos(level, containerId) {
+// Función para cargar préstamos por nivel (scope global)
+function loadPrestamos(nivelId, containerId) {
     const container = $(containerId);
-    // Ocultar la tabla y limpiar el contenedor antes de cargar nuevos datos
     container.empty();
 
-    fetch(`${apiUrlPrestamos}/nivel/${level}`)
+    fetch(`${API_BASE_URL}/prestamos/nivel/${nivelId}`)
         .then(response => response.json())
         .then(data => {
             if (Array.isArray(data) && data.length > 0) {
                 data.sort((a, b) => a.prestamo - b.prestamo);
-
                 let tableHtml = `
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Porcentaje</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-                data.forEach(prestamos => {
-                    tableHtml += `
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td>${prestamos.prestamo}%</td>
-                                <td>
-                                    <button onclick="deletePrestamos(${prestamos.id}, ${level})" class="btn btn-danger">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button onclick="editPrestamos(${prestamos.id}, '${prestamos.nombre}', ${prestamos.prestamo}, ${level})" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                                <th>Porcentaje</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                data.forEach(prestamo => {
+                    tableHtml += `
+                        <tr>
+                            <td>${prestamo.prestamo}%</td>
+                            <td>
+                                <button onclick="deletePrestamos(${prestamo.id}, ${nivelId})" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+                                <button onclick="editPrestamos(${prestamo.id}, ${nivelId})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>`;
                 });
-
-                tableHtml += `
-                            </tbody>
-                        </table>`;
-
-                container.html(tableHtml);
+                tableHtml += `</tbody></table>`;
+                container.html(tableHtml).show();
             } else {
-                container.html('<p>No se encontraron prestamos para este nivel.</p>');
+                container.html('<p>No se encontraron préstamos para este nivel.</p>').show();
             }
         })
-        .catch(error => console.error('Error fetching prestamos:', error));
+        .catch(error => console.error('Error fetching préstamos:', error));
 }
+window.loadPrestamos = loadPrestamos;
 
-$(document).ready(function () {
-    const maxLevel = 12;
-    for (let level = 1; level <= maxLevel; level++) {
-        loadPrestamos(level, '#prestamosNivel' + level);
-        handleCreatePrestamos(level, '#createPrestamosNivel' + level + 'Form', '#prestamosNivel' + level + 'Porcentaje', '#loadPrestamosNivel' + level);
-    }
-
-    // Función genérica para crear prestamos
-    function createPrestamos(level, percentage, callback) {
-        fetch(apiUrlPrestamos, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prestamo: percentage, nivel_id: level }),
-        })
-            .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating prestamos:', error));
-    }
-
-    // Función para gestionar la creación de prestamos para cualquier nivel
-    function handleCreatePrestamos(level, formId, percentageInputId, loadPrestamosBtnId) {
-        $(formId).submit(function (event) {
-            event.preventDefault();
-            const percentage = $(percentageInputId).val();
-            createPrestamos(level, percentage, function () {
-                $(percentageInputId).val('');
-                loadPrestamos(level, '#prestamosNivel' + level);
-            });
-        });
-    }
-
-});
-
-// Función para eliminar prestamos
-function deletePrestamos(id, level) {
-    fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/${id}`, {
+// Función para eliminar un préstamo (scope global)
+function deletePrestamos(id, nivelId) {
+    fetch(`${API_BASE_URL}/prestamos/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
-            // Recargar lista de prestamos para el nivel específico
-            loadPrestamos(level, '#prestamosNivel' + level);
+            $(`#prestamosNivel${nivelId}`).empty();
+            loadPrestamos(nivelId, `#prestamosNivel${nivelId}`);
         })
-        .catch(error => console.error('Error deleting prestamos:', error));
+        .catch(error => console.error('Error deleting préstamo:', error));
 }
+window.deletePrestamos = deletePrestamos;
 
-// Función para editar prestamos
-function editPrestamos(id, currentName, currentPercentage, level) {
-    const newPercentage = prompt('Nuevo prestamo del apoyo:', currentPercentage);
-    if (newPercentage) {
-        fetch(`https://tecmilenio-calculadora-backend.testingbo.com/api/prestamos/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prestamo: newPercentage }),
+// Función para editar un préstamo (scope global)
+function editPrestamos(id, nivelId) {
+    fetch(`${API_BASE_URL}/prestamos/${id}`)
+        .then(response => response.json())
+        .then(prestamo => {
+            const nuevoPrestamo = prompt('Nuevo porcentaje de préstamo:', prestamo.prestamo);
+            if (nuevoPrestamo !== null && nuevoPrestamo !== '') {
+                fetch(`${API_BASE_URL}/prestamos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prestamo: parseFloat(nuevoPrestamo), nivel_id: nivelId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        $(`#prestamosNivel${nivelId}`).empty();
+                        loadPrestamos(nivelId, `#prestamosNivel${nivelId}`);
+                    })
+                    .catch(error => console.error('Error editing préstamo:', error));
+            }
         })
-            .then(response => response.json())
-            .then(data => {
-                loadPrestamos(level, '#prestamosNivel' + level);
-            })
-            .catch(error => console.error('Error editing prestamos:', error));
-    }
+        .catch(error => console.error('Error fetching préstamo:', error));
 }
+window.editPrestamos = editPrestamos;
+
+// Función para crear un préstamo (scope global)
+function createPrestamos(nivelId, prestamo, callback) {
+    fetch(`${API_BASE_URL}/prestamos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prestamo: parseFloat(prestamo), nivel_id: nivelId })
+    })
+        .then(response => response.json())
+        .then(data => callback())
+        .catch(error => console.error('Error creating préstamo:', error));
+}
+window.createPrestamos = createPrestamos;
+
+// Inicialización y binds de eventos
+$(document).ready(function () {
+    const apiUrl = `${API_BASE_URL}/prestamos`;
+    const nivelesPrestamos = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+
+    // Cargar datos iniciales
+    nivelesPrestamos.forEach(nivelId => {
+        loadPrestamos(nivelId, '#prestamosNivel' + nivelId);
+    });
+
+    // Cargar datos cuando se hace clic en la pestaña de préstamos
+    $(document).on('click', 'a[id^="prestamos-"][id$="-tab"]', function() {
+        const nivelMatch = $(this).attr('id').match(/prestamos-(\d+)-tab/);
+        if (nivelMatch) {
+            const nivelId = parseInt(nivelMatch[1]);
+            loadPrestamos(nivelId, '#prestamosNivel' + nivelId);
+        }
+    });
+
+    // Configurar formularios de creación
+    nivelesPrestamos.forEach(nivelId => {
+        handleCreatePrestamos(
+            nivelId,
+            '#createprestamosNivel' + nivelId + 'Form',
+            '#prestamosNivel' + nivelId + 'Porcentaje'
+        );
+    });
+
+    // Manejar el formulario de creación
+    function handleCreatePrestamos(nivelId, formId, prestamoId) {
+        $(formId).submit(function (event) {
+            event.preventDefault();
+            const prestamo = $(prestamoId).val();
+            createPrestamos(nivelId, prestamo, function () {
+                $(formId)[0].reset();
+                loadPrestamos(nivelId, '#prestamosNivel' + nivelId);
+            });
+        });
+    }
+});
