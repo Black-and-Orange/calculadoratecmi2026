@@ -440,6 +440,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             totalContadoFinal = costoTotalRecuperado;
         }
         
+        // SUMAR SEGUROS AL TOTAL CONTADO
+        const totalSeguros = parseFloat(totalCostRecuperado) || 0;
+        totalContadoFinal += totalSeguros;
+        
         return {
             costoTotal: formatearPesos(costoTotalRecuperado),
             finalAmount: formatearPesos(finalAmountRecuperado),

@@ -3,5 +3,6 @@
 
 // URL de producción para referencia futura:
 // https://tecmilenio-calculadora-backend.testingbo.com/api
+// export const API_BASE_URL = 'http://localhost:3008/api'; 
 
-export const API_BASE_URL = 'http://localhost:3008/api'; 
+export const API_BASE_URL = 'https://tecmilenio-calculadora-backend.testingbo.com/staging/api'; 

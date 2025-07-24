@@ -13,7 +13,44 @@ import {
     hideZeroPercentages
 } from './utils/shared-utils.js';
 
+// Variable global para almacenar los niveles obtenidos desde la API
+let niveles = [];
+
+// Función para cargar niveles desde la API
+async function cargarNiveles() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/nivel`);
+        if (!response.ok) {
+            throw new Error('Error al obtener niveles');
+        }
+        const data = await response.json();
+        niveles = data;
+        console.log('Niveles cargados desde API:', niveles);
+    } catch (error) {
+        console.error('Error al cargar niveles:', error);
+        // Fallback con datos básicos si falla la API
+        niveles = [
+            { id: '1', descripcion: 'Preparatoria Semestral' },
+            { id: '2', descripcion: 'Profesional Semestral' },
+            { id: '3', descripcion: 'Preparatoria Tetramestral' },
+            { id: '4', descripcion: 'Profesional Semestral MAPS' },
+            { id: '5', descripcion: 'Profesional Asociado' },
+            { id: '6', descripcion: 'Ejecutivo' },
+            { id: '7', descripcion: 'Maestría y Especialidades' },
+            { id: '8', descripcion: 'Master' },
+            { id: '9', descripcion: 'MLP Connect' },
+            { id: '10', descripcion: 'MEDU+' },
+            { id: '11', descripcion: 'MLP Presencial' },
+            { id: '12', descripcion: 'Connect Presencial Matutino' },
+            { id: '13', descripcion: 'Ejecutivo MAPS Bimestral' }
+        ];
+    }
+}
+
 // ===== FUNCIONES ESPECÍFICAS DE COTIZACIÓN COMPARTIDA =====
+
+// Cargar niveles al inicio
+cargarNiveles();
 
 // Función para cargar apoyos y seguros específica para cotizaciones compartidas
 function cargarApoyosYSeguros(cotizacion) {
@@ -200,6 +237,11 @@ async function cargarCotizacion(cotizacionId) {
         // Configurar campos según el nivel
         const nivelId = cotizacion.nivel_id;
         
+        // Asegurar que los niveles estén cargados antes de organizar campos
+        if (niveles.length === 0) {
+            await cargarNiveles();
+        }
+        
         // Organizar y llenar información básica dinámicamente
         organizarCamposPorNivel(nivelId, cotizacion);
         
@@ -301,9 +343,10 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         }
     }
     
-    // Mostrar total contado
+    // Mostrar total contado (incluyendo seguros)
     if (totalContadoElem) {
-        totalContadoElem.textContent = formatearPesos(cotizacion.total_contado || 0);
+        const totalContadoConSeguros = (parseFloat(cotizacion.total_contado) || 0) + (parseFloat(cotizacion.total_seguros) || 0);
+        totalContadoElem.textContent = formatearPesos(totalContadoConSeguros);
     }
     
     // Llenar información del plan de financiamiento
@@ -445,6 +488,9 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         } catch (e) { totalSeguros = 0; }
         let totalContado = parseFloat(cotizacion.total_contado) || 0;
         let costoTotal = parseFloat(cotizacion.costo_total) || 0;
+        
+        // SUMAR SEGUROS AL TOTAL CONTADO
+        totalContado += totalSeguros;
         const cantidadBimestres = codigosBimestresOrdenados.length;
         
         // Intentar obtener costos específicos por bimestre desde la base de datos
@@ -620,8 +666,8 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
         // Si es un número entero, devolver como string sin decimales
         if (Number.isInteger(num)) {
             return num.toString();
-        }
-        
+    }
+    
         // Si es decimal, mostrar con 2 decimales
         return num.toFixed(2);
     }
@@ -638,19 +684,22 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
     
     if (cotizacion.formato && cotizacion.formato !== 'N/A' && cotizacion.formato !== '') {
         camposBase.push({ id: 'formato', label: 'Formato', valor: cotizacion.formato });
-    }
-    
+        }
+        
     // Agregar periodo (después de programa y formato)
     camposBase.push({ id: 'periodo', label: 'Periodo', valor: cotizacion.periodo || 'N/A' });
     
     // Agregar nivel solo para niveles que no sean 4 ni 13 (después del periodo)
     if (nivelId !== 4 && nivelId !== 13) {
-        camposBase.push({ id: 'nivel', label: 'Nivel', valor: cotizacion.nivel || 'N/A' });
+        // Buscar el nombre del nivel en el array de niveles
+        const nivel = niveles.find(n => n.id == nivelId);
+        const nivelNombre = nivel ? nivel.descripcion : `Nivel ${nivelId}`;
+        camposBase.push({ id: 'nivel', label: 'Nivel', valor: nivelNombre });
     }
     
     // Agregar campus (después del nivel)
     camposBase.push({ id: 'campus', label: 'Campus', valor: cotizacion.campus || 'N/A' });
-    
+            
     // Definir campos adicionales según el nivel (unidades)
     let camposAdicionales = [];
     
@@ -678,6 +727,25 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
         camposAdicionales = [
             { id: 'materias', label: materiasLabel, valor: formatearNumero(cotizacion.materias) }
         ];
+    }
+    
+    // Función auxiliar para obtener el label correcto según el nivel
+    function getMateriasLabel(nivelId) {
+        const materiasPorNivel = {
+            1: 'Materias',
+            2: 'Créditos',
+            3: 'Materias',
+            5: 'Certificados',
+            6: 'Créditos',
+            7: 'Materias',
+            8: 'Certificados',
+            9: 'Certificados',
+            10: 'Créditos',
+            11: 'Materias',
+            12: 'Materias'
+        };
+        
+        return materiasPorNivel[nivelId] || 'Materias';
     }
     
     // Combinar todos los campos

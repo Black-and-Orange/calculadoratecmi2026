@@ -349,8 +349,24 @@ document.addEventListener('DOMContentLoaded', function() {
             btnVerCotizacion.onclick = function() {
                 // Cerrar el modal
                 $('#detalleCotizacionModal').modal('hide');
+                
+                // Determinar la URL correcta según el entorno
+                let urlCotizacion;
+                const hostname = window.location.hostname;
+                
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    // Desarrollo local
+                    urlCotizacion = `http://localhost:5500/Calculadora/frontend/cotizacion-compartida.html?id=${cotizacion.id}`;
+                } else if (hostname.includes('testingbo.com')) {
+                    // Staging/Testing
+                    urlCotizacion = `https://universidad.tecmilenio.mx/cotizacion?id=${cotizacion.id}`;
+                } else {
+                    // Producción
+                    urlCotizacion = `https://universidad.tecmilenio.mx/cotizacion?id=${cotizacion.id}`;
+                }
+                
                 // Abrir la cotización completa en una nueva pestaña
-                window.open(`cotizacion-compartida.html?id=${cotizacion.id}`, '_blank');
+                window.open(urlCotizacion, '_blank');
             };
             
             // Mostrar el modal

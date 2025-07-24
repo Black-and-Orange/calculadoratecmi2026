@@ -30,13 +30,57 @@ const cotizacionesRoutes = require('./routes/cotizacionesRoutes');
 
 const app = express();
 
-// Configuración CORS más específica
-app.use(cors({
-    origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000', 'http://127.0.0.1:3000'],
+// Configuración CORS más flexible para producción
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Permitir requests sin origin (como aplicaciones móviles o Postman)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            // Desarrollo local
+            'http://localhost:5500',
+            'http://127.0.0.1:5500',
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:3002',
+            'http://127.0.0.1:3002',
+            
+            // Dominios de testingbo.com
+            'https://administrador-becas.testingbo.com',
+            'https://tecmilenio-calculadora-backend.testingbo.com',
+            'https://calculadora.testingbo.com',
+            
+            // Dominios de tecmilenio.mx
+            'https://universidad.tecmilenio.mx',
+            'https://tecmilenio.mx',
+        ];
+        
+        // Verificar si el origin está en la lista de permitidos
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            // También permitir subdominios de testingbo.com y tecmilenio.mx
+            if (origin.includes('.testingbo.com') || origin.includes('.tecmilenio.mx')) {
+                callback(null, true);
+            } else {
+                console.log('CORS bloqueado para origin:', origin);
+                callback(new Error('No permitido por CORS'));
+            }
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    credentials: true
-}));
+    credentials: true,
+    optionsSuccessStatus: 200 // Para compatibilidad con algunos navegadores
+};
+
+app.use(cors(corsOptions));
+
+// Middleware para logging de requests (útil para debugging)
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin || 'No origin'}`);
+    next();
+});
 
 app.use(bodyParser.json());
 
