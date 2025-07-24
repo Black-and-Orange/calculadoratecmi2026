@@ -6,27 +6,23 @@ import {
     formatearPesos,
     formatNumber,
     getCachedData,
-    getFieldLabel,
-    toggleFieldsByLevel,
-    hideZeroPercentages,
     cargarBeneficios,
+    actualizarBeneficios,
     cargarVigencia,
     agregarEstiloPorNivel,
-    actualizarBeneficios
+    hideZeroPercentages
 } from './utils/shared-utils.js';
 
 // ===== FUNCIONES ESPECÍFICAS DE COTIZACIÓN COMPARTIDA =====
 
 // Función para cargar apoyos y seguros específica para cotizaciones compartidas
-function cargarApoyosYSeguros(cotizacion) {
-    console.log('=== CARGANDO APOYOS Y SEGUROS ===');
-    console.log('Datos de la cotización para apoyos:', cotizacion);
-    
+function cargarApoyosYSeguros(cotizacion) {    
     // Apoyos financieros
     const becaElem = document.getElementById('beca');
     const apoyoEstudiantilElem = document.getElementById('apoyoEstudiantil');
     const apoyoEstudiantilFijoElem = document.getElementById('apoyoEstudiantilFijo');
     const prestamoPorcentajeElem = document.getElementById('prestamoPorcentaje');
+    const apoyoFinancieroElem = document.getElementById('apoyoFinanciero');
     
     // Labels para ocultar/mostrar
     const labelBeca = document.getElementById('label-beca');
@@ -37,11 +33,15 @@ function cargarApoyosYSeguros(cotizacion) {
     // Contenedor de apoyos
     const apoyosContainer = document.getElementById('apoyos');
     
-    console.log('Elementos del DOM para apoyos:');
-    console.log('becaElem:', becaElem);
-    console.log('apoyoEstudiantilElem:', apoyoEstudiantilElem);
-    console.log('apoyoEstudiantilFijoElem:', apoyoEstudiantilFijoElem);
-    console.log('prestamoPorcentajeElem:', prestamoPorcentajeElem);
+    // Mostrar nombre de la beca en apoyoFinanciero (igual que en resultados.js)
+    if (apoyoFinancieroElem) {
+        const becaNombre = cotizacion.beca_nombre || 'Apoyo estudiantil';
+        if (becaNombre && becaNombre !== 'N/A' && becaNombre !== 'null') {
+            apoyoFinancieroElem.textContent = becaNombre;
+        } else {
+            apoyoFinancieroElem.textContent = 'Apoyo estudiantil';
+        }
+    }
     
     // Beca
     if (becaElem) {
@@ -51,11 +51,9 @@ function cargarApoyosYSeguros(cotizacion) {
         if (becaPorcentaje > 0) {
             becaElem.textContent = `${becaPorcentaje}%`;
             if (labelBeca) labelBeca.classList.remove('hidden');
-            console.log('Beca mostrada:', `${becaPorcentaje}%`);
         } else {
             becaElem.textContent = '0%';
             if (labelBeca) labelBeca.classList.add('hidden');
-            console.log('Beca oculta (0%)');
         }
     }
     
@@ -66,11 +64,9 @@ function cargarApoyosYSeguros(cotizacion) {
         if (apoyoPorcentaje > 0) {
             apoyoEstudiantilElem.textContent = `${apoyoPorcentaje}%`;
             if (labelApoyoEstudiantil) labelApoyoEstudiantil.classList.remove('hidden');
-            console.log('Apoyo estudiantil % mostrado:', `${apoyoPorcentaje}%`);
         } else {
             apoyoEstudiantilElem.textContent = '0%';
             if (labelApoyoEstudiantil) labelApoyoEstudiantil.classList.add('hidden');
-            console.log('Apoyo estudiantil % oculto (0%)');
         }
     }
     
@@ -81,11 +77,9 @@ function cargarApoyosYSeguros(cotizacion) {
         if (apoyoFijo > 0) {
             apoyoEstudiantilFijoElem.textContent = formatearPesos(apoyoFijo);
             if (labelApoyoEstudiantilFijo) labelApoyoEstudiantilFijo.classList.remove('hidden');
-            console.log('Apoyo estudiantil $ mostrado:', formatearPesos(apoyoFijo));
         } else {
             apoyoEstudiantilFijoElem.textContent = '$0.00';
             if (labelApoyoEstudiantilFijo) labelApoyoEstudiantilFijo.classList.add('hidden');
-            console.log('Apoyo estudiantil $ oculto ($0.00)');
         }
     }
     
@@ -96,11 +90,9 @@ function cargarApoyosYSeguros(cotizacion) {
         if (prestamoPorcentaje > 0) {
             prestamoPorcentajeElem.textContent = `${prestamoPorcentaje}%`;
             if (labelPrestamo) labelPrestamo.classList.remove('hidden');
-            console.log('Préstamo % mostrado:', `${prestamoPorcentaje}%`);
         } else {
             prestamoPorcentajeElem.textContent = '0%';
             if (labelPrestamo) labelPrestamo.classList.add('hidden');
-            console.log('Préstamo % oculto (0%)');
         }
     }
     
@@ -110,21 +102,14 @@ function cargarApoyosYSeguros(cotizacion) {
     const viveElem = document.getElementById('vive');
     const segurosContainer = document.getElementById('seguros');
     
-    console.log('Elementos del DOM para seguros:');
-    console.log('seguroAccidentesElem:', seguroAccidentesElem);
-    console.log('coberturaEstudiantilElem:', coberturaEstudiantilElem);
-    console.log('viveElem:', viveElem);
-    
     // Seguro accidentes
     if (seguroAccidentesElem) {
         const seguroAccidentes = parseFloat(cotizacion.seguro_accidentes) || 0;
         
         if (seguroAccidentes > 0) {
             seguroAccidentesElem.textContent = formatearPesos(seguroAccidentes);
-            console.log('Seguro accidentes mostrado:', formatearPesos(seguroAccidentes));
         } else {
             seguroAccidentesElem.textContent = 'No Aplica';
-            console.log('Seguro accidentes: No Aplica');
         }
     }
     
@@ -134,10 +119,8 @@ function cargarApoyosYSeguros(cotizacion) {
         
         if (coberturaEstudiantil > 0) {
             coberturaEstudiantilElem.textContent = formatearPesos(coberturaEstudiantil);
-            console.log('Cobertura estudiantil mostrada:', formatearPesos(coberturaEstudiantil));
         } else {
             coberturaEstudiantilElem.textContent = 'No Aplica';
-            console.log('Cobertura estudiantil: No Aplica');
         }
     }
     
@@ -147,10 +130,8 @@ function cargarApoyosYSeguros(cotizacion) {
         
         if (coberturaVive > 0) {
             viveElem.textContent = formatearPesos(coberturaVive);
-            console.log('Cobertura VIVE mostrada:', formatearPesos(coberturaVive));
         } else {
             viveElem.textContent = 'No Aplica';
-            console.log('Cobertura VIVE: No Aplica');
         }
     }
     
@@ -163,9 +144,6 @@ function cargarApoyosYSeguros(cotizacion) {
     const haySeguros = (parseFloat(cotizacion.seguro_accidentes) || 0) > 0 || 
                       (parseFloat(cotizacion.seguro_estudiantil) || 0) > 0 || 
                       (parseFloat(cotizacion.cobertura_vive) || 0) > 0;
-    
-    console.log('Hay apoyos:', hayApoyos);
-    console.log('Hay seguros:', haySeguros);
     
     if (apoyosContainer) {
         if (hayApoyos) {
@@ -193,8 +171,6 @@ function cargarApoyosYSeguros(cotizacion) {
         }
     }
     
-    console.log('=== FIN CARGANDO APOYOS Y SEGUROS ===');
-    
     // Llamar a la función para ocultar porcentajes en cero
     hideZeroPercentages();
 }
@@ -205,10 +181,6 @@ async function cargarCotizacion(cotizacionId) {
     const errorSection = document.getElementById('error-section');
     const basicInfoSection = document.getElementById('basic-info-section');
     const financialPlanSection = document.getElementById('financial-plan-section');
-    
-    console.log('=== INICIANDO CARGA DE COTIZACIÓN ===');
-    console.log('ID de cotización:', cotizacionId);
-    
     try {
         // Mostrar loading
         if (loadingOverlay) loadingOverlay.style.display = 'flex';
@@ -218,63 +190,18 @@ async function cargarCotizacion(cotizacionId) {
         
         // Obtener cotización del backend
         const cotizacion = await getCachedData(`cotizacion_${cotizacionId}`, async () => {
-            console.log('Haciendo request al backend para cotización:', cotizacionId);
             const response = await fetch(`${API_BASE_URL}/cotizaciones/${cotizacionId}`);
-            console.log('Respuesta del backend:', response.status, response.statusText);
             if (!response.ok) throw new Error('Cotización no encontrada');
             const result = await response.json();
-            console.log('Datos recibidos del backend:', result);
             if (!result.success) throw new Error(result.message || 'Error al cargar cotización');
             return result.data;
         });
         
-        console.log('Cotización cargada exitosamente:', cotizacion);
-        
-
-        
-        // Llenar información básica
-        const nombreElem = document.getElementById('nombre');
-        const periodoElem = document.getElementById('periodo');
-        const campusElem = document.getElementById('campus');
-        const nivelElem = document.getElementById('nivel');
-        const programaFila1Elem = document.getElementById('programa-fila1');
-        const formatoFila1Elem = document.getElementById('formato-fila1');
-        const programaFila2Elem = document.getElementById('programa-fila2');
-        const formatoFila2Elem = document.getElementById('formato-fila2');
-        
-        if (nombreElem) nombreElem.textContent = cotizacion.nombre_estudiante || 'N/A';
-        if (periodoElem) periodoElem.textContent = cotizacion.periodo || 'N/A';
-        if (campusElem) campusElem.textContent = cotizacion.campus || 'N/A';
-        if (nivelElem) nivelElem.textContent = cotizacion.nivel_nombre || 'N/A';
-        if (programaFila1Elem) programaFila1Elem.textContent = cotizacion.programa || '';
-        if (formatoFila1Elem) formatoFila1Elem.textContent = cotizacion.formato || '';
-        // También llenar los elementos de la segunda fila con los mismos valores
-        if (programaFila2Elem) programaFila2Elem.textContent = cotizacion.programa || '';
-        if (formatoFila2Elem) formatoFila2Elem.textContent = cotizacion.formato || '';
-        
         // Configurar campos según el nivel
         const nivelId = cotizacion.nivel_id;
-        console.log('Nivel ID de la cotización:', nivelId);
         
-        // Mejorar la organización de campos según el nivel
+        // Organizar y llenar información básica dinámicamente
         organizarCamposPorNivel(nivelId, cotizacion);
-        
-        // Llenar campos académicos
-        const materiasElem = document.getElementById('materias');
-        const certificadosElem = document.getElementById('certificados');
-        const semanasElem = document.getElementById('semanas');
-        const inglesElem = document.getElementById('ingles');
-        const creditosElem = document.getElementById('creditos');
-        
-        if (materiasElem) materiasElem.textContent = formatNumber(cotizacion.materias);
-        if (certificadosElem) certificadosElem.textContent = formatNumber(cotizacion.certificados);
-        if (semanasElem) semanasElem.textContent = formatNumber(cotizacion.semanas_sedi);
-        if (inglesElem) inglesElem.textContent = formatNumber(cotizacion.ingles);
-        if (creditosElem) creditosElem.textContent = formatNumber(cotizacion.creditos);
-        
-        // Actualizar label del campo principal
-        const textMaterias = document.getElementById('text-materias');
-        if (textMaterias) textMaterias.textContent = getFieldLabel(nivelId);
         
         // Cargar beneficios y vigencia
         const beneficios = await cargarBeneficios(nivelId);
@@ -294,7 +221,6 @@ async function cargarCotizacion(cotizacionId) {
         if (basicInfoSection) basicInfoSection.style.display = 'block';
         if (financialPlanSection) financialPlanSection.style.display = 'block';
         
-        console.log('Ejecutando lógica de visualización...');
         // Ejecutar la lógica de visualización con datos del backend
         await ejecutarLogicaVisualizacion(cotizacion);
         
@@ -308,7 +234,6 @@ async function cargarCotizacion(cotizacionId) {
         if (errorSection) errorSection.style.display = 'block';
     } finally {
         if (loadingOverlay) loadingOverlay.style.display = 'none';
-        console.log('=== FIN CARGA DE COTIZACIÓN ===');
     }
 }
 
@@ -316,24 +241,6 @@ async function cargarCotizacion(cotizacionId) {
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const cotizacionId = params.get('id');
-    
-    console.log('=== INICIANDO PÁGINA DE COTIZACIÓN COMPARTIDA ===');
-    console.log('URL actual:', window.location.href);
-    console.log('ID de cotización de la URL:', cotizacionId);
-    
-    // Verificar conectividad con el backend
-    try {
-        console.log('Verificando conectividad con el backend...');
-        const testResponse = await fetch(`${API_BASE_URL}/cotizaciones`);
-        console.log('Respuesta de prueba del backend:', testResponse.status, testResponse.statusText);
-        if (testResponse.ok) {
-            console.log('✅ Backend conectado correctamente');
-        } else {
-            console.log('⚠️ Backend responde pero con error:', testResponse.status);
-        }
-    } catch (error) {
-        console.error('❌ Error de conectividad con el backend:', error);
-    }
     
     if (!cotizacionId) {
         const errorMessage = document.getElementById('error-message');
@@ -369,39 +276,21 @@ window.recargarCotizacion = () => {
 async function ejecutarLogicaVisualizacion(cotizacion) {
     const nivelId = cotizacion.nivel_id;
     
-    // LOGS DE DEPURACIÓN
-    console.log('=== DEPURACIÓN COTIZACIÓN COMPARTIDA ===');
-    console.log('Datos de la cotización:', cotizacion);
-    console.log('Nivel ID:', nivelId);
-    console.log('Costo total:', cotizacion.costo_total);
-    console.log('Total contado:', cotizacion.total_contado);
-    console.log('Primera cuota:', cotizacion.primera_cuota);
-    console.log('Total financiado:', cotizacion.total_financiado);
-    console.log('Mensualidades:', cotizacion.mensualidades);
-    
     // Llenar información financiera del plan de contado
     const colegiaturaElem = document.getElementById('colegiatura');
     const apoyoEducativoElem = document.getElementById('apoyoFinanciamiento');
     const totalContadoElem = document.getElementById('totalContado');
     
-    console.log('Elementos del DOM encontrados:');
-    console.log('colegiaturaElem:', colegiaturaElem);
-    console.log('apoyoEducativoElem:', apoyoEducativoElem);
-    console.log('totalContadoElem:', totalContadoElem);
-    
     // Mostrar colegiatura (costo total sin descuento)
     if (colegiaturaElem) {
         colegiaturaElem.textContent = formatearPesos(cotizacion.costo_total || 0);
-        console.log('Colegiatura actualizada:', formatearPesos(cotizacion.costo_total || 0));
     }
     
     // Mostrar apoyo educativo (descuento)
     if (apoyoEducativoElem) {
         const descuento = (cotizacion.costo_total || 0) - (cotizacion.total_contado || 0);
-        console.log('Descuento calculado:', descuento);
         if (descuento > 0) {
             apoyoEducativoElem.textContent = `-${formatearPesos(descuento)}`;
-            console.log('Apoyo educativo actualizado:', `-${formatearPesos(descuento)}`);
             if (apoyoEducativoElem.closest('tr')) {
                 apoyoEducativoElem.closest('tr').style.display = '';
             }
@@ -409,19 +298,16 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
             if (apoyoEducativoElem.closest('tr')) {
                 apoyoEducativoElem.closest('tr').style.display = 'none';
             }
-            console.log('Apoyo educativo ocultado (sin descuento)');
         }
     }
     
     // Mostrar total contado
     if (totalContadoElem) {
         totalContadoElem.textContent = formatearPesos(cotizacion.total_contado || 0);
-        console.log('Total contado actualizado:', formatearPesos(cotizacion.total_contado || 0));
     }
     
     // Llenar información del plan de financiamiento
     if (nivelId === 13) {
-        console.log('Procesando nivel 13 - cargando pagos bimestrales');
         
         // Configurar overlay de loading para nivel 13
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -429,17 +315,14 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         
         if (loadingOverlay) {
             loadingOverlay.style.display = 'flex';
-            console.log('Overlay de loading mostrado para nivel 13');
         }
         if (financiamientoContent) {
             financiamientoContent.style.display = 'none';
-            console.log('Contenido de financiamiento oculto para nivel 13');
         }
         
         // Para nivel 13, cargar pagos bimestrales especiales
         await cargarPagosBimestralesNivel13(cotizacion);
     } else {
-        console.log('Procesando nivel', nivelId, '- cargando información estándar');
         
         // Para otros niveles, mostrar información estándar
         const primerPagoElem = document.getElementById('primerPago');
@@ -467,43 +350,29 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         
         if (loadingOverlay) {
             loadingOverlay.style.display = 'none';
-            console.log('Overlay de loading oculto para nivel', nivelId);
         }
         if (financiamientoContent) {
-            financiamientoContent.style.display = 'block';
-            console.log('Contenido de financiamiento mostrado para nivel', nivelId);
+            financiamientoContent.style.display = 'block';  
         }
     }
-    
-    console.log('=== FIN DEPURACIÓN ===');
 }
 
 // Función para cargar pagos bimestrales del nivel 13
 async function cargarPagosBimestralesNivel13(cotizacion) {
-    console.log('=== INICIANDO CARGA DE PAGOS BIMESTRALES NIVEL 13 ===');
-    console.log('Datos de la cotización para pagos:', cotizacion);
-    
     try {
         // Obtener todos los pagos bimestrales del nivel 13
         const pagos = await getCachedData(`pagos_bimestrales_13`, async () => {
-            console.log('Haciendo request para pagos bimestrales nivel 13');
             const response = await fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`);
-            console.log('Respuesta pagos bimestrales:', response.status, response.statusText);
             if (!response.ok) throw new Error('Error al cargar pagos bimestrales');
             const data = await response.json();
-            console.log('Pagos bimestrales recibidos:', data);
             return data;
         });
         
-        console.log('Pagos procesados:', pagos);
-        
         // Obtener los períodos de la cotización
         const periodosCotizacion = cotizacion.periodo || '';
-        console.log('Períodos de la cotización:', periodosCotizacion);
         
         // Obtener los códigos únicos de bimestres desde los pagos del backend
         const codigosUnicos = [...new Set(pagos.map(pago => pago.codigo))];
-        console.log('Códigos únicos disponibles en el backend:', codigosUnicos);
         
         // Crear mapeo usando el campo 'mes' de los pagos bimestrales
         const mapeoMeses = {};
@@ -512,14 +381,12 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
                 mapeoMeses[pago.mes] = pago.codigo;
             }
         });
-        console.log('Mapeo de meses desde pagos bimestrales:', mapeoMeses);
         
         // Parsear los períodos (pueden estar separados por comas)
         let codigosBimestres = [];
         if (periodosCotizacion.includes(',')) {
             // Múltiples períodos separados por comas
             const periodosArray = periodosCotizacion.split(',').map(p => p.trim());
-            console.log('Períodos parseados:', periodosArray);
             
             codigosBimestres = periodosArray.map(periodo => mapeoMeses[periodo]).filter(codigo => codigo);
         } else {
@@ -527,15 +394,11 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
             const codigo = mapeoMeses[periodosCotizacion];
             if (codigo) codigosBimestres = [codigo];
         }
-        
-        console.log('Códigos de bimestres a buscar:', codigosBimestres);
-        
+
         // Filtrar pagos solo para los períodos seleccionados
         const pagosFiltrados = pagos.filter(pago => codigosBimestres.includes(pago.codigo));
-        console.log('Pagos filtrados por períodos:', pagosFiltrados);
         
         if (pagosFiltrados.length === 0) {
-            console.log('No hay pagos para los períodos seleccionados');
             // Mostrar mensaje de error o fallback
             const mensualidadesText = document.getElementById('mensualidadesText');
             const mensualidades = document.getElementById('mensualidades');
@@ -587,15 +450,11 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         // Intentar obtener costos específicos por bimestre desde la base de datos
         let costosPorBimestre = {};
         try {
-            console.log('Campo costos_por_bimestre en BD:', cotizacion.costos_por_bimestre);
             if (cotizacion.costos_por_bimestre) {
                 costosPorBimestre = JSON.parse(cotizacion.costos_por_bimestre);
-                console.log('Costos por bimestre parseados:', costosPorBimestre);
             } else {
-                console.log('Campo costos_por_bimestre está vacío o no existe');
             }
         } catch (e) {
-            console.log('No se pudieron parsear los costos por bimestre:', e);
         }
         
         // Usar el costo total (sin descuentos) dividido entre bimestres como fallback
@@ -603,23 +462,12 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         
         // Si no hay costos específicos en BD, recalcular usando el endpoint de costos
         if (Object.keys(costosPorBimestre).length === 0 && cotizacion.nivel_id === 13) {
-            console.log('Recalculando costos usando endpoint...');
             await recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados);
         }
-        
-        console.log('=== DEPURACIÓN COTIZACIÓN COMPARTIDA ===');
-        console.log('Total contado (con descuentos):', totalContado);
-        console.log('Costo total (sin descuentos):', costoTotal);
-        console.log('Cantidad de bimestres:', cantidadBimestres);
-        console.log('Costo por bimestre (fallback):', costoPorBimestre);
-        console.log('Costos específicos por bimestre:', costosPorBimestre);
-        console.log('Total seguros:', totalSeguros);
         
         // Obtener el descuento total para aplicarlo proporcionalmente
         const descuentoTotal = costoTotal - totalContado;
         const descuentoPorBimestre = cantidadBimestres > 0 ? descuentoTotal / cantidadBimestres : 0;
-        
-        console.log(`Descuento total: ${descuentoTotal}, descuento por bimestre: ${descuentoPorBimestre}`);
         
         // Array auxiliar para pagos con fecha
         const pagosConFechas = [];
@@ -630,8 +478,6 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
             
             // APLICAR DESCUENTO AL COSTO DEL BIMESTRE
             const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoPorBimestre);
-            
-            console.log(`Bimestre ${codigo}: costo original = ${costoBimestre}, descuento aplicado = ${descuentoPorBimestre}, costo final = ${costoBimestreConDescuento}`);
             
             const pagosBimestre = pagosPorBimestre[codigo] || [];
             pagosBimestre.forEach((pago, idx) => {
@@ -645,15 +491,10 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
                     // El interés se calcula sobre el costo total del bimestre CON DESCUENTO
                     interes = costoBimestreConDescuento * (parseFloat(pago.porcentaje_interes) / 100);
                     totalParcialidad += interes;
-                    console.log(`Bimestre ${codigo}, Pago ${idx + 1}: parcialidad=${parcialidad}, interés=${interes}, total=${totalParcialidad}`);
-                } else {
-                    console.log(`Bimestre ${codigo}, Pago ${idx + 1}: parcialidad=${parcialidad}, sin interés`);
-                }
-                
+                } 
                 // Agregar seguros completos al primer pago de cada bimestre (idx === 0)
                 if (idx === 0 && totalSeguros > 0) {
                     totalParcialidad += totalSeguros;
-                    console.log(`Bimestre ${codigo}, Pago ${idx + 1}: agregando TODOS los seguros=${totalSeguros}, total final=${totalParcialidad}`);
                 }
                 
                 // Asignar la fecha correcta a cada pago
@@ -686,10 +527,24 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
             return a.orden - b.orden;
         });
         
-        // Obtener las fechas únicas ordenadas
-        const fechasUnicas = [...new Set(pagosConFechas.map(p => p.fecha))];
-        const primeraFecha = fechasUnicas[0];
-        const fechasRestantes = fechasUnicas.slice(1);
+        // Agrupar pagos por fecha (CORRECCIÓN: igual que en resultados.js)
+        const pagosAgrupados = {};
+        pagosConFechas.forEach(pago => {
+            if (!pagosAgrupados[pago.fecha]) {
+                pagosAgrupados[pago.fecha] = 0;
+            }
+            pagosAgrupados[pago.fecha] += pago.valor;
+        });
+        
+        // Obtener las fechas ordenadas cronológicamente
+        const fechasOrdenadas = Object.keys(pagosAgrupados).sort((a, b) => {
+            // Convertir fechas de formato DD/MM/YYYY a objetos Date para comparación
+            const fechaA = new Date(a.split('/').reverse().join('-'));
+            const fechaB = new Date(b.split('/').reverse().join('-'));
+            return fechaA - fechaB;
+        });
+        const primeraFecha = fechasOrdenadas[0];
+        const fechasRestantes = fechasOrdenadas.slice(1);
         
         // Cambiar el texto "Primer pago" por la primera fecha
         const primerPagoElem = document.getElementById('primerPago');
@@ -704,8 +559,8 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         }
         
         // Mostrar el valor del primer pago (primer pago de la lista ordenada)
-        if (primerPagoElem && pagosConFechas.length > 0) {
-            primerPagoElem.textContent = formatearPesos(pagosConFechas[0].valor || 0);
+        if (primerPagoElem && fechasOrdenadas.length > 0) {
+            primerPagoElem.textContent = formatearPesos(pagosAgrupados[primeraFecha] || 0);
         }
         
         // Mostrar solo las fechas restantes en mensualidades
@@ -713,9 +568,7 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         let pagosValorHtml = '';
         fechasRestantes.forEach(fecha => {
             pagosTextHtml += `<span>${fecha}</span><br>`;
-            // Buscar el pago correspondiente a esta fecha
-            const pagoEnFecha = pagosConFechas.find(p => p.fecha === fecha);
-            pagosValorHtml += `<b>${formatearPesos(pagoEnFecha ? pagoEnFecha.valor : 0)}</b><br>`;
+            pagosValorHtml += `<b>${formatearPesos(pagosAgrupados[fecha])}</b><br>`;
         });
         
         const mensualidadesText = document.getElementById('mensualidadesText');
@@ -733,177 +586,149 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (financiamientoContent) financiamientoContent.style.display = 'block';
         
-        console.log('=== FIN CARGA DE PAGOS BIMESTRALES NIVEL 13 ===');
-        
     } catch (error) {
         console.error('Error al procesar pagos bimestrales:', error);
     }
 } 
 
-// Función para organizar campos según el nivel de manera más lógica
+// Función para organizar campos automáticamente según el nivel
 function organizarCamposPorNivel(nivelId, cotizacion) {
-    console.log('=== ORGANIZANDO CAMPOS POR NIVEL ===');
-    console.log('Nivel:', nivelId);
-    console.log('Datos de la cotización:', cotizacion);
+    const infoGrid = document.getElementById('info-grid');
+    if (!infoGrid) {
+        console.error('No se encontró el contenedor info-grid');
+        return;
+    }
     
-    // Obtener elementos del DOM
-    const materiasContainer = document.getElementById('materias-container');
-    const certificadosContainer = document.getElementById('certificados-container');
-    const semanasContainer = document.getElementById('semanas-container');
-    const inglesContainer = document.getElementById('ingles-container');
-    const creditosContainer = document.getElementById('creditos-container');
+    // Limpiar el grid
+    infoGrid.innerHTML = '';
     
-    // Ocultar todos los contenedores primero
-    if (materiasContainer) materiasContainer.style.display = 'none';
-    if (certificadosContainer) certificadosContainer.classList.add('hidden');
-    if (semanasContainer) semanasContainer.classList.add('hidden');
-    if (inglesContainer) inglesContainer.classList.add('hidden');
-    if (creditosContainer) creditosContainer.classList.add('hidden');
+    // Función para formatear números
+    function formatearNumero(valor) {
+        if (valor === null || valor === undefined || valor === '') return 'N/A';
+        
+        // Convertir a string y limpiar
+        let valorStr = valor.toString().trim();
+        
+        // Si ya es un string que termina en .00, convertirlo a entero
+        if (valorStr.endsWith('.00')) {
+            valorStr = valorStr.replace('.00', '');
+        }
+        
+        const num = parseFloat(valorStr);
+        if (isNaN(num)) return valorStr;
+        
+        // Si es un número entero, devolver como string sin decimales
+        if (Number.isInteger(num)) {
+            return num.toString();
+        }
+        
+        // Si es decimal, mostrar con 2 decimales
+        return num.toFixed(2);
+    }
     
-    // Mostrar campos según el nivel (misma lógica que resultados.js)
+    // Definir los campos base que siempre se muestran
+    const camposBase = [
+        { id: 'nombre', label: 'Nombre', valor: cotizacion.nombre_estudiante || 'N/A' }
+    ];
+    
+    // Agregar programa y formato si tienen valor (después del nombre)
+    if (cotizacion.programa && cotizacion.programa !== 'N/A' && cotizacion.programa !== '') {
+        camposBase.push({ id: 'programa', label: 'Programa', valor: cotizacion.programa });
+    }
+    
+    if (cotizacion.formato && cotizacion.formato !== 'N/A' && cotizacion.formato !== '') {
+        camposBase.push({ id: 'formato', label: 'Formato', valor: cotizacion.formato });
+    }
+    
+    // Agregar periodo (después de programa y formato)
+    camposBase.push({ id: 'periodo', label: 'Periodo', valor: cotizacion.periodo || 'N/A' });
+    
+    // Agregar nivel solo para niveles que no sean 4 ni 13 (después del periodo)
+    if (nivelId !== 4 && nivelId !== 13) {
+        camposBase.push({ id: 'nivel', label: 'Nivel', valor: cotizacion.nivel || 'N/A' });
+    }
+    
+    // Agregar campus (después del nivel)
+    camposBase.push({ id: 'campus', label: 'Campus', valor: cotizacion.campus || 'N/A' });
+    
+    // Definir campos adicionales según el nivel (unidades)
+    let camposAdicionales = [];
+    
     if (nivelId === 4) {
         // Nivel 4: certificados, semanas SEDI e inglés
-        if (certificadosContainer) certificadosContainer.classList.remove('hidden');
-        if (semanasContainer) semanasContainer.classList.remove('hidden');
-        if (inglesContainer) inglesContainer.classList.remove('hidden');
-        console.log('Nivel 4: mostrando certificados, semanas SEDI e inglés');
+        camposAdicionales = [
+            { id: 'certificados', label: 'Certificados', valor: formatearNumero(cotizacion.certificados) },
+            { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(cotizacion.semanas_sedi) },
+            { id: 'ingles', label: 'Certificados de inglés', valor: formatearNumero(cotizacion.ingles) }
+        ];
     } else if (nivelId === 13) {
         // Nivel 13: certificados y semanas SEDI
-        if (certificadosContainer) certificadosContainer.classList.remove('hidden');
-        if (semanasContainer) semanasContainer.classList.remove('hidden');
-        console.log('Nivel 13: mostrando certificados y semanas SEDI');
+        camposAdicionales = [
+            { id: 'certificados', label: 'Certificados', valor: formatearNumero(cotizacion.certificados) },
+            { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(cotizacion.semanas_sedi) }
+        ];
     } else if ([8, 9].includes(nivelId)) {
         // Niveles 8 y 9: créditos
-        if (creditosContainer) creditosContainer.classList.remove('hidden');
-        console.log(`Nivel ${nivelId}: mostrando créditos`);
+        camposAdicionales = [
+            { id: 'creditos', label: 'Créditos', valor: formatearNumero(cotizacion.creditos) }
+        ];
     } else {
         // Resto de niveles: materias
-        if (materiasContainer) materiasContainer.style.display = 'block';
-        console.log(`Nivel ${nivelId}: mostrando materias`);
+        const materiasLabel = getMateriasLabel(nivelId);
+        camposAdicionales = [
+            { id: 'materias', label: materiasLabel, valor: formatearNumero(cotizacion.materias) }
+        ];
     }
     
-    // Organizar la disposición visual según el nivel (misma lógica que resultados.js)
-    const infoProgramaFila1 = document.querySelector('.info-programa-fila1');
-    const infoProgramaFila2 = document.querySelector('.info-programa-fila2');
-    const infoFormatoFila1 = document.querySelector('.info-formato-fila1');
-    const infoFormatoFila2 = document.querySelector('.info-formato-fila2');
+    // Combinar todos los campos
+    const todosLosCampos = [...camposBase, ...camposAdicionales];
+
+    // Determinar la organización del grid
+    const totalCampos = todosLosCampos.length;
+    let gridClasses = '';
     
-    // Verificar si hay campos adicionales visibles (misma lógica que resultados.js)
-    const hayAcompananteSegundaFila = [
-        certificadosContainer,
-        semanasContainer,
-        inglesContainer,
-        creditosContainer
-    ].some(el => el && !el.classList.contains('hidden') && el.style.display !== 'none');
-    
-    // Verificar si Formato tiene valor (misma lógica que resultados.js)
-    const formatoVisible = (cotizacion.formato && cotizacion.formato !== 'N/A' && cotizacion.formato !== '');
-    
-    console.log('Hay acompañante segunda fila:', hayAcompananteSegundaFila);
-    console.log('Formato visible:', formatoVisible);
-    
-    // Solo baja Programa si hay acompañante o formato visible (misma lógica que resultados.js)
-    if (hayAcompananteSegundaFila || formatoVisible) {
-        // Mover programa y formato a la segunda fila
-        if (infoProgramaFila1) infoProgramaFila1.classList.add('hidden');
-        if (infoProgramaFila2) infoProgramaFila2.classList.remove('hidden');
-        
-        if (formatoVisible) {
-            if (infoFormatoFila1) infoFormatoFila1.classList.add('hidden');
-            if (infoFormatoFila2) infoFormatoFila2.classList.remove('hidden');
-        } else {
-            if (infoFormatoFila1) infoFormatoFila1.classList.add('hidden');
-            if (infoFormatoFila2) infoFormatoFila2.classList.add('hidden');
-        }
-        
-        // Mover campos adicionales a la segunda fila cuando hay formato visible
-        if (formatoVisible) {
-            // Ocultar campos adicionales de la primera fila
-            if (certificadosContainer) certificadosContainer.classList.add('hidden');
-            if (semanasContainer) semanasContainer.classList.add('hidden');
-            if (inglesContainer) inglesContainer.classList.add('hidden');
-            if (creditosContainer) creditosContainer.classList.add('hidden');
-            
-            // Mostrar campos adicionales en la segunda fila
-            const certificadosFila2Container = document.getElementById('certificados-fila2-container');
-            const semanasFila2Container = document.getElementById('semanas-fila2-container');
-            const inglesFila2Container = document.getElementById('ingles-fila2-container');
-            const creditosFila2Container = document.getElementById('creditos-fila2-container');
-            
-            const certificadosFila2 = document.getElementById('certificados-fila2');
-            const semanasFila2 = document.getElementById('semanas-fila2');
-            const inglesFila2 = document.getElementById('ingles-fila2');
-            const creditosFila2 = document.getElementById('creditos-fila2');
-            
-            // Mostrar certificados en segunda fila para niveles 4 y 13
-            if (certificadosFila2Container && certificadosFila2 && (nivelId === 4 || nivelId === 13)) {
-                certificadosFila2Container.classList.remove('hidden');
-                certificadosFila2.textContent = formatNumber(cotizacion.certificados || 0);
-            }
-            
-            // Mostrar semanas SEDI en segunda fila para niveles 4 y 13
-            if (semanasFila2Container && semanasFila2 && (nivelId === 4 || nivelId === 13)) {
-                semanasFila2Container.classList.remove('hidden');
-                semanasFila2.textContent = formatNumber(cotizacion.semanas_sedi || 0);
-            }
-            
-            // Mostrar inglés en segunda fila solo para nivel 4
-            if (inglesFila2Container && inglesFila2 && nivelId === 4) {
-                inglesFila2Container.classList.remove('hidden');
-                inglesFila2.textContent = formatNumber(cotizacion.ingles || 0);
-            }
-            
-            // Mostrar créditos en segunda fila para niveles 8 y 9
-            if (creditosFila2Container && creditosFila2 && [8, 9].includes(nivelId)) {
-                creditosFila2Container.classList.remove('hidden');
-                creditosFila2.textContent = formatNumber(cotizacion.creditos || 0);
-            }
+    if (totalCampos <= 6) {
+        // Una sola fila: distribuir uniformemente
+        if (totalCampos <= 2) {
+            gridClasses = 'grid-cols-1 md:grid-cols-2';
+        } else if (totalCampos <= 3) {
+            gridClasses = 'grid-cols-1 md:grid-cols-3';
+        } else if (totalCampos <= 4) {
+            gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
+        } else if (totalCampos <= 6) {
+            gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6';
         }
     } else {
-        // Mantener programa en la primera fila
-        if (infoProgramaFila1) infoProgramaFila1.classList.remove('hidden');
-        if (infoProgramaFila2) infoProgramaFila2.classList.add('hidden');
-        if (infoFormatoFila1) infoFormatoFila1.classList.add('hidden');
-        if (infoFormatoFila2) infoFormatoFila2.classList.add('hidden');
-        
-        // Ocultar campos de la segunda fila
-        const certificadosFila2Container = document.getElementById('certificados-fila2-container');
-        const semanasFila2Container = document.getElementById('semanas-fila2-container');
-        const inglesFila2Container = document.getElementById('ingles-fila2-container');
-        const creditosFila2Container = document.getElementById('creditos-fila2-container');
-        
-        if (certificadosFila2Container) certificadosFila2Container.classList.add('hidden');
-        if (semanasFila2Container) semanasFila2Container.classList.add('hidden');
-        if (inglesFila2Container) inglesFila2Container.classList.add('hidden');
-        if (creditosFila2Container) creditosFila2Container.classList.add('hidden');
+        // Dos filas: primeros 4 en la primera fila, resto en la segunda
+        gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
     }
     
-    // Actualizar el label del campo principal según el nivel
-    const textMaterias = document.getElementById('text-materias');
-    if (textMaterias) {
-        const materiasPorNivel = {
-            1: 'Materias',
-            2: 'Créditos',
-            3: 'Materias',
-            4: 'Certificados',
-            5: 'Certificados',
-            6: 'Créditos',
-            7: 'Materias',
-            8: 'Certificados',
-            9: 'Certificados',
-            10: 'Créditos',
-            11: 'Materias',
-            12: 'Materias',
-            13: 'Certificados'
-        };
-        
-        const label = materiasPorNivel[nivelId] || 'Materias';
-        textMaterias.textContent = label;
-        console.log(`Label actualizado para nivel ${nivelId}: ${label}`);
-    }
+    // Aplicar las clases del grid
+    infoGrid.className = `grid ${gridClasses} gap-4`;
     
-    console.log('=== FIN ORGANIZACIÓN DE CAMPOS ===');
-} 
+    // Crear y agregar los elementos
+    todosLosCampos.forEach((campo, index) => {
+        const campoElement = crearElementoCampo(campo, index, totalCampos);
+        infoGrid.appendChild(campoElement);
+    });
+
+}
+
+// Función auxiliar para crear un elemento de campo
+function crearElementoCampo(campo, index, totalCampos) {
+    
+    const div = document.createElement('div');
+    div.className = 'px-4 grow lg:w-auto';
+    
+    const htmlContent = `
+        <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">${campo.label}</p>
+        <p id="${campo.id}" class="text-[21px] leading-[29px]">${campo.valor}</p>
+    `;
+    
+    div.innerHTML = htmlContent;
+    
+    return div;
+}
 
 // Función para enviar cotización por WhatsApp
 window.enviarWhatsApp = function() {
@@ -977,8 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función para recalcular costos por bimestre usando el endpoint
 async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados) {
     try {
-        console.log('=== RECALCULANDO COSTOS POR BIMESTRE ===');
-        
+
         // Obtener costos base del nivel desde el endpoint
         const response = await fetch(`${API_BASE_URL}/costos/nivel/${cotizacion.nivel_id}`);
         if (!response.ok) {
@@ -986,8 +810,7 @@ async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados
         }
         
         const costosBase = await response.json();
-        console.log('Costos base obtenidos:', costosBase);
-        
+
         // Calcular costos por bimestre usando la misma lógica que en step1.js
         const costosPorBimestre = {};
         
@@ -1010,29 +833,20 @@ async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados
                 
                 // Buscar el costo usando solo el código del período dentro de la clave
                 const costoPorCredito = costosBase.find(c => c.clave.includes(codigo))?.costo || 0;
-                console.log(`Bimestre ${codigo}: buscando clave que contenga '${codigo}', costo por crédito = ${costoPorCredito}`);
                 
-                // Corregir la fórmula: (certificados × 10 × costo) + (semanas × 1 × costo)
-                console.log('numeroCertificados', numeroCertificados);
                 const costoCertificados = numeroCertificados * 10 * costoPorCredito;
                 const costoSemanasSEDI = numeroSemanasSEDI * 1 * costoPorCredito;
                 costoBimestre = costoCertificados + costoSemanasSEDI;
-                
-                console.log(`Bimestre ${codigo}: certificados=${numeroCertificados}×10×${costoPorCredito}=${costoCertificados}, semanas=${numeroSemanasSEDI}×1×${costoPorCredito}=${costoSemanasSEDI}, total=${costoBimestre}`);
             }
             
             // NO aplicar descuentos aquí porque ya están aplicados en total_contado de la BD
             // Los descuentos se aplican a nivel de cotización, no por bimestre individual
             
             costosPorBimestre[codigo] = Math.max(0, costoBimestre);
-            console.log(`Bimestre ${codigo}: costo calculado = ${costoBimestre}`);
         });
         
         // Actualizar la variable global para que se use en los cálculos de pagos
         window.costosPorBimestreRecalculados = costosPorBimestre;
-        
-        console.log('Costos recalculados:', costosPorBimestre);
-        console.log('=== FIN RECÁLCULO DE COSTOS ===');
         
         return costosPorBimestre;
         

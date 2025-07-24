@@ -2131,3 +2131,42 @@ p.msg.error {
   font-size: 1.5rem;
   margin-left: 8px;
 }
+
+/* Estilos para el grid de información básica - Manteniendo estilo original */
+#info-grid {
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* Responsive grid para diferentes cantidades de campos */
+@media (min-width: 768px) {
+    #info-grid.grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #info-grid.grid-cols-1.md\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    #info-grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    #info-grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    #info-grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    #info-grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-6 {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+

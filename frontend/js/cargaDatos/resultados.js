@@ -46,22 +46,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('campus', campus);
     localStorage.setItem('programa', programa);
 
-    document.getElementById('nombre').textContent = nombre;
-    document.getElementById('periodo').textContent = periodo;
-    document.getElementById('campus').textContent = campus;
-    document.getElementById('nivel').textContent = nivel;
-    document.getElementById('materias').textContent = formatNumber(materias);
-    document.getElementById('certificados').textContent = formatNumber(certificados);
-    document.getElementById('semanas').textContent = formatNumber(semanas);
-    document.getElementById('ingles').textContent = formatNumber(ingles);
-    if(document.getElementById('formato')) {
-        if (formato && formato !== 'N/A') {
-            document.getElementById('formato').textContent = formato;
-            document.getElementById('formato').parentElement.style.display = '';
-        } else {
-            document.getElementById('formato').parentElement.style.display = 'none';
-        }
-    }
+    // CÓDIGO ANTIGUO - COMENTADO PORQUE AHORA SE HACE DINÁMICAMENTE
+    // document.getElementById('nombre').textContent = nombre;
+    // document.getElementById('periodo').textContent = periodo;
+    // document.getElementById('campus').textContent = campus;
+    // document.getElementById('nivel').textContent = nivel;
+    // document.getElementById('materias').textContent = formatNumber(materias);
+    // document.getElementById('certificados').textContent = formatNumber(certificados);
+    // document.getElementById('semanas').textContent = formatNumber(semanas);
+    // document.getElementById('ingles').textContent = formatNumber(ingles);
+    // if(document.getElementById('formato')) {
+    //     if (formato && formato !== 'N/A') {
+    //         document.getElementById('formato').textContent = formato;
+    //         document.getElementById('formato').parentElement.style.display = '';
+    //     } else {
+    //         document.getElementById('formato').parentElement.style.display = 'none';
+    //     }
+    // }
 
     const materiasPorNivel = {
         1: 'Materias',
@@ -77,16 +78,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         12: 'Materias'
     };
 
-    if (materiasPorNivel[levelId]) {
-        document.getElementById('text-materias').textContent = materiasPorNivel[levelId];
-    } 
+    // CÓDIGO ANTIGUO - COMENTADO PORQUE AHORA SE HACE DINÁMICAMENTE
+    // if (materiasPorNivel[levelId]) {
+    //     document.getElementById('text-materias').textContent = materiasPorNivel[levelId];
+    // } 
 
-    if (levelId == 4) {
-        document.getElementById('materias-container').style.display = 'none';
-        document.getElementById('certificados-container').classList.remove('hidden');
-        document.getElementById('semanas-container').classList.remove('hidden');
-        document.getElementById('ingles-container').classList.remove('hidden');
-    }
+    // CÓDIGO ANTIGUO - COMENTADO PORQUE AHORA SE HACE DINÁMICAMENTE
+    // if (levelId == 4) {
+    //     document.getElementById('materias-container').style.display = 'none';
+    //     document.getElementById('certificados-container').classList.remove('hidden');
+    //     document.getElementById('semanas-container').classList.remove('hidden');
+    //     document.getElementById('ingles-container').classList.remove('hidden');
+    // }
 
     // --- AJUSTE PARA NIVEL 13 ---
     if (levelId == 13) {
@@ -112,7 +115,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (periodosSeleccionados.length > 0) {
             // Mostrar múltiples períodos
             const periodosTexto = periodosSeleccionados.map(p => p.mes).join(', ');
-            document.getElementById('periodo').textContent = periodosTexto;
+            // CÓDIGO ANTIGUO - COMENTADO PORQUE AHORA SE HACE DINÁMICAMENTE
+            // document.getElementById('periodo').textContent = periodosTexto;
             codigosBimestres = periodosSeleccionados.map(p => p.codigo);
         } else {
             // Fallback al comportamiento anterior
@@ -124,15 +128,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     mesBimestre = bimestreTexto;
                 }
             }
-            document.getElementById('periodo').textContent = mesBimestre;
+            // CÓDIGO ANTIGUO - COMENTADO PORQUE AHORA SE HACE DINÁMICAMENTE
+            // document.getElementById('periodo').textContent = mesBimestre;
             const codigoBimestre = params.get('select-period') || '';
             if (codigoBimestre) codigosBimestres = [codigoBimestre];
         }
-        document.getElementById('materias-container').style.display = 'none';
-        document.getElementById('certificados-container').classList.remove('hidden');
-        document.getElementById('semanas-container').classList.remove('hidden');
-        document.getElementById('certificados').textContent = certificados;
-        document.getElementById('semanas').textContent = semanas;
+        // CÓDIGO ANTIGUO - COMENTADO PORQUE AHORA SE HACE DINÁMICAMENTE
+        // document.getElementById('materias-container').style.display = 'none';
+        // document.getElementById('certificados-container').classList.remove('hidden');
+        // document.getElementById('semanas-container').classList.remove('hidden');
+        // document.getElementById('certificados').textContent = certificados;
+        // document.getElementById('semanas').textContent = semanas;
 
         // OCULTAR EL BLOQUE TRADICIONAL DE PLAN DE FINANCIAMIENTO
         const planFinanciamientoTrad = document.querySelector('.plan-financiamiento-tradicional');
@@ -194,8 +200,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount')) || 0;
                 const descuentoPorBimestre = cantidadBimestres > 0 ? finalAmountRecuperado / cantidadBimestres : 0;
                 
-                console.log(`Descuento total: ${finalAmountRecuperado}, descuento por bimestre: ${descuentoPorBimestre}`);
-                
                 codigosBimestresOrdenados.forEach((codigo, bimestreIdx) => {
                     // Obtener el costo total del bimestre específico desde localStorage
                     const costoBimestreKey = `totalContado_${codigo}`;
@@ -209,8 +213,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // APLICAR DESCUENTO AL COSTO DEL BIMESTRE
                     const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoPorBimestre);
                     
-                    console.log(`Bimestre ${codigo}: costo original = ${costoBimestre}, descuento aplicado = ${descuentoPorBimestre}, costo final = ${costoBimestreConDescuento}`);
-                    
                     const pagosBimestre = pagosPorBimestre[codigo] || [];
                     pagosBimestre.forEach((pago, idx) => {
                         const porcentaje = parseFloat(pago.porcentaje_parcialidad) / 100;
@@ -223,15 +225,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             // El interés se calcula sobre el costo total del bimestre CON DESCUENTO
                             interes = costoBimestreConDescuento * (parseFloat(pago.porcentaje_interes) / 100);
                             totalParcialidad += interes;
-                            console.log(`Bimestre ${codigo}, Pago ${idx + 1}: parcialidad=${parcialidad}, interés=${interes}, total=${totalParcialidad}`);
-                        } else {
-                            console.log(`Bimestre ${codigo}, Pago ${idx + 1}: parcialidad=${parcialidad}, sin interés`);
                         }
                         
                         // Agregar seguros completos al primer pago de cada bimestre (idx === 0)
                         if (idx === 0 && totalSeguros > 0) {
                             totalParcialidad += totalSeguros;
-                            console.log(`Bimestre ${codigo}, Pago ${idx + 1}: agregando TODOS los seguros=${totalSeguros}, total final=${totalParcialidad}`);
                         }
                         
                         // Asignar la fecha correcta a cada pago
@@ -330,6 +328,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
     }
+
+    // Llamar a la función para organizar campos dinámicamente
+    let periodoFinal = periodo;
+    
+    // Para nivel 13, usar el período procesado
+    if (levelId === 13) {
+        const periodosSeleccionados = JSON.parse(localStorage.getItem('periodosSeleccionados') || '[]');
+        if (periodosSeleccionados.length > 0) {
+            periodoFinal = periodosSeleccionados.map(p => p.mes).join(', ');
+        } else {
+            const bimestreLocal = localStorage.getItem('bimestreSeleccionado');
+            if (bimestreLocal) {
+                const bimestreTexto = JSON.parse(bimestreLocal);
+                if (bimestreTexto && bimestreTexto !== periodo) {
+                    periodoFinal = bimestreTexto;
+                }
+            }
+        }
+    }
+    
+    const datosBasicos = {
+        nombre: nombre,
+        periodo: periodoFinal,
+        campus: campus,
+        nivel: nivel,
+        materias: materias,
+        certificados: certificados,
+        semanas: semanas,
+        ingles: ingles,
+        programa: programa,
+        formato: formato
+    };
+    
+    organizarCamposPorNivel(levelId, datosBasicos);
 
     let segurosData;
     const viveDiv = document.getElementById('div-vive');
@@ -728,6 +760,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         benefitsWrapper.innerHTML = ''; // Limpiar el contenedor de beneficios
         const titleBenefit = document.getElementById('titleBenefit');
         titleBenefit.innerText = tituloPorNivel[nivel] || 'N/A';
+        // Mantener las clases originales y solo agregar el margen si no existe
+        if (!titleBenefit.classList.contains('mb-8')) {
+            titleBenefit.classList.add('mb-8');
+        }
         const beneficios = beneficiosPorNivel || [];
         beneficios.forEach((beneficio, index) => {
             const benefitItem = document.createElement('div');
@@ -1138,5 +1174,161 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.removeItem('cotizacionId');
             await guardarCotizacion();
         });
+    }
+
+    // Función para organizar campos automáticamente según el nivel
+    function organizarCamposPorNivel(nivelId, datos) {
+        const infoGrid = document.getElementById('info-grid');
+        if (!infoGrid) {
+            console.error('No se encontró el contenedor info-grid');
+            return;
+        }
+        
+        // Limpiar el grid
+        infoGrid.innerHTML = '';
+        
+        // Función para formatear números
+        function formatearNumero(valor) {
+            if (valor === null || valor === undefined || valor === '') return 'N/A';
+            
+            // Convertir a string y limpiar
+            let valorStr = valor.toString().trim();
+            
+            // Si ya es un string que termina en .00, convertirlo a entero
+            if (valorStr.endsWith('.00')) {
+                valorStr = valorStr.replace('.00', '');
+            }
+            
+            const num = parseFloat(valorStr);
+            if (isNaN(num)) return valorStr;
+            
+            // Si es un número entero, devolver como string sin decimales
+            if (Number.isInteger(num)) {
+                return num.toString();
+            }
+            
+            // Si es decimal, mostrar con 2 decimales
+            return num.toFixed(2);
+        }
+        
+        // Definir los campos base que siempre se muestran
+        const camposBase = [
+            { id: 'nombre', label: 'Nombre', valor: datos.nombre || 'N/A' }
+        ];
+        
+        // Agregar programa y formato si tienen valor (después del nombre)
+        if (datos.programa && datos.programa !== 'N/A' && datos.programa !== '') {
+            camposBase.push({ id: 'programa', label: 'Programa', valor: datos.programa });
+        }
+        
+        if (datos.formato && datos.formato !== 'N/A' && datos.formato !== '') {
+            camposBase.push({ id: 'formato', label: 'Formato', valor: datos.formato });
+        }
+        
+        // Agregar periodo (después de programa y formato)
+        camposBase.push({ id: 'periodo', label: 'Periodo', valor: datos.periodo || 'N/A' });
+        
+        // Agregar nivel solo para niveles que no sean 4 ni 13 (después del periodo)
+        if (nivelId !== 4 && nivelId !== 13) {
+            camposBase.push({ id: 'nivel', label: 'Nivel', valor: datos.nivel || 'N/A' });
+        }
+        
+        // Agregar campus (después del nivel)
+        camposBase.push({ id: 'campus', label: 'Campus', valor: datos.campus || 'N/A' });
+        
+        // Definir campos adicionales según el nivel (unidades)
+        let camposAdicionales = [];
+        
+        if (nivelId === 4) {
+            // Nivel 4: certificados, semanas SEDI e inglés
+            camposAdicionales = [
+                { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.certificados) },
+                { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(datos.semanas) },
+                { id: 'ingles', label: 'Certificados de inglés', valor: formatearNumero(datos.ingles) }
+            ];
+        } else if (nivelId === 13) {
+            // Nivel 13: certificados y semanas SEDI
+            camposAdicionales = [
+                { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.certificados) },
+                { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(datos.semanas) }
+            ];
+        } else if ([8, 9].includes(nivelId)) {
+            // Niveles 8 y 9: créditos
+            camposAdicionales = [
+                { id: 'creditos', label: 'Créditos', valor: formatearNumero(datos.materias) }
+            ];
+        } else {
+            // Resto de niveles: materias
+            const materiasLabel = getMateriasLabel(nivelId);
+            camposAdicionales = [
+                { id: 'materias', label: materiasLabel, valor: formatearNumero(datos.materias) }
+            ];
+        }
+        
+        // Combinar todos los campos
+        const todosLosCampos = [...camposBase, ...camposAdicionales];
+
+        // Determinar la organización del grid
+        const totalCampos = todosLosCampos.length;
+        let gridClasses = '';
+        
+        if (totalCampos <= 6) {
+            // Una sola fila: distribuir uniformemente
+            if (totalCampos <= 2) {
+                gridClasses = 'grid-cols-1 md:grid-cols-2';
+            } else if (totalCampos <= 3) {
+                gridClasses = 'grid-cols-1 md:grid-cols-3';
+            } else if (totalCampos <= 4) {
+                gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
+            } else if (totalCampos <= 6) {
+                gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6';
+            }
+        } else {
+            // Dos filas: primeros 4 en la primera fila, resto en la segunda
+            gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
+        }
+        
+        // Aplicar las clases del grid
+        infoGrid.className = `grid ${gridClasses} gap-4`;
+        
+        // Crear y agregar los elementos
+        todosLosCampos.forEach((campo, index) => {
+            const campoElement = crearElementoCampo(campo, index, totalCampos);
+            infoGrid.appendChild(campoElement);
+        });
+    }
+
+    // Función auxiliar para crear un elemento de campo
+    function crearElementoCampo(campo, index, totalCampos) {
+        const div = document.createElement('div');
+        div.className = 'px-4 grow lg:w-auto';
+        
+        const htmlContent = `
+            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">${campo.label}</p>
+            <p id="${campo.id}" class="text-[21px] leading-[29px]">${campo.valor}</p>
+        `;
+        
+        div.innerHTML = htmlContent;
+        
+        return div;
+    }
+
+    // Función auxiliar para obtener el label correcto según el nivel
+    function getMateriasLabel(nivelId) {
+        const materiasPorNivel = {
+            1: 'Materias',
+            2: 'Créditos',
+            3: 'Materias',
+            5: 'Certificados',
+            6: 'Créditos',
+            7: 'Materias',
+            8: 'Certificados',
+            9: 'Certificados',
+            10: 'Créditos',
+            11: 'Materias',
+            12: 'Materias'
+        };
+        
+        return materiasPorNivel[nivelId] || 'Materias';
     }
 });

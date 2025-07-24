@@ -99,7 +99,7 @@
             <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
                 <div class="flex flex-row justify-center">
                     <div class="px-4 w-full text-center">
-                        <h2 class="text-write-color-3">Beneficios de estudiar en Tecmilenio</h2>
+                        <h2 class="text-write-color-3 mb-8">Beneficios de estudiar en Tecmilenio</h2>
                     </div>
                 </div>
                 <div class=" flex flex-row flex-wrap justify-center" id="benefits-wrappers">
@@ -170,66 +170,12 @@
                 <div class="flex flex-row flex-wrap justify-center">
                     <div
                         class="w-full bg-secondary-color-5 px-[20px] lg:px-[50px] py-[20px] rounded-[6px] flex flex-wrap lg:flex-nowrap justify-center">
-                        <div class="px-4 grow lg:w-auto">
-                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nombre</p>
-                            <p id="nombre" class="text-[21px] leading-[29px]">Jerónimo Garza</p>
+                        <!-- Contenedor principal con grid responsivo -->
+                        <div id="info-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                            <!-- Los elementos se insertarán dinámicamente aquí -->
                         </div>
-                        <div class="px-4 grow lg:w-auto">
-                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Periodo</p>
-                            <p id="periodo" class="text-[21px] leading-[29px]">Verano 2025</p>
-                        </div>
-                        <div class="px-4 grow lg:w-auto">
-                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Campus</p>
-                            <p id="campus" class="text-[21px] leading-[29px]">Mérida</p>
-                        </div>
-                        <div class="px-4 grow lg:w-auto">
-                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Nivel</p>
-                            <p id="nivel" class="text-[21px] leading-[29px]">Preparatoria Semestral</p>
-                        </div>
-                        <div class="min-w-0 info-programa info-programa-fila1">
-                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Programa</p>
-                            <p id="programa-fila1" class="text-[21px] leading-[29px]"></p>
-                        </div>
-                        <div class="min-w-0 info-formato info-formato-fila1">
-                            <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Formato</p>
-                            <p id="formato-fila1" class="text-[21px] leading-[29px]"></p>
-                        </div>
-                        <!-- Contenedor original de materias -->
-                        <div id="materias-container" class="px-4 grow lg:w-auto">
-                            <p id="text-materias"
-                                class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Materias</p>
-                            <p id="materias" class="text-[21px] leading-[29px]">6</p>
-                        </div>
-
-                        <!-- Estos contenedores solo se mostrarán en el nivel 4 -->
-                        <div class="w-full flex flex-row flex-wrap justify-center mt-4">
-                            <div class="px-4 grow lg:w-auto min-w-0 info-programa info-programa-fila2 hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Programa</p>
-                                <p id="programa-fila2" class="text-[21px] leading-[29px]"></p>
-                            </div>
-                            <div class="px-4 grow lg:w-auto min-w-0 info-formato info-formato-fila2 hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Formato</p>
-                                <p id="formato-fila2" class="text-[21px] leading-[29px]"></p>
-                            </div>
-                            <div id="certificados-container" class="px-4 grow lg:w-auto hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Certificados
-                                </p>
-                                <p id="certificados" class="text-[21px] leading-[29px]"></p>
-                            </div>
-                            <div id="semanas-container" class="px-4 grow lg:w-auto hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Semanas de Desarrollo Integral
-                                </p>
-                                <p id="semanas" class="text-[21px] leading-[29px]"></p>
-                            </div>
-                            <div id="ingles-container" class="px-4 grow lg:w-auto hidden">
-                                <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">Certificados de inglés</p>
-                                <p id="ingles" class="text-[21px] leading-[29px]"></p>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -256,7 +202,7 @@
                                     <td class="px-[10px] md:px-[20px] py-[10px]">
                                         <p id="colegiaturaText"
                                             class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            {{ module.t_tulo_colegiatura }}</p>
+                                            Colegiatura 2025</p>
                                     </td>
                                     <td class="px-[10px] md:px-[20px] py-[10px]">
                                         <p id="colegiatura"

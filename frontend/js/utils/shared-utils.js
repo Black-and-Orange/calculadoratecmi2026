@@ -326,6 +326,10 @@ export function actualizarBeneficios(beneficios, nivel) {
     
     benefitsWrapper.innerHTML = ''; // Limpiar el contenedor de beneficios
     titleBenefit.innerText = getTituloPorNivel(nivel);
+    // Mantener las clases originales y solo agregar el margen si no existe
+    if (!titleBenefit.classList.contains('mb-8')) {
+        titleBenefit.classList.add('mb-8');
+    }
     
     beneficios.forEach((beneficio, index) => {
         const benefitItem = document.createElement('div');
