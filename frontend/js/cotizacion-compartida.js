@@ -16,7 +16,7 @@ import {
 // ===== FUNCIONES ESPECÍFICAS DE COTIZACIÓN COMPARTIDA =====
 
 // Función para cargar apoyos y seguros específica para cotizaciones compartidas
-function cargarApoyosYSeguros(cotizacion) {    
+function cargarApoyosYSeguros(cotizacion) {
     // Apoyos financieros
     const becaElem = document.getElementById('beca');
     const apoyoEstudiantilElem = document.getElementById('apoyoEstudiantil');
@@ -352,7 +352,7 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
             loadingOverlay.style.display = 'none';
         }
         if (financiamientoContent) {
-            financiamientoContent.style.display = 'block';  
+            financiamientoContent.style.display = 'block';
         }
     }
 }
@@ -394,7 +394,7 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
             const codigo = mapeoMeses[periodosCotizacion];
             if (codigo) codigosBimestres = [codigo];
         }
-
+        
         // Filtrar pagos solo para los períodos seleccionados
         const pagosFiltrados = pagos.filter(pago => codigosBimestres.includes(pago.codigo));
         
@@ -491,7 +491,7 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
                     // El interés se calcula sobre el costo total del bimestre CON DESCUENTO
                     interes = costoBimestreConDescuento * (parseFloat(pago.porcentaje_interes) / 100);
                     totalParcialidad += interes;
-                } 
+                }
                 // Agregar seguros completos al primer pago de cada bimestre (idx === 0)
                 if (idx === 0 && totalSeguros > 0) {
                     totalParcialidad += totalSeguros;
@@ -728,7 +728,7 @@ function crearElementoCampo(campo, index, totalCampos) {
     div.innerHTML = htmlContent;
     
     return div;
-}
+} 
 
 // Función para enviar cotización por WhatsApp
 window.enviarWhatsApp = function() {
@@ -802,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función para recalcular costos por bimestre usando el endpoint
 async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados) {
     try {
-
+        
         // Obtener costos base del nivel desde el endpoint
         const response = await fetch(`${API_BASE_URL}/costos/nivel/${cotizacion.nivel_id}`);
         if (!response.ok) {
@@ -810,7 +810,7 @@ async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados
         }
         
         const costosBase = await response.json();
-
+        
         // Calcular costos por bimestre usando la misma lógica que en step1.js
         const costosPorBimestre = {};
         
