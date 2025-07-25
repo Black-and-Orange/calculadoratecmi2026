@@ -25,10 +25,9 @@ async function cargarNiveles() {
         }
         const data = await response.json();
         niveles = data;
-        console.log('Niveles cargados desde API:', niveles);
     } catch (error) {
         console.error('Error al cargar niveles:', error);
-        // Fallback con datos básicos si falla la API
+        // Usar array de respaldo si falla la API
         niveles = [
             { id: '1', descripcion: 'Preparatoria Semestral' },
             { id: '2', descripcion: 'Profesional Semestral' },
@@ -322,31 +321,78 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     const colegiaturaElem = document.getElementById('colegiatura');
     const apoyoEducativoElem = document.getElementById('apoyoFinanciamiento');
     const totalContadoElem = document.getElementById('totalContado');
+    const totalContadoTextElem = document.getElementById('totalContadoText');
+    
+    // Verificar si hay descuento real
+    // Verificar si hay cualquier tipo de descuento: beca, apoyo estudiantil, o finalAmount
+    const hayBeca = cotizacion.beca_porcentaje && parseFloat(cotizacion.beca_porcentaje) > 0;
+    const hayApoyoEstudiantil = cotizacion.apoyo_estudiantil_porcentaje && parseFloat(cotizacion.apoyo_estudiantil_porcentaje) > 0;
+    const hayApoyoFijo = cotizacion.apoyo_estudiantil_fijo && parseFloat(cotizacion.apoyo_estudiantil_fijo) > 0;
+    const hayFinalAmount = cotizacion.finalAmount && parseFloat(cotizacion.finalAmount) > 0;
+    
+    const hayDescuento = hayBeca || hayApoyoEstudiantil || hayApoyoFijo || hayFinalAmount;
     
     // Mostrar colegiatura (costo total sin descuento)
     if (colegiaturaElem) {
-        colegiaturaElem.textContent = formatearPesos(cotizacion.costo_total || 0);
+        if (hayDescuento) {
+            colegiaturaElem.textContent = formatearPesos(cotizacion.costo_total || 0);
+            colegiaturaElem.closest('tr').style.display = '';
+        } else {
+            colegiaturaElem.closest('tr').style.display = 'none';
+        }
     }
     
     // Mostrar apoyo educativo (descuento)
     if (apoyoEducativoElem) {
-        const descuento = (cotizacion.costo_total || 0) - (cotizacion.total_contado || 0);
-        if (descuento > 0) {
-            apoyoEducativoElem.textContent = `-${formatearPesos(descuento)}`;
-            if (apoyoEducativoElem.closest('tr')) {
-                apoyoEducativoElem.closest('tr').style.display = '';
+        // Calcular el descuento total como la diferencia entre costo_total y total_contado
+        const costoTotal = parseFloat(cotizacion.costo_total) || 0;
+        const totalContado = parseFloat(cotizacion.total_contado) || 0;
+        const descuentoTotal = costoTotal - totalContado;
+        
+        const esCero = descuentoTotal <= 0 || Math.abs(descuentoTotal) < 0.000001;
+        let tr = apoyoEducativoElem.closest('tr');
+        if (!tr && apoyoEducativoElem.parentElement && apoyoEducativoElem.parentElement.parentElement && apoyoEducativoElem.parentElement.parentElement.tagName === 'TR') {
+            tr = apoyoEducativoElem.parentElement.parentElement;
+        }
+        if (!esCero) {
+            apoyoEducativoElem.textContent = `-${formatearPesos(descuentoTotal)}`;
+            if (tr) {
+                tr.style.display = '';
             }
         } else {
-            if (apoyoEducativoElem.closest('tr')) {
-                apoyoEducativoElem.closest('tr').style.display = 'none';
+            if (tr) {
+                tr.style.display = 'none';
+            }
+        }
+    }
+    
+    // Ocultar línea separadora cuando no hay descuento
+    const lineaSeparadora = document.querySelector('tr td[colspan="2"] hr');
+    if (lineaSeparadora) {
+        const trSeparadora = lineaSeparadora.closest('tr');
+        if (trSeparadora) {
+            if (!hayDescuento) {
+                trSeparadora.style.display = 'none';
+            } else {
+                trSeparadora.style.display = '';
             }
         }
     }
     
     // Mostrar total contado (incluyendo seguros)
     if (totalContadoElem) {
-        const totalContadoConSeguros = (parseFloat(cotizacion.total_contado) || 0) + (parseFloat(cotizacion.total_seguros) || 0);
-        totalContadoElem.textContent = formatearPesos(totalContadoConSeguros);
+        totalContadoElem.textContent = formatearPesos(cotizacion.total_contado || 0);
+    }
+    
+    // Cambiar el texto del label según si hay descuento
+    if (totalContadoTextElem) {
+        if (!hayDescuento) {
+            // Cuando NO hay descuento: unificar en un solo texto
+            totalContadoTextElem.innerHTML = 'Total Contado<br>Colegiatura 2025';
+        } else {
+            // Cuando SÍ hay descuento: mostrar solo "Total Contado"
+            totalContadoTextElem.innerHTML = 'Total Contado';
+        }
     }
     
     // Llenar información del plan de financiamiento
@@ -489,8 +535,7 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         let totalContado = parseFloat(cotizacion.total_contado) || 0;
         let costoTotal = parseFloat(cotizacion.costo_total) || 0;
         
-        // SUMAR SEGUROS AL TOTAL CONTADO
-        totalContado += totalSeguros;
+        // NO SUMAR SEGUROS AQUÍ - ya están incluidos en total_contado de la BD
         const cantidadBimestres = codigosBimestresOrdenados.length;
         
         // Intentar obtener costos específicos por bimestre desde la base de datos
@@ -498,31 +543,25 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         try {
             if (cotizacion.costos_por_bimestre) {
                 costosPorBimestre = JSON.parse(cotizacion.costos_por_bimestre);
-            } else {
+                // console.log('Costos por bimestre desde BD:', costosPorBimestre);
+                // console.log('Códigos de bimestres ordenados:', codigosBimestresOrdenados);
             }
         } catch (e) {
-        }
-        
-        // Usar el costo total (sin descuentos) dividido entre bimestres como fallback
-        let costoPorBimestre = cantidadBimestres > 0 ? costoTotal / cantidadBimestres : 0;
-        
-        // Si no hay costos específicos en BD, recalcular usando el endpoint de costos
-        if (Object.keys(costosPorBimestre).length === 0 && cotizacion.nivel_id === 13) {
-            await recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados);
+            console.error('Error al parsear costos_por_bimestre:', e);
         }
         
         // Obtener el descuento total para aplicarlo proporcionalmente
-        const descuentoTotal = costoTotal - totalContado;
-        const descuentoPorBimestre = cantidadBimestres > 0 ? descuentoTotal / cantidadBimestres : 0;
+        // Usar la misma lógica que en resultados.js: finalAmount
+        const finalAmount = parseFloat(cotizacion.finalAmount) || 0;
+        const descuentoPorBimestre = cantidadBimestres > 0 ? finalAmount / cantidadBimestres : 0;
         
         // Array auxiliar para pagos con fecha
         const pagosConFechas = [];
-        codigosBimestresOrdenados.forEach((codigo, bimestreIdx) => {
-            // Obtener el costo total del bimestre específico
-            // Usar costos recalculados si están disponibles, sino usar costos específicos de BD, sino usar el costo dividido equitativamente
-            let costoBimestre = window.costosPorBimestreRecalculados?.[codigo] || costosPorBimestre[codigo] || costoPorBimestre;
+        
+        // Función para procesar los pagos de un bimestre
+        function procesarPagosBimestre(codigo, costoBimestre) {
             
-            // APLICAR DESCUENTO AL COSTO DEL BIMESTRE
+            // APLICAR DESCUENTO AL COSTO DEL BIMESTRE (igual que en resultados.js)
             const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoPorBimestre);
             
             const pagosBimestre = pagosPorBimestre[codigo] || [];
@@ -557,7 +596,42 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
                 }
                 totalPagos += totalParcialidad;
             });
-        });
+        }
+        
+        // Procesar todos los bimestres
+        for (let i = 0; i < codigosBimestresOrdenados.length; i++) {
+            const codigo = codigosBimestresOrdenados[i];
+            let costoBimestre = costosPorBimestre[codigo];
+            
+            // Si no hay costo específico del bimestre, recalcular usando la lógica de step1.js
+            if (costoBimestre === undefined || costoBimestre === 0) {
+                try {
+                    // Obtener costos base del nivel desde el endpoint
+                    const response = await fetch(`${API_BASE_URL}/costos/nivel/${cotizacion.nivel_id}`);
+                    const costosMateria = await response.json();
+                    
+                    // Calcular créditos para este bimestre (igual que en step1.js)
+                    const numeroCertificados = parseInt(cotizacion.certificados) || 0;
+                    const numeroSemanasSEDI = parseInt(cotizacion.semanas_sedi) || 0;
+                    const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
+                    
+                    // Buscar el costo usando solo el código del período
+                    const costoPeriodo = costosMateria.find(item => item.clave.includes(codigo))?.costo || 0;
+                    
+                    // Calcular el costo del bimestre (igual que en step1.js)
+                    costoBimestre = totalCreditos * costoPeriodo;
+
+                } catch (error) {
+                    console.error('Error al recalcular costos:', error);
+                    // Fallback: usar totalContado dividido
+                    const totalContadoSinSeguros = totalContado - totalSeguros;
+                    costoBimestre = cantidadBimestres > 0 ? totalContadoSinSeguros / cantidadBimestres : 0;
+                }
+            }
+            
+            // Procesar los pagos de este bimestre
+            procesarPagosBimestre(codigo, costoBimestre);
+        }
         
         // Ordenar pagos por fecha y luego por orden dentro de la misma fecha
         pagosConFechas.sort((a, b) => {

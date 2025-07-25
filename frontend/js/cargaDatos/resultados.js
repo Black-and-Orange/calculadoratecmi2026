@@ -470,12 +470,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // No actualizar totalContado en el DOM para nivel 13
             originalMostrarValores({ ...valores, skipTotalContado: true });
-            // Refuerzo: mostrar el valor de localStorage en el DOM
+            // Refuerzo: mostrar el valor de localStorage en el DOM (incluyendo seguros)
             const totalContadoElem = document.getElementById('totalContado');
             const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
+            const totalCostRecuperado = JSON.parse(localStorage.getItem('totalCost')); // Seguros
+            
             if (totalContadoElem && totalContadoRecuperado !== undefined && totalContadoRecuperado !== null) {
-                
-                totalContadoElem.textContent = formatearPesos(totalContadoRecuperado);
+                // SUMAR SEGUROS AL TOTAL CONTADO (igual que en recuperarValoresAdicionales)
+                const totalSeguros = parseFloat(totalCostRecuperado) || 0;
+                const totalContadoConSeguros = totalContadoRecuperado + totalSeguros;
+                totalContadoElem.textContent = formatearPesos(totalContadoConSeguros);
             }
         } else {
             originalMostrarValores(valores);
@@ -501,11 +505,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // FUNCIÓN ESPECÍFICA PARA NIVEL 13
     function mostrarValoresNivel13(valores) {
         
-        // Verificar si hay descuento real
+        // Verificar si hay cualquier tipo de descuento: beca, apoyo estudiantil, o finalAmount
         const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount'));
-        const hayDescuento = finalAmountRecuperado && finalAmountRecuperado > 0;
+        const becaRecuperada = JSON.parse(localStorage.getItem('selectedScholarshipValue')) || 0;
+        const apoyoEstudiantilRecuperado = JSON.parse(localStorage.getItem('selectedSupportValue')) || 0;
+        const apoyoFijoRecuperado = JSON.parse(localStorage.getItem('selectedSupportFixValue')) || 0;
         
-        // 1trar/ocultar colegiatura según si hay descuento
+        const hayBeca = becaRecuperada > 0;
+        const hayApoyoEstudiantil = apoyoEstudiantilRecuperado > 0;
+        const hayApoyoFijo = apoyoFijoRecuperado > 0;
+        const hayFinalAmount = finalAmountRecuperado && finalAmountRecuperado > 0;
+        
+        const hayDescuento = hayBeca || hayApoyoEstudiantil || hayApoyoFijo || hayFinalAmount;
+        
+        // 1. Mostrar/ocultar colegiatura según si hay descuento
         if (colegiatura) {
             if (hayDescuento) {
                 // Mostrar el valor SIN descuento en colegiatura
@@ -526,13 +539,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } 
         
-        // 2trar/ocultar apoyo financiamiento según si hay descuento
+        // 2. Mostrar/ocultar apoyo financiamiento según si hay descuento (aplica para todos los niveles)
         if (apoyoFinanciamiento) {
-            if (hayDescuento) {
-                apoyoFinanciamiento.textContent = `-${valores.finalAmount}`;
-                apoyoFinanciamiento.closest('tr').style.display = '';
+            // Calcular el descuento total como la diferencia entre costoTotal y totalContado
+            const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal')) || 0;
+            const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado')) || 0;
+            const descuentoTotal = costoTotalRecuperado - totalContadoRecuperado;
+            
+            const esCero = descuentoTotal <= 0 || Math.abs(descuentoTotal) < 0.000001;
+            let tr = apoyoFinanciamiento.closest('tr');
+            if (!tr && apoyoFinanciamiento.parentElement && apoyoFinanciamiento.parentElement.parentElement && apoyoFinanciamiento.parentElement.parentElement.tagName === 'TR') {
+                tr = apoyoFinanciamiento.parentElement.parentElement;
+            }
+            if (!esCero) {
+                apoyoFinanciamiento.textContent = `-${formatearPesos(descuentoTotal)}`;
+                if (tr) {
+                    tr.style.display = '';
+                }
             } else {
-                apoyoFinanciamiento.closest('tr').style.display = 'none';
+                if (tr) {
+                    tr.style.display = 'none';
+                }
             }
         }
         
@@ -540,24 +567,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const totalContadoElem = document.getElementById('totalContado');
 
         if (totalContadoElem) {
-            const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado'));
-            const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));      
-            
-            let totalContadoFinal = totalContadoRecuperado;
-            if (!hayDescuento) {
-                totalContadoFinal = costoTotalRecuperado;
-            }
-            
-            if (totalContadoFinal !== undefined && totalContadoFinal !== null) {
-                totalContadoElem.textContent = formatearPesos(totalContadoFinal);
-            }
+            // Usar valores.totalContado que ya incluye seguros (igual que en mostrarValoresOtrosNiveles)
+            totalContadoElem.textContent = valores.totalContado;
             
             // 4. Cambiar el texto del label según si hay descuento
             const totalContadoText = document.getElementById('totalContadoText');
+            const colegiaturaText = document.getElementById('colegiaturaText');
             
             if (totalContadoText) {
                 if (!hayDescuento) {
-                    // Cuando NO hay descuento: mostrar "Total Contado Colegiatura 2025"
+                    // Cuando NO hay descuento: unificar en un solo texto
                     totalContadoText.innerHTML = 'Total Contado<br>Colegiatura 2025';
                 } else {
                     // Cuando SÍ hay descuento: mostrar solo "Total Contado"
@@ -571,8 +590,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, 10);
             }
         }
+        
+        // 5. Ocultar línea separadora cuando no hay descuento
+        const lineaSeparadora = document.querySelector('tr td[colspan="2"] hr');
+        if (lineaSeparadora) {
+            const trSeparadora = lineaSeparadora.closest('tr');
+            if (trSeparadora) {
+                if (!hayDescuento) {
+                    trSeparadora.style.display = 'none';
+                } else {
+                    trSeparadora.style.display = '';
+                }
+            }
+        }
 
-        //5. Mostrar apoyos y seguros
+        //6. Mostrar apoyos y seguros
         mostrarApoyosYSeguros(valores);
     }
 
@@ -593,15 +625,64 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const totalfinanciado = calcularTotalFinanciado(valores, levelId);
 
+        // Verificar si hay cualquier tipo de descuento: beca, apoyo estudiantil, o finalAmount
+        const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount'));
+        const becaRecuperada = JSON.parse(localStorage.getItem('selectedScholarshipValue')) || 0;
+        const apoyoEstudiantilRecuperado = JSON.parse(localStorage.getItem('selectedSupportValue')) || 0;
+        const apoyoFijoRecuperado = JSON.parse(localStorage.getItem('selectedSupportFixValue')) || 0;
+        
+        const hayBeca = becaRecuperada > 0;
+        const hayApoyoEstudiantil = apoyoEstudiantilRecuperado > 0;
+        const hayApoyoFijo = apoyoFijoRecuperado > 0;
+        const hayFinalAmount = finalAmountRecuperado && finalAmountRecuperado > 0;
+        
+        const hayDescuento = hayBeca || hayApoyoEstudiantil || hayApoyoFijo || hayFinalAmount;
+
         // Mostrar todos los campos para otros niveles
         if (colegiatura) {
-            colegiatura.textContent = valores.costoTotal;
+            if (hayDescuento) {
+                colegiatura.textContent = valores.costoTotal;
+                colegiatura.closest('tr').style.display = '';
+            } else {
+                colegiatura.closest('tr').style.display = 'none';
+            }
         } 
         if (apoyoFinanciamiento) {
-            apoyoFinanciamiento.textContent = `-${valores.finalAmount}`;
+            // Calcular el descuento total como la diferencia entre costoTotal y totalContado
+            const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal')) || 0;
+            const totalContadoRecuperado = JSON.parse(localStorage.getItem('totalContado')) || 0;
+            const descuentoTotal = costoTotalRecuperado - totalContadoRecuperado;
+            
+            const esCero = descuentoTotal <= 0 || Math.abs(descuentoTotal) < 0.000001;
+            let tr = apoyoFinanciamiento.closest('tr');
+            if (!tr && apoyoFinanciamiento.parentElement && apoyoFinanciamiento.parentElement.parentElement && apoyoFinanciamiento.parentElement.parentElement.tagName === 'TR') {
+                tr = apoyoFinanciamiento.parentElement.parentElement;
+            }
+            if (!esCero) {
+                apoyoFinanciamiento.textContent = `-${formatearPesos(descuentoTotal)}`;
+                if (tr) {
+                    tr.style.display = '';
+                }
+            } else {
+                if (tr) {
+                    tr.style.display = 'none';
+                }
+            }
         }
         if (totalContado) {
             totalContado.textContent = valores.totalContado;
+            
+            // Cambiar el texto del label según si hay descuento
+            const totalContadoText = document.getElementById('totalContadoText');
+            if (totalContadoText) {
+                if (!hayDescuento) {
+                    // Cuando NO hay descuento: unificar en un solo texto
+                    totalContadoText.innerHTML = 'Total Contado<br>Colegiatura 2025';
+                } else {
+                    // Cuando SÍ hay descuento: mostrar solo "Total Contado"
+                    totalContadoText.innerHTML = 'Total Contado';
+                }
+            }
         }
         if (primerPago) {
             primerPago.textContent = valores.primeraCuota;
@@ -614,6 +695,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (mensualidadesText) {
             mensualidadesText.textContent = textoMensualidades;
+        }
+        
+        // Ocultar línea separadora cuando no hay descuento
+        const lineaSeparadora = document.querySelector('tr td[colspan="2"] hr');
+        if (lineaSeparadora) {
+            const trSeparadora = lineaSeparadora.closest('tr');
+            if (trSeparadora) {
+                if (!hayDescuento) {
+                    trSeparadora.style.display = 'none';
+                } else {
+                    trSeparadora.style.display = '';
+                }
+            }
         }
         
         // Mostrar apoyos y seguros
