@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!cotizaciones || cotizaciones.length === 0) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = 8; // Actualizado para reflejar el nuevo número de columnas
+            cell.colSpan = 9; // Actualizado para reflejar el número correcto de columnas (sin fecha de vigencia)
             cell.textContent = 'No hay cotizaciones registradas.';
             row.appendChild(cell);
             tbody.appendChild(row);
@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             const nivel = niveles.find(n => n.id == cotizacion.nivel_id);
             const nivelNombre = cotizacion.nivel_nombre || (nivel ? nivel.nombre : `Nivel ${cotizacion.nivel_id}`);
+            
             row.innerHTML = `
                 <td>${cotizacion.id}</td>
                 <td>${cotizacion.nombre_estudiante || ''}</td>
@@ -162,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Costo Total', 'Total Contado', 'Total Financiado', 'Primera Cuota', 'Mensualidades', 
             'Beca Nombre', 'Beca %', 'Apoyo Estudiantil %', 'Apoyo Estudiantil Fijo', 
             'Préstamo %', 'Seguro Accidentes', 'Seguro Estudiantil', 'Cobertura Vive', 
-            'Total Seguros', 'Fecha Creación'
+            'Total Seguros', 'Fecha Creación', 'Fecha Vigencia'
         ];
 
         const csvContent = [
@@ -172,6 +173,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nivel = niveles.find(n => n.id == cotizacion.nivel_id);
                 const nivelNombre = nivel ? nivel.nombre : `Nivel ${cotizacion.nivel_id}`;
                 const fecha = new Date(cotizacion.fecha_creacion).toLocaleDateString('es-ES');
+                const fechaVigencia = cotizacion.fecha_vigencia ? 
+                    (() => {
+                        // Formatear fecha directamente desde la base de datos para evitar problemas de zona horaria
+                        const fecha = new Date(cotizacion.fecha_vigencia);
+                        const dia = fecha.getUTCDate().toString().padStart(2, '0');
+                        const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+                        const año = fecha.getUTCFullYear();
+                        return `${dia}/${mes}/${año}`;
+                    })() : 
+                    'N/A';
                 
                 return [
                     cotizacion.id,
@@ -200,7 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     cotizacion.seguro_estudiantil || 0,
                     cotizacion.cobertura_vive || 0,
                     cotizacion.total_seguros || 0,
-                    `"${fecha}"`
+                    `"${fecha}"`,
+                    `"${fechaVigencia}"`
                 ].join(',');
             })
         ].join('\n');
@@ -339,6 +351,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
+                
+                ${cotizacion.fecha_vigencia ? `
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="font-weight-bold text-success">FECHA DE VIGENCIA</h6>
+                        <div class="p-3 bg-light rounded">
+                            ${(() => {
+                                // Formatear fecha directamente desde la base de datos para evitar problemas de zona horaria
+                                const fecha = new Date(cotizacion.fecha_vigencia);
+                                const dia = fecha.getUTCDate().toString().padStart(2, '0');
+                                const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+                                const año = fecha.getUTCFullYear();
+                                return `${dia}/${mes}/${año}`;
+                            })()}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
             `;
             
             // Llenar el contenido del modal

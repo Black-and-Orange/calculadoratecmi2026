@@ -155,16 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- CORRECCIÓN NIVEL 13 ---
         if (mappedLevel === 13) {
-            // Obtener períodos seleccionados del select múltiple
-            const selectMultiple = document.getElementById('select-periodos-multiple');
-            let periodosSeleccionados = [];
-            if (selectMultiple) {
-                periodosSeleccionados = Array.from(selectMultiple.selectedOptions).map(opt => ({
-                    codigo: opt.value,
-                    mes: opt.textContent,
-                    index: parseInt(opt.getAttribute('data-index'))
-                }));
-            }
+            // Obtener períodos seleccionados de los checkboxes
+            let periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
+            // Obtener configuración por período
+            const configuracionesPorPeriodo = obtenerConfiguracionPorPeriodo();
+            
             // Si no hay selección, costo 0
             if (periodosSeleccionados.length === 0) {
                 costoTotal = 0;
@@ -187,9 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     const claveFinal = `${periodKey}${nivelKey}${planKey}${campusKey}`;
                     const costoPeriodo = (costosMateria.find(item => item.clave === claveFinal) || { costo: 0 }).costo;
-                    // Calcular créditos para este período
-                    const numeroCertificados = parseInt(selectors.certificados.value) || 0;
-                    const numeroSemanasSEDI = parseInt(selectors.semanas.value) || 0;
+                    
+                    // Obtener certificados y semanas específicos para este período
+                    const configPeriodo = configuracionesPorPeriodo[periodKey] || { certificados: 0, semanas: 0 };
+                    const numeroCertificados = configPeriodo.certificados;
+                    const numeroSemanasSEDI = configPeriodo.semanas;
+                    
                     const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
                     // Sumar el costo de los créditos de este período
                     const totalContadoBimestre = totalCreditos * costoPeriodo;
@@ -362,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (parseInt(localStorage.getItem('selectedNivel')) === 13) {
             // Para nivel 13, usar el primer período seleccionado como clave
-            const periodosSeleccionados = obtenerPeriodosSeleccionados();
+            const periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
             if (periodosSeleccionados.length > 0) {
                 periodKey = periodosSeleccionados[0].codigo;
             } else {
@@ -501,10 +499,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleAdditionalSelectors = (show, nivel = null) => {
         const display = show ? 'flex' : 'none';
         const displayMaterias = show ? 'none' : 'flex';
+        
+        // Para nivel 13, ocultar completamente los selects globales ya que cada período tiene sus propios controles
+        if (nivel === 13) {
+            selectors.divCertificado.style.display = 'none';
+            selectors.divSemanas.style.display = 'none';
+            selectors.divIngles.style.display = 'none';
+        } else {
         selectors.divCertificado.style.display = display;
         selectors.divSemanas.style.display = display;
-        // Solo mostrar inglés si no es nivel 13
         selectors.divIngles.style.display = (show && nivel !== 13) ? 'flex' : 'none';
+        }
+        
         selectors.divMaterias.style.display = displayMaterias;
     };
 
@@ -531,57 +537,278 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // 1. Crear el select múltiple de períodos para nivel 13
+    // 1. Crear checkboxes de períodos para nivel 13
     function crearSelectPeriodosMultiples(bimestresUnicos) {
         const periodoContainer = selectors.periodo.parentElement;
-        const periodoLabel = periodoContainer.previousElementSibling.querySelector('label');
-        if (periodoLabel) periodoLabel.textContent = 'Períodos:';
         selectors.periodo.style.display = 'none';
 
-        // Eliminar el select múltiple anterior si existe
+        // Ocultar el contenedor original para que no interfiera con el layout
+        periodoContainer.style.display = 'none';
+        
+        // Ocultar el label original del período
+        const periodoLabelOriginal = document.querySelector('label[for="select-period"]');
+        if (periodoLabelOriginal) {
+            periodoLabelOriginal.style.display = 'none';
+        }
+
+        // Eliminar elementos anteriores si existen
         let selectMultiple = document.getElementById('select-periodos-multiple');
         if (selectMultiple) selectMultiple.remove();
-        // Eliminar mensaje de ayuda/error anterior
+        let checkboxContainer = document.getElementById('periodos-checkbox-container');
+        if (checkboxContainer) checkboxContainer.remove();
         let helpText = document.getElementById('periodos-help-text');
         if (helpText) helpText.remove();
         let errorMsg = document.getElementById('periodos-error-msg');
         if (errorMsg) errorMsg.remove();
 
-        // Crear el select múltiple
-        selectMultiple = document.createElement('select');
-        selectMultiple.id = 'select-periodos-multiple';
-        selectMultiple.multiple = true;
-        selectMultiple.size = 2; // Compacto, parece dropdown
-        selectMultiple.className = 'select-multiple-periodos';
-        selectMultiple.style.width = '100%';
-        selectMultiple.style.minHeight = '100px';
-        selectMultiple.style.maxHeight = '100px';
-        selectMultiple.style.marginTop = '0.5rem';
-        selectMultiple.style.overflowY = 'auto';
+        // Crear contenedor principal para períodos que ocupe toda la fila
+        const periodosRowContainer = document.createElement('div');
+        periodosRowContainer.id = 'periodos-row-container';
+        periodosRowContainer.className = 'periodos-row-container';
 
+        // Crear label para períodos
+        const periodosLabel = document.createElement('label');
+        periodosLabel.textContent = 'Períodos:';
+        periodosLabel.className = 'font-semibold periodos-label';
+        periodosRowContainer.appendChild(periodosLabel);
+
+        // Crear contenedor para checkboxes
+        checkboxContainer = document.createElement('div');
+        checkboxContainer.id = 'periodos-checkbox-container';
+        checkboxContainer.className = 'periodos-checkbox-grid periodos-checkbox-container';
+
+        // Crear checkboxes organizados
         bimestresUnicos.forEach((bim, index) => {
-            const option = document.createElement('option');
-            option.value = bim.codigo;
-            option.textContent = bim.mes;
-            option.setAttribute('data-index', index);
-            selectMultiple.appendChild(option);
-        });
-        periodoContainer.appendChild(selectMultiple);
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'periodo-checkbox-item';
 
-        // Ya NO agregar mensaje de ayuda
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `periodo-${bim.codigo}`;
+            checkbox.value = bim.codigo;
+            checkbox.setAttribute('data-mes', bim.mes);
+            checkbox.setAttribute('data-index', index);
+            checkbox.className = 'periodo-checkbox';
 
-        // Evento de validación
-        selectMultiple.addEventListener('change', () => {
-            validarPeriodosConsecutivosSelect();
-            updateCosto();
+            const label = document.createElement('label');
+            label.htmlFor = `periodo-${bim.codigo}`;
+            label.textContent = bim.mes;
+            label.className = 'periodo-checkbox-label';
+
+                        // Agregar evento hover
+            checkboxDiv.addEventListener('mouseenter', () => {
+                if (!checkbox.checked) {
+                    checkboxDiv.classList.add('hover');
+                }
+            });
+
+            checkboxDiv.addEventListener('mouseleave', () => {
+                if (!checkbox.checked) {
+                    checkboxDiv.classList.remove('hover');
+                }
+            });
+
+            // Agregar evento de cambio
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    checkboxDiv.classList.add('active');
+                    checkboxDiv.classList.remove('hover');
+                    // Mostrar configuración del período
+                    mostrarConfiguracionPeriodo(bim.codigo, bim.mes, index);
+                } else {
+                    checkboxDiv.classList.remove('active');
+                    checkboxDiv.classList.remove('hover');
+                    // Ocultar configuración del período
+                    ocultarConfiguracionPeriodo(bim.codigo);
+                }
+                validarPeriodosConsecutivosCheckboxes();
+                updateCosto();
+            });
+
+            // Permitir hacer clic en todo el div para marcar/desmarcar
+            checkboxDiv.addEventListener('click', (e) => {
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+            checkboxContainer.appendChild(checkboxDiv);
         });
+
+        // Agregar mensaje de ayuda
+        const helpTextDiv = document.createElement('div');
+        helpTextDiv.id = 'periodos-help-text';
+        helpTextDiv.className = 'periodos-help-text';
+        helpTextDiv.textContent = 'Selecciona períodos consecutivos únicamente';
+        checkboxContainer.appendChild(helpTextDiv);
+
+        periodosRowContainer.appendChild(checkboxContainer);
+        
+        // Insertar el contenedor de períodos después del contenedor de campus
+        const campusContainer = selectors.campus.parentElement;
+        campusContainer.parentElement.insertBefore(periodosRowContainer, campusContainer.nextSibling);
+
+        // Crear contenedor para configuraciones de períodos
+        const configContainer = document.createElement('div');
+        configContainer.id = 'configuraciones-periodos';
+        configContainer.className = 'configuraciones-periodos';
+        periodosRowContainer.appendChild(configContainer);
     }
 
-    // 2. Validar consecutividad en el select múltiple
-    function validarPeriodosConsecutivosSelect() {
-        const selectMultiple = document.getElementById('select-periodos-multiple');
-        const selectedOptions = Array.from(selectMultiple.selectedOptions);
-        const selectedIndexes = selectedOptions.map(opt => parseInt(opt.getAttribute('data-index'))).sort((a, b) => a - b);
+    // Función para mostrar la configuración de un período específico
+    async function mostrarConfiguracionPeriodo(codigo, mes, index) {
+        const configContainer = document.getElementById('configuraciones-periodos');
+        if (!configContainer) return;
+
+        // Mostrar el contenedor si está oculto
+        configContainer.style.display = 'grid';
+        configContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        configContainer.style.gap = '16px';
+
+        // Verificar si ya existe la configuración para este período
+        let periodoConfig = document.getElementById(`config-periodo-${codigo}`);
+        if (periodoConfig) {
+            periodoConfig.style.display = 'block';
+            return;
+        }
+
+        // Crear la configuración del período
+        periodoConfig = document.createElement('div');
+        periodoConfig.id = `config-periodo-${codigo}`;
+        periodoConfig.className = 'periodo-config';
+
+        // Título del período
+        const titulo = document.createElement('h4');
+        titulo.textContent = `Configuración: ${mes}`;
+        titulo.className = 'periodo-config-titulo';
+        periodoConfig.appendChild(titulo);
+
+        // Contenedor para los controles
+        const controlesContainer = document.createElement('div');
+        controlesContainer.className = 'periodo-controles-container';
+
+        // Cargar opciones de certificados
+        const certificadosData = await fetch(`${API_BASE_URL}/certificados/nivel/13`).then(res => res.json());
+        const semanasData = await fetch(`${API_BASE_URL}/semanas/nivel/13`).then(res => res.json());
+
+        // Select de certificados
+        const certificadosDiv = document.createElement('div');
+        certificadosDiv.className = 'periodo-certificados-div';
+
+        const certificadosLabel = document.createElement('label');
+        certificadosLabel.textContent = 'Certificados:';
+        certificadosLabel.className = 'periodo-certificados-label';
+
+        const certificadosSelect = document.createElement('select');
+        certificadosSelect.id = `certificados-${codigo}`;
+        certificadosSelect.className = 'periodo-certificados-select';
+
+        // Agregar opciones de certificados
+        certificadosSelect.innerHTML = '<option value="">Seleccionar</option>';
+        certificadosData.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.num_certificados;
+            option.textContent = item.num_certificados;
+            option.setAttribute('valor_certificado', item.valor_certificado || 10);
+            certificadosSelect.appendChild(option);
+        });
+
+        certificadosDiv.appendChild(certificadosLabel);
+        certificadosDiv.appendChild(certificadosSelect);
+
+        // Select de semanas
+        const semanasDiv = document.createElement('div');
+        semanasDiv.className = 'periodo-semanas-div';
+
+        const semanasLabel = document.createElement('label');
+        semanasLabel.textContent = 'Semanas SEDI:';
+        semanasLabel.className = 'periodo-semanas-label';
+
+        const semanasSelect = document.createElement('select');
+        semanasSelect.id = `semanas-${codigo}`;
+        semanasSelect.className = 'periodo-semanas-select';
+
+        // Agregar opciones de semanas
+        semanasSelect.innerHTML = '<option value="">Seleccionar</option>';
+        semanasData.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.num_semanas;
+            option.textContent = item.num_semanas;
+            option.setAttribute('valor_semana_sedi', item.valor_semana_sedi || 1);
+            semanasSelect.appendChild(option);
+        });
+
+        semanasDiv.appendChild(semanasLabel);
+        semanasDiv.appendChild(semanasSelect);
+
+        // Agregar eventos para actualizar costo
+        certificadosSelect.addEventListener('change', updateCosto);
+        semanasSelect.addEventListener('change', updateCosto);
+
+        controlesContainer.appendChild(certificadosDiv);
+        controlesContainer.appendChild(semanasDiv);
+        periodoConfig.appendChild(controlesContainer);
+
+        configContainer.appendChild(periodoConfig);
+    }
+
+    // Función para ocultar la configuración de un período
+    function ocultarConfiguracionPeriodo(codigo) {
+        const periodoConfig = document.getElementById(`config-periodo-${codigo}`);
+        if (periodoConfig) {
+            periodoConfig.style.display = 'none';
+        }
+
+        // Verificar si hay configuraciones visibles
+        const configContainer = document.getElementById('configuraciones-periodos');
+        if (configContainer) {
+            const configuracionesVisibles = configContainer.querySelectorAll('.periodo-config');
+            let hayConfiguracionesVisibles = false;
+            
+            configuracionesVisibles.forEach(config => {
+                if (config.style.display !== 'none') {
+                    hayConfiguracionesVisibles = true;
+                }
+            });
+            
+            if (!hayConfiguracionesVisibles) {
+                configContainer.style.display = 'none';
+            } else {
+                configContainer.style.display = 'grid';
+                configContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                configContainer.style.gap = '16px';
+            }
+        }
+    }
+
+    // Función para obtener certificados y semanas por período
+    function obtenerConfiguracionPorPeriodo() {
+        const configuraciones = {};
+        const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+        
+        checkboxes.forEach(checkbox => {
+            const codigo = checkbox.value;
+            const certificadosSelect = document.getElementById(`certificados-${codigo}`);
+            const semanasSelect = document.getElementById(`semanas-${codigo}`);
+            
+            configuraciones[codigo] = {
+                certificados: certificadosSelect ? parseInt(certificadosSelect.value) || 0 : 0,
+                semanas: semanasSelect ? parseInt(semanasSelect.value) || 0 : 0,
+                mes: checkbox.getAttribute('data-mes')
+            };
+        });
+        
+        return configuraciones;
+    }
+
+    // 2. Validar consecutividad en los checkboxes
+    function validarPeriodosConsecutivosCheckboxes() {
+        const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+        const selectedIndexes = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
+        
         let sonConsecutivos = true;
         for (let i = 1; i < selectedIndexes.length; i++) {
             if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
@@ -589,33 +816,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
         }
-        // Mensaje de error
+
+        // Mostrar/ocultar mensaje de error
         let errorMsg = document.getElementById('periodos-error-msg');
+        const checkboxContainer = document.getElementById('periodos-checkbox-container');
+        
         if (!sonConsecutivos && selectedIndexes.length > 1) {
             if (!errorMsg) {
-                errorMsg = document.createElement('p');
+                errorMsg = document.createElement('div');
                 errorMsg.id = 'periodos-error-msg';
-                errorMsg.className = 'text-sm text-red-600 mt-2';
-                errorMsg.textContent = 'Solo puedes seleccionar períodos consecutivos';
-                selectMultiple.parentElement.appendChild(errorMsg);
+                errorMsg.className = 'periodos-error-msg';
+                errorMsg.textContent = '⚠️ Solo puedes seleccionar períodos consecutivos';
+                checkboxContainer.appendChild(errorMsg);
             }
         } else {
             if (errorMsg) errorMsg.remove();
         }
+
         // Deshabilitar botón siguiente si no es válido
         const btnSiguiente = document.getElementById('step-1-next');
-        if (btnSiguiente) btnSiguiente.disabled = (!sonConsecutivos || selectedIndexes.length === 0);
+        if (btnSiguiente) {
+            btnSiguiente.disabled = (!sonConsecutivos || selectedIndexes.length === 0);
+        }
+
         return sonConsecutivos && selectedIndexes.length > 0;
     }
 
-    // 3. Obtener períodos seleccionados del select múltiple
+    // 3. Obtener períodos seleccionados de los checkboxes
     function obtenerPeriodosSeleccionadosSelect() {
-        const selectMultiple = document.getElementById('select-periodos-multiple');
-        if (!selectMultiple) return [];
-        return Array.from(selectMultiple.selectedOptions).map(opt => ({
-            codigo: opt.value,
-            mes: opt.textContent,
-            index: parseInt(opt.getAttribute('data-index'))
+        const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+        if (!checkboxes.length) return [];
+        return Array.from(checkboxes).map(cb => ({
+            codigo: cb.value,
+            mes: cb.getAttribute('data-mes'),
+            index: parseInt(cb.getAttribute('data-index'))
         })).sort((a, b) => a.index - b.index);
     }
 
@@ -629,16 +863,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const mappedLevel = levelMapping[selectedLevel];
         const periodoLabel = selectors.periodo.parentElement.previousElementSibling.querySelector('label') || document.querySelector('label[for="select-period"]');
 
-        // Siempre deja el label en 'Periodo:'
-        if (periodoLabel) periodoLabel.textContent = 'Periodo:';
+        // Cambiar el label según el nivel
+        if (periodoLabel) {
+            if (mappedLevel === 13) {
+                periodoLabel.textContent = 'Períodos:';
+            } else {
+                periodoLabel.textContent = 'Periodo:';
+            }
+        }
 
-        // Eliminar el select múltiple si existe (al cambiar a cualquier nivel)
+        // Eliminar elementos anteriores si existen (al cambiar a cualquier nivel)
         let selectMultiple = document.getElementById('select-periodos-multiple');
         if (selectMultiple) selectMultiple.remove();
+        let periodosRowContainer = document.getElementById('periodos-row-container');
+        if (periodosRowContainer) periodosRowContainer.remove();
+        let checkboxContainer = document.getElementById('periodos-checkbox-container');
+        if (checkboxContainer) checkboxContainer.remove();
+        let configContainer = document.getElementById('configuraciones-periodos');
+        if (configContainer) configContainer.remove();
         let helpText = document.getElementById('periodos-help-text');
         if (helpText) helpText.remove();
         let errorMsg = document.getElementById('periodos-error-msg');
         if (errorMsg) errorMsg.remove();
+        
+        // Restaurar el label original del período
+        const periodoLabelOriginal = document.querySelector('label[for="select-period"]');
+        if (periodoLabelOriginal) {
+            periodoLabelOriginal.style.display = '';
+        }
 
         if (mappedLevel === 13) {
             fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`)
@@ -657,13 +909,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     ];
                     bimestresUnicos.sort((a, b) => ordenMeses.indexOf(a.mes) - ordenMeses.indexOf(b.mes));
                     crearSelectPeriodosMultiples(bimestresUnicos);
-                    validarPeriodosConsecutivosSelect();
+                    validarPeriodosConsecutivosCheckboxes();
                 });
             selectors.periodo.style.display = 'none';
-            // Mostrar selects de semanas y certificados, ocultar materias e inglés
+            // Ocultar selects globales ya que cada período tendrá sus propios controles
             toggleAdditionalSelectors(true, 13);
-            loadOptions(selectors.certificados, `${API_BASE_URL}/certificados/nivel/13`, 'num_certificados', true, true);
-            loadOptions(selectors.semanas, `${API_BASE_URL}/semanas/nivel/13`, 'num_semanas', true, true);
             selectors.divMaterias.style.display = 'none';
             // Cargar otros selects necesarios para nivel 13
             loadOptions(selectors.planes, `${API_BASE_URL}/planes/nivel/13`, 'descripcion', true, true);
@@ -776,8 +1026,10 @@ document.addEventListener('DOMContentLoaded', () => {
         formElement.addEventListener('submit', (event) => {
             if (parseInt(localStorage.getItem('selectedNivel')) === 13) {
                 const periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
+                const configuracionesPorPeriodo = obtenerConfiguracionPorPeriodo();
                 if (periodosSeleccionados.length > 0) {
                     localStorage.setItem('periodosSeleccionados', JSON.stringify(periodosSeleccionados));
+                    localStorage.setItem('configuracionesPorPeriodo', JSON.stringify(configuracionesPorPeriodo));
                 }
             }
         });

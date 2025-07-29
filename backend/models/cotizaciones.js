@@ -28,7 +28,10 @@ const createCotizacion = (cotizacion, callback) => {
         seguro_estudiantil,
         cobertura_vive,
         total_seguros,
-        fecha_creacion
+        costos_por_bimestre,
+        configuraciones_por_periodo,
+        fecha_creacion,
+        fecha_vigencia
     } = cotizacion;
 
     const query = `
@@ -38,8 +41,9 @@ const createCotizacion = (cotizacion, callback) => {
             total_financiado, primera_cuota, mensualidades, beca_nombre, 
             beca_porcentaje, apoyo_estudiantil_porcentaje, apoyo_estudiantil_fijo, 
             prestamo_porcentaje, seguro_accidentes, seguro_estudiantil, 
-            cobertura_vive, total_seguros, fecha_creacion
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            cobertura_vive, total_seguros, costos_por_bimestre, configuraciones_por_periodo, 
+            fecha_creacion, fecha_vigencia
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -48,7 +52,8 @@ const createCotizacion = (cotizacion, callback) => {
         total_financiado, primera_cuota, mensualidades, beca_nombre,
         beca_porcentaje, apoyo_estudiantil_porcentaje, apoyo_estudiantil_fijo,
         prestamo_porcentaje, seguro_accidentes, seguro_estudiantil,
-        cobertura_vive, total_seguros, fecha_creacion
+        cobertura_vive, total_seguros, costos_por_bimestre, configuraciones_por_periodo,
+        fecha_creacion, fecha_vigencia
     ];
 
     db.query(query, values, (error, results) => {

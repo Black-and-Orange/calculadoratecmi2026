@@ -234,10 +234,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
               }
               if (isNivel13) {
-                // Validar el select múltiple
-                const selectMultiple = document.getElementById('select-periodos-multiple');
-                const selectedOptions = selectMultiple ? Array.from(selectMultiple.selectedOptions) : [];
-                const selectedIndexes = selectedOptions.map(opt => parseInt(opt.getAttribute('data-index'))).sort((a, b) => a - b);
+                // Validar los checkboxes
+                const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+                const selectedIndexes = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
                 let sonConsecutivos = true;
                 for (let i = 1; i < selectedIndexes.length; i++) {
                   if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
@@ -246,23 +245,38 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                 }
                 if (selectedIndexes.length === 0 || !sonConsecutivos) {
-                  selectMultiple.classList.add('error');
+                  // Agregar clase de error al contenedor
+                  const checkboxContainer = document.getElementById('periodos-checkbox-container');
+                  if (checkboxContainer) checkboxContainer.style.borderColor = '#dc3545';
+                  
                   // Mensaje de error visual
                   let errorMsg = document.getElementById('periodos-error-msg');
                   if (!errorMsg) {
-                    errorMsg = document.createElement('p');
+                    errorMsg = document.createElement('div');
                     errorMsg.id = 'periodos-error-msg';
-                    errorMsg.className = 'text-sm text-red-600 mt-2';
-                    errorMsg.textContent = selectedIndexes.length === 0 ? 'Este campo es necesario' : 'Solo puedes seleccionar períodos consecutivos';
-                    selectMultiple.parentElement.appendChild(errorMsg);
+                    errorMsg.style.cssText = `
+                      margin-top: 8px;
+                      padding: 8px 12px;
+                      background: #f8d7da;
+                      border: 1px solid #f5c6cb;
+                      border-radius: 4px;
+                      color: #721c24;
+                      font-size: 14px;
+                      font-weight: 500;
+                    `;
+                    errorMsg.textContent = selectedIndexes.length === 0 ? '⚠️ Este campo es necesario' : '⚠️ Solo puedes seleccionar períodos consecutivos';
+                    checkboxContainer.appendChild(errorMsg);
                   } else {
-                    errorMsg.textContent = selectedIndexes.length === 0 ? 'Este campo es necesario' : 'Solo puedes seleccionar períodos consecutivos';
+                    errorMsg.textContent = selectedIndexes.length === 0 ? '⚠️ Este campo es necesario' : '⚠️ Solo puedes seleccionar períodos consecutivos';
                   }
                   hasError = true;
                   canContinue();
                   break;
                 } else {
-                  selectMultiple.classList.remove('error');
+                  // Remover clase de error del contenedor
+                  const checkboxContainer = document.getElementById('periodos-checkbox-container');
+                  if (checkboxContainer) checkboxContainer.style.borderColor = '#e9ecef';
+                  
                   let errorMsg = document.getElementById('periodos-error-msg');
                   if (errorMsg) errorMsg.remove();
                   hasError = false;

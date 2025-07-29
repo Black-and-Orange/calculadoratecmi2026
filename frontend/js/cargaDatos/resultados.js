@@ -348,14 +348,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
+    // Calcular suma total de certificados y semanas para nivel 13
+    let certificadosTotal = certificados;
+    let semanasTotal = semanas;
+    
+    if (levelId === 13) {
+        const configuracionesPorPeriodo = JSON.parse(localStorage.getItem('configuracionesPorPeriodo')) || {};
+        certificadosTotal = 0;
+        semanasTotal = 0;
+        
+        // Sumar certificados y semanas de todos los períodos seleccionados
+        Object.values(configuracionesPorPeriodo).forEach(config => {
+            certificadosTotal += parseInt(config.certificados) || 0;
+            semanasTotal += parseInt(config.semanas) || 0;
+        });
+    }
+    
     const datosBasicos = {
         nombre: nombre,
         periodo: periodoFinal,
         campus: campus,
         nivel: nivel,
         materias: materias,
-        certificados: certificados,
-        semanas: semanas,
+        certificados: certificadosTotal,
+        semanas: semanasTotal,
         ingles: ingles,
         programa: programa,
         formato: formato
@@ -1039,11 +1055,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         return (typeof valor === 'number' && valor % 1 === 0) ? valor.toString() : valor;
     }
 
+    // Función auxiliar para calcular la fecha de vigencia
+    async function calcularFechaVigencia() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/configuracion-vigencia/dias-vigencia`);
+            const data = await response.json();
+            
+            const fechaActual = new Date();
+            const fechaVencimiento = new Date(fechaActual);
+            fechaVencimiento.setDate(fechaVencimiento.getDate() + data.dias_vigencia);
+            
+            return fechaVencimiento;
+        } catch (error) {
+            // Fallback a 5 días si hay error
+            const fechaActual = new Date();
+            const fechaVencimiento = new Date(fechaActual);
+            fechaVencimiento.setDate(fechaVencimiento.getDate() + 5);
+            return fechaVencimiento;
+        }
+    }
+
     // Función para guardar la cotización en la base de datos
     async function guardarCotizacion() {
         try {
             const valores = recuperarValores();
             const valoresAdicionales = recuperarValoresAdicionales();
+            
+            // Calcular la fecha de vigencia
+            const fechaVigencia = await calcularFechaVigencia();
             
             // Determinar qué campos mostrar según el nivel
             let materiasValue = 0;
@@ -1062,9 +1101,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 materiasValue = 0;
                 creditosValue = 0;
             } else if (levelId === 13) {
-                // Nivel 13: certificados y semanas SEDI
-                certificadosValue = parseFloat(certificados) || 0;
-                semanasSediValue = parseFloat(semanas) || 0;
+                // Nivel 13: certificados y semanas SEDI (suma total de todos los períodos)
+                const configuracionesPorPeriodo = JSON.parse(localStorage.getItem('configuracionesPorPeriodo')) || {};
+                certificadosValue = 0;
+                semanasSediValue = 0;
+                
+                // Sumar certificados y semanas de todos los períodos seleccionados
+                Object.values(configuracionesPorPeriodo).forEach(config => {
+                    certificadosValue += parseInt(config.certificados) || 0;
+                    semanasSediValue += parseInt(config.semanas) || 0;
+                });
+                
                 inglesValue = 0;
                 materiasValue = 0;
                 creditosValue = 0;
@@ -1149,7 +1196,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 seguro_estudiantil: valores.coverage !== 'No Aplica' ? parseFloat(valores.coverage.replace(/[^0-9.-]+/g, "")) : 0,
                 cobertura_vive: valores.vive !== 'No Aplica' ? parseFloat(valores.vive.replace(/[^0-9.-]+/g, "")) : 0,
                 total_seguros: parseFloat(valoresAdicionales.totalCost) || 0,
-                costos_por_bimestre: levelId === 13 ? JSON.stringify(costosPorBimestre) : null
+                costos_por_bimestre: levelId === 13 ? JSON.stringify(costosPorBimestre) : null,
+                configuraciones_por_periodo: levelId === 13 ? JSON.stringify(JSON.parse(localStorage.getItem('configuracionesPorPeriodo') || '{}')) : null,
+                fecha_vigencia: fechaVigencia
             };
 
             // Enviar datos al backend

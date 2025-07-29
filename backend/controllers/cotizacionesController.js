@@ -1,35 +1,53 @@
 const cotizacionesModel = require('../models/cotizaciones');
+const ConfiguracionVigencia = require('../models/configuracionVigencia');
 
 // Crear una nueva cotización
-const createCotizacion = (req, res) => {
-    
-    const cotizacionData = {
-        ...req.body,
-        fecha_creacion: new Date()
-    };
+const createCotizacion = async (req, res) => {
+    try {
+        // Obtener los días de vigencia desde la configuración
+        const diasVigencia = await ConfiguracionVigencia.obtenerDiasVigencia();
+        
+        // Calcular la fecha de vigencia
+        const fechaActual = new Date();
+        const fechaVigencia = new Date(fechaActual);
+        fechaVigencia.setDate(fechaVigencia.getDate() + diasVigencia);
+        
+        const cotizacionData = {
+            ...req.body,
+            fecha_creacion: fechaActual,
+            fecha_vigencia: fechaVigencia
+        };
 
-    cotizacionesModel.createCotizacion(cotizacionData, (error, results) => {
-        if (error) {
-            console.error('Controlador: Error al crear cotización:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Error al crear la cotización',
-                error: error.message
-            });
-        }
-        
-        // Devolver el ID de la cotización creada
-        const cotizacionId = results.insertId;
-        
-        res.status(201).json({
-            success: true,
-            message: 'Cotización creada exitosamente',
-            data: {
-                id: cotizacionId,
-                ...cotizacionData
+        cotizacionesModel.createCotizacion(cotizacionData, (error, results) => {
+            if (error) {
+                console.error('Controlador: Error al crear cotización:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error al crear la cotización',
+                    error: error.message
+                });
             }
+            
+            // Devolver el ID de la cotización creada
+            const cotizacionId = results.insertId;
+            
+            res.status(201).json({
+                success: true,
+                message: 'Cotización creada exitosamente',
+                data: {
+                    id: cotizacionId,
+                    ...cotizacionData
+                }
+            });
         });
-    });
+    } catch (error) {
+        console.error('Error al obtener configuración de vigencia:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener configuración de vigencia',
+            error: error.message
+        });
+    }
 };
 
 // Obtener todas las cotizaciones

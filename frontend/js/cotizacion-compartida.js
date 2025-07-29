@@ -13,6 +13,21 @@ import {
     hideZeroPercentages
 } from './utils/shared-utils.js';
 
+// Función helper para parsear JSON de manera segura
+function parseJSONSafely(data) {
+    if (!data) return null;
+    if (typeof data === 'object') return data;
+    if (typeof data === 'string') {
+        try {
+            return JSON.parse(data);
+        } catch (e) {
+            console.error('Error al parsear JSON:', e);
+            return null;
+        }
+    }
+    return null;
+}
+
 // Variable global para almacenar los niveles obtenidos desde la API
 let niveles = [];
 
@@ -245,14 +260,26 @@ async function cargarCotizacion(cotizacionId) {
         organizarCamposPorNivel(nivelId, cotizacion);
         
         // Cargar beneficios y vigencia
-        const beneficios = await cargarBeneficios(nivelId);
-        actualizarBeneficios(beneficios, nivelId);
+        const beneficios = await cargarBeneficios(cotizacion.nivel_id);
+        actualizarBeneficios(beneficios, cotizacion.nivel_id);
         
-        // Cargar vigencia usando la función compartida
-        const vigenciaInfo = await cargarVigencia();
+        // Mostrar fecha de vigencia guardada en la cotización
         const fechaVencimientoElem = document.getElementById('fechaVencimiento');
         if (fechaVencimientoElem) {
-            fechaVencimientoElem.textContent = `Vigencia de la propuesta: ${vigenciaInfo.fechaVencimiento}`;
+            if (cotizacion.fecha_vigencia) {
+                // Usar la fecha de vigencia guardada en la cotización
+                // Formatear fecha directamente desde la base de datos para evitar problemas de zona horaria
+                const fechaVigencia = new Date(cotizacion.fecha_vigencia);
+                const dia = fechaVigencia.getUTCDate().toString().padStart(2, '0');
+                const mes = (fechaVigencia.getUTCMonth() + 1).toString().padStart(2, '0');
+                const año = fechaVigencia.getUTCFullYear();
+                const fechaVigenciaFormateada = `${dia}/${mes}/${año}`;
+                fechaVencimientoElem.textContent = `Vigencia de la propuesta: ${fechaVigenciaFormateada}`;
+            } else {
+                // Fallback: calcular dinámicamente si no hay fecha guardada
+                const vigenciaInfo = await cargarVigencia();
+                fechaVencimientoElem.textContent = `Vigencia de la propuesta: ${vigenciaInfo.fechaVencimiento}`;
+            }
         }
         
         // Agregar estilos según el nivel usando la función compartida
@@ -539,16 +566,9 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         const cantidadBimestres = codigosBimestresOrdenados.length;
         
         // Intentar obtener costos específicos por bimestre desde la base de datos
-        let costosPorBimestre = {};
-        try {
-            if (cotizacion.costos_por_bimestre) {
-                costosPorBimestre = JSON.parse(cotizacion.costos_por_bimestre);
-                // console.log('Costos por bimestre desde BD:', costosPorBimestre);
-                // console.log('Códigos de bimestres ordenados:', codigosBimestresOrdenados);
-            }
-        } catch (e) {
-            console.error('Error al parsear costos_por_bimestre:', e);
-        }
+        let costosPorBimestre = parseJSONSafely(cotizacion.costos_por_bimestre) || {};
+        // console.log('Costos por bimestre desde BD:', costosPorBimestre);
+        // console.log('Códigos de bimestres ordenados:', codigosBimestresOrdenados);
         
         // Obtener el descuento total para aplicarlo proporcionalmente
         // Usar la misma lógica que en resultados.js: finalAmount
@@ -603,23 +623,43 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
             const codigo = codigosBimestresOrdenados[i];
             let costoBimestre = costosPorBimestre[codigo];
             
-            // Si no hay costo específico del bimestre, recalcular usando la lógica de step1.js
+            // Si no hay costo específico del bimestre, recalcular usando las configuraciones por período
             if (costoBimestre === undefined || costoBimestre === 0) {
                 try {
                     // Obtener costos base del nivel desde el endpoint
                     const response = await fetch(`${API_BASE_URL}/costos/nivel/${cotizacion.nivel_id}`);
                     const costosMateria = await response.json();
                     
-                    // Calcular créditos para este bimestre (igual que en step1.js)
-                    const numeroCertificados = parseInt(cotizacion.certificados) || 0;
-                    const numeroSemanasSEDI = parseInt(cotizacion.semanas_sedi) || 0;
-                    const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
+                    // Obtener configuraciones por período desde el backend
+                    let configuracionesPorPeriodo = parseJSONSafely(cotizacion.configuraciones_por_periodo) || {};
+                    console.log('Configuraciones por período desde BD:', configuracionesPorPeriodo);
                     
-                    // Buscar el costo usando solo el código del período
-                    const costoPeriodo = costosMateria.find(item => item.clave.includes(codigo))?.costo || 0;
-                    
-                    // Calcular el costo del bimestre (igual que en step1.js)
-                    costoBimestre = totalCreditos * costoPeriodo;
+                    // Obtener la configuración específica para este bimestre
+                    const configPeriodo = configuracionesPorPeriodo[codigo];
+                    if (configPeriodo) {
+                        // Calcular créditos para este bimestre específico usando las configuraciones guardadas
+                        const numeroCertificados = parseInt(configPeriodo.certificados) || 0;
+                        const numeroSemanasSEDI = parseInt(configPeriodo.semanas) || 0;
+                        const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
+                        
+                        // Buscar el costo usando solo el código del período
+                        const costoPeriodo = costosMateria.find(item => item.clave.includes(codigo))?.costo || 0;
+                        
+                        // Calcular el costo del bimestre
+                        costoBimestre = totalCreditos * costoPeriodo;
+                        
+                        console.log(`Bimestre ${codigo}:`, {
+                            certificados: numeroCertificados,
+                            semanas: numeroSemanasSEDI,
+                            creditos: totalCreditos,
+                            costoPeriodo: costoPeriodo,
+                            costoBimestre: costoBimestre
+                        });
+                    } else {
+                        // Si no hay configuración específica, usar fallback
+                        const totalContadoSinSeguros = totalContado - totalSeguros;
+                        costoBimestre = cantidadBimestres > 0 ? totalContadoSinSeguros / cantidadBimestres : 0;
+                    }
 
                 } catch (error) {
                     console.error('Error al recalcular costos:', error);
