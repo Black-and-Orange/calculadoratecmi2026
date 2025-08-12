@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const costosMateria = await fetchCostosMateria(mappedLevel);
         const numeroMaterias = parseFloat(selectors.materias.value);
         const claveGenerada = costosMateria.find(item => item.clave === createKeyFromSelectors()) || { costo: 0 };
-        const costoMateria = claveGenerada.costo;
+        const costoMateria = parseFloat(claveGenerada.costo);
         let costoTotal;
 
         // --- CORRECCIÓN NIVEL 13 ---
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
                     }
                     const claveFinal = `${periodKey}${nivelKey}${planKey}${campusKey}`;
-                    const costoPeriodo = (costosMateria.find(item => item.clave === claveFinal) || { costo: 0 }).costo;
+                    const costoPeriodo = parseFloat((costosMateria.find(item => item.clave === claveFinal) || { costo: 0 }).costo);
                     
                     // Obtener certificados y semanas específicos para este período
                     const configPeriodo = configuracionesPorPeriodo[periodKey] || { certificados: 0, semanas: 0 };
@@ -205,7 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const valorSemanaSEDI = parseInt(selectors.semanas.options[selectors.semanas.selectedIndex].getAttribute('valor_semana_sedi')) || 2;
             const numeroCursosIngles = parseInt(selectors.ingles.value);
             const valorCursoIngles = parseInt(selectors.ingles.options[selectors.ingles.selectedIndex].getAttribute('valor_curso_ingles')) || 10;
-            const costoUnidad = parseInt(claveGenerada.costo);
+            const costoUnidad = parseFloat(claveGenerada.costo);
+            
             costoTotal = calcularCostoTotalCertificadosSemanasIngles(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad);
         } else if (mappedLevel === 5) {
             const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].textContent;
