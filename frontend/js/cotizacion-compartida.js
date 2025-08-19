@@ -44,19 +44,19 @@ async function cargarNiveles() {
         console.error('Error al cargar niveles:', error);
         // Usar array de respaldo si falla la API
         niveles = [
-            { id: '1', descripcion: 'Preparatoria Semestral' },
-            { id: '2', descripcion: 'Profesional Semestral' },
-            { id: '3', descripcion: 'Preparatoria Tetramestral' },
-            { id: '4', descripcion: 'Profesional Semestral MAPS' },
-            { id: '5', descripcion: 'Profesional Asociado' },
-            { id: '6', descripcion: 'Ejecutivo' },
-            { id: '7', descripcion: 'Maestría y Especialidades' },
-            { id: '8', descripcion: 'Master' },
-            { id: '9', descripcion: 'MLP Connect' },
-            { id: '10', descripcion: 'MEDU+' },
-            { id: '11', descripcion: 'MLP Presencial' },
-            { id: '12', descripcion: 'Connect Presencial Matutino' },
-            { id: '13', descripcion: 'Ejecutivo MAPS Bimestral' }
+            { id: 1, descripcion: 'Preparatoria Semestral' },
+            { id: 2, descripcion: 'Profesional Semestral' },
+            { id: 3, descripcion: 'Preparatoria Tetramestral' },
+            { id: 4, descripcion: 'Profesional Semestral MAPS' },
+            { id: 5, descripcion: 'Profesional Asociado' },
+            { id: 6, descripcion: 'Ejecutivo' },
+            { id: 7, descripcion: 'Maestría y Especialidades' },
+            { id: 8, descripcion: 'Master' },
+            { id: 9, descripcion: 'MLP Connect' },
+            { id: 10, descripcion: 'MEDU+' },
+            { id: 11, descripcion: 'MLP Presencial' },
+            { id: 12, descripcion: 'Connect Presencial Matutino' },
+            { id: 13, descripcion: 'Ejecutivo  Bimestral MAPS' }
         ];
     }
 }
@@ -251,11 +251,6 @@ async function cargarCotizacion(cotizacionId) {
         // Configurar campos según el nivel
         const nivelId = cotizacion.nivel_id;
         
-        // Asegurar que los niveles estén cargados antes de organizar campos
-        if (niveles.length === 0) {
-            await cargarNiveles();
-        }
-        
         // Organizar y llenar información básica dinámicamente
         organizarCamposPorNivel(nivelId, cotizacion);
         
@@ -303,10 +298,13 @@ async function cargarCotizacion(cotizacionId) {
     } finally {
         if (loadingOverlay) loadingOverlay.style.display = 'none';
     }
+    document.querySelector('body').style.display = "block";
 }
 
 // Inicialización cuando se carga la página
 document.addEventListener('DOMContentLoaded', async () => {
+    // Cargar niveles al inicio
+    await cargarNiveles();
     const params = new URLSearchParams(window.location.search);
     const cotizacionId = params.get('id');
     
@@ -806,7 +804,7 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
     // Agregar nivel solo para niveles que no sean 4 ni 13 (después del periodo)
     if (nivelId !== 4 && nivelId !== 13) {
         // Buscar el nombre del nivel en el array de niveles
-        const nivel = niveles.find(n => n.id == nivelId);
+        const nivel = niveles.find(n => n.id_nivel == nivelId || n.id == nivelId || n.id == parseInt(nivelId));
         const nivelNombre = nivel ? nivel.descripcion : `Nivel ${nivelId}`;
         camposBase.push({ id: 'nivel', label: 'Nivel', valor: nivelNombre });
     }
@@ -830,10 +828,10 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
             { id: 'certificados', label: 'Certificados', valor: formatearNumero(cotizacion.certificados) },
             { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(cotizacion.semanas_sedi) }
         ];
-    } else if ([8, 9].includes(nivelId)) {
-        // Niveles 8 y 9: créditos
+    } else if ([5, 8, 9].includes(nivelId)) {
+        // Niveles 5, 8, 9: certificados
         camposAdicionales = [
-            { id: 'creditos', label: 'Créditos', valor: formatearNumero(cotizacion.creditos) }
+            { id: 'certificados', label: 'Certificados', valor: formatearNumero(cotizacion.certificados) }
         ];
     } else {
         // Resto de niveles: materias
@@ -849,6 +847,7 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
             1: 'Materias',
             2: 'Créditos',
             3: 'Materias',
+            4: 'Certificados',
             5: 'Certificados',
             6: 'Créditos',
             7: 'Materias',
@@ -856,7 +855,8 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
             9: 'Certificados',
             10: 'Créditos',
             11: 'Materias',
-            12: 'Materias'
+            12: 'Materias',
+            13: 'Certificados'
         };
         
         return materiasPorNivel[nivelId] || 'Materias';

@@ -942,6 +942,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     agregarEstiloPorNivel();
+    document.querySelector('body').style.display = "block";
     
     async function obtenerYMostrarVigencia() {
         try {
@@ -1091,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let semanasSediValue = 0;
             let inglesValue = 0;
 
-            const nivelesConCreditos = [8, 9]; // Ajusta según tus niveles de créditos
+            const nivelesConCreditos = [2, 6, 10]; // Niveles que manejan créditos
 
             if (levelId === 4) {
                 // Nivel 4: certificados, semanas SEDI e inglés
@@ -1115,6 +1116,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 inglesValue = 0;
                 materiasValue = 0;
                 creditosValue = 0;
+            } else if (levelId === 5) {
+                // Nivel 5: certificados
+                const numeroCertificados = parseFloat(materias) || 0;
+                certificadosValue = numeroCertificados;
+                materiasValue = 0;
+                creditosValue = 0;
+                semanasSediValue = 0;
+                inglesValue = 0;
+            } else if (levelId === 8) {
+                // Nivel 8: certificados
+                const numeroCertificados = parseFloat(materias) || 0;
+                certificadosValue = numeroCertificados;
+                materiasValue = 0;
+                creditosValue = 0;
+                semanasSediValue = 0;
+                inglesValue = 0;
+            } else if (levelId === 9) {
+                // Nivel 9: certificados
+                const numeroCertificados = parseFloat(materias) || 0;
+                certificadosValue = numeroCertificados;
+                materiasValue = 0;
+                creditosValue = 0;
+                semanasSediValue = 0;
+                inglesValue = 0;
             } else if (nivelesConCreditos.includes(levelId)) {
                 // Niveles de créditos
                 const creditos = typeof window.creditos !== 'undefined' ? window.creditos : (typeof materias !== 'undefined' ? materias : 0);
@@ -1393,19 +1418,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(datos.semanas) },
                 { id: 'ingles', label: 'Certificados de inglés', valor: formatearNumero(datos.ingles) }
             ];
+        } else if (nivelId === 5) {
+            // Nivel 5: certificados
+            camposAdicionales = [
+                { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.materias) }
+            ];
+        } else if (nivelId === 8) {
+            // Nivel 8: certificados
+            camposAdicionales = [
+                { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.materias) }
+            ];
+        } else if (nivelId === 9) {
+            // Nivel 9: certificados
+            camposAdicionales = [
+                { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.materias) }
+            ];
         } else if (nivelId === 13) {
             // Nivel 13: certificados y semanas SEDI
             camposAdicionales = [
                 { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.certificados) },
                 { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(datos.semanas) }
             ];
-        } else if ([8, 9].includes(nivelId)) {
-            // Niveles 8 y 9: créditos
-            camposAdicionales = [
-                { id: 'creditos', label: 'Créditos', valor: formatearNumero(datos.materias) }
-            ];
         } else {
-            // Resto de niveles: materias
+            // Resto de niveles: usar la función getMateriasLabel para determinar el label correcto
             const materiasLabel = getMateriasLabel(nivelId);
             camposAdicionales = [
                 { id: 'materias', label: materiasLabel, valor: formatearNumero(datos.materias) }
@@ -1466,6 +1501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             1: 'Materias',
             2: 'Créditos',
             3: 'Materias',
+            4: 'Certificados', // Nivel 4 maneja certificados, pero se maneja por separado
             5: 'Certificados',
             6: 'Créditos',
             7: 'Materias',
@@ -1473,7 +1509,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             9: 'Certificados',
             10: 'Créditos',
             11: 'Materias',
-            12: 'Materias'
+            12: 'Materias',
+            13: 'Certificados' // Nivel 13 maneja certificados, pero se maneja por separado
         };
         
         return materiasPorNivel[nivelId] || 'Materias';

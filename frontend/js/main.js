@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
               if (nivelValue) {
                 // Buscar el texto del nivel seleccionado
                 const selectedOption = nivelSelect.options[nivelSelect.selectedIndex];
-                if (selectedOption && selectedOption.textContent.toLowerCase().includes('ejecutivo maps bimestral')) {
+                if (selectedOption && selectedOption.textContent.toLowerCase().includes('ejecutivo bimestral maps')) {
                   isNivel13 = true;
                 }
               }

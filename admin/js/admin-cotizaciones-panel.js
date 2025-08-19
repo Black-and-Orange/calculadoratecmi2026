@@ -184,6 +184,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     })() : 
                     'N/A';
                 
+                // Determinar qué valor mostrar según el nivel
+                let materiasValue = 0;
+                let certificadosValue = 0;
+                let creditosValue = 0;
+                let semanasValue = 0;
+                let inglesValue = 0;
+
+                if (cotizacion.nivel_id === 4) {
+                    // Nivel 4: certificados, semanas SEDI e inglés
+                    certificadosValue = cotizacion.certificados || 0;
+                    semanasValue = cotizacion.semanas_sedi || 0;
+                    inglesValue = cotizacion.ingles || 0;
+                } else if ([5, 8, 9].includes(cotizacion.nivel_id)) {
+                    // Niveles 5, 8, 9: certificados
+                    certificadosValue = cotizacion.certificados || 0;
+                } else if ([2, 6, 10].includes(cotizacion.nivel_id)) {
+                    // Niveles 2, 6, 10: créditos
+                    creditosValue = cotizacion.creditos || 0;
+                } else if (cotizacion.nivel_id === 13) {
+                    // Nivel 13: certificados y semanas SEDI
+                    certificadosValue = cotizacion.certificados || 0;
+                    semanasValue = cotizacion.semanas_sedi || 0;
+                } else {
+                    // Niveles 1, 3, 7, 11, 12: materias
+                    materiasValue = cotizacion.materias || 0;
+                }
+
                 return [
                     cotizacion.id,
                     `"${cotizacion.nombre_estudiante}"`,
@@ -192,11 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     `"${cotizacion.campus || ''}"`,
                     `"${cotizacion.programa || ''}"`,
                     `"${cotizacion.formato || ''}"`,
-                    cotizacion.materias || 0,
-                    cotizacion.certificados || 0,
-                    cotizacion.semanas_sedi || 0,
-                    cotizacion.ingles || 0,
-                    cotizacion.creditos || 0, // Nueva columna para créditos
+                    materiasValue,
+                    certificadosValue,
+                    semanasValue,
+                    inglesValue,
+                    creditosValue,
                     cotizacion.costo_total || 0,
                     cotizacion.total_contado || 0,
                     cotizacion.total_financiado || 0,
@@ -273,9 +300,16 @@ document.addEventListener('DOMContentLoaded', function() {
             let infoUnidades = '';
             if (cotizacion.nivel_id === 4) {
                 infoUnidades = `Certificados: ${cotizacion.certificados || 0}<br>Semanas de Desarrollo Integral: ${cotizacion.semanas_sedi || 0}<br>Certificados de Inglés: ${cotizacion.ingles || 0}`;
+            } else if ([5, 8, 9].includes(cotizacion.nivel_id)) {
+                // Niveles 5, 8, 9: certificados
+                infoUnidades = `Certificados: ${cotizacion.certificados || 0}`;
+            } else if ([2, 6, 10].includes(cotizacion.nivel_id)) {
+                // Niveles 2, 6, 10: créditos
+                infoUnidades = `Créditos: ${cotizacion.creditos || 0}`;
             } else if (cotizacion.nivel_id === 13) {
                 infoUnidades = `Certificados: ${cotizacion.certificados || 0}<br>Semanas de Desarrollo Integral: ${cotizacion.semanas_sedi || 0}`;
             } else {
+                // Niveles 1, 3, 7, 11, 12: materias
                 infoUnidades = `Materias: ${cotizacion.materias || 0}`;
             }
 

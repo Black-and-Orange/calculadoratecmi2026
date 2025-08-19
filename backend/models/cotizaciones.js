@@ -70,7 +70,7 @@ const getAllCotizaciones = (callback) => {
         SELECT c.*, n.descripcion as nivel_nombre 
         FROM cotizaciones c 
         LEFT JOIN nivel n ON c.nivel_id = n.id_nivel 
-        ORDER BY c.fecha_creacion DESC
+        ORDER BY c.id DESC
     `;
     db.query(query, callback);
 };

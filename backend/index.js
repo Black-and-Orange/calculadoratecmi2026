@@ -80,7 +80,6 @@ app.use(cors(corsOptions));
 
 // Middleware para logging de requests (útil para debugging)
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin || 'No origin'}`);
     next();
 });
 
