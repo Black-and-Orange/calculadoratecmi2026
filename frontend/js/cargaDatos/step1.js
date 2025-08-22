@@ -775,9 +775,15 @@ document.addEventListener('DOMContentLoaded', () => {
         semanasDiv.appendChild(semanasLabel);
         semanasDiv.appendChild(semanasSelect);
 
-        // Agregar eventos para actualizar costo
-        certificadosSelect.addEventListener('change', updateCosto);
-        semanasSelect.addEventListener('change', updateCosto);
+        // Agregar eventos para actualizar costo y validar
+        certificadosSelect.addEventListener('change', () => {
+            updateCosto();
+            validarPeriodosConsecutivosCheckboxes();
+        });
+        semanasSelect.addEventListener('change', () => {
+            updateCosto();
+            validarPeriodosConsecutivosCheckboxes();
+        });
 
         controlesContainer.appendChild(certificadosDiv);
         controlesContainer.appendChild(semanasDiv);
@@ -835,7 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return configuraciones;
     }
 
-    // 2. Validar consecutividad en los checkboxes
+    // 2. Validar consecutividad y configuración completa en los checkboxes
     function validarPeriodosConsecutivosCheckboxes() {
         const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
         const selectedIndexes = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
@@ -848,7 +854,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Mostrar/ocultar mensaje de error
+        // Validar configuración de cada período seleccionado
+        let configuracionCompleta = true;
+        let mensajeError = '';
+        
+        if (selectedIndexes.length > 0) {
+            checkboxes.forEach(checkbox => {
+                const codigo = checkbox.value;
+                const certificadosSelect = document.getElementById(`certificados-${codigo}`);
+                const semanasSelect = document.getElementById(`semanas-${codigo}`);
+                
+                if (!certificadosSelect || !semanasSelect) {
+                    configuracionCompleta = false;
+                    mensajeError = '⚠️ Falta cargar la configuración de períodos';
+                } else if (!certificadosSelect.value || !semanasSelect.value) {
+                    configuracionCompleta = false;
+                    mensajeError = '⚠️ Debes completar la configuración de todos los períodos seleccionados';
+                }
+            });
+        }
+
+        // Mostrar mensaje de error solo para períodos no consecutivos (inmediatamente)
         let errorMsg = document.getElementById('periodos-error-msg');
         const checkboxContainer = document.getElementById('periodos-checkbox-container');
         
@@ -861,17 +887,101 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkboxContainer.appendChild(errorMsg);
             }
         } else {
-            if (errorMsg) errorMsg.remove();
+            // Solo remover el mensaje de consecutividad, no otros mensajes
+            if (errorMsg && errorMsg.textContent.includes('consecutivos')) {
+                errorMsg.remove();
+            }
         }
 
         // Deshabilitar botón siguiente si no es válido
-        const btnSiguiente = document.getElementById('step-1-next');
-        if (btnSiguiente) {
-            btnSiguiente.disabled = (!sonConsecutivos || selectedIndexes.length === 0);
+        // NO deshabilitar el botón automáticamente - permitir que se ejecute la validación
+        // El botón se controlará desde main.js cuando se intente avanzar
+
+        return sonConsecutivos && selectedIndexes.length > 0 && configuracionCompleta;
+    }
+
+    // Función para validar y mostrar errores solo cuando se intente avanzar
+    function validarPeriodosConErrores() {
+        const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
+        const selectedIndexes = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
+        
+        let sonConsecutivos = true;
+        for (let i = 1; i < selectedIndexes.length; i++) {
+            if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
+                sonConsecutivos = false;
+                break;
+            }
         }
 
-        return sonConsecutivos && selectedIndexes.length > 0;
+        // Validar configuración de cada período seleccionado
+        let configuracionCompleta = true;
+        let mensajeError = '';
+        
+        if (selectedIndexes.length > 0) {
+            checkboxes.forEach(checkbox => {
+                const codigo = checkbox.value;
+                const certificadosSelect = document.getElementById(`certificados-${codigo}`);
+                const semanasSelect = document.getElementById(`semanas-${codigo}`);
+                
+
+                
+                if (!certificadosSelect || !semanasSelect) {
+                    configuracionCompleta = false;
+                    mensajeError = '⚠️ Falta cargar la configuración de períodos';
+                } else if (!certificadosSelect.value || !semanasSelect.value) {
+                    configuracionCompleta = false;
+                    mensajeError = '⚠️ Debes completar la configuración de todos los períodos seleccionados';
+                }
+            });
+        }
+        
+
+
+        // Mostrar mensaje de error solo para configuración incompleta (no consecutividad)
+        let errorMsg = document.getElementById('periodos-error-msg');
+        const checkboxContainer = document.getElementById('periodos-checkbox-container');
+        
+
+        
+        if (selectedIndexes.length === 0) {
+            if (!errorMsg) {
+                errorMsg = document.createElement('div');
+                errorMsg.id = 'periodos-error-msg';
+                errorMsg.className = 'periodos-error-msg';
+                errorMsg.textContent = '⚠️ Este campo es necesario';
+                checkboxContainer.appendChild(errorMsg);
+            } else {
+                errorMsg.textContent = '⚠️ Este campo es necesario';
+            }
+            return false;
+        } else if (!configuracionCompleta) {
+            if (!errorMsg) {
+                errorMsg = document.createElement('div');
+                errorMsg.id = 'periodos-error-msg';
+                errorMsg.className = 'periodos-error-msg';
+                errorMsg.textContent = mensajeError;
+                checkboxContainer.appendChild(errorMsg);
+            } else {
+                errorMsg.textContent = mensajeError;
+            }
+            return false;
+        } else {
+            // Solo remover mensajes de configuración, no de consecutividad
+            if (errorMsg && !errorMsg.textContent.includes('consecutivos')) {
+                errorMsg.remove();
+            }
+            return true;
+        }
+        
+        // Asegurar que el botón esté habilitado para que pueda recibir eventos
+        const btnSiguiente = document.getElementById('step-1-next');
+        if (btnSiguiente) {
+            btnSiguiente.disabled = false;
+        }
     }
+
+    // Hacer la función disponible globalmente para main.js
+    window.validarPeriodosConErrores = validarPeriodosConErrores;
 
     // 3. Obtener períodos seleccionados de los checkboxes
     function obtenerPeriodosSeleccionadosSelect() {

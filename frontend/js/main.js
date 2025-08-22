@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       btnNextStep.forEach(function (elem, index) {
-
+        // Evento para clic normal
         elem.addEventListener("click", () => {
           switch (currentStep) {
             /* ======== STEP 1 ======== */
@@ -234,51 +234,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
               }
               if (isNivel13) {
-                // Validar los checkboxes
+                // Validar consecutividad y configuración
                 const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
                 const selectedIndexes = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
                 let sonConsecutivos = true;
                 for (let i = 1; i < selectedIndexes.length; i++) {
-                  if (selectedIndexes[i] !== selectedIndexes[i-1] + 1) {
+                  if (selectedIndexes[i] !== selectedIndexes[i - 1] + 1) {
                     sonConsecutivos = false;
                     break;
                   }
                 }
-                if (selectedIndexes.length === 0 || !sonConsecutivos) {
-                  // Agregar clase de error al contenedor
-                  const checkboxContainer = document.getElementById('periodos-checkbox-container');
-                  if (checkboxContainer) checkboxContainer.style.borderColor = '#dc3545';
-                  
-                  // Mensaje de error visual
-                  let errorMsg = document.getElementById('periodos-error-msg');
-                  if (!errorMsg) {
-                    errorMsg = document.createElement('div');
-                    errorMsg.id = 'periodos-error-msg';
-                    errorMsg.style.cssText = `
-                      margin-top: 8px;
-                      padding: 8px 12px;
-                      background: #f8d7da;
-                      border: 1px solid #f5c6cb;
-                      border-radius: 4px;
-                      color: #721c24;
-                      font-size: 14px;
-                      font-weight: 500;
-                    `;
-                    errorMsg.textContent = selectedIndexes.length === 0 ? '⚠️ Este campo es necesario' : '⚠️ Solo puedes seleccionar períodos consecutivos';
-                    checkboxContainer.appendChild(errorMsg);
-                  } else {
-                    errorMsg.textContent = selectedIndexes.length === 0 ? '⚠️ Este campo es necesario' : '⚠️ Solo puedes seleccionar períodos consecutivos';
-                  }
+
+                // Usar la función de validación de step1.js que maneja los mensajes de configuración
+                const configuracionValida = window.validarPeriodosConErrores ? window.validarPeriodosConErrores() : true;
+
+                if (selectedIndexes.length === 0 || !sonConsecutivos || !configuracionValida) {
                   hasError = true;
                   canContinue();
                   break;
                 } else {
-                  // Remover clase de error del contenedor
-                  const checkboxContainer = document.getElementById('periodos-checkbox-container');
-                  if (checkboxContainer) checkboxContainer.style.borderColor = '#e9ecef';
-                  
-                  let errorMsg = document.getElementById('periodos-error-msg');
-                  if (errorMsg) errorMsg.remove();
                   hasError = false;
                 }
               } else {
@@ -321,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               if (divMateriales.style.display !== "none") {
-                
+
                 if (selectSubjects.value == "") {
                   selectSubjects.classList.add("error");
                   selectSubjectsMsg.classList.add("error");
@@ -445,26 +419,26 @@ document.addEventListener("DOMContentLoaded", () => {
         fieldAvg3 = document.querySelectorAll(".field-avg-3");
 
       if (txtAverageMark) {
-      txtAverageMark.addEventListener('keyup', () => {
-        if (txtAverageMark.value != "") {
+        txtAverageMark.addEventListener('keyup', () => {
+          if (txtAverageMark.value != "") {
             fieldAvg1.forEach(function (elem, index) {
               elem.classList.remove("hidden");
             });
             fieldAvg2.forEach(function (elem, index) {
               elem.classList.remove("hidden");
             });
-        } else {
-          fieldAvg1.forEach(function (elem, index) {
-            elem.classList.add("hidden");
-          });
-          fieldAvg2.forEach(function (elem, index) {
-            elem.classList.add("hidden");
-          });
-          fieldAvg3.forEach(function (elem, index) {
-            elem.classList.add("hidden");
-          });
-        }
-      });
+          } else {
+            fieldAvg1.forEach(function (elem, index) {
+              elem.classList.add("hidden");
+            });
+            fieldAvg2.forEach(function (elem, index) {
+              elem.classList.add("hidden");
+            });
+            fieldAvg3.forEach(function (elem, index) {
+              elem.classList.add("hidden");
+            });
+          }
+        });
       }
     }
 
