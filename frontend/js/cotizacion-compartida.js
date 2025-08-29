@@ -369,10 +369,34 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     
     // Mostrar apoyo educativo (descuento)
     if (apoyoEducativoElem) {
-        // Calcular el descuento total como la diferencia entre costo_total y total_contado
+        let descuentoTotal = 0;
         const costoTotal = parseFloat(cotizacion.costo_total) || 0;
-        const totalContado = parseFloat(cotizacion.total_contado) || 0;
-        const descuentoTotal = costoTotal - totalContado;
+        
+        // Para nivel 13, calcular descuento dinámicamente usando los porcentajes guardados
+        if (nivelId === 13) {
+            // Calcular descuento basado en los porcentajes guardados en la BD
+            const becaPorcentaje = parseFloat(cotizacion.beca_porcentaje) || 0;
+            const apoyoPorcentaje = parseFloat(cotizacion.apoyo_estudiantil_porcentaje) || 0;
+            const apoyoFijo = parseFloat(cotizacion.apoyo_estudiantil_fijo) || 0;
+            
+            // Aplicar descuentos sobre el costo total original
+            let descuentoBeca = 0;
+            let descuentoApoyo = 0;
+            
+            if (becaPorcentaje > 0) {
+                descuentoBeca = costoTotal * (becaPorcentaje / 100);
+            }
+            
+            if (apoyoPorcentaje > 0) {
+                descuentoApoyo = costoTotal * (apoyoPorcentaje / 100);
+            }
+            
+            descuentoTotal = descuentoBeca + descuentoApoyo + apoyoFijo;
+        } else {
+            // Para otros niveles, usar la diferencia entre costo_total y total_contado
+            const totalContado = parseFloat(cotizacion.total_contado) || 0;
+            descuentoTotal = costoTotal - totalContado;
+        }
         
         const esCero = descuentoTotal <= 0 || Math.abs(descuentoTotal) < 0.000001;
         let tr = apoyoEducativoElem.closest('tr');
@@ -406,7 +430,31 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     
     // Mostrar total contado (incluyendo seguros)
     if (totalContadoElem) {
-        totalContadoElem.textContent = formatearPesos(cotizacion.total_contado || 0);
+        let totalContadoFinal = parseFloat(cotizacion.total_contado) || 0;
+        
+        // Para nivel 13, recalcular total contado con descuentos aplicados dinámicamente
+        if (nivelId === 13) {
+            const costoTotal = parseFloat(cotizacion.costo_total) || 0;
+            const becaPorcentaje = parseFloat(cotizacion.beca_porcentaje) || 0;
+            const apoyoPorcentaje = parseFloat(cotizacion.apoyo_estudiantil_porcentaje) || 0;
+            const apoyoFijo = parseFloat(cotizacion.apoyo_estudiantil_fijo) || 0;
+            
+            // Calcular descuento total
+            let descuentoTotal = 0;
+            if (becaPorcentaje > 0) {
+                descuentoTotal += costoTotal * (becaPorcentaje / 100);
+            }
+            if (apoyoPorcentaje > 0) {
+                descuentoTotal += costoTotal * (apoyoPorcentaje / 100);
+            }
+            descuentoTotal += apoyoFijo;
+            
+            // Total contado = costo total - descuentos + seguros
+            const totalSeguros = parseFloat(cotizacion.total_seguros) || 0;
+            totalContadoFinal = costoTotal - descuentoTotal + totalSeguros;
+        }
+        
+        totalContadoElem.textContent = formatearPesos(totalContadoFinal);
     }
     
     // Cambiar el texto del label según si hay descuento
@@ -569,8 +617,21 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         // console.log('Códigos de bimestres ordenados:', codigosBimestresOrdenados);
         
         // Obtener el descuento total para aplicarlo proporcionalmente
-        // Usar la misma lógica que en resultados.js: finalAmount
-        const finalAmount = parseFloat(cotizacion.finalAmount) || 0;
+        // Para nivel 13, calcular descuento dinámicamente usando los porcentajes guardados
+        let finalAmount = 0;
+        const becaPorcentaje = parseFloat(cotizacion.beca_porcentaje) || 0;
+        const apoyoPorcentaje = parseFloat(cotizacion.apoyo_estudiantil_porcentaje) || 0;
+        const apoyoFijo = parseFloat(cotizacion.apoyo_estudiantil_fijo) || 0;
+        
+        // Calcular descuento total dinámicamente
+        if (becaPorcentaje > 0) {
+            finalAmount += costoTotal * (becaPorcentaje / 100);
+        }
+        if (apoyoPorcentaje > 0) {
+            finalAmount += costoTotal * (apoyoPorcentaje / 100);
+        }
+        finalAmount += apoyoFijo;
+        
         const descuentoPorBimestre = cantidadBimestres > 0 ? finalAmount / cantidadBimestres : 0;
         
         // Array auxiliar para pagos con fecha

@@ -313,10 +313,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 infoUnidades = `Materias: ${cotizacion.materias || 0}`;
             }
 
-            // Definir la fila de mensualidades correctamente
+            // Definir la fila de mensualidades y primera cuota correctamente
             let filaMensualidades = `<tr><td><strong>Mensualidades:</strong></td><td>${formatearPesos(cotizacion.mensualidades)}</td></tr>`;
+            let filaPrimeraCuota = `<tr><td><strong>Primera Cuota:</strong></td><td>${formatearPesos(cotizacion.primera_cuota)}</td></tr>`;
             if (cotizacion.nivel_id === 13) {
                 filaMensualidades = '';
+                filaPrimeraCuota = '';
             }
             
             // Crear el contenido HTML del modal
@@ -351,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <tr><td><strong>Costo Total:</strong></td><td>${formatearPesos(cotizacion.costo_total)}</td></tr>
                             <tr><td><strong>Total Contado:</strong></td><td>${formatearPesos(cotizacion.total_contado)}</td></tr>
                             <tr><td><strong>Total Financiado:</strong></td><td>${formatearPesos(cotizacion.total_financiado)}</td></tr>
-                            <tr><td><strong>Primera Cuota:</strong></td><td>${formatearPesos(cotizacion.primera_cuota)}</td></tr>
+                            ${filaPrimeraCuota}
                             ${filaMensualidades}
                         </table>
                     </div>
