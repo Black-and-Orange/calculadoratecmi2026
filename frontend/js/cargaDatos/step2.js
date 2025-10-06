@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (numericPercentage > 30 && [1, 2, 3, 4].includes(currentLevel)) {
                 supportFix.classList.add('hidden');
                 supportFixSelect.classList.add('hidden');
-            } else if (numericPercentage > 35 && [6, 7, 8, 9, 10, 13].includes(currentLevel)) {
+            } else if (numericPercentage > 40 && [6, 7, 8, 9, 10, 13].includes(currentLevel)) {
                 supportFix.classList.add('hidden');
                 supportFixSelect.classList.add('hidden');
             }

@@ -55,6 +55,9 @@ const corsOptions = {
             // Dominios de tecmilenio.mx
             'https://universidad.tecmilenio.mx',
             'https://tecmilenio.mx',
+            
+            // Dominios de HubSpot
+            'https://2429099.hubspotpreview-na1.com',
         ];
         
         // Verificar si el origin está en la lista de permitidos
