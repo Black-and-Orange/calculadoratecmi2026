@@ -1556,11 +1556,14 @@ p.msg.error {
 .tooltip .tooltiptext {
 		visibility: hidden;
 		width: 180px;
+		max-width: 300px;
 		background-color: #26D07C;
 		color: #000000;
 		text-align: left;
 		padding: 10px 16px;
 		border-radius: 6px;
+		white-space: normal;
+		word-wrap: break-word;
 
 		/* Position the tooltip text */
 		position: absolute;
@@ -1612,7 +1615,8 @@ p.msg.error {
 		.tooltip .tooltiptext {
 			bottom: unset;
 			right: unset;
-			width: 150px;
+			width: 250px;
+			max-width: 350px;
 		}
 
 		.tooltip-right {
@@ -1636,6 +1640,35 @@ p.msg.error {
 .tooltip:hover .tooltiptext {
 		visibility: visible;
 		opacity: 1;
+	}
+
+/* Estilo para el icono de interrogación en los tooltips */
+.tooltip .fa-circle-question {
+		cursor: pointer;
+		font-size: 18px;
+		padding: 2px;
+	}
+
+/* Asegurar que el tooltip de créditos esté oculto por defecto */
+#tooltip-creditos.hidden {
+		display: none !important;
+		visibility: hidden !important;
+		opacity: 0 !important;
+	}
+
+/* Prevenir que el tooltip se muestre en hover cuando está oculto */
+#tooltip-creditos.hidden:hover .tooltiptext,
+#tooltip-creditos[style*="display: none"]:hover .tooltiptext,
+#tooltip-creditos[style*="display:none"]:hover .tooltiptext {
+		visibility: hidden !important;
+		opacity: 0 !important;
+		display: none !important;
+	}
+
+/* Asegurar que cuando el tooltip NO está oculto, el hover funcione correctamente */
+#tooltip-creditos:not(.hidden):hover .tooltiptext {
+		visibility: visible !important;
+		opacity: 1 !important;
 	}
 .hover\:bg-white:hover {
   --tw-bg-opacity: 1;

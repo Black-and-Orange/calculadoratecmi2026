@@ -92,7 +92,7 @@
                 <div class="flex flex-row flex-wrap justify-center">
                     <div class="px-4 w-full md:w-8/12 lg:w-1/2 mb-10">
                         <p class="text-[20px] leading-[28px]">Descubre lo fácil que es calcular la colegiatura de Tecmilenio con nuestra calculadora de costos. 
-                            Obtén una experiencia de valor excepcional junto con una propuesta económica personalizada que se ajuste a las necesidades de nuestros futuros aprendedores.</p>
+                            Obtén una experiencia de valor excepcional junto con una propuesta económica personalizada que se ajuste a las necesidades de nuestros aprendedores.</p>
                     </div>
                 </div>
                 <div class="flex flex-row flex-wrap justify-center">
@@ -123,10 +123,18 @@
                                         <label class="font-semibold" for="select-grade">Nivel:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-grade" id="select-grade">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Opción 1</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-grade" id="select-grade">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Opción 1</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Selecciona el nivel educativo de inscripción. Si el plan de estudios es por materias selecciona Profesional Semestral y si es por certificados selecciona Profesional Semestral MAPS
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="select-grade-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -135,10 +143,18 @@
                                         <label class="font-semibold" for="select-plan">Programa:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-plan" id="select-plan">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Opción 1</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-plan" id="select-plan">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Opción 1</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Selecciona el plan de estudios o carrera
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="select-plan-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -183,10 +199,18 @@
                                         <label class="font-semibold" for="select-subjects">Materias:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-subjects" id="select-subjects">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-subjects" id="select-subjects">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Elige</option>
+                                            </select>
+                                            <div id="tooltip-creditos" class="tooltip absolute top-[10px] right-[10px] hidden" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Carga completa: 48 créditos<br>Sobre carga: 56 créditos
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="select-subjects-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -196,10 +220,18 @@
                                         <label class="font-semibold" for="select-certificado">Certificados:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-certificado" id="select-certificado">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-certificado" id="select-certificado">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Carga completa: 3 certificados (cada certificado es de 10 créditos)
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="select-certificado-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -208,22 +240,38 @@
                                         <label class="font-semibold" for="select-semanas">Semanas de Desarrollo Integral:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-semanas" id="select-semanas">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-semanas" id="select-semanas">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Carga completa: 2 Semanas Desarrollo Integral
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="select-semanas-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
                                 <div id="div-ingles" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
-                                        <label class="font-semibold" for="select-ingles">Certificados de inglés:</label>
+                                        <label class="font-semibold" for="select-ingles">Certificados de idioma:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-ingles" id="select-ingles">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-ingles" id="select-ingles">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Carga completa: 1 certificado de idioma
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="select-ingles-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -243,8 +291,16 @@
                                         <label class="font-semibold" for="txt-average-mark">Promedio:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <input type="number" name="txt-average-mark" id="txt-average-mark" min="0"
-                                            max="100">
+                                        <div class="relative">
+                                            <input type="number" name="txt-average-mark" id="txt-average-mark" min="0"
+                                                max="100">
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Ingresa el promedio académico acumulado aproximado
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="txt-average-mark-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -256,9 +312,17 @@
                                         <label class="font-semibold" for="txt-scholarship">Tipo de beca:</label>
                                     </div>
                                     <div class="flex-1 relative">
-                                        <select name="txt-scholarship" id="txt-scholarship">
-                                            <option value="">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="txt-scholarship" id="txt-scholarship">
+                                                <option value="">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Si cuentas con una beca, selecciona el tipo correspondiente. Si no conoces el tipo, elige la opción "Con beca"
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="txt-scholarship-msg">Este campo es necesario</p>
                                         <div id="w-socioeconomica" class="tooltip absolute top-[10px] right-[10px] hidden2" style="right: 5px;">
                                             <i
@@ -301,9 +365,17 @@
                                             %:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="txt-support-percentage" id="txt-support-percentage">
-                                            <option value="">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="txt-support-percentage" id="txt-support-percentage">
+                                                <option value="">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Este apoyo aplica solo para estudiantes de nuevo ingreso.
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="txt-support-percentage-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -313,9 +385,17 @@
                                             $:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="txt-support-fix" id="txt-support-fix">
-                                            <option value="">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="txt-support-fix" id="txt-support-fix">
+                                                <option value="">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Este apoyo aplica solo para estudiantes de nuevo ingreso.
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="txt-support-fix-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -326,9 +406,17 @@
                                         </label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="txt-prestamo-percentage" id="txt-prestamo-percentage">
-                                            <option value="">Elige</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="txt-prestamo-percentage" id="txt-prestamo-percentage">
+                                                <option value="">Elige</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    En caso de contar con un préstamo educativo, selecciona el porcentaje
+                                                </span>
+                                            </div>
+                                        </div>
                                         <p class="msg" id="txt-prestamo-percentage-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
@@ -376,11 +464,19 @@
                                         <label class="font-semibold" for="select-insurance">Seguro de accidente:</label>
                                     </div>
                                     <div class="flex-1">
-                                        <select name="select-insurance" id="select-insurance">
-                                            <option value="">Elige</option>
-                                            <option value="si">Sí</option>
-                                            <option value="no">No aplica</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select name="select-insurance" id="select-insurance">
+                                                <option value="">Elige</option>
+                                                <option value="si">Sí</option>
+                                                <option value="no">No aplica</option>
+                                            </select>
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Todos los estudiantes presenciales deberán contar con un seguro de accidentes, ya sea contratado con Tecmilenio o particular. Los estudiantes de Semestre Empresarial se deberá contratar el Seguro Plus como obligatorio.
+                                                </span>
+                                            </div>
+                                        </div>
                                         <div class="flex flex-row mt-2" id="anuncioPoliza" style="margin-top: 1rem;">
                                             <div class="pr-2 mt-1">
                                                 <i class="fa-solid fa-circle-exclamation text-header-color-1"></i>

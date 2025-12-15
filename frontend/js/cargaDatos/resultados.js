@@ -198,8 +198,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Obtener el descuento total para aplicarlo proporcionalmente
                 const finalAmountRecuperado = JSON.parse(localStorage.getItem('finalAmount')) || 0;
-                const descuentoPorBimestre = cantidadBimestres > 0 ? finalAmountRecuperado / cantidadBimestres : 0;
+                const costoTotal = parseFloat(localStorage.getItem('costoTotal')) || 0;
+                const scholarshipPercentage = parseFloat(JSON.parse(localStorage.getItem('selectedPercentage')) || 0);
+                const supportPercentage = parseFloat(JSON.parse(localStorage.getItem('selectedSupportValue')) || 0);
+                const supportFix = parseFloat(JSON.parse(localStorage.getItem('selectedSupportFixValue')) || 0);
+                const prestamo = parseFloat(JSON.parse(localStorage.getItem('selectedprestamo')) || 0);
                 
+                // Obtener todos los porcentajes individuales
                 codigosBimestresOrdenados.forEach((codigo, bimestreIdx) => {
                     // Obtener el costo total del bimestre específico desde localStorage
                     const costoBimestreKey = `totalContado_${codigo}`;
@@ -210,10 +215,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         costoBimestre = cantidadBimestres > 0 ? totalContado / cantidadBimestres : 0;
                     }
                     
-                    // APLICAR DESCUENTO AL COSTO DEL BIMESTRE
-                    const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoPorBimestre);
+                    // Calcular descuento por bimestre según la fórmula del Excel
+                    // Fórmula: (costoBimestre × porcentajeBeca) + (costoBimestre × porcentajeApoyo) + (costoBimestre × porcentajePrestamo) + (apoyoFijo / cantidadBimestres)
+                    // O simplificado: costoBimestre × (sumaPorcentajes) + (apoyoFijo / cantidadBimestres)
+                    const descuentoBeca = costoBimestre * (scholarshipPercentage / 100);
+                    const descuentoApoyo = costoBimestre * (supportPercentage / 100);
+                    const descuentoPrestamo = costoBimestre * (prestamo / 100);
+                    const apoyoFijoPorBimestre = cantidadBimestres > 0 ? supportFix / cantidadBimestres : 0;
+                    
+                    const descuentoBimestreCalculado = descuentoBeca + descuentoApoyo + descuentoPrestamo + apoyoFijoPorBimestre;
+                    
+                    // APLICAR DESCUENTO AL COSTO DEL BIMESTRE (usando el método del Excel)
+                    const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoBimestreCalculado);
                     
                     const pagosBimestre = pagosPorBimestre[codigo] || [];
+                    
                     pagosBimestre.forEach((pago, idx) => {
                         const porcentaje = parseFloat(pago.porcentaje_parcialidad) / 100;
                         let parcialidad = costoBimestreConDescuento * porcentaje;
@@ -247,6 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         totalPagos += totalParcialidad;
                     });
                 });
+                
                 // Agrupar pagos por fecha
                 const pagosAgrupados = {};
                 pagosConFechas.forEach(pago => {

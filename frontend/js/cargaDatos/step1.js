@@ -35,6 +35,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let levelMapping = {};
 
+    // Función auxiliar para ocultar el tooltip de créditos
+    const ocultarTooltipCreditos = () => {
+        const tooltipCreditos = document.getElementById('tooltip-creditos');
+        if (tooltipCreditos) {
+            tooltipCreditos.classList.add('hidden');
+            tooltipCreditos.style.setProperty('display', 'none', 'important');
+            tooltipCreditos.style.setProperty('visibility', 'hidden', 'important');
+            tooltipCreditos.style.setProperty('opacity', '0', 'important');
+            // También ocultar el tooltiptext
+            const tooltiptext = tooltipCreditos.querySelector('.tooltiptext');
+            if (tooltiptext) {
+                tooltiptext.style.setProperty('visibility', 'hidden', 'important');
+                tooltiptext.style.setProperty('opacity', '0', 'important');
+            }
+            // Debug: console.log('Tooltip de créditos ocultado');
+        }
+    };
+    
+    // Función auxiliar para mostrar el tooltip de créditos (solo nivel 2)
+    const mostrarTooltipCreditos = (nivel) => {
+        const tooltipCreditos = document.getElementById('tooltip-creditos');
+        if (tooltipCreditos && nivel === 2) {
+            tooltipCreditos.classList.remove('hidden');
+            // Establecer explícitamente los estilos para que sea visible y funcione el hover
+            tooltipCreditos.style.setProperty('display', 'inline-block', 'important');
+            tooltipCreditos.style.setProperty('visibility', 'visible', 'important');
+            tooltipCreditos.style.setProperty('opacity', '1', 'important');
+            // Asegurar que el tooltiptext también esté listo para mostrarse
+            const tooltiptext = tooltipCreditos.querySelector('.tooltiptext');
+            if (tooltiptext) {
+                tooltiptext.style.removeProperty('visibility');
+                tooltiptext.style.removeProperty('opacity');
+            }
+            // Debug: console.log('Tooltip de créditos mostrado para nivel 2');
+        } else if (tooltipCreditos) {
+            // Debug: console.log('Ocultando tooltip - nivel no es 2, es:', nivel);
+            ocultarTooltipCreditos();
+        }
+    };
 
     // Inicializa el mapeo de niveles obteniendo los datos desde la API
     const initializeLevelMapping = async () => {
@@ -148,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const costosMateria = await fetchCostosMateria(mappedLevel);
+        
         const numeroMaterias = parseFloat(selectors.materias.value);
         const claveGenerada = costosMateria.find(item => item.clave === createKeyFromSelectors()) || { costo: 0 };
         const costoMateria = parseFloat(claveGenerada.costo);
@@ -166,7 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Sumar el costo de cada período seleccionado
                 costoTotal = 0;
-                periodosSeleccionados.forEach(periodo => {
+                
+                periodosSeleccionados.forEach((periodo, index) => {
                     // Generar clave para cada período
                     let periodKey = periodo.codigo;
                     const nivelKey = selectors.grade.options[selectors.grade.selectedIndex].getAttribute('nivel_ed') || '';
@@ -181,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         campusKey = selectors.campus.options[selectors.campus.selectedIndex].getAttribute('categoria_coleg') || '';
                     }
                     const claveFinal = `${periodKey}${nivelKey}${planKey}${campusKey}`;
+                    
                     const costoPeriodo = parseFloat((costosMateria.find(item => item.clave === claveFinal) || { costo: 0 }).costo);
                     
                     // Obtener certificados y semanas específicos para este período
@@ -189,9 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const numeroSemanasSEDI = configPeriodo.semanas;
                     
                     const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
-                    // Sumar el costo de los créditos de este período
                     const totalContadoBimestre = totalCreditos * costoPeriodo;
+                    
                     costoTotal += totalContadoBimestre;
+                    
                     // Guardar el total contado de este bimestre en localStorage
                     localStorage.setItem('totalContado_' + periodKey, JSON.stringify(totalContadoBimestre));
                 });
@@ -355,11 +398,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Genera una clave única basada en las opciones seleccionadas
     const createKeyFromSelectors = () => {
+        const isNivel13 = parseInt(localStorage.getItem('selectedNivel')) === 13;
+        
         let periodKey = '';
         const nivelKey = selectors.grade.options[selectors.grade.selectedIndex].getAttribute('nivel_ed') || '';
         const planKey = selectors.planes.options[selectors.planes.selectedIndex].getAttribute('tipo_plan') || '';
 
-        if (parseInt(localStorage.getItem('selectedNivel')) === 13) {
+        if (isNivel13) {
             // Para nivel 13, usar el primer período seleccionado como clave
             const periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
             if (periodosSeleccionados.length > 0) {
@@ -826,15 +871,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const configuraciones = {};
         const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
         
-        checkboxes.forEach(checkbox => {
+        checkboxes.forEach((checkbox) => {
             const codigo = checkbox.value;
+            const mes = checkbox.getAttribute('data-mes');
             const certificadosSelect = document.getElementById(`certificados-${codigo}`);
             const semanasSelect = document.getElementById(`semanas-${codigo}`);
             
+            const certificados = certificadosSelect ? parseInt(certificadosSelect.value) || 0 : 0;
+            const semanas = semanasSelect ? parseInt(semanasSelect.value) || 0 : 0;
+            
             configuraciones[codigo] = {
-                certificados: certificadosSelect ? parseInt(certificadosSelect.value) || 0 : 0,
-                semanas: semanasSelect ? parseInt(semanasSelect.value) || 0 : 0,
-                mes: checkbox.getAttribute('data-mes')
+                certificados: certificados,
+                semanas: semanas,
+                mes: mes
             };
         });
         
@@ -986,12 +1035,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Obtener períodos seleccionados de los checkboxes
     function obtenerPeriodosSeleccionadosSelect() {
         const checkboxes = document.querySelectorAll('#periodos-checkbox-container input[type="checkbox"]:checked');
-        if (!checkboxes.length) return [];
-        return Array.from(checkboxes).map(cb => ({
+        
+        if (!checkboxes.length) {
+            return [];
+        }
+        
+        const periodos = Array.from(checkboxes).map(cb => ({
             codigo: cb.value,
             mes: cb.getAttribute('data-mes'),
             index: parseInt(cb.getAttribute('data-index'))
         })).sort((a, b) => a.index - b.index);
+        
+        return periodos;
     }
 
     // Reemplazar la creación de checkboxes por el select múltiple en el evento de cambio de nivel
@@ -1000,8 +1055,20 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.clear();
         clearCache();
 
+        // Ocultar el tooltip de créditos al cambiar de nivel (siempre ocultar primero)
+        ocultarTooltipCreditos();
+
         const selectedLevel = selectors.grade.value;
         const mappedLevel = levelMapping[selectedLevel];
+        
+        // Si no hay nivel seleccionado o es vacío, asegurar que el tooltip esté oculto y salir
+        if (!selectedLevel || !mappedLevel || selectedLevel === '') {
+            ocultarTooltipCreditos();
+            return;
+        }
+        
+        // Asegurar que el tooltip esté oculto al inicio (se mostrará después si es nivel 2)
+        ocultarTooltipCreditos();
         const periodoLabel = selectors.periodo.parentElement.previousElementSibling.querySelector('label') || document.querySelector('label[for="select-period"]');
 
         // Cambiar el label según el nivel
@@ -1107,12 +1174,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             apiUrl = `${API_BASE_URL}/creditos/nivel/${mappedLevel}`;
                             property = 'credito';
                             selectors.divMaterias.querySelector('label').textContent = 'Créditos:';
+                            // Solo mostrar el tooltip para el nivel 2 (Profesional Semestral)
+                            if (mappedLevel === 2) {
+                                mostrarTooltipCreditos(mappedLevel);
+                            } else {
+                                ocultarTooltipCreditos();
+                            }
                         } else if ([5, 8, 9].includes(mappedLevel)) {
                             apiUrl = `${API_BASE_URL}/certificados/nivel/${mappedLevel}`;
                             property = 'num_certificados';
                             selectors.divMaterias.querySelector('label').textContent = 'Certificados:';
+                            ocultarTooltipCreditos();
                         } else {
                             selectors.divMaterias.querySelector('label').textContent = 'Materias:';
+                            ocultarTooltipCreditos();
                         }
                     }
                     if (key === 'periodo') {
@@ -1124,6 +1199,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             updateCosto();
+            
+            // Verificación final: asegurar que el tooltip solo esté visible para nivel 2
+            const currentMappedLevel = parseInt(localStorage.getItem('selectedNivel')) || null;
+            if (currentMappedLevel !== 2) {
+                ocultarTooltipCreditos();
+            }
         }
     });
 
@@ -1135,12 +1216,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateCosto();
                 if (key === 'grade') {
                     // lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));
+                    // Verificar y ajustar tooltip después de cambiar el nivel
+                    setTimeout(() => {
+                        const currentLevel = selectors.grade.value;
+                        const currentMappedLevel = levelMapping[currentLevel];
+                        if (currentMappedLevel !== 2) {
+                            ocultarTooltipCreditos();
+                        }
+                    }, 100);
                 }
             });
         }
     });
+    // Asegurar que el tooltip de créditos esté oculto al cargar la página
+    ocultarTooltipCreditos();
+    
     // Inicializa el formulario y carga el mapeo de niveles al cargar la página y enlaza eventos
-    initializeLevelMapping().then(loadGradeOptions);
+    initializeLevelMapping().then(() => {
+        loadGradeOptions();
+        // Asegurar que el tooltip de créditos esté oculto después de cargar
+        setTimeout(() => {
+            ocultarTooltipCreditos();
+            // Verificar el nivel actual y ajustar el tooltip
+            const currentLevel = selectors.grade.value;
+            const currentMappedLevel = levelMapping[currentLevel];
+            if (currentMappedLevel !== 2) {
+                ocultarTooltipCreditos();
+            }
+        }, 200);
+    });
 
     // Selecciona el formulario y agrega el evento de reseteo
     const formElement = document.querySelector('form');
@@ -1148,6 +1252,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formElement.addEventListener('reset', () => {
             resetFormFields(formElement);
             localStorage.clear();
+            // Ocultar el tooltip de créditos al resetear el formulario
+            ocultarTooltipCreditos();
         });
     }
 

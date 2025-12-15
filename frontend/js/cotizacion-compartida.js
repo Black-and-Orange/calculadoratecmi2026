@@ -632,16 +632,25 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         }
         finalAmount += apoyoFijo;
         
-        const descuentoPorBimestre = cantidadBimestres > 0 ? finalAmount / cantidadBimestres : 0;
+        // Obtener porcentajes individuales
+        const prestamoPorcentaje = parseFloat(cotizacion.prestamo_porcentaje) || 0;
         
         // Array auxiliar para pagos con fecha
         const pagosConFechas = [];
         
         // Función para procesar los pagos de un bimestre
         function procesarPagosBimestre(codigo, costoBimestre) {
+            // Calcular descuento por bimestre según la fórmula del Excel
+            // Fórmula: (costoBimestre × beca%) + (costoBimestre × apoyo%) + (costoBimestre × préstamo%) + (apoyoFijo / cantidadBimestres)
+            const descuentoBeca = costoBimestre * (becaPorcentaje / 100);
+            const descuentoApoyo = costoBimestre * (apoyoPorcentaje / 100);
+            const descuentoPrestamo = costoBimestre * (prestamoPorcentaje / 100);
+            const apoyoFijoPorBimestre = cantidadBimestres > 0 ? apoyoFijo / cantidadBimestres : 0;
             
-            // APLICAR DESCUENTO AL COSTO DEL BIMESTRE (igual que en resultados.js)
-            const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoPorBimestre);
+            const descuentoBimestreCalculado = descuentoBeca + descuentoApoyo + descuentoPrestamo + apoyoFijoPorBimestre;
+            
+            // APLICAR DESCUENTO AL COSTO DEL BIMESTRE (método del Excel)
+            const costoBimestreConDescuento = Math.max(0, costoBimestre - descuentoBimestreCalculado);
             
             const pagosBimestre = pagosPorBimestre[codigo] || [];
             pagosBimestre.forEach((pago, idx) => {
