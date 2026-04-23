@@ -5,6 +5,8 @@ const segurosController = require('../controllers/segurosController');
 // Obtener todos los campus
 router.get('/', segurosController.getAllSeguro);
 
+// IMPORTANTE: La ruta más específica debe ir ANTES de la genérica
+router.get('/nivel/:nivelId/todos', segurosController.getSegurosByNivelAll);
 router.get('/nivel/:nivelId', segurosController.getSegurosByNivel);
 
 // Obtener un campus por ID

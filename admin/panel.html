@@ -215,8 +215,18 @@
             return `
             <div id="${getTabDivId(pestaña, nivel)}"></div>
                 <form id="create${getTabDivId(pestaña, nivel)}Form">
-                ${fields.map(field => `
-                <input type="text" class="form-control" id="${getTabDivId(pestaña, nivel)}${field.id}" name="${field.id}" placeholder="${field.placeholder}" required>`).join('')}
+                ${fields.map(field => {
+                    if (field.type === 'checkbox') {
+                        return `
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="${getTabDivId(pestaña, nivel)}${field.id}" name="${field.id}" checked>
+                            <label class="form-check-label" for="${getTabDivId(pestaña, nivel)}${field.id}">${field.label || field.placeholder}</label>
+                        </div>`;
+                    } else {
+                        return `
+                        <input type="text" class="form-control mb-2" id="${getTabDivId(pestaña, nivel)}${field.id}" name="${field.id}" placeholder="${field.placeholder}" required>`;
+                    }
+                }).join('')}
                     <button type="submit" class="btn btn-success">Crear ${pestaña.nombre}</button>
                 </form>
             `;
@@ -238,9 +248,9 @@
                     { id: 'Type', placeholder: 'Código' }
                 ],
                 'seguros': [
-                    { id: 'Accidentes', placeholder: 'Seguro Accidentes' },
-                    { id: 'Cobertura', placeholder: 'Cobertura VIVE' },
-                    { id: 'Estudiantil', placeholder: 'Seguro Estudiantil' }
+                    { id: 'Nombre', placeholder: 'Nombre del Seguro' },
+                    { id: 'Valor', placeholder: 'Valor (ej: 1500.00)' },
+                    { id: 'Estado', placeholder: 'Estado', type: 'checkbox', label: 'Habilitado' }
                 ],
                 'becas': [
                     { id: 'Tipo', placeholder: 'Tipo de Beca' },

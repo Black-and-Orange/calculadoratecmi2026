@@ -396,29 +396,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     organizarCamposPorNivel(levelId, datosBasicos);
 
-    let segurosData;
+    let segurosData = [];
     const viveDiv = document.getElementById('div-vive');
     const seguros = document.getElementById('seguros');
 
     async function fetchSeguros() {
-
         try {
             const response = await fetch(`${API_BASE_URL}/seguros/nivel/${levelId}`);
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const segurosDataArray = await response.json(); // Recibimos un array
 
-            if (segurosDataArray.length > 0) {
-                segurosData = segurosDataArray[0];
+            if (Array.isArray(segurosDataArray) && segurosDataArray.length > 0) {
+                segurosData = segurosDataArray;
             }
 
-            if (levelId >= 6 && levelId <= 12) {
-                viveDiv.style.display = 'none';
+            // Lógica especial para VIVE: ocultar en niveles 6-13
+            if (levelId >= 6 && levelId <= 13) {
+                if (viveDiv) viveDiv.style.display = 'none';
             } else {
-                viveDiv.style.display = 'flex';
+                if (viveDiv) viveDiv.style.display = 'flex';
             }
             
-            if (recuperarValores().insurance == 'No Aplica' && recuperarValores().coverage == 'No Aplica' && recuperarValores().vive == 'No Aplica') {
+            // Verificar si hay algún seguro seleccionado
+            const segurosSeleccionados = JSON.parse(localStorage.getItem('segurosSeleccionados') || '{}');
+            const tieneSegurosSeleccionados = Object.values(segurosSeleccionados).some(s => s.valor === 'si');
+            
+            if (!tieneSegurosSeleccionados && seguros) {
                 seguros.style.display = 'none';
+            } else if (seguros) {
+                seguros.style.display = '';
             }
 
         } catch (error) {
@@ -429,14 +435,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchSeguros();
 
     function recuperarValores() {
-        const insuranceValue = JSON.parse(localStorage.getItem('insuranceValue'));
-        const coverageValue = JSON.parse(localStorage.getItem('coverageValue'));
-        const viveValue = JSON.parse(localStorage.getItem('viveValue'));
+        const segurosSeleccionados = JSON.parse(localStorage.getItem('segurosSeleccionados') || '{}');
+        const valores = {};
+
+        // Crear un mapa de seguros por nombre para compatibilidad
+        segurosData.forEach(seguro => {
+            const seleccionado = segurosSeleccionados[seguro.id_seguro];
+            if (seleccionado && seleccionado.valor === 'si') {
+                // Usar el nombre del seguro como clave (normalizado)
+                const nombreKey = seguro.nombre_seguro.toLowerCase()
+                    .replace(/\s+/g, '_')
+                    .replace(/[^a-z0-9_]/g, '');
+                valores[nombreKey] = formatearPesos(seguro.valor);
+            }
+        });
+
+        // Mantener compatibilidad con código antiguo (si existe)
+        const insuranceValue = segurosSeleccionados[Object.keys(segurosSeleccionados).find(k => {
+            const s = segurosData.find(seg => seg.id_seguro == k);
+            return s && s.nombre_seguro && s.nombre_seguro.toLowerCase().includes('accidente');
+        })];
+        const coverageValue = segurosSeleccionados[Object.keys(segurosSeleccionados).find(k => {
+            const s = segurosData.find(seg => seg.id_seguro == k);
+            return s && s.nombre_seguro && (s.nombre_seguro.toLowerCase().includes('estudiantil') || s.nombre_seguro.toLowerCase().includes('colegiatura'));
+        })];
+        const viveValue = segurosSeleccionados[Object.keys(segurosSeleccionados).find(k => {
+            const s = segurosData.find(seg => seg.id_seguro == k);
+            return s && s.nombre_seguro && s.nombre_seguro.toLowerCase().includes('vive');
+        })];
 
         return {
-            insurance: insuranceValue === 'si' ? formatearPesos(segurosData.seguro_accidentes) : 'No Aplica',
-            coverage: coverageValue === 'si' ? formatearPesos(segurosData.seguro_estudiantil) : 'No Aplica',
-            vive: viveValue === 'si' ? formatearPesos(segurosData.cobertura_vive) : 'No Aplica'
+            insurance: insuranceValue && insuranceValue.valor === 'si' 
+                ? formatearPesos(segurosData.find(s => s.id_seguro == Object.keys(segurosSeleccionados).find(k => {
+                    const seg = segurosData.find(seg => seg.id_seguro == k);
+                    return seg && seg.nombre_seguro && seg.nombre_seguro.toLowerCase().includes('accidente');
+                }))?.valor || 0) 
+                : 'No Aplica',
+            coverage: coverageValue && coverageValue.valor === 'si' 
+                ? formatearPesos(segurosData.find(s => s.id_seguro == Object.keys(segurosSeleccionados).find(k => {
+                    const seg = segurosData.find(seg => seg.id_seguro == k);
+                    return seg && seg.nombre_seguro && (seg.nombre_seguro.toLowerCase().includes('estudiantil') || seg.nombre_seguro.toLowerCase().includes('colegiatura'));
+                }))?.valor || 0) 
+                : 'No Aplica',
+            vive: viveValue && viveValue.valor === 'si' 
+                ? formatearPesos(segurosData.find(s => s.id_seguro == Object.keys(segurosSeleccionados).find(k => {
+                    const seg = segurosData.find(seg => seg.id_seguro == k);
+                    return seg && seg.nombre_seguro && seg.nombre_seguro.toLowerCase().includes('vive');
+                }))?.valor || 0) 
+                : 'No Aplica',
+            // Agregar objeto con todos los seguros para uso futuro
+            todos: valores
         };
     }
 
@@ -755,15 +803,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (apoyoFinanciero && (apoyoFinanciero.textContent === 'Elige' || apoyoFinanciero.textContent === 'null')) {
             apoyoFinanciero.textContent = `Apoyo estudiantil`;
         }
-        if (seguroAccidentes) {
-            seguroAccidentes.textContent = valores.insurance;
-        }
-        if (coberturaEstudiantil) {
-            coberturaEstudiantil.textContent = valores.coverage;
-        }
-        if (vive) {
-            vive.textContent = valores.vive;
-        }
+        
+        // Mostrar seguros dinámicamente
+        mostrarSegurosDinamicos();
+        
         if (apoyoEstudiantil) {
             apoyoEstudiantil.textContent = `${valores.supportValue}%`;
         }
@@ -792,6 +835,72 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         hideZeroPercentages();
+    }
+
+    // Función para mostrar seguros dinámicamente en resultados
+    function mostrarSegurosDinamicos() {
+        const segurosContainer = document.getElementById('seguros-dinamicos-resultados');
+        if (!segurosContainer) {
+            console.warn('No se encontró el contenedor de seguros dinámicos');
+            return;
+        }
+
+        const segurosSeleccionados = JSON.parse(localStorage.getItem('segurosSeleccionados') || '{}');
+        
+        // Limpiar contenedor
+        segurosContainer.innerHTML = '';
+
+        // Verificar que segurosData esté disponible
+        if (!segurosData || segurosData.length === 0) {
+            console.warn('No hay datos de seguros disponibles');
+            const segurosSection = document.getElementById('seguros');
+            if (segurosSection) {
+                segurosSection.style.display = 'none';
+            }
+            return;
+        }
+
+        // Obtener todos los seguros seleccionados con valor "si"
+        const segurosConValor = [];
+        segurosData.forEach(seguro => {
+            const seleccionado = segurosSeleccionados[seguro.id_seguro];
+            if (seleccionado && seleccionado.valor === 'si' && seguro.valor > 0) {
+                segurosConValor.push({
+                    nombre: seguro.nombre_seguro,
+                    valor: parseFloat(seguro.valor) || 0
+                });
+            }
+        });
+
+        // Si no hay seguros seleccionados, ocultar la sección completa
+        if (segurosConValor.length === 0) {
+            const segurosSection = document.getElementById('seguros');
+            if (segurosSection) {
+                segurosSection.style.display = 'none';
+            }
+            return;
+        }
+
+        // Mostrar la sección de seguros
+        const segurosSection = document.getElementById('seguros');
+        if (segurosSection) {
+            segurosSection.style.display = '';
+        }
+
+        // Generar HTML para cada seguro seleccionado
+        segurosConValor.forEach(seguro => {
+            const div = document.createElement('div');
+            div.className = 'flex flex-row justify-between subtable-padding';
+            div.innerHTML = `
+                <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
+                    ${seguro.nombre}
+                </p>
+                <p class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
+                    ${formatearPesos(seguro.valor)}
+                </p>
+            `;
+            segurosContainer.appendChild(div);
+        });
     }
 
     function hideZeroPercentages() {
@@ -1237,6 +1346,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 seguro_accidentes: valores.insurance !== 'No Aplica' ? parseFloat(valores.insurance.replace(/[^0-9.-]+/g, "")) : 0,
                 seguro_estudiantil: valores.coverage !== 'No Aplica' ? parseFloat(valores.coverage.replace(/[^0-9.-]+/g, "")) : 0,
                 cobertura_vive: valores.vive !== 'No Aplica' ? parseFloat(valores.vive.replace(/[^0-9.-]+/g, "")) : 0,
+                // Guardar también los seguros dinámicos completos
+                seguros_dinamicos: JSON.parse(localStorage.getItem('segurosSeleccionados') || '{}'),
                 total_seguros: parseFloat(valoresAdicionales.totalCost) || 0,
                 costos_por_bimestre: levelId === 13 ? JSON.stringify(costosPorBimestre) : null,
                 configuraciones_por_periodo: levelId === 13 ? JSON.stringify(JSON.parse(localStorage.getItem('configuracionesPorPeriodo') || '{}')) : null,

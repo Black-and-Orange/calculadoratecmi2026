@@ -100,21 +100,15 @@ document.addEventListener("DOMContentLoaded", () => {
       /* STEP 2 FIELDS AND MESSAGES */
       let txtAverageMark = document.querySelector("#txt-average-mark"),
         txtScholarship = document.querySelector("#txt-scholarship"),
+        txtPercentageStudents = document.querySelector("#txt-percentage-students"),
 
         txtAverageMarkMsg = document.querySelector("#txt-average-mark-msg"),
-        txtScholarshipMsg = document.querySelector("#txt-scholarship-msg");
+        txtScholarshipMsg = document.querySelector("#txt-scholarship-msg"),
+        txtPercentageStudentsMsg = document.querySelector("#txt-percentage-students-msg");
 
 
       /* STEP 3 FIELDS AND MESSAGES */
-      let txtVive = document.querySelector("#txt-vive"),
-        selectInsurance = document.querySelector("#select-insurance"),
-        selectInsuranceType = document.querySelector("#select-insurance-type"),
-        selectCoverage = document.querySelector("#select-coverage"),
-
-        txtViveMsg = document.querySelector("#txt-vive-msg"),
-        selectInsuranceMsg = document.querySelector("#select-insurance-msg"),
-        selectInsuranceTypeMsg = document.querySelector("#select-insurance-type-msg"),
-        selectCoverageMsg = document.querySelector("#select-coverage-msg");
+      // Los seguros ahora son dinámicos, se validan en el case 3
 
 
       let currentStep = 1,
@@ -128,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stepNumber3 = document.querySelector(".step-num-3"),
 
         step1 = document.querySelector("#step-1"),
-        step2 = document.querySelector("#step-2"),
+        step2 = document.querySelector("#step-2-students"),
         step3 = document.querySelector("#step-3"),
         btnNextStep = document.querySelectorAll(".btn-next-step"),
         btnPrevStep = document.querySelectorAll(".btn-prev-step");
@@ -174,6 +168,12 @@ document.addEventListener("DOMContentLoaded", () => {
             step1.classList.add("hidden");
             step2.classList.remove("hidden");
             step3.classList.add("hidden");
+            
+            // Disparar evento personalizado para que step2-students se inicialice
+            if (step2 && step2.id === 'step-2-students') {
+              const event = new CustomEvent('stepChanged', { detail: { step: 2 } });
+              document.dispatchEvent(event);
+            }
 
             stepNumber1.classList.remove("active");
             stepNumber2.classList.add("active");
@@ -316,16 +316,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
             /* ======== STEP 2 ======== */
             case 2:
-              if (txtAverageMark.value == "") {
-                txtAverageMark.classList.add("error");
-                txtAverageMarkMsg.classList.add("error");
-                hasError = true;
-                canContinue();
-                break;
-              } else {
-                txtAverageMark.classList.remove("error");
-                txtAverageMarkMsg.classList.remove("error");
+              // Validar step-2-students (nuevo)
+              if (step2 && step2.id === 'step-2-students') {
                 hasError = false;
+                
+                // Validar que se seleccione el porcentaje de beca (obligatorio)
+                if (txtPercentageStudents) {
+                  if (txtPercentageStudents.value == "" || txtPercentageStudents.value == "Elige") {
+                    txtPercentageStudents.classList.add("error");
+                    txtPercentageStudentsMsg.classList.add("error");
+                    txtPercentageStudentsMsg.textContent = "Este campo es necesario";
+                    hasError = true;
+                  } else {
+                    txtPercentageStudents.classList.remove("error");
+                    txtPercentageStudentsMsg.classList.remove("error");
+                  }
+                }
+                
+                // El préstamo es opcional, no se valida
+                
+                if (hasError) {
+                  canContinue();
+                  break;
+                }
+              } else {
+                // Validar step-2 original (respaldo)
+                if (txtAverageMark && txtAverageMark.value == "") {
+                  txtAverageMark.classList.add("error");
+                  txtAverageMarkMsg.classList.add("error");
+                  hasError = true;
+                  canContinue();
+                  break;
+                } else {
+                  if (txtAverageMark) {
+                    txtAverageMark.classList.remove("error");
+                    txtAverageMarkMsg.classList.remove("error");
+                  }
+                  hasError = false;
+                }
               }
 
               canContinue();
@@ -334,51 +362,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
             /* ======== STEP 3 ======== */
             case 3:
-              if (txtVive.value == "" || txtVive.value == "Elige") {
+              hasError = false;
+              
+              // Validar SELECTs dinámicos de seguros
+              const segurosSelects = document.querySelectorAll('[id^="select-seguro-"]');
+              let hasUnselectedSeguro = false;
+              
+              segurosSelects.forEach(select => {
+                if (select.value === "" || select.value === "Elige") {
+                  select.classList.add("error");
+                  const msgId = select.id + "-msg";
+                  const msgElement = document.getElementById(msgId);
+                  if (msgElement) {
+                    msgElement.classList.add("error");
+                    msgElement.textContent = "Debe seleccionar una opción.";
+                  }
+                  hasError = true;
+                  hasUnselectedSeguro = true;
+                } else {
+                  select.classList.remove("error");
+                  const msgId = select.id + "-msg";
+                  const msgElement = document.getElementById(msgId);
+                  if (msgElement) {
+                    msgElement.classList.remove("error");
+                  }
+                }
+              });
 
-
-                txtVive.classList.add("error");
-                txtViveMsg.classList.add("error");
-                txtViveMsg.textContent = "Debe seleccionar una opción.";
-                hasError = true;
+              if (hasError) {
                 canContinue();
                 break;
-              } else {
-                txtVive.classList.remove("error");
-                txtViveMsg.classList.remove("error");
-                hasError = false;
-              }
-
-
-
-              if (selectInsurance.value === "" || selectInsurance.value === "Elige") {
-                event.preventDefault();
-                selectInsurance.classList.add("error");
-                selectInsuranceMsg.classList.add("error");
-                selectInsuranceMsg.textContent = "Debe seleccionar una opción.";
-                hasError = true;
-              } else {
-                selectInsurance.classList.remove("error");
-                selectInsuranceMsg.classList.remove("error");
-              }
-
-              if (!hasError) {
-                canContinue();
-              }
-
-
-              if (selectCoverage.value == "" || selectCoverage.value == "Elige") {
-                selectCoverage.classList.add("error");
-                selectCoverageMsg.classList.add("error");
-                selectCoverageMsg.textContent = "Debe seleccionar una opción.";
-                hasError = true;
-                canContinue();
-                break;
-              } else {
-
-                selectCoverage.classList.remove("error");
-                selectCoverageMsg.classList.remove("error");
-                hasError = false;
               }
 
               canContinue();
@@ -418,7 +431,8 @@ document.addEventListener("DOMContentLoaded", () => {
         fieldAvg2 = document.querySelectorAll(".field-avg-2"),
         fieldAvg3 = document.querySelectorAll(".field-avg-3");
 
-      if (txtAverageMark) {
+      // Solo aplicar esta lógica si existe txtAverageMark (step-2 original, no step-2-students)
+      if (txtAverageMark && step2 && step2.id !== 'step-2-students') {
         txtAverageMark.addEventListener('keyup', () => {
           if (txtAverageMark.value != "") {
             fieldAvg1.forEach(function (elem, index) {

@@ -1,112 +1,139 @@
 import { API_BASE_URL } from '../apiConfig.js';
 
-function sortSelectOptions(selectElement) {
-    const optionsArray = Array.from(selectElement.options);
-    optionsArray.sort((a, b) => {
-        const valueA = parseFloat(a.value);
-        const valueB = parseFloat(b.value);
-        return valueA - valueB;
-    });
-    selectElement.innerHTML = '';
-
-    optionsArray.forEach(option => selectElement.appendChild(option));
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    const averageInput = document.getElementById('txt-average-mark');
-    const scholarshipSelect = document.getElementById('txt-scholarship');
-    const percentageSelect = document.getElementById('txt-percentage');
-    const percentageSelect2 = document.getElementById('txt-percentage2');
-    const tipoBeca = document.getElementById('tipo-beca');
-    const supportPercentageSelect = document.getElementById('txt-support-percentage');
-    const support = document.getElementById('support');
-    const supportFixSelect = document.getElementById('txt-support-fix');
-    const supportFix = document.getElementById('support-fix');
-    const prestamoPercentageSelect = document.getElementById('txt-prestamo-percentage');
-    const prestamoPercentageContainer = document.querySelector('.field-avg-4');
+    const percentageSelectStudents = document.getElementById('txt-percentage-students');
+    const prestamoPercentageSelectStudents = document.getElementById('txt-prestamo-percentage-students');
+    const prestamoPercentageContainerStudents = document.getElementById('prestamo-students-container');
 
     const getLevelId = () => JSON.parse(localStorage.getItem('selectedNivel'));
 
+    // Función para obtener todos los porcentajes de beca disponibles (combinando fijas y variables)
+    const obtenerTodosLosPorcentajesBeca = async (nivelId) => {
+        const porcentajes = new Set();
 
-    percentageSelect.addEventListener('change', () => {
-        uptadetSelectedPercentage(percentageSelect.value);
+        try {
+            // 1. Obtener becas fijas del nivel (sin filtrar por promedio)
+            const becasFijasResponse = await fetch(`${API_BASE_URL}/becasFijas/nivel/${nivelId}`);
+            if (!becasFijasResponse.ok) throw new Error('Error al obtener becas fijas');
+            const becasFijas = await becasFijasResponse.json();
 
-        const numericPercentage = parseFloat(percentageSelect.value);
-        const currentLevel = getLevelId();
-            if (numericPercentage > 30 && [1, 2, 3, 4].includes(currentLevel)) {
-                supportFix.classList.add('hidden');
-                supportFixSelect.classList.add('hidden');
-            } else if (numericPercentage > 40 && [6, 7, 8, 9, 10, 13].includes(currentLevel)) {
-                supportFix.classList.add('hidden');
-                supportFixSelect.classList.add('hidden');
-            }
-            else {
-                supportFix.classList.remove('hidden');
-                supportFixSelect.classList.remove('hidden');
-            }
-        
-    });
+            // Agregar porcentajes de becas fijas
+            becasFijas.forEach(beca => {
+                const porcentaje = parseFloat(beca.porcentaje);
+                if (!isNaN(porcentaje)) {
+                    porcentajes.add(porcentaje);
+                }
+            });
 
-    scholarshipSelect.addEventListener('change', () => {
-        uptadetSelectedName(scholarshipSelect.options[scholarshipSelect.selectedIndex].text);
-    
-        if (isProfessionalSelected() && isScolarshipSelected()) {
-            adjustLoanOptions();
+            // 2. Obtener becas variables del nivel (sin filtrar por promedio)
+            const becasVariablesResponse = await fetch(`${API_BASE_URL}/becasVariables/nivel/${nivelId}`);
+            if (!becasVariablesResponse.ok) throw new Error('Error al obtener becas variables');
+            const becasVariables = await becasVariablesResponse.json();
+
+            // Agregar todos los porcentajes de los rangos de becas variables
+            becasVariables.forEach(beca => {
+                const min = parseFloat(beca.porcentaje_min);
+                const max = parseFloat(beca.porcentaje_max);
+                if (!isNaN(min) && !isNaN(max)) {
+                    // Generar TODOS los valores del rango (incremento de 1)
+                    for (let i = min; i <= max; i += 1) {
+                        porcentajes.add(i);
+                    }
+                }
+            });
+
+            // 3. Convertir a array, ordenar y retornar
+            return Array.from(porcentajes).sort((a, b) => a - b);
+        } catch (error) {
+            console.error('Error al obtener porcentajes de beca:', error);
+            return [];
         }
-    
-        // Obtener el texto seleccionado
-        const textoSeleccionado = scholarshipSelect.options[scholarshipSelect.selectedIndex]?.text?.toLowerCase() || '';
-    
-        // Controlar la visibilidad de cada tooltip según el texto seleccionado
-        document.getElementById('w-vive').classList.toggle('hidden2', !textoSeleccionado.includes("vive"));
-        document.getElementById('w-socioeconomica').classList.toggle('hidden2', !textoSeleccionado.includes("socioeco"));
-        document.getElementById('w-steam').classList.toggle('hidden2', !textoSeleccionado.includes("steam"));
-    });
+    };
 
-    supportPercentageSelect.addEventListener('change', () => {
-        uptadetSuportPercentage(supportPercentageSelect.value);
-    });
+    // Función para cargar porcentajes de beca en el select
+    const cargarPorcentajesBeca = async () => {
+        if (!percentageSelectStudents) return;
+        
+        const levelId = getLevelId();
+        if (!levelId) {
+            percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            return;
+        }
 
-    supportFixSelect.addEventListener('change', () => {
-        uptadetSuportFix(supportFixSelect.value);
-    });
-
-    prestamoPercentageSelect.addEventListener('change', () => {
-        uptadetPrestamoPercentage(prestamoPercentageSelect.value);
-    });
-
-    function isScolarshipSelected() {
-        const selectedScholarship = localStorage.getItem('selectedScholarshipName');
-        return selectedScholarship && selectedScholarship !== '0';
-    }
-
-    function isProfessionalSelected() {
-        return getLevelId() == 2 || getLevelId() == 4;
-    }
-
-    function adjustLoanOptions() {
-        const selectedScholarship = scholarshipSelect.value;
-
-        sortSelectOptions(supportPercentageSelect);
-        sortSelectOptions(supportFixSelect);
-        sortSelectOptions(prestamoPercentageSelect);
-        sortSelectOptions(percentageSelect);
-
-        document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
-            let isProfessional = isProfessionalSelected();
-            let currentValueNumber = Number(optionElement.value.replace('%', ''));
-            let isGT20 = currentValueNumber > 20;
-
-            if (selectedScholarship === "0") {
-                optionElement.disabled = false;
-            } else if (isProfessional && isScolarshipSelected() && isGT20) {
-                optionElement.disabled = true;
-            } else {
-                optionElement.disabled = false;
+        try {
+            const porcentajes = await obtenerTodosLosPorcentajesBeca(levelId);
+            
+            percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            
+            if (porcentajes.length > 0) {
+                porcentajes.forEach(porcentaje => {
+                    const option = document.createElement('option');
+                    option.value = porcentaje;
+                    option.textContent = `${porcentaje}%`;
+                    percentageSelectStudents.appendChild(option);
+                });
             }
-        });
-    }
+        } catch (error) {
+            console.error('Error al cargar porcentajes de beca:', error);
+            percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+        }
+    };
 
+    // Función para cargar préstamos (sin depender de promedio)
+    const cargarPrestamos = async () => {
+        if (!prestamoPercentageSelectStudents) return;
+        
+        const levelId = getLevelId();
+        if (!levelId) {
+            if (prestamoPercentageContainerStudents) {
+                prestamoPercentageContainerStudents.classList.add('hidden');
+            }
+            prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            return;
+        }
+
+        try {
+            const prestamoResponse = await fetch(`${API_BASE_URL}/prestamos/nivel/${levelId}`);
+            if (!prestamoResponse.ok) throw new Error('Error al obtener préstamos');
+            const prestamos = await prestamoResponse.json();
+
+            if (prestamos && Array.isArray(prestamos) && prestamos.length > 0) {
+                prestamos.sort((a, b) => parseFloat(a.prestamo) - parseFloat(b.prestamo));
+
+                // Mostrar el contenedor del préstamo
+                if (prestamoPercentageContainerStudents) {
+                    prestamoPercentageContainerStudents.classList.remove('hidden');
+                }
+                
+                if (prestamoPercentageSelectStudents) {
+                    prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+
+                    prestamos.forEach(prestamo => {
+                        const option = document.createElement('option');
+                        option.value = prestamo.prestamo;
+                        option.textContent = `${prestamo.prestamo}%`;
+                        prestamoPercentageSelectStudents.appendChild(option);
+                    });
+                }
+            } else {
+                // Si no hay préstamos, ocultar el contenedor
+                if (prestamoPercentageContainerStudents) {
+                    prestamoPercentageContainerStudents.classList.add('hidden');
+                }
+                if (prestamoPercentageSelectStudents) {
+                    prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+                }
+            }
+        } catch (error) {
+            console.error('Error al cargar préstamos:', error);
+            if (prestamoPercentageContainerStudents) {
+                prestamoPercentageContainerStudents.classList.add('hidden');
+            }
+            prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+        }
+    };
+
+    // Función para obtener el interés
     async function fetchInteres(levelId) {
         try {
             const response = await fetch(`${API_BASE_URL}/intereses/nivel/${levelId}`);
@@ -130,39 +157,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const calculateDiscounts = (scholarshipPercentage, supportPercentage, selectedPercentage, prestamo, supportFix, costoTotal) => {
-        // Suma todos los porcentajes aplicables
+    // Función simplificada para calcular descuentos (solo porcentaje de beca + préstamo)
+    const calculateDiscounts = (percentageBeca, prestamo, costoTotal) => {
+        // Suma los porcentajes aplicables
         let totalDescuentoPorcentual = 0;
-        if (scholarshipPercentage > 0) totalDescuentoPorcentual += scholarshipPercentage;
-        if (selectedPercentage > 0) totalDescuentoPorcentual += selectedPercentage;
-        if (supportPercentage > 0) totalDescuentoPorcentual += supportPercentage;
+        if (percentageBeca > 0) totalDescuentoPorcentual += percentageBeca;
         if (prestamo > 0) totalDescuentoPorcentual += prestamo;
 
         // Calcula el descuento porcentual total
-        let descuentoPorcentual = (totalDescuentoPorcentual / 100) * costoTotal;
-
-        // Suma el apoyo fijo
-        let descuentoFijo = supportFix > 0 ? supportFix : 0;
-
-        // Suma total de descuentos
-        const totalDescuentos = descuentoPorcentual + descuentoFijo;
+        const descuentoPorcentual = (totalDescuentoPorcentual / 100) * costoTotal;
         
-        return totalDescuentos;
+        return descuentoPorcentual;
     };
 
+    // Función simplificada para calcular el monto final
     const calculateFinalAmount = async () => {
-        const scholarshipPercentage = parseFloat(document.getElementById('txt-percentage').value) || 0;
-        const isFixedScholarshipSelected = document.getElementById('txt-scholarship').querySelector('option:checked[data-fixed="true"]');
-        const supportPercentage = parseFloat(document.getElementById('txt-support-percentage').value) || 0;
-        const supportFix = parseFloat(document.getElementById('txt-support-fix').value) || 0;
-        const selectedPercentage = isFixedScholarshipSelected ? parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0 : 0;
-        const selectedprestamo = parseFloat(JSON.parse(localStorage.getItem('selectedprestamo'))) || 0;
-
+        if (!percentageSelectStudents) return;
+        
+        const percentageBeca = parseFloat(percentageSelectStudents.value) || 0;
+        const prestamo = prestamoPercentageSelectStudents ? parseFloat(prestamoPercentageSelectStudents.value) || 0 : 0;
         const levelId = getLevelId();
 
-        const finalAmount = calculateDiscounts(scholarshipPercentage, supportPercentage, selectedPercentage, selectedprestamo, supportFix, window.costoTotal);
+        if (!levelId || !window.costoTotal) {
+            return;
+        }
+
+        const finalAmount = calculateDiscounts(percentageBeca, prestamo, window.costoTotal);
 
         localStorage.setItem('finalAmount', JSON.stringify(finalAmount));
+        localStorage.setItem('selectedPercentage', JSON.stringify(percentageBeca));
+        localStorage.setItem('selectedprestamo', JSON.stringify(prestamo));
 
         const totalContado = window.costoTotal - finalAmount;
         localStorage.setItem('totalContado', JSON.stringify(totalContado));
@@ -175,298 +199,95 @@ document.addEventListener('DOMContentLoaded', () => {
         return totalConInteres;
     };
 
-    const uptadetSelectedPercentage = (value) => {
-        localStorage.setItem('selectedPercentage', JSON.stringify(value));
-    }
-
-    const uptadetSelectedName = (value) => {
-        localStorage.setItem('selectedScholarshipName', JSON.stringify(value));
-    }
-
-    const uptadetSuportPercentage = (value) => {
-        localStorage.setItem('selectedSupportValue', JSON.stringify(value));
-    }
-
-    const uptadetSuportFix = (value) => {
-        localStorage.setItem('selectedSupportFixValue', JSON.stringify(value));
-    }
-
-    const uptadetPrestamoPercentage = (value) => {
-        localStorage.setItem('selectedprestamo', JSON.stringify(value));
-    }
-
-    [scholarshipSelect, percentageSelect, supportPercentageSelect, supportFixSelect, prestamoPercentageSelect, averageInput].forEach(element => {
-        element.addEventListener('change', () => {
+    // Event listeners (solo si los elementos existen)
+    if (percentageSelectStudents) {
+        percentageSelectStudents.addEventListener('change', () => {
             calculateFinalAmount();
         });
-    });
+    }
 
-    averageInput.addEventListener('input', async () => {
-        const average = parseFloat(averageInput.value);
+    if (prestamoPercentageSelectStudents) {
+        prestamoPercentageSelectStudents.addEventListener('change', () => {
+            calculateFinalAmount();
+        });
+    }
 
-        if (isNaN(average) || average < 70 || average > 100) {
-            scholarshipSelect.innerHTML = '<option value="">Elige</option>';
-            percentageSelect.innerHTML = '<option value="">Elige</option>';
-            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-            supportFixSelect.innerHTML = '<option value="">Elige</option>';
-            percentageSelect.classList.add('hidden');
-            percentageSelect2.classList.add('hidden');
-        }
-
+    // Cargar datos al iniciar
+    const inicializar = async () => {
         const levelId = getLevelId();
-
-        try {
-
-            const fixedScholarshipsResponse = await fetch(`${API_BASE_URL}/becasFijas/nivel/${levelId}/promedio?promedio=${average}`);
-            if (!fixedScholarshipsResponse.ok) throw new Error('Error al obtener becas fijas');
-            const fixedScholarships = await fixedScholarshipsResponse.json();
-
-            const variableScholarshipsResponse = await fetch(`${API_BASE_URL}/becasVariables/nivel/${levelId}/promedio?promedio=${average}`);
-            if (!variableScholarshipsResponse.ok) throw new Error('Error al obtener becas variables');
-            const variableScholarships = await variableScholarshipsResponse.json();
-
-            // Muestra el select si hay becas disponibles (fijas o variables)
-
-            if (variableScholarships.length > 0) {
-
-                scholarshipSelect.classList.remove('hidden');
-                tipoBeca.classList.remove('hidden');
-                scholarshipSelect.innerHTML = '<option value="">Elige</option>';
-
-                const sinBecaOption = document.createElement('option');
-                sinBecaOption.value = "0";
-                sinBecaOption.textContent = "Sin Beca";
-                scholarshipSelect.insertBefore(sinBecaOption, scholarshipSelect.children[1]);
-
-                if (fixedScholarships.length > 0) {
-                    fixedScholarships.forEach(scholarship => {
-                        const option = document.createElement('option');
-                        option.value = scholarship.id;
-                        option.textContent = scholarship.tipo;
-                        option.dataset.porcentaje = scholarship.porcentaje;
-                        option.dataset.fixed = true;
-                        scholarshipSelect.appendChild(option);
-                    });
-                }
-                if (variableScholarships.length > 0) {
-                    variableScholarships.forEach(scholarship => {
-                        const option = document.createElement('option');
-                        option.value = scholarship.id;
-                        option.textContent = scholarship.tipo;
-                        option.dataset.porcentaje = scholarship.porcentaje;
-                        scholarshipSelect.appendChild(option);
-                    });
-                }
-            } else {
-                scholarshipSelect.classList.add('hidden');
-                tipoBeca.classList.add('hidden');
+        if (levelId) {
+            // Cargar ambos en paralelo para mayor eficiencia
+            await Promise.all([
+                cargarPorcentajesBeca(),
+                cargarPrestamos()
+            ]);
+        } else {
+            // Si no hay nivel, limpiar los selects
+            if (percentageSelectStudents) {
+                percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
             }
-            scholarshipSelect.addEventListener('change', async () => {
-                const selectedScholarshipId = scholarshipSelect.value;
-
-                if (selectedScholarshipId === "0") {
-                    percentageSelect.classList.add('hidden');
-                    percentageSelect2.classList.add('hidden');
-                    supportPercentageSelect.classList.add('hidden');
-                    support.classList.add('hidden');
-                    percentageSelect.innerHTML = '<option value="">Elige</option>';
-                    //supportFixSelect.classList.add('hidden');
-                    //supportFix.classList.add('hidden');
-                    //supportFixSelect.innerHTML = '<option value="">Elige</option>';
-                    localStorage.setItem('selectedPercentage', JSON.stringify(0));
-
-                    document.querySelectorAll('#txt-prestamo-percentage option').forEach(optionElement => {
-                        optionElement.disabled = false;
-                    });
-
-                    await calculateFinalAmount();
-                } else if (selectedScholarshipId) {                    
-                    const isFixedScholarship = fixedScholarships.some(scholarship => scholarship.id == selectedScholarshipId);
-                    if (isFixedScholarship) {
-                        percentageSelect.classList.add('hidden');
-                        percentageSelect2.classList.add('hidden');
-                        percentageSelect.innerHTML = '<option value="">Elige</option>';
-
-                        const selectedOption = scholarshipSelect.options[scholarshipSelect.selectedIndex];
-                        const selectedPercentage = selectedOption.dataset.porcentaje;
-                        const numericPercentage = parseFloat(selectedPercentage);                        
-
-                        localStorage.setItem('selectedPercentage', JSON.stringify(selectedPercentage));
-                        localStorage.setItem('numericPercentage', JSON.stringify(numericPercentage));
-                        await calculateFinalAmount();
-                    } else {
-                        percentageSelect.classList.remove('hidden');
-                        await updatePercentageOptionsByScholarshipId(selectedScholarshipId);
-                    }
-                } else {
-                    percentageSelect.classList.add('hidden');
-                    percentageSelect2.classList.add('hidden');
-                    percentageSelect.innerHTML = '<option value="">Elige</option>';
-                }
-            });
-
-
-            const hideScholarshipSelectForLevel5 = () => {
-                const levelId = getLevelId();
-                if (levelId == 5) {
-                    tipoBeca.classList.add('hidden');
-                }
-            };
-
-
-            async function updatePercentageOptionsByScholarshipId(scholarshipId) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/becasVariables/rangosPorcentaje/${scholarshipId}`);
-                    if (!response.ok) throw new Error('Error al obtener los rangos de porcentaje');
-                    const { porcentajeMin, porcentajeMax } = await response.json();
-
-                    const fragment = document.createDocumentFragment();
-                    percentageSelect.innerHTML = '<option value="">Elige</option>';
-                    for (let i = porcentajeMin; i <= porcentajeMax; i += 5) {
-                        const option = document.createElement('option');
-                        option.value = i;
-                        option.textContent = `${i}%`;
-                        fragment.appendChild(option);
-                    }
-
-                    percentageSelect.appendChild(fragment);
-                } catch (error) {
-                    percentageSelect.innerHTML = '<option value="">Elige</option>';
-                    console.error('Error al actualizar las opciones de porcentaje:', error);
-                }
+            if (prestamoPercentageSelectStudents) {
+                prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
             }
-
-            const mostrarPrestamoSelectSiNivel2 = async () => {
-                if (getLevelId() === 2 || getLevelId() === 4 || getLevelId() == 6 || getLevelId() == 7 || getLevelId() == 13) {
-                    try {
-                        const prestamoResponse = await fetch(`${API_BASE_URL}/prestamos/nivel/${levelId}`);
-                        if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
-                        const prestamos = await prestamoResponse.json();
-
-                        prestamos.sort((a, b) => a.prestamo - b.prestamo);
-
-                        prestamoPercentageContainer.classList.remove('hidden');
-                        prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-                        prestamos.forEach(prestamo => {
-                            const option = document.createElement('option');
-                            option.value = prestamo.prestamo;
-                            option.textContent = prestamo.prestamo + '%';
-                            prestamoPercentageSelect.appendChild(option);
-                        });
-
-                    } catch (error) {
-                        console.error('Error en la carga de datos de préstamos:', error);
-                        prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-                        prestamoPercentageContainer.classList.add('hidden');
-                    }
-                } else {
-                    prestamoPercentageContainer.classList.add('hidden');
-                    prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-                }
-            };
-
-            mostrarPrestamoSelectSiNivel2();
-            hideScholarshipSelectForLevel5();
-
-        } catch (error) {
-            console.error('Error en la carga de datos:', error);
-            scholarshipSelect.innerHTML = '<option value="">Elige</option>';
-            percentageSelect.innerHTML = '<option value="">Elige</option>';
-            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-            supportFixSelect.innerHTML = '<option value="">Elige</option>';
-            prestamoPercentageSelect.innerHTML = '<option value="">Elige</option>';
-            percentageSelect.classList.add('hidden');
-            percentageSelect2.classList.add('hidden');
-            scholarshipSelect.classList.add('hidden');
-            tipoBeca.classList.add('hidden');
-        }
-
-        if (average >= 70 && average <= 100 && levelId != 5) {
-            const supportResponse = await fetch(`${API_BASE_URL}/apoyosFijos/nivel/${levelId}`);
-            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
-            const supports = await supportResponse.json();
-            
-            supports.sort((a, b) => a.valor - b.valor);
-
-            supportFixSelect.classList.remove('hidden');
-            supportFix.classList.remove('hidden');
-            supportFixSelect.innerHTML = '<option value="">Elige</option>';
-
-            supports.forEach(supportFix => {
-                const option = document.createElement('option');
-                option.value = supportFix.valor;
-                option.textContent = `${supportFix.valor}`;
-                supportFixSelect.appendChild(option);
-            });
-        } 
-        if (average >= 70 && average <= 100 && levelId == 5) {
-            const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
-            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
-            const supports = await supportResponse.json();
-
-            supports.sort((a, b) => a.porcentaje - b.porcentaje);
-
-            supportPercentageSelect.classList.remove('hidden');
-            support.classList.remove('hidden');
-            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-            supports.forEach(support => {
-                const option = document.createElement('option');
-                option.value = support.porcentaje;
-                option.textContent = `${support.porcentaje}%`;
-                supportPercentageSelect.appendChild(option);
-            });
-        } 
-        // Para Ejecutivo MAPS Bimestral (nivel 13), siempre mostrar apoyo de porcentaje sin importar el promedio
-        if (levelId == 13) {
-            const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
-            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
-            const supports = await supportResponse.json();
-
-            // Ordenar los apoyos de menor a mayor porcentaje
-            supports.sort((a, b) => a.porcentaje - b.porcentaje);
-
-            supportPercentageSelect.classList.remove('hidden');
-            support.classList.remove('hidden');
-            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-            supports.forEach(support => {
-                const option = document.createElement('option');
-                option.value = support.porcentaje;
-                option.textContent = `${support.porcentaje}%`;
-                supportPercentageSelect.appendChild(option);
-            });
-        }
-        else if (average >= 70 && average <= 79 && levelId != 5) {
-            const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
-            if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
-            const supports = await supportResponse.json();
-
-            // Ordenar los apoyos de menor a mayor porcentaje
-            supports.sort((a, b) => a.porcentaje - b.porcentaje);
-
-            supportPercentageSelect.classList.remove('hidden');
-            support.classList.remove('hidden');
-            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-
-            supports.forEach(support => {
-                const option = document.createElement('option');
-                option.value = support.porcentaje;
-                option.textContent = `${support.porcentaje}%`;
-                supportPercentageSelect.appendChild(option);
-            });
-        } 
-        if (average < 70 || average > 100) {
-            // No ocultar apoyo de porcentaje para nivel 13 (Ejecutivo MAPS Bimestral)
-            if (levelId != 13) {
-                supportPercentageSelect.classList.add('hidden');
-                support.classList.add('hidden');
-                supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+            if (prestamoPercentageContainerStudents) {
+                prestamoPercentageContainerStudents.classList.add('hidden');
             }
-            supportFixSelect.classList.add('hidden');
-            supportFix.classList.add('hidden');
-            supportFixSelect.innerHTML = '<option value="">Elige</option>';
         }
-    });
+    };
+
+    // Inicializar cuando el step-2-students se muestre
+    const step2Students = document.getElementById('step-2-students');
+    if (step2Students) {
+        // Función para verificar y inicializar
+        const checkAndInitialize = () => {
+            if (!step2Students.classList.contains('hidden')) {
+                // Pequeño delay para asegurar que el DOM esté listo
+                setTimeout(() => {
+                    inicializar();
+                }, 200);
+            }
+        };
+
+        // Observar cuando el step se muestre
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    checkAndInitialize();
+                }
+            });
+        });
+
+        observer.observe(step2Students, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        // También inicializar si ya está visible al cargar
+        checkAndInitialize();
+
+        // También inicializar cuando cambie el nivel (por si el usuario vuelve al step 1 y cambia nivel)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'selectedNivel') {
+                checkAndInitialize();
+            }
+        });
+
+        // Escuchar eventos personalizados de cambio de step
+        document.addEventListener('stepChanged', (e) => {
+            if (e.detail && e.detail.step === 2) {
+                checkAndInitialize();
+            }
+        });
+
+        // También escuchar cuando se muestre el step desde main.js usando IntersectionObserver
+        const intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !step2Students.classList.contains('hidden')) {
+                    checkAndInitialize();
+                }
+            });
+        }, { threshold: 0.1 });
+
+        intersectionObserver.observe(step2Students);
+    }
 });

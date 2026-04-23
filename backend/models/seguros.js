@@ -6,10 +6,30 @@ const getAllSeguros = (callback) => {
 
 const getSegurosByNivel = (nivelId, callback) => {
     const query = `
-        SELECT seguro.id_seguro, seguro.seguro_accidentes, seguro.seguro_estudiantil, seguro.cobertura_vive
-        FROM seguro
-        JOIN seguro_nivel ON seguro.id_seguro = seguro_nivel.id_seguro
-        WHERE seguro_nivel.id_nivel = ?
+        SELECT 
+            s.id_seguro, 
+            s.nombre_seguro, 
+            sn.valor, 
+            sn.estado
+        FROM seguro s
+        JOIN seguro_nivel sn ON s.id_seguro = sn.id_seguro
+        WHERE sn.id_nivel = ? AND sn.estado = TRUE
+        ORDER BY s.nombre_seguro
+    `;
+    db.query(query, [nivelId], callback);
+};
+
+const getSegurosByNivelAll = (nivelId, callback) => {
+    const query = `
+        SELECT 
+            s.id_seguro, 
+            s.nombre_seguro, 
+            sn.valor, 
+            sn.estado
+        FROM seguro s
+        JOIN seguro_nivel sn ON s.id_seguro = sn.id_seguro
+        WHERE sn.id_nivel = ?
+        ORDER BY s.nombre_seguro
     `;
     db.query(query, [nivelId], callback);
 };
@@ -19,8 +39,8 @@ const getSeguroById = (id, callback) => {
 };
 
 const createSeguro = (seguro, callback) => {
-    const { seguro_accidentes, seguro_estudiantil, cobertura_vive } = seguro;
-    db.query('INSERT INTO seguro (seguro_accidentes, seguro_estudiantil, cobertura_vive) VALUES (?, ?, ?)', [seguro_accidentes, seguro_estudiantil, cobertura_vive], callback);
+    const { nombre_seguro } = seguro;
+    db.query('INSERT INTO seguro (nombre_seguro) VALUES (?)', [nombre_seguro], callback);
 };
 
 const deleteSeguro = (id, callback) => {
@@ -58,6 +78,7 @@ const changeColumnNames = (columnChanges, callback) => {
 module.exports = {
     getAllSeguros,
     getSegurosByNivel,
+    getSegurosByNivelAll,
     getSeguroById,
     createSeguro,
     deleteSeguro,
