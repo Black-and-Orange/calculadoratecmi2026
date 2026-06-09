@@ -17,6 +17,32 @@
     <link rel="stylesheet" href="css/resultado-dashboard.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <title>Tu cotización | Calculadora Tecmilenio</title>
+    <script>
+        // Modo demo (?demo=1): siembra una cotización de ejemplo en localStorage
+        // para revisión visual del dashboard sin completar el wizard.
+        (function () {
+            if (new URLSearchParams(location.search).get('demo') !== '1') return;
+            const d = {
+                perfilUsuario: '"alumno"',
+                datosPersonales: JSON.stringify({ perfil: 'alumno', matricula: 'AL024680', nombre: 'Valeria', apellidos: 'Montes' }),
+                selectedNivel: '1',
+                costoTotal: '46900',
+                selectedPercentage: '6',
+                selectedprestamo: '0',
+                finalAmount: '2814',
+                totalContado: '44086',
+                totalCost: '1700',
+                interesDividido: '9229.05',
+                primeraCuota: '10929.05',
+                selectedScholarshipName: '"Beca académica"',
+                segurosSeleccionados: JSON.stringify([
+                    { nombre: 'Apoyo financiero', costo: 0, seleccionado: 'si' },
+                    { nombre: 'Cobertura VIVE', costo: 1700, seleccionado: 'si' }
+                ]),
+            };
+            Object.keys(d).forEach(k => localStorage.setItem(k, d[k]));
+        })();
+    </script>
 </head>
 
 <body class="bg-white font-display dash-body">
