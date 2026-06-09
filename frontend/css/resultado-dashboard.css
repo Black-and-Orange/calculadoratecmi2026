@@ -900,3 +900,51 @@ body.capture {
 body.capture .dash-hero {
     padding-bottom: 150px;
 }
+
+/* ════ Modo captura PDF (descargarPDF.js agrega body.capture) ════
+   html2canvas recorta sombras y contenido en overflow:hidden; durante la
+   captura se aplanan las tarjetas y se da aire extra a las filas de totales. */
+body.capture .dash-card,
+body.capture .dash-card-plan {
+    box-shadow: none !important;
+    overflow: visible !important;
+    border: 1px solid #e3e6e5 !important;
+}
+
+body.capture .dash-card-plan table {
+    margin-bottom: 18px !important;
+}
+
+body.capture .dash-card-plan td,
+body.capture .dash-card-plan th {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
+body.capture .dash-total-value,
+body.capture .dash-total-label,
+body.capture .dash-row-value,
+body.capture .dash-row-label {
+    line-height: 1.25 !important;
+}
+
+body.capture .dash-hero {
+    padding-bottom: 48px !important;
+}
+
+body.capture .dash-hero-orb {
+    display: none !important;
+}
+
+body.capture .dash-plans {
+    margin-top: 24px !important;
+}
+
+body.capture .dash-plans .dash-card-plan {
+    transform: none !important;
+}
+
+body.capture * {
+    transition: none !important;
+    animation: none !important;
+}
