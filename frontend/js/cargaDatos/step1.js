@@ -140,7 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcularCostoTotal = (numeroMaterias, costoMateria) => {
         if ([1, 2, 3, 4, 5, 6].includes(numeroMaterias)) {
             return numeroMaterias * costoMateria;
-        } else if (numeroMaterias === 7 || numeroMaterias === 8) {
+        } // PENDIENTE-FASE3 (confirmar con cliente): materias 7 u 8 se cobran como 6.
+        // ¿Promoción intencional o error? Ver auditoría de cálculo 2026-06-09.
+        else if (numeroMaterias === 7 || numeroMaterias === 8) {
             return 6 * costoMateria;
         } else {
             return 0;
@@ -243,7 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
             costoTotal = calcularCostoCreditos(numeroMaterias, costoMateria);
         } else if (mappedLevel === 4) {
             const numeroCertificados = parseInt(selectors.certificados.value);
-            const valorCertificado = parseInt(selectors.certificados.options[selectors.certificados.selectedIndex].getAttribute('valor_certificado')) || 10;
+            // PENDIENTE-FASE3: pesos hardcodeados (cert=10, semana=2, inglés=10); deberían venir del admin.
+        const valorCertificado = parseInt(selectors.certificados.options[selectors.certificados.selectedIndex].getAttribute('valor_certificado')) || 10;
             const numeroSemanasSEDI = parseInt(selectors.semanas.value);
             const valorSemanaSEDI = parseInt(selectors.semanas.options[selectors.semanas.selectedIndex].getAttribute('valor_semana_sedi')) || 2;
             const numeroCursosIngles = parseInt(selectors.ingles.value);

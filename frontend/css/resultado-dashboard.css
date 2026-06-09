@@ -1,0 +1,902 @@
+/* ════════════════════════════════════════════════════════════════════════
+   resultado-dashboard.css — Sprint 4 (HU32-41/71-80)
+   Dashboard de cotización premium. Se carga DESPUÉS de styles.css y
+   wizard.css; restylea resultado.html sin tocar los ids/clases que usa el
+   motor resultados.js ni la captura del PDF (#contenido, .no-print).
+
+   Paleta Tecmilenio:
+   verde oscuro #00534C · teal #00A499 · naranja #F68D2E · verde claro #26D07C
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --tec-verde: #00534C;
+    --tec-verde-profundo: #003A35;
+    --tec-teal: #00A499;
+    --tec-teal-claro: #5ECEC6;
+    --tec-naranja: #F68D2E;
+    --tec-naranja-suave: #FFB549;
+    --tec-menta: #26D07C;
+    --tec-crema: #FFF7EE;
+    --tec-marfil: #FAF8F4;
+    --tec-tinta: #11302C;
+    --tec-gris: #6B7C79;
+    --tec-linea: #E4EBE9;
+    --dash-sombra: 0 2px 6px rgba(0, 58, 53, 0.05), 0 18px 44px -18px rgba(0, 58, 53, 0.28);
+    --dash-radio: 22px;
+}
+
+/* ───────────────────────── base ───────────────────────── */
+
+body.dash-body {
+    font-family: "Cairo", sans-serif;
+    background:
+        linear-gradient(180deg, var(--tec-marfil) 0%, #FFFFFF 480px);
+    color: var(--tec-tinta);
+    /* aire para la barra de acciones sticky */
+    padding-bottom: 132px;
+}
+
+body.dash-body h1,
+body.dash-body h2,
+body.dash-body h3 {
+    font-family: "Cairo", sans-serif;
+}
+
+.dash-main {
+    display: block;
+}
+
+/* ───────────────────────── hero ───────────────────────── */
+
+.dash-hero {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(118deg, var(--tec-verde-profundo) 0%, var(--tec-verde) 46%, #00756C 100%);
+    color: #fff;
+    padding: 34px 0 150px;
+    min-height: 0;
+}
+
+/* neutraliza los cuadros naranjas legados de styles.css en el banner */
+.dash-hero.banner-form-section::before,
+.dash-hero.banner-form-section::after {
+    content: none;
+    display: none;
+}
+
+/* orbes decorativos (divs reales: html2canvas-safe) */
+.dash-hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.dash-hero-orb-1 {
+    width: 520px;
+    height: 520px;
+    right: -140px;
+    top: -210px;
+    background: rgba(0, 164, 153, 0.35);
+}
+
+.dash-hero-orb-2 {
+    width: 320px;
+    height: 320px;
+    right: 180px;
+    bottom: -190px;
+    background: rgba(38, 208, 124, 0.16);
+}
+
+.dash-hero-orb-3 {
+    width: 200px;
+    height: 200px;
+    left: -90px;
+    bottom: -60px;
+    background: rgba(246, 141, 46, 0.22);
+}
+
+.dash-hero-inner {
+    position: relative;
+    z-index: 20;
+}
+
+.dash-hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.dash-hero-logo img {
+    max-width: 190px;
+    display: block;
+}
+
+.dash-badge-vigencia {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    padding: 8px 18px;
+    margin-top: 8px;
+}
+
+.dash-badge-vigencia i {
+    color: var(--tec-naranja-suave);
+    font-size: 15px;
+    margin-right: 9px;
+}
+
+.dash-badge-vigencia p {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.dash-eyebrow {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--tec-naranja-suave);
+    margin-bottom: 10px;
+}
+
+.dash-eyebrow-dark {
+    color: var(--tec-naranja);
+}
+
+.dash-greeting {
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.dash-greeting-nombre:not(:empty)::before {
+    content: ", ";
+}
+
+/* el motor escribe la frase del nivel en #titleBenefit */
+h1#titleBenefit.dash-title {
+    font-size: clamp(18px, 2.4vw, 26px);
+    font-weight: 500;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.82);
+    max-width: 720px;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+/* ─────────────────── tarjetas protagonistas ─────────────────── */
+
+.dash-plans {
+    margin-top: -104px;
+    position: relative;
+    z-index: 30;
+    padding-bottom: 8px;
+}
+
+.dash-plans-grid {
+    align-items: stretch;
+}
+
+.dash-card {
+    background: #fff;
+    border-radius: var(--dash-radio);
+    box-shadow: var(--dash-sombra);
+    border: 1px solid rgba(0, 83, 76, 0.07);
+}
+
+.dash-card-plan {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dash-card-plan:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 10px rgba(0, 58, 53, 0.06), 0 30px 60px -22px rgba(0, 58, 53, 0.38);
+}
+
+.dash-card-plan table {
+    border-collapse: collapse;
+}
+
+/* franja superior de cada plan (th estático del HTML) */
+.dash-card-plan th.dash-plan-head {
+    text-align: left;
+    padding: 22px 26px 18px;
+    position: relative;
+}
+
+.dash-card-contado th.dash-plan-head {
+    background: linear-gradient(120deg, var(--tec-verde) 0%, var(--tec-teal) 100%);
+}
+
+.dash-card-fin th.dash-plan-head {
+    background: linear-gradient(120deg, #C45F0A 0%, var(--tec-naranja) 58%, var(--tec-naranja-suave) 100%);
+}
+
+.dash-plan-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    font-size: 17px;
+    margin-bottom: 10px;
+}
+
+.dash-plan-head-title {
+    font-size: 25px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.dash-chip {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.16);
+    border-radius: 999px;
+    padding: 3px 12px;
+}
+
+/* filas de montos */
+#plan-section .dash-card-plan td {
+    padding: 13px 26px;
+}
+
+.dash-row-label {
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--tec-gris);
+}
+
+.dash-row-value {
+    font-size: 18px;
+    line-height: 1.4;
+    font-weight: 700;
+    color: var(--tec-tinta);
+    font-variant-numeric: tabular-nums;
+}
+
+.dash-row-descuento {
+    color: #D64545 !important;
+}
+
+.dash-hr {
+    border-color: var(--tec-linea);
+}
+
+.dash-total-label {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--tec-verde);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.dash-total-value {
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.1;
+    font-weight: 900;
+    color: var(--tec-verde);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}
+
+.dash-card-fin .dash-primer-pago-label {
+    color: var(--tec-naranja);
+}
+
+.dash-card-fin .dash-primer-pago {
+    color: #C45F0A;
+}
+
+/* nivel 13: el motor inyecta fechas con <span>/<b> en mensualidades */
+#mensualidadesText span {
+    display: inline-block;
+    font-weight: 600;
+    color: var(--tec-gris);
+}
+
+#mensualidades b {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────── desglose "tu plan incluye" ─────────────────── */
+
+.dash-card-incluye {
+    border-radius: var(--dash-radio);
+}
+
+.dash-incluye-head {
+    background: var(--tec-verde);
+    padding: 16px 26px;
+    display: flex;
+    align-items: center;
+}
+
+.dash-incluye-title {
+    color: #fff;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-align: left;
+}
+
+.dash-incluye-body {
+    padding: 10px 6px 14px;
+}
+
+.dash-incluye-grupo {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--tec-verde);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dash-incluye-grupo img {
+    width: 20px;
+    vertical-align: -4px;
+}
+
+.dash-incluye-grupo-valor {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tec-tinta);
+}
+
+.dash-incluye-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--tec-gris);
+}
+
+.dash-incluye-valor {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--tec-tinta);
+    font-variant-numeric: tabular-nums;
+}
+
+/* filas dinámicas (seguros) que genera el motor con clases tailwind largas */
+#seguros-dinamicos-resultados p {
+    font-size: 16px !important;
+    line-height: 24px !important;
+}
+
+#seguros-dinamicos-resultados p:first-child {
+    color: var(--tec-gris);
+    font-weight: 500;
+}
+
+#seguros-dinamicos-resultados p:last-child {
+    color: var(--tec-tinta);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+#apoyos .subtable-padding,
+#seguros .subtable-padding {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+#apoyos .subtable-padding + .subtable-padding,
+#seguros-dinamicos-resultados .subtable-padding {
+    border-top: 1px dashed var(--tec-linea);
+}
+
+@media (min-width: 768px) {
+    #apoyos.dash-incluye-col {
+        border-right: 1px solid var(--tec-linea);
+    }
+}
+
+/* ─────────────────── secciones / encabezados ─────────────────── */
+
+.dash-section {
+    padding: 44px 0 8px;
+}
+
+.dash-section-head {
+    margin-bottom: 22px;
+    padding-left: 16px;
+}
+
+.dash-section-head-center {
+    text-align: center;
+    padding-left: 0;
+}
+
+.dash-h2 {
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 800;
+    color: var(--tec-verde);
+    letter-spacing: -0.01em;
+    margin-bottom: 0;
+}
+
+/* ─────────────────── resumen de información ─────────────────── */
+
+.dash-card-resumen {
+    padding: 28px 32px;
+    background:
+        linear-gradient(0deg, #fff, #fff) padding-box,
+        linear-gradient(120deg, var(--tec-teal), var(--tec-menta)) border-box;
+    border: 2px solid transparent;
+}
+
+/* el motor genera: <p class="...">label</p><p id="...">valor</p> */
+#info-grid > div {
+    padding: 2px 10px;
+    border-left: 3px solid var(--tec-teal-claro);
+}
+
+#info-grid p:first-child {
+    font-size: 12px !important;
+    line-height: 18px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--tec-teal) !important;
+    margin-bottom: 4px !important;
+}
+
+#info-grid p:last-child {
+    font-size: 19px !important;
+    line-height: 26px !important;
+    font-weight: 700;
+    color: var(--tec-tinta);
+}
+
+/* ─────────────────── beneficios (cards del motor) ─────────────────── */
+
+.dash-benefits {
+    padding-bottom: 30px;
+}
+
+#benefits-wrappers .benefits-item,
+#benefits-wrappers > div > div {
+    border: 1px solid rgba(0, 83, 76, 0.08) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 14px 34px -16px rgba(0, 58, 53, 0.22);
+    background: #fff !important;
+}
+
+#benefits-wrappers .benefit-card-elem p.font-bold {
+    color: var(--tec-verde);
+    font-size: 19px;
+}
+
+#benefits-wrappers .benefit-card-elem p {
+    font-size: 15px;
+    line-height: 23px;
+}
+
+/* ─────────────────── notas / condiciones ─────────────────── */
+
+.dash-details {
+    padding-top: 10px;
+}
+
+.dash-notes {
+    background: var(--tec-crema);
+    border: 1px solid #F3DFC8;
+    border-left: 5px solid var(--tec-naranja);
+    border-radius: 14px;
+    padding: 24px 30px;
+    color: #5C5247;
+}
+
+.dash-notes p {
+    font-size: 13.5px;
+    line-height: 21px;
+    margin-bottom: 8px;
+}
+
+.dash-notes-title {
+    font-size: 15px !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--tec-naranja);
+    margin-bottom: 12px !important;
+}
+
+.dash-notes-title i {
+    margin-right: 6px;
+}
+
+/* ─────────────────── barra de acciones sticky ─────────────────── */
+
+.dash-actions {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    background: rgba(255, 255, 255, 0.94);
+    border-top: 1px solid var(--tec-linea);
+    box-shadow: 0 -14px 40px -18px rgba(0, 58, 53, 0.35);
+    padding: 14px 0;
+}
+
+@supports (backdrop-filter: blur(6px)) {
+    .dash-actions {
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(10px);
+    }
+}
+
+.dash-actions-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dash-actions-label {
+    font-size: 15px;
+    color: var(--tec-gris);
+    margin-right: 16px;
+}
+
+.dash-actions-label strong {
+    color: var(--tec-verde);
+}
+
+.dash-actions-btns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.dash-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Cairo", sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    padding: 11px 22px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+    margin-left: 10px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    white-space: nowrap;
+}
+
+.dash-btn i,
+.dash-btn svg {
+    margin-right: 8px;
+}
+
+.dash-btn:hover {
+    transform: translateY(-2px);
+}
+
+.dash-btn-primary {
+    background: var(--tec-verde);
+    color: #fff;
+    box-shadow: 0 10px 22px -10px rgba(0, 83, 76, 0.55);
+}
+
+.dash-btn-primary:hover {
+    background: var(--tec-verde-profundo);
+}
+
+.dash-btn-wa {
+    background: #25D366;
+    color: #fff;
+    box-shadow: 0 10px 22px -10px rgba(37, 211, 102, 0.55);
+}
+
+.dash-btn-wa:hover {
+    background: #128C7E;
+}
+
+.dash-btn-secondary {
+    background: #fff;
+    color: var(--tec-naranja);
+    border-color: var(--tec-naranja);
+}
+
+.dash-btn-secondary:hover {
+    background: var(--tec-naranja);
+    color: #fff;
+    box-shadow: 0 10px 22px -10px rgba(246, 141, 46, 0.55);
+}
+
+/* ─────────────────── modal nueva cotización ─────────────────── */
+
+.dash-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.dash-modal.visible {
+    display: flex;
+}
+
+.dash-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 42, 38, 0.55);
+}
+
+@supports (backdrop-filter: blur(4px)) {
+    .dash-modal-backdrop {
+        backdrop-filter: blur(4px);
+    }
+}
+
+.dash-modal-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: var(--dash-radio);
+    box-shadow: 0 40px 90px -28px rgba(0, 30, 27, 0.55);
+    padding: 30px 30px 24px;
+    animation: dashModalIn 0.28s cubic-bezier(0.21, 1.02, 0.55, 1.01) both;
+}
+
+@keyframes dashModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(22px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dash-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    border: none;
+    background: none;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--tec-gris);
+    cursor: pointer;
+}
+
+.dash-modal-close:hover {
+    color: var(--tec-verde);
+}
+
+.dash-modal-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--tec-verde);
+    margin: 2px 0 4px;
+    letter-spacing: -0.01em;
+}
+
+.dash-modal-sub {
+    font-size: 15px;
+    color: var(--tec-gris);
+    margin-bottom: 18px;
+}
+
+.nc-opcion {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 2px solid var(--tec-linea);
+    border-radius: 16px;
+    padding: 16px 18px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    font-family: "Cairo", sans-serif;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.nc-opcion:hover {
+    transform: translateY(-2px);
+}
+
+.nc-opcion-conservar:hover {
+    border-color: var(--tec-teal);
+    box-shadow: 0 14px 30px -14px rgba(0, 164, 153, 0.45);
+}
+
+.nc-opcion-cero:hover {
+    border-color: var(--tec-naranja);
+    box-shadow: 0 14px 30px -14px rgba(246, 141, 46, 0.5);
+}
+
+.nc-opcion-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 19px;
+    margin-right: 14px;
+}
+
+.nc-opcion-conservar .nc-opcion-icon {
+    background: rgba(0, 164, 153, 0.12);
+    color: var(--tec-teal);
+}
+
+.nc-opcion-cero .nc-opcion-icon {
+    background: rgba(246, 141, 46, 0.14);
+    color: var(--tec-naranja);
+}
+
+.nc-opcion-texto {
+    flex: 1 1 auto;
+}
+
+.nc-opcion-texto strong {
+    display: block;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--tec-tinta);
+    line-height: 1.3;
+}
+
+.nc-opcion-texto small {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--tec-gris);
+    margin-top: 2px;
+}
+
+.nc-opcion-flecha {
+    color: var(--tec-gris);
+    font-size: 13px;
+    margin-left: 10px;
+}
+
+.dash-modal-cancelar {
+    display: block;
+    margin: 6px auto 0;
+    border: none;
+    background: none;
+    font-family: "Cairo", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--tec-gris);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.dash-modal-cancelar:hover {
+    color: var(--tec-verde);
+}
+
+/* bloquear scroll del fondo con el modal abierto */
+body.dash-modal-abierto {
+    overflow: hidden;
+}
+
+/* ─────────────────── footer ─────────────────── */
+
+.dash-footer a {
+    margin: 4px 10px;
+}
+
+/* ─────────────────── responsive fino ─────────────────── */
+
+@media (max-width: 767px) {
+    body.dash-body {
+        padding-bottom: 170px;
+    }
+
+    .dash-hero {
+        padding: 24px 0 120px;
+    }
+
+    .dash-hero-top {
+        margin-bottom: 26px;
+    }
+
+    .dash-hero-logo img {
+        max-width: 150px;
+    }
+
+    .dash-badge-vigencia {
+        padding: 6px 14px;
+    }
+
+    .dash-badge-vigencia p {
+        font-size: 12px;
+    }
+
+    .dash-plans {
+        margin-top: -86px;
+    }
+
+    .dash-plan-col + .dash-plan-col {
+        margin-top: 18px;
+    }
+
+    #plan-section .dash-card-plan td {
+        padding: 11px 18px;
+    }
+
+    .dash-card-plan th.dash-plan-head {
+        padding: 18px 18px 14px;
+    }
+
+    .dash-card-resumen {
+        padding: 20px 18px;
+    }
+
+    .dash-actions-inner {
+        justify-content: center;
+    }
+
+    .dash-actions-label {
+        width: 100%;
+        text-align: center;
+        margin: 0 0 4px;
+    }
+
+    .dash-actions-btns {
+        justify-content: center;
+    }
+
+    .dash-btn {
+        margin-left: 4px;
+        margin-right: 4px;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+
+/* ─────────────────── ajustes para la captura del PDF ───────────────────
+   descargarPDF.js fuerza secciones a 1440px; mantenemos al hero compacto y
+   evitamos que la barra sticky (no-print) deje hueco. */
+
+body.capture {
+    padding-bottom: 0;
+}
+
+body.capture .dash-hero {
+    padding-bottom: 150px;
+}

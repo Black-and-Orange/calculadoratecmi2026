@@ -218,7 +218,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Calcular descuento por bimestre según la fórmula del Excel
                     // Fórmula: (costoBimestre × porcentajeBeca) + (costoBimestre × porcentajeApoyo) + (costoBimestre × porcentajePrestamo) + (apoyoFijo / cantidadBimestres)
                     // O simplificado: costoBimestre × (sumaPorcentajes) + (apoyoFijo / cantidadBimestres)
-                    const descuentoBeca = costoBimestre * (scholarshipPercentage / 100);
+                    // PENDIENTE-FASE3 (auditoría 2026-06-09): riesgo de doble descuento en nivel 13
+            // (selectedPercentage ya pudo aplicarse en finalAmount). Validar con caso real del cliente.
+            const descuentoBeca = costoBimestre * (scholarshipPercentage / 100);
                     const descuentoApoyo = costoBimestre * (supportPercentage / 100);
                     const descuentoPrestamo = costoBimestre * (prestamo / 100);
                     const apoyoFijoPorBimestre = cantidadBimestres > 0 ? supportFix / cantidadBimestres : 0;
