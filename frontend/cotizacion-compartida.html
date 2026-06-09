@@ -1,414 +1,260 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Description">
-    <meta name="keywords" content="Keywords">
+    <!-- id viewportElem: descargarPDF.js lo usa para fijar el ancho durante la captura -->
+    <meta id="viewportElem" name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tu cotización personalizada de Universidad Tecmilenio">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/wizard.css">
-    <!-- <link rel="stylesheet" href="css/style-universidad.css"> -->
-    <!-- Cada css style- sirve para darle un nuevo estilo a la página/calculadora-->
-    <!-- link(rel="stylesheet", href="style-universidad.css") -->
-    <!-- link(rel="stylesheet", href="style-icbi.css")-->
-    <!-- link(rel="stylesheet", href="style-profesional-asociado.css")-->
+    <link rel="stylesheet" href="css/resultado-dashboard.css">
+    <link rel="stylesheet" href="css/cotizacion-compartida-extra.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <title>Tu cotización | Calculadora Tecmilenio</title>
+</head>
 
-    <head rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-        <title>Inicio | Calculadora Tecmilenio</title>
-    </head>
+<body class="bg-white font-display dash-body">
 
-<body class="flex flex-col bg-white font-display">
-    <header class="header-alt-version fixed t-0 l-0 w-full z-40">
-        <div class="info bg-header-color-1 py-[11px]">
-            <div class="container mx-auto px-4 sm:px-8 xl:px-28">
-                <div class="flex justify-end flex-row">
-                    <div class="flex flex-row mb-0 justify-center sm:justify-end">
-                        <div class="pr-3 flex flex-col justify-center"><a class="link white text-[20px]" href="#"><i
-                                    class="fa-brands fa-facebook-f"></i></a></div>
-                        <div class="px-3 flex flex-col justify-center"><a class="link white text-[20px]" href="#"><i
-                                    class="fa-brands fa-twitter"></i></a></div>
-                        <div class="pl-3 flex flex-col justify-center"><a class="link white text-[20px]" href="#"><i
-                                    class="fa-brands fa-instagram"></i></a></div>
+    <!-- ════════ CONTENIDO PRINCIPAL (capturado por html2canvas para el PDF) ════════ -->
+    <main id="contenido" class="dash-main">
+
+        <!-- HERO: saludo + vigencia -->
+        <section class="banner-form-section dash-hero" id="banner-form-section">
+            <span class="dash-hero-orb dash-hero-orb-1"></span>
+            <span class="dash-hero-orb dash-hero-orb-2"></span>
+            <span class="dash-hero-orb dash-hero-orb-3"></span>
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28 dash-hero-inner">
+                <div class="dash-hero-top">
+                    <a class="dash-hero-logo" href="https://tecmilenio.mx/" target="_blank" rel="noopener">
+                        <img src="./img/tecmilenio-logo.svg" alt="Universidad Tecmilenio">
+                    </a>
+                    <div class="dash-badge-vigencia">
+                        <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+                        <p id="fechaVencimiento" class="font-bold mb-0">Vigencia de la propuesta:</p>
                     </div>
                 </div>
+                <p class="dash-eyebrow">Cotización personalizada</p>
+                <p class="dash-greeting">¡Tu cotización está lista!</p>
+                <h1 id="titleBenefit" class="dash-title">Impulsa tu futuro desde hoy</h1>
             </div>
-        </div>
-        <div class="navbar bg-main-color-1 min-h-[80px] pt-[20px] pb-[22px]">
-            <div class="container mx-auto px-4 sm:px-8 xl:px-28">
-                <div class="flex justify-between flex-col xl:flex-row">
-                    <div class="flex flex-row justify-between xl:justify-start grow flex-wrap">
-                        <div class="mr-4"><a class="link white" href="#"><img class="max-w-[190px]"
-                                    src="./img/tecmilenio-logo.svg" alt="Tecmilenio - Logo"></a></div>
-                        <div class="flex flex-col justify-center xl:hidden">
-                            <button class="mobile-btn"><i
-                                    class="fa-solid fa-bars text-2xl show text-header-color-3"></i><i
-                                    class="fa-solid fa-times text-2xl hidden close text-header-color-3"></i></button>
-                        </div>
-                        <div
-                            class="menu submenu flex-row xl:justify-center hidden xl:block relative z-40 top-0 left-0 grow xl:pl-8 2xl:pl-16 bg-accent-color w-full xl:w-auto pt-4 xl:py-0">
-                            <div class="h-full flex flex-row justify-end">
-                                <ul class="flex flex-col xl:flex-row">
-                                    <li
-                                        class="px-0 pb-2 xl:pb-0 xl:pr-3 2xl:pr-4 xl:text-lg relative flex flex-col justify-center">
-                                        <a class="link white" href="#">About</a>
-                                    </li>
-                                    <li
-                                        class="px-0 pb-2 xl:pb-0 xl:px-3 2xl:px-4 xl:text-lg relative flex flex-col justify-center">
-                                        <a class="link white" href="#">Portfolio</a>
-                                    </li>
-                                    <li
-                                        class="px-0 pb-2 xl:pb-0 xl:px-3 2xl:px-4 xl:text-lg relative flex flex-col justify-center">
-                                        <a class="link white" href="#">Blog</a>
-                                    </li>
-                                    <li
-                                        class="px-0 pb-2 xl:pb-0 xl:px-3 2xl:px-4 xl:text-lg relative flex flex-col justify-center">
-                                        <a class="link white" href="#">Contact</a>
-                                    </li>
-                                    <li
-                                        class="px-0 pb-2 xl:pb-0 xl:pl-3 2xl:pl-4 xl:text-lg relative flex flex-col justify-center">
-                                        <a class="link white" href="#"><i
-                                                class="fa-solid fa-magnifying-glass text-2xl text-header-color-3"></i></a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </nav>
-            </div>
-    </header>
-    <main class="mt-[128px]">
+        </section>
 
-        <section class="banner-form-section relative bg-main-color-2 text-white overflow-hidden min-h-[210px]"
-            id="banner-form-section">
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28 min-h-[150px] lg:min-h-[90px]">
-                <div class="flex justify-between flex-col lg:flex-row">
-                    <div class="px-4 w-full min-h-[150px] lg:min-h-[90px] flex flex-col justify-center">
-                        <h1 class="text-left lg:text-center mb-0 " id="titleBenefit">Impulsa tu futuro desde hoy</h1>
-                    </div>
+        <!-- ERROR (lo muestra cotizacion-compartida.js si el id no es válido) -->
+        <section id="error-section" class="dash-section dash-error-section no-print" style="display:none;">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="dash-card dash-error-card">
+                    <span class="dash-error-icon"><i class="fa-solid fa-triangle-exclamation"
+                            aria-hidden="true"></i></span>
+                    <h2 class="dash-error-title">No pudimos cargar tu cotización</h2>
+                    <p id="error-message" class="dash-error-msg mb-0">Ocurrió un error al cargar la cotización.</p>
+                    <p class="dash-error-ayuda mb-0">Verifica que el enlace que recibiste esté completo o solicita una
+                        nueva cotización a tu asesor.</p>
                 </div>
             </div>
         </section>
 
-        <section class="benefits-section" id="benefits-section">
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                <div class="flex flex-row justify-center">
-                    <div class="px-4 w-full text-center">
-                        <h2 class="text-write-color-3 mb-8">Beneficios de estudiar en Tecmilenio</h2>
-                    </div>
-                </div>
-                <div class=" flex flex-row flex-wrap justify-center" id="benefits-wrappers">
-                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit">
-                        <div
-                            class="bg-secondary-color-3 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
-                            <img
-                                src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-1.svg">
-                        </div>
-                        <p class="font-bold text-[18px] leading-[26px]">Certificaciones</p>
-                        <p class="text-[16px] lg:text-[24px]">Te ofrecemos 3 certificaciones que te preparan con
-                            habilidades para el futuro...</p>
-                    </div>
-                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit">
-                        <div
-                            class="bg-main-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
-                            <img
-                                src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-2.svg">
-                        </div>
-                        <p class="font-bold text-[18px] leading-[26px]">Interculturalidad</p>
-                        <p class="text-[16px] lg:text-[24px]">Aprende en un entorno global donde te desarrollas junto a
-                            una comunidad
-                            multicultural...</p>
-                    </div>
-                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit">
-                        <div
-                            class="bg-secondary-color-1 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
-                            <img
-                                src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-3.svg">
-                        </div>
-                        <p class="font-bold text-[18px] leading-[26px]">Vivencia Estudiantil</p>
-                        <p class="text-[16px] lg:text-[24px]">Participarás en proyectos y eventos que fomentan tu
-                            desarrollo académico...</p>
-                    </div>
-                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit">
-                        <div
-                            class="bg-secondary-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
-                            <img
-                                src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-4.svg">
-                        </div>
-                        <p class="font-bold text-[18px] leading-[26px]">Propósito de Vida</p>
-                        <p class="text-[16px] lg:text-[24px]">Descubre tu propósito a través de un acompañamiento
-                            apreciativo y el Plan
-                            Vocacional...</p>
-                    </div>
-                    <div class="px-4 w-full md:w-1/2 xl:w-1/4 relative mt-24 benefit">
-                        <div
-                            class="bg-main-color-2 w-[96px] h-[96px] inline-block mx-auto absolute rounded-full -top-[75px] left-1/2 -translate-x-1/2">
-                            <img
-                                src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/calculadora-ago24/benefits-icon-5.svg">
-                        </div>
-                        <p class="font-bold text-[18px] leading-[26px]">Crecimiento Personal</p>
-                        <p class="text-[16px] lg:text-[24px]">Participa en talleres y actividades que promueven el
-                            desarrollo personal y
-                            emocional...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- PLANES: contado vs financiado (los montos los escribe cotizacion-compartida.js) -->
+        <section class="plan-section dash-plans" id="plan-section">
+            <!-- id financial-plan-section: oculto por defecto; cotizacion-compartida.js
+                 lo muestra (display:block) cuando la cotización carga bien -->
+            <div id="financial-plan-section" style="display:none;">
+                <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                    <div class="flex flex-row flex-wrap justify-center dash-plans-grid">
 
-        <section class="basic-info-section" id="basic-info-section">
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                <div class="flex flex-row justify-center">
-                    <div class="px-4 w-full text-center">
-                        <h2 class="text-write-color-3">Información básica</h2>
-                    </div>
-                </div>
-                <div class="flex flex-row flex-wrap justify-center">
-                    <div
-                        class="w-full bg-secondary-color-5 px-[20px] lg:px-[50px] py-[20px] rounded-[6px] flex flex-wrap lg:flex-nowrap justify-center">
-                        <!-- Contenedor principal con grid responsivo -->
-                        <div id="info-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                            <!-- Los elementos se insertarán dinámicamente aquí -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="plan-section" id="plan-section">
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                <div class="flex flex-row justify-center">
-                    <div class="px-4 w-full text-center">
-                        <h2 class="text-write-color-3">Colegiatura</h2>
-                    </div>
-                </div>
-
-                <div class="flex flex-row flex-wrap justify-center">
-                    <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables">
-                        <div
-                            class="relative overflow-hidden border-2 border-solid border-secondary-color-3 rounded-[6px] h-full">
-                            <table class="w-full">
-                                <tr>
-                                    <th class="bg-secondary-color-3 text-white p-[11px]" colspan="2">
-                                        <p class="text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
-                                            de contado</p>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="colegiaturaText"
-                                            class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            Colegiatura 2025</p>
-                                    </td>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="colegiatura"
-                                            class="text-[18px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-semibold text-right">
-                                            $0</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="apoyosText"
-                                            class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            Apoyo educativo</p>
-                                    </td>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="apoyoFinanciamiento"
-                                            class="text-[18px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 text-right font-semibold text-red-color">
-                                            -$0</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]" colspan="2">
-                                        <hr class="border-t border-solid border-[#E6E6E6]">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="totalContadoText"
-                                            class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                            Total Contado</p>
-                                    </td>
-                                    <td class="px-[10px] md:px-[20px] py-[10px]">
-                                        <p id="totalContado"
-                                            class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-bold mb-0 text-right">
-                                            $0</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables">
-                        <div class="relative overflow-hidden border-2 border-solid border-secondary-color-2 rounded-[6px] h-full">
-                            <!-- Overlay de loading para plan de financiamiento -->
-                            <div id="loading-overlay" style="display:flex; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); z-index:1000; justify-content:center; align-items:center; font-size:2rem; color:#ff9800; font-weight:bold;">
-                                Cargando pagos...
-                            </div>
-                            <div id="financiamiento-content" style="display:none;">
+                        <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables dash-plan-col">
+                            <div class="dash-card dash-card-plan dash-card-contado h-full relative overflow-hidden">
                                 <table class="w-full">
                                     <tr>
-                                        <th class="bg-secondary-color-2 text-white p-[11px]" colspan="2">
-                                            <p class="text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">Plan
-                                                de financiamiento</p>
+                                        <th class="dash-plan-head" colspan="2">
+                                            <span class="dash-plan-icon"><i class="fa-solid fa-hand-holding-dollar"
+                                                    aria-hidden="true"></i></span>
+                                            <p class="dash-plan-head-title mb-0">Plan de contado</p>
+                                            <span class="dash-chip">Una sola exhibición</span>
                                         </th>
                                     </tr>
                                     <tr>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                                            <p
-                                                class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-secondary-color-2">
-                                                Primer pago</p>
+                                        <td>
+                                            <p id="colegiaturaText" class="dash-row-label mb-0">Colegiatura 2025</p>
                                         </td>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                                            <p id="primerPago"
-                                                class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right text-secondary-color-2">
-                                                $0</p>
+                                        <td>
+                                            <p id="colegiatura" class="dash-row-value mb-0 text-right">$0</p>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                                            <p id="mensualidadesText"
-                                                class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                                4 Mensualidades</p>
+                                        <td>
+                                            <p id="apoyosText" class="dash-row-label mb-0">Apoyo educativo</p>
                                         </td>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                                            <p id="mensualidades"
-                                                class="text-[18px] lg:text-[22px] leading-[24px] lg:leading-[30px] font-semibold mb-0 text-right">
-                                                $0</p>
+                                        <td>
+                                            <p id="apoyoFinanciamiento"
+                                                class="dash-row-value dash-row-descuento mb-0 text-right text-red-color">
+                                                -$0</p>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]" colspan="2">
-                                            <hr class="border-t border-solid border-[#E6E6E6]">
+                                        <td colspan="2">
+                                            <hr class="dash-hr border-t border-solid border-[#E6E6E6]">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                                            <p
-                                                class="text-[18px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                                Total financiado</p>
+                                        <td>
+                                            <p id="totalContadoText" class="dash-total-label mb-0">Total Contado</p>
                                         </td>
-                                        <td class="px-[10px] md:px-[20px] py-[10px]">
-                                            <p id="totalFinanciado"
-                                                class="text-[20px] lg:text-[28px] leading-[28px] lg:leading-[36px] font-semibold mb-0 text-right">
-                                                $0</p>
+                                        <td>
+                                            <p id="totalContado" class="dash-total-value mb-0 text-right">$0</p>
                                         </td>
                                     </tr>
                                 </table>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div id="plan" class="flex flex-row flex-wrap justify-center">
-                    <div class="px-4 w-full pt-6">
-                        <div class="block table-print">
-                            <div id="alwas-included"
-                                class="relative overflow-hidden border-2 border-solid border-[#ADADAD] rounded-[6px] h-full">
-
-                                <div>
-                                    <div class="bg-[#ADADAD] text-white p-[11px]">
-                                        <p
-                                            class="font-bold text-center text-[24px] lg:text-[30px] leading-[26px] lg:leading-[38px] mb-0">
-                                            Tu plan incluye</p>
-                                    </div>
-                                    <div class="flex flex-row flex-wrap justify-center">
-
-                                        <div class="w-full md:w-1/2 py-4" id="apoyos">
-
-
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p id="apoyo-financiero"
-                                                    class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0 pr-2">
-                                                    <img src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/check-elem.svg"
-                                                        alt="Apoyo Financiero" loading="lazy"
-                                                        class="inline-block">&nbsp;Apoyo financiero
+                        <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables dash-plan-col">
+                            <div class="dash-card dash-card-plan dash-card-fin h-full relative overflow-hidden">
+                                <!-- Overlay de loading para plan de financiamiento (nivel 13) -->
+                                <div id="loading-overlay"
+                                    style="display:flex; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:1000; justify-content:center; align-items:center; font-size:1.4rem; color:#F68D2E; font-weight:bold;">
+                                    Cargando pagos...
+                                </div>
+                                <div id="financiamiento-content" style="display:none;">
+                                    <table class="w-full">
+                                        <tr>
+                                            <th class="dash-plan-head" colspan="2">
+                                                <span class="dash-plan-icon"><i class="fa-solid fa-calendar-days"
+                                                        aria-hidden="true"></i></span>
+                                                <p class="dash-plan-head-title mb-0">Plan de financiamiento</p>
+                                                <span class="dash-chip">Paga mes a mes</span>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="dash-total-label dash-primer-pago-label mb-0">Primer pago</p>
+                                            </td>
+                                            <td>
+                                                <p id="primerPago"
+                                                    class="dash-total-value dash-primer-pago mb-0 text-right">
+                                                    $0</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p id="mensualidadesText" class="dash-row-label mb-0">4 Mensualidades
                                                 </p>
-                                                <p id="apoyoFinanciero"
-                                                    class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
-                                                    Apoyo estudiantil</p>
-                                            </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p id="label-beca"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Beca</p>
-                                                <p id="beca"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    30%</p>
-                                            </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p id="label-apoyoEstudiantil"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Apoyo estudiantil %</p>
-                                                <p id="apoyoEstudiantil"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    0%</p>
-                                            </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p id="label-apoyoEstudiantilFijo"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Apoyo estudiantil $</p>
-                                                <p id="apoyoEstudiantilFijo"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    $3,050.00</p>
-                                            </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p id="label-prestamo"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Préstamo estudiantil %</p>
-                                                <p id="prestamoPorcentaje"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    0%</p>
-                                            </div>
+                                            </td>
+                                            <td>
+                                                <p id="mensualidades" class="dash-row-value mb-0 text-right">$0</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <hr class="dash-hr border-t border-solid border-[#E6E6E6]">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="dash-row-label mb-0">Total financiado</p>
+                                            </td>
+                                            <td>
+                                                <p id="totalFinanciado" class="dash-row-value mb-0 text-right">$0</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- DESGLOSE: tu plan incluye (apoyos, beca, préstamo, seguros) -->
+                    <div id="plan" class="flex flex-row flex-wrap justify-center dash-incluye-row">
+                        <div class="px-4 w-full pt-6">
+                            <div class="block table-print">
+                                <div id="alwas-included"
+                                    class="dash-card dash-card-incluye relative overflow-hidden h-full">
+                                    <div>
+                                        <div class="dash-incluye-head">
+                                            <p class="dash-incluye-title font-bold mb-0">Tu plan incluye</p>
                                         </div>
+                                        <div class="flex flex-row flex-wrap justify-center dash-incluye-body">
 
-                                        <div id="seguros" class="w-full md:w-1/2 py-4">
-                                            <div class="flex flex-row">
-                                                <div class="w-full subtable-padding">
-                                                    <p
-                                                        class="text-[16px] lg:text-[23px] leading-[24px] lg:leading-[31px] font-semibold mb-0">
+                                            <div class="w-full md:w-1/2 py-4 dash-incluye-col" id="apoyos">
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p id="apoyo-financiero" class="dash-incluye-grupo mb-0 pr-2">
                                                         <img src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/check-elem.svg"
-                                                            alt="Seguros y cobertura VIVE" loading="lazy"
-                                                            class="inline-block">&nbsp;Seguros y cobertura VIVE
+                                                            alt="Apoyo Financiero" loading="lazy"
+                                                            class="inline-block">&nbsp;Apoyo financiero
                                                     </p>
+                                                    <p id="apoyoFinanciero" class="dash-incluye-grupo-valor mb-0">
+                                                        Apoyo estudiantil</p>
+                                                </div>
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p id="label-beca" class="dash-incluye-label mb-0 desc-left">Beca
+                                                    </p>
+                                                    <p id="beca" class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        30%</p>
+                                                </div>
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p id="label-apoyoEstudiantil"
+                                                        class="dash-incluye-label mb-0 desc-left">
+                                                        Apoyo estudiantil %</p>
+                                                    <p id="apoyoEstudiantil"
+                                                        class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        0%</p>
+                                                </div>
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p id="label-apoyoEstudiantilFijo"
+                                                        class="dash-incluye-label mb-0 desc-left">
+                                                        Apoyo estudiantil $</p>
+                                                    <p id="apoyoEstudiantilFijo"
+                                                        class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        $3,050.00</p>
+                                                </div>
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p id="label-prestamo" class="dash-incluye-label mb-0 desc-left">
+                                                        Préstamo estudiantil %</p>
+                                                    <p id="prestamoPorcentaje"
+                                                        class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        0%</p>
                                                 </div>
                                             </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Seguro accidentes</p>
-                                                <p id="seguroAccidentes"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    $690.00</p>
-                                            </div>
-                                            <div class="flex flex-row justify-between subtable-padding">
-                                                <p
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Cobertura estudiantil</p>
-                                                <p id="coberturaEstudiantil"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    $350.00</p>
-                                            </div>
-                                            <div id="div-vive" class="flex flex-row justify-between subtable-padding">
-                                                <p
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 desc-left">
-                                                    Cobertura VIVE</p>
-                                                <p id="vive"
-                                                    class="text-[16px] lg:text-[22px] leading-[24px] lg:leading-[30px] mb-0 font-bold text-right">
-                                                    $970.00</p>
-                                            </div>
 
+                                            <div id="seguros" class="w-full md:w-1/2 py-4 dash-incluye-col">
+                                                <div class="flex flex-row">
+                                                    <div class="w-full subtable-padding">
+                                                        <p class="dash-incluye-grupo mb-0">
+                                                            <img src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/check-elem.svg"
+                                                                alt="Seguros y cobertura VIVE" loading="lazy"
+                                                                class="inline-block">&nbsp;Seguros y cobertura VIVE
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p class="dash-incluye-label mb-0 desc-left">Seguro accidentes</p>
+                                                    <p id="seguroAccidentes"
+                                                        class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        $690.00</p>
+                                                </div>
+                                                <div class="flex flex-row justify-between subtable-padding">
+                                                    <p class="dash-incluye-label mb-0 desc-left">Cobertura estudiantil
+                                                    </p>
+                                                    <p id="coberturaEstudiantil"
+                                                        class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        $350.00</p>
+                                                </div>
+                                                <div id="div-vive"
+                                                    class="flex flex-row justify-between subtable-padding">
+                                                    <p class="dash-incluye-label mb-0 desc-left">Cobertura VIVE</p>
+                                                    <p id="vive" class="dash-incluye-valor mb-0 font-bold text-right">
+                                                        $970.00</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -416,73 +262,126 @@
             </div>
         </section>
 
-        <section class="details-section" id="details-section">
+        <!-- RESUMEN DE LA INFORMACIÓN DE LA COTIZACIÓN -->
+        <!-- Oculto por defecto; cotizacion-compartida.js lo muestra al cargar la cotización -->
+        <section class="basic-info-section dash-section" id="basic-info-section" style="display:none;">
             <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                <div class="flex flex-row justify-center">
-                    <div class="px-4 w-full text-center">
-                        <div class="bg-write-color-3 text-white rounded-[6px] p-[8px] mb-6">
-                            <p id="fechaVencimiento" class="font-bold mb-0">Vigencia de la propuesta:</p>
-                        </div>
-                    </div>
+                <div class="dash-section-head">
+                    <p class="dash-eyebrow dash-eyebrow-dark">Tus datos</p>
+                    <h2 class="dash-h2">Resumen de tu cotización</h2>
                 </div>
-                <div class="flex flex-row justify-center">
-                    <div class="px-4 w-full mb-10">
-                        <div
-                            class="bg-[#e6eeee] text-main-color-1 rounded-[6px] px-[20px] lg:px-[50px] py-[30px] text-[15px] leading-[23px]">
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El simulador de
-                                costos de colegiaturas interno es un ejercicio de carácter informativo, sin validez,
-                                sujeto a cambios y
-                                no representa la formalización de ningún acuerdo con Universidad Tecmilenio.
-                            </p>
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*Pago Fijo: Pago que
-                                corresponde a cubrir adeudo de Préstamo Educativo y que se realiza de manera adicional a
-                                la colegiatura.
-                                El pago fijo mensual es de $65 por cada 10% de préstamo.</p>
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*Considerar que los
-                                adeudos anteriores del alumno deberán de cubrirse al momento de la inscripción.</p>
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El importe de las
-                                colegiaturas consignado en este documento podrá incrementarse con los impuestos
-                                Federales o
-                                Estatales correspondientes, si así lo establecieren las disposiciones fiscales en el
-                                futuro.</p>
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El seguro de
-                                accidentes y la cobertura estudiantil entra en vigor a partir del primer día de clases.
-                            </p>
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El precio del seguro
-                                de accidentes está sujeto a cambio por tarifas establecidas por la aseguradora.</p>
-                            <p class="text-[15px] lg:text-[22px] leading-[23px] lg:leading-[30px]">*El porcentaje de
-                                devolución de cuotas se aplicará sobre el costo total de cada materia y
-                                se determinará de acuerdo con la fecha en que la materia sea dada de baja.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex flex-row justify-center no-print">
-                    <div class="px-4 w-full">
-                        <div class="flex flex-row flex-wrap justify-center">
-                            <div class="px-4 mb-4"><button onclick="descargarPDF()"
-                                    class="btn btn-main">Imprimir</button></div>
+                <div class="flex flex-row flex-wrap justify-center">
+                    <div class="w-full dash-card dash-card-resumen">
+                        <!-- Contenedor principal con grid responsivo (lo llena cotizacion-compartida.js) -->
+                        <div id="info-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        </div>
-        <footer class="footer bg-main-color-1 py-8 no-print">
-            <div class="container mx-auto px-4 sm:px-8 xl:px-28">
-                <div class="flex flex-col md:flex-row justify-between">
-                    <div class="flex flex-col justify-center mb-4 md:mb-0">
-                        <p class="text-white text-sm">© Tecmilenio. Todos los derechos reservados.</p>
-                    </div>
-                    <div class="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6">
-                        <a class="text-white text-sm underline hover:opacity-80" href="https://tecmilenio.mx/es/terminos-y-condiciones" target="_blank" rel="noopener">Términos y Condiciones</a>
-                        <a class="text-white text-sm underline hover:opacity-80" href="https://tecmilenio.mx/es/aviso-de-privacidad" target="_blank" rel="noopener">Aviso de Privacidad</a>
+        <!-- BENEFICIOS (los llena cotizacion-compartida.js) -->
+        <section class="benefits-section dash-section dash-benefits" id="benefits-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="dash-section-head dash-section-head-center">
+                    <p class="dash-eyebrow dash-eyebrow-dark">Más que una colegiatura</p>
+                    <h2 class="dash-h2">Beneficios de estudiar en Tecmilenio</h2>
+                </div>
+                <div class="flex flex-row flex-wrap justify-center" id="benefits-wrappers"></div>
+            </div>
+        </section>
+
+        <!-- NOTAS / CONDICIONES -->
+        <section class="details-section dash-section dash-details" id="details-section">
+            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
+                <div class="flex flex-row justify-center">
+                    <div class="px-4 w-full mb-10">
+                        <div class="dash-notes">
+                            <p class="dash-notes-title"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                Condiciones de la propuesta</p>
+                            <p>*El simulador de costos de colegiaturas interno es un ejercicio de carácter informativo,
+                                sin validez, sujeto a cambios y no representa la formalización de ningún acuerdo con
+                                Universidad Tecmilenio.</p>
+                            <p>*Pago Fijo: Pago que corresponde a cubrir adeudo de Préstamo Educativo y que se realiza
+                                de manera adicional a la colegiatura. El pago fijo mensual es de $65 por cada 10% de
+                                préstamo.</p>
+                            <p>*Considerar que los adeudos anteriores del alumno deberán de cubrirse al momento de la
+                                inscripción.</p>
+                            <p>*El importe de las colegiaturas consignado en este documento podrá incrementarse con los
+                                impuestos Federales o Estatales correspondientes, si así lo establecieren las
+                                disposiciones fiscales en el futuro.</p>
+                            <p>*El seguro de accidentes y la cobertura estudiantil entra en vigor a partir del primer
+                                día de clases.</p>
+                            <p>*El precio del seguro de accidentes está sujeto a cambio por tarifas establecidas por la
+                                aseguradora.</p>
+                            <p>*El porcentaje de devolución de cuotas se aplicará sobre el costo total de cada materia
+                                y se determinará de acuerdo con la fecha en que la materia sea dada de baja.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </footer>
-        <script src="js/main.js"></script>
-        <script type="module" src="js/cotizacion-compartida.js"></script>
+        </section>
+    </main>
+
+    <!-- ════════ BARRA DE ACCIONES (sticky, fuera del PDF) ════════ -->
+    <div class="dash-actions no-print" id="dash-actions">
+        <div class="container mx-auto px-4 sm:px-8 xl:px-28 dash-actions-inner">
+            <p class="dash-actions-label mb-0">¿Te gustó tu plan? <strong>Guárdalo o compártelo.</strong></p>
+            <div class="dash-actions-btns">
+                <button onclick="descargarPDF()" class="dash-btn dash-btn-primary" type="button">
+                    <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                    Imprimir / PDF
+                </button>
+                <button onclick="enviarWhatsApp()" class="dash-btn dash-btn-wa" type="button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
+                    </svg>
+                    WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer bg-main-color-1 py-8 no-print dash-footer">
+        <div class="container mx-auto px-4 sm:px-8 xl:px-28">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="flex flex-col justify-center mb-4 md:mb-0">
+                    <p class="text-white text-sm">© Tecmilenio. Todos los derechos reservados.</p>
+                </div>
+                <div class="flex flex-col md:flex-row justify-center items-center dash-footer-links">
+                    <a class="text-white text-sm underline hover:opacity-80"
+                        href="https://tecmilenio.mx/es/terminos-y-condiciones" target="_blank"
+                        rel="noopener">Términos y Condiciones</a>
+                    <a class="text-white text-sm underline hover:opacity-80"
+                        href="https://tecmilenio.mx/es/aviso-de-privacidad" target="_blank" rel="noopener">Aviso de
+                        Privacidad</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal para ingresar número de WhatsApp -->
+    <div id="modal-whatsapp" class="modal-whatsapp-custom">
+        <div class="modal-whatsapp-content">
+            <div class="modal-whatsapp-header">
+                <span class="modal-whatsapp-title">Llena los datos de la persona que recibirá el whatsapp</span>
+                <button id="btn-cerrar-whatsapp" class="modal-whatsapp-close">&times;</button>
+            </div>
+            <div class="modal-whatsapp-body">
+                <input id="input-numero-whatsapp" type="tel" maxlength="10" pattern="[0-9]{10}"
+                    class="modal-whatsapp-input" placeholder="Ejemplo: 4446625080">
+                <div id="error-numero-whatsapp" class="modal-whatsapp-error hidden">El número debe tener 10 dígitos.
+                </div>
+                <button id="btn-enviar-whatsapp" class="modal-whatsapp-send">
+                    ENVIAR
+                    <span class="modal-whatsapp-arrow">&#8594;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script type="module" src="js/cotizacion-compartida.js"></script>
 
     <!-- Librerías necesarias para PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Crear mapa para acceso rápido
                 segurosMap.clear();
                 segurosData.forEach(seguro => {
+            if (!seguro.nombre_seguro) return;
                     segurosMap.set(seguro.id_seguro, seguro);
                 });
                 
@@ -105,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         segurosContainer.innerHTML = ''; // Limpiar contenedor
 
         seguros.forEach(seguro => {
+            if (!seguro.nombre_seguro) return; // dato inválido en BD (reportado a cliente)
             // Filtrar seguros deshabilitados
             if (!seguro.estado) return;
 
@@ -168,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para obtener texto del tooltip según el nombre del seguro
     function getTooltipText(nombreSeguro) {
-        const nombre = nombreSeguro.toLowerCase();
+        const nombre = (nombreSeguro || '').toLowerCase(); // registros con nombre null en BD no deben romper
         
         if (nombre.includes('accidente')) {
             return 'Todos los estudiantes presenciales deberán contar con un seguro de accidentes, ya sea contratado con Tecmilenio o particular. Los estudiantes de Semestre Empresarial se deberá contratar el Seguro Plus como obligatorio.';
@@ -192,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Iterar sobre todos los seguros disponibles
         segurosData.forEach(seguro => {
+            if (!seguro.nombre_seguro) return;
             if (!seguro.estado) return; // Saltar seguros deshabilitados
 
             // Lógica especial para VIVE: no aplicar en niveles 6-12 (pero sí en 13)
@@ -226,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Actualizar valores de seguros seleccionados en localStorage (desde DOM si está disponible)
         const segurosSeleccionadosActualizados = {};
         segurosData.forEach(seguro => {
+            if (!seguro.nombre_seguro) return;
             const selectElement = document.getElementById(`select-seguro-${seguro.id_seguro}`);
             if (selectElement) {
                 segurosSeleccionadosActualizados[seguro.id_seguro] = {

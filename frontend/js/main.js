@@ -218,9 +218,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Nivel 13 (bimestral): el periodo es un grupo de checkboxes (de 2 a 5)
         const periodosContainer = step1.querySelector("#periodos-checkbox-container");
-        if (periodosContainer && periodosContainer.offsetParent !== null) {
+        const esNivel13 = periodosContainer && periodosContainer.offsetParent !== null;
+        if (esNivel13) {
           const marcados = periodosContainer.querySelectorAll('input[type="checkbox"]:checked').length;
           if (marcados < 2) completo = false;
+        }
+
+        // El costo debe ser mayor a cero (p.ej. MAPS con 0 certificados, 0
+        // semanas y 0 inglés produce una cotización vacía). Nivel 13 calcula
+        // por bimestre y no usa costoTotal global.
+        if (completo && !esNivel13) {
+          let costo = 0;
+          try { costo = parseFloat(JSON.parse(localStorage.getItem("costoTotal"))) || 0; } catch (e) { }
+          if (costo <= 0) completo = false;
         }
 
         btnStep1Next.disabled = !completo;

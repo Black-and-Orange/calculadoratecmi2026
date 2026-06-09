@@ -1,0 +1,88 @@
+/* ════════════════════════════════════════════════════════════════════════
+   cotizacion-compartida-extra.css
+   Ajustes mínimos para cotizacion-compartida.html sobre resultado-dashboard.css.
+   Solo cubre lo que esta página tiene de diferente:
+   - tarjeta de error (#error-section / #error-message)
+   - filas estáticas de seguros (#seguros) que en resultado.html son dinámicas
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────── tarjeta de error (la muestra cotizacion-compartida.js) ─────────── */
+
+.dash-error-section {
+    margin-top: -104px;
+    position: relative;
+    z-index: 30;
+    padding-top: 0;
+    padding-bottom: 70px;
+}
+
+.dash-error-card {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 34px;
+    text-align: center;
+    border-top: 5px solid var(--tec-naranja);
+}
+
+.dash-error-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(246, 141, 46, 0.14);
+    color: var(--tec-naranja);
+    font-size: 26px;
+    margin-bottom: 16px;
+}
+
+.dash-error-title {
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 800;
+    color: var(--tec-verde);
+    margin-bottom: 10px;
+}
+
+.dash-error-msg {
+    font-size: 16px;
+    font-weight: 700;
+    color: #D64545;
+    margin-bottom: 10px;
+}
+
+.dash-error-ayuda {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--tec-gris);
+}
+
+@media (max-width: 767px) {
+    .dash-error-section {
+        margin-top: -86px;
+    }
+
+    .dash-error-card {
+        padding: 30px 22px;
+    }
+}
+
+/* Con el error visible, ocultar las secciones que quedarían vacías
+   (beneficios, notas y barra de acciones). Mejora progresiva con :has(). */
+body:has(#error-section[style*="display: block"]) .dash-benefits,
+body:has(#error-section[style*="display: block"]) .dash-details,
+body:has(#error-section[style*="display: block"]) .dash-actions {
+    display: none;
+}
+
+/* sin barra sticky no hace falta el aire inferior del body */
+body:has(#error-section[style*="display: block"]) {
+    padding-bottom: 0;
+}
+
+/* ─────────── seguros estáticos: mismo separador que las filas dinámicas ─────────── */
+
+#seguros .subtable-padding + .subtable-padding,
+#seguros .flex + .flex {
+    border-top: 1px dashed var(--tec-linea);
+}

@@ -165,6 +165,7 @@ const initProspecto = () => {
                 promedio.value = '100';
                 promedio.dispatchEvent(new Event('input', { bubbles: true }));
                 promedio.dispatchEvent(new Event('change', { bubbles: true }));
+                promedio.dispatchEvent(new Event('keyup', { bubbles: true })); // main.js des-oculta .field-avg con keyup
             }
         }
 
@@ -172,6 +173,10 @@ const initProspecto = () => {
         [tipoBeca, scholarshipSelect].forEach(el => el && el.classList.toggle('hidden', rBeca !== 'si'));
         if (rBeca !== 'si') {
             [porcentajeBeca, percentageSelect].forEach(el => el && el.classList.add('hidden'));
+        } else if (scholarshipSelect && scholarshipSelect.value && scholarshipSelect.value !== '0'
+            && percentageSelect && percentageSelect.options.length > 1) {
+            // Beca variable elegida: mostrar el select de % (HU56)
+            [porcentajeBeca, percentageSelect].forEach(el => el && el.classList.remove('hidden'));
         }
         if (rBeca === 'no' && scholarshipSelect) {
             const sinBeca = Array.from(scholarshipSelect.options).find(o => o.value === '0');
