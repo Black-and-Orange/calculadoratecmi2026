@@ -1,4 +1,5 @@
-require('dotenv').config()
+// En Workers no hay filesystem para .env; las variables llegan por bindings.
+try { require('dotenv').config(); } catch (e) { /* entorno sin .env */ }
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -58,6 +59,9 @@ const corsOptions = {
             
             // Dominios de HubSpot
             'https://2429099.hubspotpreview-na1.com',
+
+            // Staging en Cloudflare Pages
+            'https://calculadora-tecmi.pages.dev',
         ];
         
         // Verificar si el origin está en la lista de permitidos
@@ -65,7 +69,7 @@ const corsOptions = {
             callback(null, true);
         } else {
             // También permitir subdominios de testingbo.com y tecmilenio.mx
-            if (origin.includes('.testingbo.com') || origin.includes('.tecmilenio.mx')) {
+            if (origin.includes('.testingbo.com') || origin.includes('.tecmilenio.mx') || origin.endsWith('calculadora-tecmi.pages.dev')) {
                 callback(null, true);
             } else {
                 console.log('CORS bloqueado para origin:', origin);
@@ -87,6 +91,23 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+
+// Rutas de escritura que deben quedar públicas (las usa la calculadora / el login)
+const PUBLIC_WRITE_ROUTES = [
+    { method: 'POST', path: '/api/auth/login' },
+    { method: 'POST', path: '/api/cotizaciones' },
+];
+
+// Toda escritura al API requiere token, salvo las rutas públicas de arriba.
+// Los GET quedan abiertos: los consume la calculadora pública.
+const authenticateToken = require('./middlewares/authenticateToken');
+app.use('/api', (req, res, next) => {
+    if (req.method === 'GET' || req.method === 'OPTIONS') return next();
+    const fullPath = (req.baseUrl + req.path).replace(/\/+$/, '') || '/';
+    const isPublic = PUBLIC_WRITE_ROUTES.some(r => r.method === req.method && r.path === fullPath);
+    if (isPublic) return next();
+    return authenticateToken(req, res, next);
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/apoyos', apoyosRoutes);
@@ -115,6 +136,9 @@ app.use('/api/configuracion-vigencia', configuracionVigenciaRoutes);
 app.use('/api/cotizaciones', cotizacionesRoutes);
 
 const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// El worker de Cloudflare (worker.js) necesita el server para envolverlo.
+module.exports = server;
