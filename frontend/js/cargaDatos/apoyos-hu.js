@@ -53,16 +53,27 @@ const seleccionarCero = (select) => {
     }
 };
 
-// Deshabilita las opciones de préstamo que rompan beca + préstamo ≤ 60
+// Deshabilita las opciones de préstamo que rompan las reglas:
+// (a) beca + préstamo ≤ 60 (HU18/56)
+// (b) en profesional (niveles 2 y 4) con beca, préstamo máx. 20% — regla
+//     heredada de step2.js (adjustLoanOptions), que este filtro pisaría si
+//     no la replica aquí porque corre periódicamente después.
+const NIVELES_PROFESIONAL_TOPE_20 = [2, 4];
+
+const prestamoExcedido = (becaPct, v) => {
+    if ((becaPct + v) > TOPE_BECA_PRESTAMO) return true;
+    return NIVELES_PROFESIONAL_TOPE_20.includes(nivel()) && becaPct > 0 && v > 20;
+};
+
 const filtrarOpcionesPrestamo = (select, becaPct) => {
     if (!select) return;
     Array.from(select.options).forEach(opt => {
         const v = parseFloat(opt.value);
         if (isNaN(v) || opt.value === '' || opt.value === '0') return;
-        opt.disabled = (becaPct + v) > TOPE_BECA_PRESTAMO;
+        opt.disabled = prestamoExcedido(becaPct, v);
     });
     const actual = parseFloat(select.value);
-    if (!isNaN(actual) && actual > 0 && (becaPct + actual) > TOPE_BECA_PRESTAMO) {
+    if (!isNaN(actual) && actual > 0 && prestamoExcedido(becaPct, actual)) {
         select.value = '';
         select.dispatchEvent(new Event('change', { bubbles: true }));
     }
