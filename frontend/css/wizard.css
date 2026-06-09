@@ -67,6 +67,44 @@
     pointer-events: none;
 }
 
+/* ===== Radios sí/no de apoyos y seguros (Sprint 3) ===== */
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: 8px;
+}
+
+.radio-opcion {
+    margin-right: 2rem;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.radio-opcion input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    vertical-align: -3px;
+    accent-color: rgb(0 164 153);
+    cursor: pointer;
+}
+
+.radio-opcion input[type="radio"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.msg-info {
+    margin-top: 0.5rem;
+    color: rgb(0 164 153);
+    font-size: 15px;
+}
+
+.radio-group .msg {
+    flex-basis: 100%;
+}
+
 /* ===== Selección de perfil (HU1) ===== */
 .btn-perfil {
     min-height: 64px;

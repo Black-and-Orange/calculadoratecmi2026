@@ -100,11 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (prestamos && Array.isArray(prestamos) && prestamos.length > 0) {
                 prestamos.sort((a, b) => parseFloat(a.prestamo) - parseFloat(b.prestamo));
 
-                // Mostrar el contenedor del préstamo
-                if (prestamoPercentageContainerStudents) {
-                    prestamoPercentageContainerStudents.classList.remove('hidden');
-                }
-                
+                // La visibilidad del contenedor la controla apoyos-hu.js según
+                // el radio "¿cuentas con préstamo?" (HU19)
+
                 if (prestamoPercentageSelectStudents) {
                     prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
 

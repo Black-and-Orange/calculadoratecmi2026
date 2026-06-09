@@ -403,10 +403,35 @@
                             </div>
                             <div class="step-2 hidden" id="step-2">
                                 <h3 class="text-write-color-3">Apoyos financieros</h3>
-                                <p class="text-[20px] leading-[28px]">En Tecmilenio, creemos en apoyar a las personas por mérito propio y también a aquellas que tienen mayores necesidades económicas.  
-                                    Ingresa el promedio de tu prospecto para comenzar el cálculo.</p>
+                                <p class="text-[20px] leading-[28px]">En Tecmilenio, creemos en apoyar a las personas por mérito propio y también a aquellas que tienen mayores necesidades económicas.</p>
                                 <hr class="mb-8">
-                                <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+
+                                <!-- HU56: ¿deseas una beca? -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-beca-prospecto">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold">¿Deseas aplicar a una beca?</label>
+                                    </div>
+                                    <div class="flex-1 radio-group">
+                                        <label class="radio-opcion"><input type="radio" name="radio-beca-prospecto" value="si"> Sí</label>
+                                        <label class="radio-opcion"><input type="radio" name="radio-beca-prospecto" value="no"> No</label>
+                                        <p class="msg" id="radio-beca-prospecto-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
+                                <!-- HU57: ¿deseas un préstamo estudiantil? -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-prestamo-prospecto">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold">¿Deseas un préstamo estudiantil?</label>
+                                    </div>
+                                    <div class="flex-1 radio-group">
+                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-prospecto" value="si"> Sí</label>
+                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-prospecto" value="no"> No</label>
+                                        <p class="msg-info hidden" id="radio-prestamo-prospecto-info"></p>
+                                        <p class="msg" id="radio-prestamo-prospecto-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row hidden" id="row-promedio">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
                                         <label class="font-semibold" for="txt-average-mark">Promedio:</label>
                                     </div>
@@ -545,17 +570,42 @@
                                         <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
                                     </div>
                                     <div class="px-4 mb-4">
-                                        <button class="btn btn-main btn-next-step" type="button">Siguiente</button>
+                                        <button class="btn btn-main btn-next-step" type="button" id="step-2-next" disabled>Siguiente</button>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="step-2-students hidden" id="step-2-students">
                                 <h3 class="text-write-color-3">Becas y préstamos</h3>
-                                <p class="text-[20px] leading-[28px]">Selecciona el porcentaje de beca y préstamo educativo si aplica.</p>
+                                <p class="text-[20px] leading-[28px]">Cuéntanos sobre tu beca y préstamo educativo.</p>
                                 <hr class="mb-8">
-                                
-                                <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+
+                                <!-- HU18: ¿cuentas con una beca? -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-beca-alumno">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold">¿Actualmente cuentas con una beca?</label>
+                                    </div>
+                                    <div class="flex-1 radio-group">
+                                        <label class="radio-opcion"><input type="radio" name="radio-beca-alumno" value="si"> Sí</label>
+                                        <label class="radio-opcion"><input type="radio" name="radio-beca-alumno" value="no"> No</label>
+                                        <p class="msg" id="radio-beca-alumno-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
+                                <!-- HU19: ¿cuentas con un préstamo estudiantil? -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-prestamo-alumno">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold">¿Cuentas con un préstamo estudiantil?</label>
+                                    </div>
+                                    <div class="flex-1 radio-group">
+                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-alumno" value="si"> Sí</label>
+                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-alumno" value="no"> No</label>
+                                        <p class="msg-info hidden" id="radio-prestamo-alumno-info"></p>
+                                        <p class="msg" id="radio-prestamo-alumno-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row hidden" id="row-beca-alumno">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
                                         <label class="font-semibold" for="txt-percentage-students">Porcentaje de beca:</label>
                                     </div>
@@ -602,7 +652,7 @@
                                         <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
                                     </div>
                                     <div class="px-4 mb-4">
-                                        <button class="btn btn-main btn-next-step" type="button">Siguiente</button>
+                                        <button class="btn btn-main btn-next-step" type="button" id="step-2-students-next" disabled>Siguiente</button>
                                     </div>
                                 </div>
                             </div>
@@ -612,7 +662,19 @@
                                 <p class="text-[20px] leading-[28px]">Selecciona los seguros y coberturas que deseas
                                     incluir dentro del cálculo.</p>
                                 <hr class="mb-8">
-                                
+
+                                <!-- HU23/61: ¿interesado en contratar un seguro con Tecmilenio? -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row hidden" id="row-radio-seguro-interes">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold">¿Te interesa contratar un seguro con Tecmilenio?</label>
+                                    </div>
+                                    <div class="flex-1 radio-group">
+                                        <label class="radio-opcion"><input type="radio" name="radio-seguro-interes" value="si"> Sí</label>
+                                        <label class="radio-opcion"><input type="radio" name="radio-seguro-interes" value="no"> No, cuento con seguro propio</label>
+                                        <p class="msg" id="radio-seguro-interes-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
                                 <!-- Contenedor dinámico para seguros -->
                                 <div id="seguros-dinamicos-container">
                                     <!-- Los SELECTs se generarán dinámicamente aquí -->
@@ -717,6 +779,7 @@
     <script type="module" src="js/cargaDatos/step2.js"></script>
     <script type="module" src="js/cargaDatos/step2-students.js"></script>
     <script type="module" src="js/cargaDatos/step3.js"></script>
+    <script type="module" src="js/cargaDatos/apoyos-hu.js"></script>
     <!-- <script src="js/calculations.js"></script> -->
 </body>
 
