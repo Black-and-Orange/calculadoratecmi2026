@@ -115,25 +115,126 @@
                     <div class="px-4 w-full mb-10">
                         <div class="steps-container flex flex-row flex-wrap justify-between relative"><span
                                 class="step step-num-1 active">1</span><span class="step step-num-2">2</span><span
-                                class="step step-num-3">3</span><span class="step step-num-4">4</span></div>
+                                class="step step-num-3">3</span><span class="step step-num-4">4</span><span
+                                class="step step-num-5">5</span></div>
                     </div>
                 </div>
                 <div class="flex flex-row flex-wrap justify-center hidden" id="wizard-row">
                     <div class="px-4 w-full md:w-8/12 lg:w-7/12">
                         <form action="resultado.html">
-                            <div class="step-1" id="step-1">
-                                <h3 class="text-write-color-3">Información Básica</h3>
-                                <p class="text-[20px] leading-[28px]">Para comenzar con el cálculo de costos completa los datos personales y académicos.</p>
+                            <!-- PASO 1: Datos personales (HU4 alumno / HU42 prospecto) -->
+                            <div class="step-dp" id="step-dp">
+                                <h3 class="text-write-color-3">Datos personales</h3>
+                                <p class="text-[20px] leading-[28px]">Para comenzar con el cálculo de costos completa tus datos personales.</p>
                                 <hr class="mb-8">
-                                <div class="flex flex-wrap mb-6 flex-col md:flex-row">
-                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="txt-name">Nombre:</label>
+
+                                <!-- El nombre completo viaja a resultado.html por query string -->
+                                <input type="hidden" name="txt-name" id="txt-name">
+
+                                <!-- Campos de ALUMNO (HU4) -->
+                                <div id="datos-alumno">
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-matricula">Matrícula:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="text" id="txt-matricula" maxlength="8" autocomplete="off">
+                                            <p class="msg" id="txt-matricula-msg">Ingresa tu matrícula de 8 caracteres (letras y números, sin caracteres especiales)</p>
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <input type="text" name="txt-name" id="txt-name">
-                                        <p class="msg" id="txt-name-msg">Este campo es necesario</p>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-nombre-alumno">Nombre (s):</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="text" id="txt-nombre-alumno" maxlength="100">
+                                            <p class="msg" id="txt-nombre-alumno-msg">Este campo es necesario</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-apellido-alumno">Apellido:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="text" id="txt-apellido-alumno" maxlength="100">
+                                            <p class="msg" id="txt-apellido-alumno-msg">Este campo es necesario</p>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- Campos de PROSPECTO (HU42) -->
+                                <div id="datos-prospecto" class="hidden">
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-nombre-prospecto">Nombre (s):</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="text" id="txt-nombre-prospecto" maxlength="100">
+                                            <p class="msg" id="txt-nombre-prospecto-msg">Este campo es necesario</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-apellido-paterno">Apellido paterno:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="text" id="txt-apellido-paterno" maxlength="100">
+                                            <p class="msg" id="txt-apellido-paterno-msg">Este campo es necesario</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-apellido-materno">Apellido materno:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="text" id="txt-apellido-materno" maxlength="100">
+                                            <p class="msg" id="txt-apellido-materno-msg">Este campo es necesario</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-fecha-nacimiento">Fecha de nacimiento:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="date" id="txt-fecha-nacimiento">
+                                            <p class="msg" id="txt-fecha-nacimiento-msg">Este campo es necesario</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-telefono">Teléfono:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="tel" id="txt-telefono" maxlength="10" inputmode="numeric">
+                                            <p class="msg" id="txt-telefono-msg">Ingresa un teléfono de 10 dígitos</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="txt-correo">Correo electrónico:</label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="email" id="txt-correo" maxlength="50">
+                                            <p class="msg" id="txt-correo-msg">Ingresa un correo electrónico válido</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-row flex-wrap justify-center mb-6">
+                                    <div class="px-4 mb-4">
+                                        <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
+                                    </div>
+                                    <div class="px-4 mb-4">
+                                        <button class="btn btn-main btn-next-step" type="button" id="step-dp-next">Siguiente</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASO 2: Nivel de estudios (HU5-15 / HU43-53) -->
+                            <div class="step-1 hidden" id="step-1">
+                                <h3 class="text-write-color-3">Nivel de estudios</h3>
+                                <p class="text-[20px] leading-[28px]">Completa los datos académicos para el cálculo de costos.</p>
+                                <hr class="mb-8">
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
                                         <label class="font-semibold" for="select-grade">Nivel:</label>
@@ -293,7 +394,10 @@
                                 </div>
                                 <div class="flex flex-row flex-wrap justify-center mb-6">
                                     <div class="px-4 mb-4">
-                                        <button class="btn btn-main btn-next-step" type="button" id="step-1-next">Siguiente</button>
+                                        <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
+                                    </div>
+                                    <div class="px-4 mb-4">
+                                        <button class="btn btn-main btn-next-step" type="button" id="step-1-next" disabled>Siguiente</button>
                                     </div>
                                 </div>
                             </div>

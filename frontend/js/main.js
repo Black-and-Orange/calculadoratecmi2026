@@ -121,16 +121,21 @@ document.addEventListener("DOMContentLoaded", () => {
         stepNumber2 = document.querySelector(".step-num-2"),
         stepNumber3 = document.querySelector(".step-num-3"),
         stepNumber4 = document.querySelector(".step-num-4"),
+        stepNumber5 = document.querySelector(".step-num-5"),
 
         stepsBarRow = document.querySelector("#steps-bar-row"),
         wizardRow = document.querySelector("#wizard-row"),
         step0 = document.querySelector("#step-0"),
+        stepDP = document.querySelector("#step-dp"),
+        datosAlumno = document.querySelector("#datos-alumno"),
+        datosProspecto = document.querySelector("#datos-prospecto"),
         step1 = document.querySelector("#step-1"),
         step2Prospecto = document.querySelector("#step-2"),
         step2Students = document.querySelector("#step-2-students"),
         step3 = document.querySelector("#step-3"),
         step4 = document.querySelector("#step-4"),
         btnPerfil = document.querySelectorAll(".btn-perfil"),
+        btnStep1Next = document.querySelector("#step-1-next"),
         rowContactoAsesor = document.querySelector("#row-contacto-asesor"),
         checkTerminos = document.querySelector("#check-terminos"),
         checkPrivacidad = document.querySelector("#check-privacidad"),
@@ -161,12 +166,14 @@ document.addEventListener("DOMContentLoaded", () => {
         moveStep();
       }
 
-      const stepCircles = [stepNumber1, stepNumber2, stepNumber3, stepNumber4];
+      const stepCircles = [stepNumber1, stepNumber2, stepNumber3, stepNumber4, stepNumber5];
 
       const moveStep = () => {
-        const stepPanels = [step1, step2, step3, step4];
+        // Paneles: 1=Datos personales, 2=Nivel de estudios, 3=Apoyos (variante
+        // según perfil), 4=Seguros, 5=Términos
+        const stepPanels = [stepDP, step1, step2, step3, step4];
 
-        // Ocultar ambas variantes del step 2; solo la activa se vuelve a mostrar
+        // Ocultar ambas variantes del paso de apoyos; solo la activa se muestra
         if (step2Prospecto) step2Prospecto.classList.add("hidden");
         if (step2Students) step2Students.classList.add("hidden");
 
@@ -183,12 +190,48 @@ document.addEventListener("DOMContentLoaded", () => {
         stepsContainer.classList.toggle("step-2", currentStep >= 2);
         stepsContainer.classList.toggle("step-3", currentStep >= 3);
         stepsContainer.classList.toggle("step-4", currentStep >= 4);
+        stepsContainer.classList.toggle("step-5", currentStep >= 5);
+
+        // HU16/54: al entrar al nivel de estudios, recalcular si el botón
+        // continuar debe estar habilitado
+        if (currentStep === 2) checkNivelCompleto();
 
         // Disparar evento personalizado para que step2-students se inicialice
-        if (currentStep === 2 && step2 && step2.id === 'step-2-students') {
+        if (currentStep === 3 && step2 && step2.id === 'step-2-students') {
           const event = new CustomEvent('stepChanged', { detail: { step: 2 } });
           document.dispatchEvent(event);
         }
+      }
+
+      // HU16/54: el botón continuar del nivel de estudios queda deshabilitado
+      // hasta que todos los campos visibles estén llenos. Los campos varían
+      // según el nivel (materias, certificados, créditos, formato, etc.).
+      const checkNivelCompleto = () => {
+        if (!btnStep1Next || !step1) return;
+
+        let completo = true;
+
+        // Todos los selects visibles del panel deben tener valor
+        step1.querySelectorAll("select").forEach((select) => {
+          if (select.offsetParent !== null && select.value === "") completo = false;
+        });
+
+        // Nivel 13 (bimestral): el periodo es un grupo de checkboxes (de 2 a 5)
+        const periodosContainer = step1.querySelector("#periodos-checkbox-container");
+        if (periodosContainer && periodosContainer.offsetParent !== null) {
+          const marcados = periodosContainer.querySelectorAll('input[type="checkbox"]:checked').length;
+          if (marcados < 2) completo = false;
+        }
+
+        btnStep1Next.disabled = !completo;
+      }
+
+      if (step1) {
+        step1.addEventListener("change", checkNivelCompleto);
+        step1.addEventListener("input", checkNivelCompleto);
+        // Los selects se llenan vía API después de elegir nivel; revisar
+        // periódicamente cubre los cambios programáticos que no disparan eventos
+        setInterval(checkNivelCompleto, 700);
       }
 
       // PASO 0 (HU1): selección de perfil. Define qué variante del step 2 se usa
@@ -214,6 +257,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           step2 = (perfil === "prospecto" && step2Prospecto) ? step2Prospecto : step2Students;
 
+          // Datos personales según perfil: alumno (HU4) o prospecto (HU42)
+          if (datosAlumno) datosAlumno.classList.toggle("hidden", perfil !== "alumno");
+          if (datosProspecto) datosProspecto.classList.toggle("hidden", perfil !== "prospecto");
+
           // El check de contacto por asesor (HU68) solo aplica a prospectos
           if (rowContactoAsesor) {
             rowContactoAsesor.classList.toggle("hidden", perfil !== "prospecto");
@@ -223,25 +270,84 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      // ===== Validación de datos personales (HU4 / HU42) =====
+      const marcarCampo = (input, valido) => {
+        const msg = document.getElementById(input.id + "-msg");
+        input.classList.toggle("error", !valido);
+        if (msg) msg.classList.toggle("error", !valido);
+        return valido;
+      }
+
+      const validarDatosPersonales = () => {
+        const perfil = localStorage.getItem("perfilUsuario");
+        let valido = true;
+        const noVacio = (v) => v.trim().length > 0;
+
+        if (perfil === "prospecto") {
+          const nombre = document.getElementById("txt-nombre-prospecto");
+          const paterno = document.getElementById("txt-apellido-paterno");
+          const materno = document.getElementById("txt-apellido-materno");
+          const fecha = document.getElementById("txt-fecha-nacimiento");
+          const telefono = document.getElementById("txt-telefono");
+          const correo = document.getElementById("txt-correo");
+
+          valido = marcarCampo(nombre, noVacio(nombre.value)) && valido;
+          valido = marcarCampo(paterno, noVacio(paterno.value)) && valido;
+          valido = marcarCampo(materno, noVacio(materno.value)) && valido;
+          valido = marcarCampo(fecha, noVacio(fecha.value)) && valido;
+          valido = marcarCampo(telefono, /^[0-9]{10}$/.test(telefono.value)) && valido;
+          valido = marcarCampo(correo, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.value) && correo.value.length <= 50) && valido;
+
+          if (valido) {
+            const nombreCompleto = `${nombre.value.trim()} ${paterno.value.trim()} ${materno.value.trim()}`;
+            document.getElementById("txt-name").value = nombreCompleto;
+            localStorage.setItem("datosPersonales", JSON.stringify({
+              perfil: "prospecto",
+              nombre: nombre.value.trim(),
+              apellidoPaterno: paterno.value.trim(),
+              apellidoMaterno: materno.value.trim(),
+              fechaNacimiento: fecha.value,
+              telefono: telefono.value,
+              correo: correo.value.trim(),
+            }));
+          }
+        } else {
+          const matricula = document.getElementById("txt-matricula");
+          const nombre = document.getElementById("txt-nombre-alumno");
+          const apellido = document.getElementById("txt-apellido-alumno");
+
+          valido = marcarCampo(matricula, /^[A-Za-z0-9]{8}$/.test(matricula.value)) && valido;
+          valido = marcarCampo(nombre, noVacio(nombre.value)) && valido;
+          valido = marcarCampo(apellido, noVacio(apellido.value)) && valido;
+
+          if (valido) {
+            const nombreCompleto = `${nombre.value.trim()} ${apellido.value.trim()}`;
+            document.getElementById("txt-name").value = nombreCompleto;
+            localStorage.setItem("datosPersonales", JSON.stringify({
+              perfil: "alumno",
+              matricula: matricula.value.trim().toUpperCase(),
+              nombre: nombre.value.trim(),
+              apellidos: apellido.value.trim(),
+            }));
+          }
+        }
+
+        return valido;
+      }
+
 
       btnNextStep.forEach(function (elem, index) {
         // Evento para clic normal
         elem.addEventListener("click", (event) => {
           switch (currentStep) {
-            /* ======== STEP 1 ======== */
+            /* ======== PASO 1: DATOS PERSONALES (HU4/HU42) ======== */
             case 1:
-              if (txtName.value == "") {
-                txtName.classList.add("error");
-                txtNameMsg.classList.add("error");
-                hasError = true;
-                canContinue();
-                break;
-              } else {
-                txtName.classList.remove("error");
-                txtNameMsg.classList.remove("error");
-                hasError = false;
-              }
+              hasError = !validarDatosPersonales();
+              canContinue();
+              break;
 
+            /* ======== PASO 2: NIVEL DE ESTUDIOS ======== */
+            case 2:
               // --- VALIDACIÓN DE PERÍODOS SEGÚN NIVEL ---
               const nivelSelect = document.getElementById('select-grade');
               let nivelValue = nivelSelect ? nivelSelect.value : '';
@@ -334,8 +440,8 @@ document.addEventListener("DOMContentLoaded", () => {
               canContinue();
               break;
 
-            /* ======== STEP 2 ======== */
-            case 2:
+            /* ======== PASO 3: APOYOS Y PRÉSTAMOS ======== */
+            case 3:
               // Validar step-2-students (nuevo)
               if (step2 && step2.id === 'step-2-students') {
                 hasError = false;
@@ -380,10 +486,10 @@ document.addEventListener("DOMContentLoaded", () => {
               break;
 
 
-            /* ======== STEP 3 ======== */
-            case 3:
+            /* ======== PASO 4: SEGUROS ======== */
+            case 4:
               hasError = false;
-              
+
               // Validar SELECTs dinámicos de seguros
               const segurosSelects = document.querySelectorAll('[id^="select-seguro-"]');
               let hasUnselectedSeguro = false;
@@ -417,8 +523,8 @@ document.addEventListener("DOMContentLoaded", () => {
               canContinue();
               break;
 
-            /* ======== STEP 4: TÉRMINOS (HU28/29/66/67) ======== */
-            case 4:
+            /* ======== PASO 5: TÉRMINOS (HU28/29/66/67) ======== */
+            case 5:
               hasError = false;
 
               if (!checkTerminos.checked) {
@@ -454,28 +560,11 @@ document.addEventListener("DOMContentLoaded", () => {
       btnPrevStep.forEach(function (elem, index) {
 
         elem.addEventListener("click", () => {
-          switch (currentStep) {
-            /* ======== STEP 1: regresar a la selección de perfil ======== */
-            case 1:
-              showPerfil();
-              break;
-
-            /* ======== STEP 2 ======== */
-            case 2:
-              returnSlide();
-              break;
-
-            /* ======== STEP 3 ======== */
-            case 3:
-              returnSlide();
-              break;
-
-            /* ======== STEP 4 ======== */
-            case 4:
-              returnSlide();
-              break;
-
-
+          if (currentStep === 1) {
+            // Desde datos personales se regresa a la selección de perfil (HU17/55)
+            showPerfil();
+          } else {
+            returnSlide();
           }
         });
       });
