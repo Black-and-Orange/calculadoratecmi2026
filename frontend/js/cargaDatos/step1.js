@@ -1052,7 +1052,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reemplazar la creación de checkboxes por el select múltiple en el evento de cambio de nivel
     selectors.grade.addEventListener('change', async () => {
         resetFormFields(formElement);
+        // El perfil (HU1) se elige antes que el nivel; debe sobrevivir al reseteo
+        const perfilUsuario = localStorage.getItem('perfilUsuario');
         localStorage.clear();
+        if (perfilUsuario) localStorage.setItem('perfilUsuario', perfilUsuario);
         clearCache();
 
         // Ocultar el tooltip de créditos al cambiar de nivel (siempre ocultar primero)
@@ -1251,7 +1254,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formElement) {
         formElement.addEventListener('reset', () => {
             resetFormFields(formElement);
+            const perfilUsuario = localStorage.getItem('perfilUsuario');
             localStorage.clear();
+            if (perfilUsuario) localStorage.setItem('perfilUsuario', perfilUsuario);
             // Ocultar el tooltip de créditos al resetear el formulario
             ocultarTooltipCreditos();
         });

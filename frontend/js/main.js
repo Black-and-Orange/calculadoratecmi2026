@@ -120,12 +120,28 @@ document.addEventListener("DOMContentLoaded", () => {
         stepNumber1 = document.querySelector(".step-num-1"),
         stepNumber2 = document.querySelector(".step-num-2"),
         stepNumber3 = document.querySelector(".step-num-3"),
+        stepNumber4 = document.querySelector(".step-num-4"),
 
+        stepsBarRow = document.querySelector("#steps-bar-row"),
+        wizardRow = document.querySelector("#wizard-row"),
+        step0 = document.querySelector("#step-0"),
         step1 = document.querySelector("#step-1"),
-        step2 = document.querySelector("#step-2-students"),
+        step2Prospecto = document.querySelector("#step-2"),
+        step2Students = document.querySelector("#step-2-students"),
         step3 = document.querySelector("#step-3"),
+        step4 = document.querySelector("#step-4"),
+        btnPerfil = document.querySelectorAll(".btn-perfil"),
+        rowContactoAsesor = document.querySelector("#row-contacto-asesor"),
+        checkTerminos = document.querySelector("#check-terminos"),
+        checkPrivacidad = document.querySelector("#check-privacidad"),
+        checkContacto = document.querySelector("#check-contacto"),
+        checkTerminosMsg = document.querySelector("#check-terminos-msg"),
+        checkPrivacidadMsg = document.querySelector("#check-privacidad-msg"),
         btnNextStep = document.querySelectorAll(".btn-next-step"),
         btnPrevStep = document.querySelectorAll(".btn-prev-step");
+
+      // El step 2 depende del perfil: alumno → #step-2-students, prospecto → #step-2
+      let step2 = step2Students;
 
 
       const canContinue = () => {
@@ -145,68 +161,72 @@ document.addEventListener("DOMContentLoaded", () => {
         moveStep();
       }
 
+      const stepCircles = [stepNumber1, stepNumber2, stepNumber3, stepNumber4];
+
       const moveStep = () => {
+        const stepPanels = [step1, step2, step3, step4];
 
-        switch (currentStep) {
-          case 1:
-            step1.classList.remove("hidden");
-            step2.classList.add("hidden");
-            step3.classList.add("hidden");
+        // Ocultar ambas variantes del step 2; solo la activa se vuelve a mostrar
+        if (step2Prospecto) step2Prospecto.classList.add("hidden");
+        if (step2Students) step2Students.classList.add("hidden");
 
-            stepNumber1.classList.add("active");
-            stepNumber2.classList.remove("active");
-            stepNumber3.classList.remove("active");
+        stepPanels.forEach((panel, index) => {
+          if (panel) panel.classList.toggle("hidden", index !== currentStep - 1);
+        });
 
-            stepNumber1.classList.remove("passed");
-            stepNumber2.classList.remove("passed");
-            stepNumber3.classList.remove("passed");
+        stepCircles.forEach((circle, index) => {
+          if (!circle) return;
+          circle.classList.toggle("active", index === currentStep - 1);
+          circle.classList.toggle("passed", index < currentStep - 1);
+        });
 
-            stepsContainer.classList.remove("step-2");
-            stepsContainer.classList.remove("step-3");
-            break;
-          case 2:
-            step1.classList.add("hidden");
-            step2.classList.remove("hidden");
-            step3.classList.add("hidden");
-            
-            // Disparar evento personalizado para que step2-students se inicialice
-            if (step2 && step2.id === 'step-2-students') {
-              const event = new CustomEvent('stepChanged', { detail: { step: 2 } });
-              document.dispatchEvent(event);
-            }
+        stepsContainer.classList.toggle("step-2", currentStep >= 2);
+        stepsContainer.classList.toggle("step-3", currentStep >= 3);
+        stepsContainer.classList.toggle("step-4", currentStep >= 4);
 
-            stepNumber1.classList.remove("active");
-            stepNumber2.classList.add("active");
-            stepNumber3.classList.remove("active");
-
-            stepNumber1.classList.add("passed");
-            stepNumber2.classList.remove("passed");
-            stepNumber3.classList.remove("passed");
-            stepsContainer.classList.add("step-2");
-            stepsContainer.classList.remove("step-3");
-            break;
-          case 3:
-            step1.classList.add("hidden");
-            step2.classList.add("hidden");
-            step3.classList.remove("hidden");
-
-            stepNumber1.classList.remove("active");
-            stepNumber2.classList.remove("active");
-            stepNumber3.classList.add("active");
-
-            stepNumber1.classList.add("passed");
-            stepNumber2.classList.add("passed");
-            stepNumber3.classList.remove("passed");
-            stepsContainer.classList.add("step-2");
-            stepsContainer.classList.add("step-3");
-            break;
+        // Disparar evento personalizado para que step2-students se inicialice
+        if (currentStep === 2 && step2 && step2.id === 'step-2-students') {
+          const event = new CustomEvent('stepChanged', { detail: { step: 2 } });
+          document.dispatchEvent(event);
         }
       }
+
+      // PASO 0 (HU1): selección de perfil. Define qué variante del step 2 se usa
+      // y muestra el wizard.
+      const showWizard = () => {
+        step0.classList.add("hidden");
+        stepsBarRow.classList.remove("hidden");
+        wizardRow.classList.remove("hidden");
+        currentStep = 1;
+        moveStep();
+      }
+
+      const showPerfil = () => {
+        step0.classList.remove("hidden");
+        stepsBarRow.classList.add("hidden");
+        wizardRow.classList.add("hidden");
+      }
+
+      btnPerfil.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const perfil = btn.dataset.perfil; // 'alumno' | 'prospecto'
+          localStorage.setItem("perfilUsuario", perfil);
+
+          step2 = (perfil === "prospecto" && step2Prospecto) ? step2Prospecto : step2Students;
+
+          // El check de contacto por asesor (HU68) solo aplica a prospectos
+          if (rowContactoAsesor) {
+            rowContactoAsesor.classList.toggle("hidden", perfil !== "prospecto");
+          }
+
+          showWizard();
+        });
+      });
 
 
       btnNextStep.forEach(function (elem, index) {
         // Evento para clic normal
-        elem.addEventListener("click", () => {
+        elem.addEventListener("click", (event) => {
           switch (currentStep) {
             /* ======== STEP 1 ======== */
             case 1:
@@ -396,6 +416,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
               canContinue();
               break;
+
+            /* ======== STEP 4: TÉRMINOS (HU28/29/66/67) ======== */
+            case 4:
+              hasError = false;
+
+              if (!checkTerminos.checked) {
+                checkTerminosMsg.classList.add("error");
+                hasError = true;
+              } else {
+                checkTerminosMsg.classList.remove("error");
+              }
+
+              if (!checkPrivacidad.checked) {
+                checkPrivacidadMsg.classList.add("error");
+                hasError = true;
+              } else {
+                checkPrivacidadMsg.classList.remove("error");
+              }
+
+              if (hasError) {
+                // Bloquear el submit del formulario hasta aceptar los legales
+                event.preventDefault();
+                break;
+              }
+
+              localStorage.setItem("aceptoTerminos", "true");
+              localStorage.setItem("aceptoPrivacidad", "true");
+              localStorage.setItem("contactoAsesor", checkContacto && checkContacto.checked ? "true" : "false");
+              // Sin errores: el input type=submit envía el formulario a resultado.html
+              break;
           }
         });
       });
@@ -405,9 +455,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         elem.addEventListener("click", () => {
           switch (currentStep) {
-            /* ======== STEP 1 ======== */
+            /* ======== STEP 1: regresar a la selección de perfil ======== */
             case 1:
-              returnSlide();
+              showPerfil();
               break;
 
             /* ======== STEP 2 ======== */
@@ -417,6 +467,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             /* ======== STEP 3 ======== */
             case 3:
+              returnSlide();
+              break;
+
+            /* ======== STEP 4 ======== */
+            case 4:
               returnSlide();
               break;
 
@@ -431,8 +486,9 @@ document.addEventListener("DOMContentLoaded", () => {
         fieldAvg2 = document.querySelectorAll(".field-avg-2"),
         fieldAvg3 = document.querySelectorAll(".field-avg-3");
 
-      // Solo aplicar esta lógica si existe txtAverageMark (step-2 original, no step-2-students)
-      if (txtAverageMark && step2 && step2.id !== 'step-2-students') {
+      // El campo de promedio vive en #step-2 (flujo prospecto); el listener es
+      // inocuo cuando el perfil es alumno porque ese panel queda oculto.
+      if (txtAverageMark) {
         txtAverageMark.addEventListener('keyup', () => {
           if (txtAverageMark.value != "") {
             fieldAvg1.forEach(function (elem, index) {
