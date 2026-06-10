@@ -49,11 +49,13 @@ async function llenarDatosProspecto(page, datos = DATOS_PRUEBA) {
   await expect(page.locator('#step-1')).toBeVisible();
 }
 
-// Selects encadenados: espera a que haya opciones reales y elige por etiqueta o la primera.
+// Selects encadenados: espera a que haya opciones reales (excluyendo el placeholder
+// estático "op1" del HTML que precede a la carga de la API) y elige por etiqueta o la primera.
 async function elegirOpcion(page, selector, etiqueta = null) {
   const sel = page.locator(selector);
-  const opciones = sel.locator('option:not([value=""]):not([disabled])');
-  await expect(opciones.first()).toBeAttached({ timeout: 20_000 });
+  // Esperar a que aparezca al menos una opción real (no vacía, no disabled, no placeholder "op1")
+  const opciones = sel.locator('option:not([value=""]):not([disabled]):not([value="op1"])');
+  await expect(opciones.first()).toBeAttached({ timeout: 30_000 });
   if (etiqueta) {
     await sel.selectOption({ label: etiqueta });
   } else {
@@ -66,7 +68,18 @@ async function elegirOpcion(page, selector, etiqueta = null) {
 // Devuelve las etiquetas elegidas para el pie de foto.
 async function completarNivel(page, { nivel = null } = {}) {
   const eleccion = {};
-  eleccion.nivel = await elegirOpcion(page, '#select-grade', nivel);
+  // Seleccionar grade con reintento: loadGradeOptions() concurrente puede borrar
+  // la selección después de que la hagamos. Esperar a que grade quede estable
+  // (con un valor no vacío durante > 1s indica que las cargas concurrentes terminaron)
+  // antes de proceder con los demás selects.
+  for (let intento = 0; intento < 3; intento++) {
+    eleccion.nivel = await elegirOpcion(page, '#select-grade', nivel);
+    // Esperar 1.2s para que loadGradeOptions() (fetch ~600ms) tenga tiempo de completarse
+    await page.waitForTimeout(1200);
+    const gradeVal = await page.locator('#select-grade').inputValue();
+    if (gradeVal) break; // Grade persiste; salir del bucle
+    // Grade fue borrado por carga concurrente; reintentar
+  }
   eleccion.plan = await elegirOpcion(page, '#select-plan');
   for (const [clave, contenedor, selector] of [
     ['formato', '#div-formato', '#select-formato'],
