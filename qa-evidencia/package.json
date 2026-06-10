@@ -1,0 +1,11 @@
+{
+  "name": "qa-evidencia-calculadora-tecmi",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "documento": "node genera-documento.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

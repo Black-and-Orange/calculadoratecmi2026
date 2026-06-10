@@ -1,0 +1,6 @@
+node_modules/
+resultados/
+screenshots/
+reporte-html/
+*.pdf
+test-results/
