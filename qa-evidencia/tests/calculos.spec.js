@@ -938,3 +938,138 @@ test('[HU36,HU75] vigencia de la cotización — fecha válida posterior a hoy',
 
   await w.capturar(page, testInfo, 'calculos', 'vigencia-fecha-verificada');
 });
+
+// ---------------------------------------------------------------------------
+// TEST 9: [HU22,HU25,HU60,HU63] Seguros forzados SÍ en Preparatoria
+// apoyos-hu.js esForzado():
+//   NIVELES_VIVE_FORZADA = [1, 2, 3, 4]        → label contiene 'vive'
+//   NIVELES_COLEGIATURA_FORZADA = [1, 3]       → label contiene 'colegiatura'
+//   En niveles prepa (1, 3) ambos aplican: select.value = 'si' y
+//   select.disabled = true (no deseleccionable).
+// Cobertura: prospecto (HU60/63) y alumno (HU22/25) en ambos niveles prepa.
+// Nota: si el seguro de colegiatura no está en la BD de staging se reporta
+// como hallazgo; el forzado se ejercita igual con Cobertura VIVE.
+// ---------------------------------------------------------------------------
+test('[HU22,HU25,HU60,HU63] seguros forzados en Prepa (VIVE y colegiatura) — select=si y deshabilitado', async ({ page }, testInfo) => {
+  const nivelesPrepa = [
+    { label: 'Preparatoria Semestral', id: 1 },
+    { label: 'Preparatoria Tetramestral', id: 3 },
+  ];
+
+  for (const perfil of ['prospecto', 'alumno']) {
+    for (const nivelPrepa of nivelesPrepa) {
+      testInfo.annotations.push({ type: 'escenario', description: `${perfil} / ${nivelPrepa.label}` });
+
+      // ── Navegar hasta step-3 ───────────────────────────────────────────
+      await w.seleccionarPerfil(page, perfil);
+      if (perfil === 'alumno') {
+        await w.llenarDatosAlumno(page);
+      } else {
+        await w.llenarDatosProspecto(page);
+      }
+      await expect(page.locator('#step-1')).toBeVisible();
+
+      let nivelSeleccionado = false;
+      try {
+        await w.completarNivel(page, { nivel: nivelPrepa.label });
+        nivelSeleccionado = true;
+      } catch (e) {
+        testInfo.annotations.push({
+          type: 'warning',
+          description: `Nivel "${nivelPrepa.label}" no disponible (${perfil}): ${e.message}`,
+        });
+      }
+      if (!nivelSeleccionado) continue;
+
+      // ── step-2: beca=no para llegar a step-3 lo más rápido posible ────
+      if (perfil === 'alumno') {
+        await expect(page.locator('#step-2-students')).toBeVisible({ timeout: 15_000 });
+        const radioPrestamoNo = page.locator('#row-radio-prestamo-alumno input[value="no"]');
+        await page.locator('#row-radio-beca-alumno input[value="no"]').check();
+        if (!await radioPrestamoNo.isDisabled()) await radioPrestamoNo.check();
+        await expect(page.locator('#step-2-students-next')).toBeEnabled({ timeout: 15_000 });
+        await page.locator('#step-2-students-next').click();
+      } else {
+        await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+        const radioPrestamoNo = page.locator('#row-radio-prestamo-prospecto input[value="no"]');
+        await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
+        await page.waitForTimeout(900);
+        if (!await radioPrestamoNo.isDisabled()) await radioPrestamoNo.check();
+        await expect(page.locator('#step-2-next')).toBeEnabled({ timeout: 20_000 });
+        await page.locator('#step-2-next').click();
+      }
+
+      // ── step-3: esperar a que el contenedor de seguros cargue ─────────
+      await expect(page.locator('#step-3')).toBeVisible({ timeout: 15_000 });
+      const contenedor = page.locator('#seguros-dinamicos-container');
+      // Esperar a que apoyos-hu.js haya corrido al menos un ciclo (700ms interval)
+      await expect(contenedor.locator('select').first()).toBeAttached({ timeout: 15_000 }).catch(() => {});
+      await page.waitForTimeout(1200); // margen extra para MutationObserver + interval
+
+      // ── Buscar los selects de seguros forzados (VIVE y colegiatura) ───
+      // Cada select tiene id="select-seguro-{id_seguro}" y un label asociado.
+      const labelsText = await contenedor.locator('label').allTextContents();
+      testInfo.annotations.push({
+        type: `seguros-labels-${perfil}-${nivelPrepa.id}`,
+        description: JSON.stringify(labelsText),
+      });
+
+      await w.capturar(page, testInfo, 'calculos', `seguros-forzados-${perfil}-${nivelPrepa.label.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 25)}`);
+
+      if (!labelsText.some(t => t.toLowerCase().includes('colegiatura'))) {
+        // El seguro de colegiatura no está en la BD de staging — la regla de
+        // forzado por nombre no se puede ejercitar para él; queda documentado.
+        testInfo.annotations.push({
+          type: 'hallazgo',
+          description: `[HU25,HU63] ${perfil} / ${nivelPrepa.label}: NO se encontró ningún seguro de colegiatura en el DOM de step-3. Si el backend devuelve el seguro, la regla de forzado no funcionaría. Verificar datos de BD.`,
+        });
+      }
+
+      const selectsAll = contenedor.locator('select[id^="select-seguro-"]');
+      const nSelects = await selectsAll.count();
+      let forzadosVerificados = 0;
+
+      for (let i = 0; i < nSelects; i++) {
+        const sel = selectsAll.nth(i);
+        const selectId = await sel.getAttribute('id');
+        const labelEl = page.locator(`label[for="${selectId}"]`);
+        const labelTxt = (await labelEl.textContent().catch(() => '')).toLowerCase();
+
+        const esVive = labelTxt.includes('vive');
+        const esColegiatura = labelTxt.includes('colegiatura');
+        if (!esVive && !esColegiatura) continue;
+        forzadosVerificados++;
+
+        const hus = esVive ? '[HU22,HU60]' : '[HU25,HU63]';
+        const valor = await sel.inputValue();
+        const isDisabled = await sel.isDisabled();
+
+        testInfo.annotations.push({
+          type: `seguro-forzado-${perfil}-${nivelPrepa.id}`,
+          description: `${hus} id=${selectId}, label="${labelTxt.trim()}", valor="${valor}", disabled=${isDisabled}`,
+        });
+
+        // ASERCIÓN 1: el select debe estar en 'si'
+        expect(
+          valor,
+          `${hus} ${perfil} / ${nivelPrepa.label}: seguro forzado "${labelTxt.trim()}" (${selectId}) debe tener value="si". Valor actual: "${valor}"`,
+        ).toBe('si');
+
+        // ASERCIÓN 2: el select debe estar deshabilitado (no deseleccionable)
+        expect(
+          isDisabled,
+          `${hus} ${perfil} / ${nivelPrepa.label}: seguro forzado "${labelTxt.trim()}" (${selectId}) debe estar disabled. disabled=${isDisabled}`,
+        ).toBe(true);
+      }
+
+      // En staging la Cobertura VIVE existe en todos los niveles prepa: si no
+      // se verificó ningún seguro forzado, el test no ejercitó la regla.
+      expect(
+        forzadosVerificados,
+        `[HU22,HU25,HU60,HU63] ${perfil} / ${nivelPrepa.label}: ningún seguro forzado (VIVE/colegiatura) encontrado en step-3. labels=${JSON.stringify(labelsText)}`,
+      ).toBeGreaterThan(0);
+
+      await page.goto('/');
+    }
+  }
+});

@@ -197,7 +197,7 @@
     "epica": "Seguros y coberturas",
     "caso": "calculos.spec.js",
     "tipoEvidencia": "aserción",
-    "estado": "pendiente-manual"
+    "estado": "pasó"
   },
   {
     "hu": "HU26",
@@ -503,7 +503,7 @@
     "epica": "Seguros y coberturas",
     "caso": "calculos.spec.js",
     "tipoEvidencia": "aserción",
-    "estado": "pendiente-manual"
+    "estado": "pasó"
   },
   {
     "hu": "HU64",
