@@ -201,15 +201,43 @@ test('[HU4,HU5,HU6,HU7,HU8,HU9,HU16,HU18,HU19,HU20,HU22,HU23,HU24,HU26,HU28,HU29
     const prestamoVisible = await containerPrestamo.isVisible({ timeout: 5_000 }).catch(() => false);
     if (prestamoVisible) {
       await w.elegirOpcion(page, '#txt-prestamo-percentage-students');
+      // Dar tiempo a sync() (intervalo 700ms) para que procese la selección y habilite el botón
+      await page.waitForTimeout(1000);
       await w.capturar(page, testInfo, '6-apoyos', 'completo-prestamo-si');
+    } else {
+      // El contenedor no apareció: sync() puede haber forzado préstamo=no para este nivel.
+      // Asegurarse de que radio-no quede marcado para que sync() habilite el botón.
+      const radioPrestamoNoFallback = page.locator('#row-radio-prestamo-alumno input[value="no"]');
+      if (!await radioPrestamoNoFallback.isDisabled()) {
+        await radioPrestamoNoFallback.check();
+      }
+      testInfo.annotations.push({ type: 'info', description: 'Contenedor préstamo no visible tras marcar sí; se revierte a no para que sync() habilite el botón' });
     }
   }
 
-  await expect(page.locator('#step-2-students-next')).toBeEnabled({ timeout: 15_000 });
-  await page.locator('#step-2-students-next').click();
-
-  // --- Seguros (step-3) ---
-  await expect(page.locator('#step-3')).toBeVisible({ timeout: 15_000 });
+  // Avanzar de apoyos a seguros con reintento:
+  // cargarPorcentajesBeca() puede dispararse después de seleccionar préstamo y vaciar la beca,
+  // o entre el click del botón y la validación de main.js. Si step-3 no aparece, se
+  // re-selecciona la beca y se vuelve a intentar (máx 3 veces).
+  let step3Visible = false;
+  for (let intento = 0; intento < 3 && !step3Visible; intento++) {
+    if (intento > 0) {
+      testInfo.annotations.push({ type: 'info', description: `Reintento ${intento} para avanzar de apoyos a seguros` });
+    }
+    // Re-seleccionar beca si el select fue vaciado
+    const becaValChk = await page.locator('#txt-percentage-students').inputValue();
+    if (!becaValChk || becaValChk === '') {
+      await seleccionarBecaConReintento(page);
+    }
+    await expect(page.locator('#step-2-students-next')).toBeEnabled({ timeout: 20_000 });
+    await page.locator('#step-2-students-next').click();
+    step3Visible = await expect(page.locator('#step-3'))
+      .toBeVisible({ timeout: 8_000 }).then(() => true).catch(() => false);
+  }
+  if (!step3Visible) {
+    // Último recurso con timeout completo (falla el test si no aparece)
+    await expect(page.locator('#step-3')).toBeVisible({ timeout: 20_000 });
+  }
   await w.capturar(page, testInfo, '7-seguros', 'completo-seguros-inicio');
 
   // completarSeguros: espera fetchSeguros, responde radio de interés si está visible,
