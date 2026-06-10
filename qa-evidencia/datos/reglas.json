@@ -1,0 +1,77 @@
+{
+  "commit": "a57e6fa",
+  "topePrestamoProfesionalConBeca": {
+    "porcentajeMax": 20,
+    "nivelesAplica": [2, 4],
+    "detalle": "En niveles 2 (Profesional Semestral plan 2018) y 4 (Profesional Semestral MAPS), cuando hay una beca seleccionada, las opciones de préstamo con valor > 20% se deshabilitan. La validación se aplica en dos lugares: step2.js vía adjustLoanOptions() y apoyos-hu.js vía prestamoExcedido(). La constante NIVELES_PROFESIONAL_TOPE_20 = [2, 4] define los niveles afectados.",
+    "fuente": "frontend/js/cargaDatos/apoyos-hu.js:61-65 y frontend/js/cargaDatos/step2.js:95-107"
+  },
+  "reglaSumaBecaPrestamo": {
+    "detalle": "beca% + préstamo% NO puede superar 60%. La constante TOPE_BECA_PRESTAMO = 60 se define en apoyos-hu.js. La función aplicarRegla60() fuerza el radio de préstamo a 'no' y deshabilita los radios si la beca alcanza 60%. La función filtrarOpcionesPrestamo() deshabilita opciones individuales del select de préstamo si becaPct + v > 60. Aplica tanto a alumno (HU18/19) como a prospecto (HU56/57).",
+    "fuente": "frontend/js/cargaDatos/apoyos-hu.js:9,63-93"
+  },
+  "prepaSinPrestamo": {
+    "detalle": "Niveles de preparatoria (NIVELES_PREPA = [1, 3]: Preparatoria Semestral y Preparatoria Tetramestral) no tienen préstamo disponible por defecto. Para alumno (HU19): si el nivel es prepa y el radio de préstamo no está marcado, se fuerza a 'no'. Para prospecto (HU57): en el intervalo periódico (700ms), si el nivel es prepa y el radio no está marcado, se fuerza a 'no'. Adicionalmente, si el backend no devuelve opciones de préstamo para el nivel, el radio se deshabilita con mensaje 'El préstamo estudiantil no está disponible para tu nivel.'",
+    "fuente": "frontend/js/cargaDatos/apoyos-hu.js:6,136-143,224-228"
+  },
+  "formulaContado": {
+    "descripcion": "totalContado = costoTotal - finalAmount. finalAmount = suma de descuentos = (beca% + apoyo% + préstamo%) / 100 * costoTotal + apoyoFijo. El costoTotal es calculado en step1.js: para materias normales (1-6) = numeroMaterias * costoMateria; para 7 u 8 materias = 6 * costoMateria (tope); para créditos = numeroCreditos * costoCredito; para nivel 4 MAPS = certificados*valorCert + semanas*valorSemana + inglés*valorIngles multiplicado por costoUnidad; para nivel 13 bimestral = suma por período de (cert*10 + semanas*1) * costoPeriodo. El totalContado mostrado en #totalContado incluye los seguros seleccionados: totalContadoFinal = totalContadoRecuperado + totalSeguros (totalCost del localStorage).",
+    "fuente": "frontend/js/cargaDatos/step1.js:140-269, frontend/js/cargaDatos/step2.js:133-168, frontend/js/cargaDatos/resultados.js:521-533"
+  },
+  "formulaFinanciado": {
+    "descripcion": "Para niveles distintos de 13: totalFinanciado = primeraCuota + interesDividido * factorMultiplicador. factorMultiplicador: 4 para niveles 1, 2, 4 (mostrando '4 Mensualidades'); 2 para nivel 10; 3 para todos los demás. interesDividido y primeraCuota se calculan en step2.js/step2-students.js: totalConInteres = totalContado * (1 + interes/100), donde interes se obtiene del endpoint /api/intereses/nivel/{nivelId}. El redondeo usa parseFloat estándar sin redondeo explícito (toFixed no aplicado). Para nivel 13 (bimestral): totalFinanciado = suma de todas las parcialidades por período; cada parcialidad = (costoBimestreConDescuento * porcentaje_parcialidad/100); el interés (porcentaje_interes) solo aplica al primer pago de cada bimestre; los seguros se suman al primer pago de cada bimestre.",
+    "fuente": "frontend/js/utils/shared-utils.js:187-198, frontend/js/cargaDatos/resultados.js:694-710,1163-1175, frontend/js/cargaDatos/resultados.js:237-265"
+  },
+  "segurosEnTotal": {
+    "descripcion": "Los seguros NO reducen el costo base pero SÍ se suman al totalContado mostrado en resultados. La suma de seguros se lee del localStorage clave 'totalCost'. En resultados.js: totalContadoFinal += totalSeguros (línea 528). Para nivel 13, los seguros (totalSeguros desde 'totalCost') se suman al primer pago de cada bimestre (idx === 0). El DOM #totalContado muestra el total con seguros incluidos. Los seguros se muestran individualmente en el contenedor #seguros-dinamicos-resultados con nombre y valor de cada seguro seleccionado.",
+    "fuente": "frontend/js/cargaDatos/resultados.js:526-528,248-250"
+  },
+  "viveYColegiaturaForzadas": {
+    "descripcion": "Cobertura VIVE forzada en 'si' y deshabilitada (select.disabled=true) para NIVELES_VIVE_FORZADA = [1, 2, 3, 4] (Prepa Semestral, Prof. plan 2018, Prepa Tetramestral, Prof. MAPS). Seguro de colegiatura forzado en 'si' para NIVELES_COLEGIATURA_FORZADA = [1, 3] (solo preparatorias). En niveles 6 a 13, el div VIVE se oculta (display:'none'). La lógica se basa en el texto del nombre del seguro: si contiene 'vive' → aplicar NIVELES_VIVE_FORZADA; si contiene 'colegiatura' → aplicar NIVELES_COLEGIATURA_FORZADA.",
+    "fuente": "frontend/js/cargaDatos/apoyos-hu.js:7-8,240-275, frontend/js/cargaDatos/resultados.js:416-419"
+  },
+  "vigenciaCotizacion": {
+    "descripcion": "La vigencia se obtiene del endpoint /api/configuracion-vigencia/dias-vigencia. Se calcula fechaVencimiento = fechaActual + diasVigencia días. Si hay error de red, el fallback es 5 días. Se muestra formateada como DD/MM/AAAA en el elemento #fechaVencimiento con prefijo 'Vigencia de la propuesta: '.",
+    "fuente": "frontend/js/cargaDatos/resultados.js:1075-1097, frontend/js/utils/shared-utils.js:225-255"
+  },
+  "formatoMensualidades": {
+    "descripcion": "El texto en #mensualidadesText varía por nivel: '4 Mensualidades' para niveles 1, 2, 4; '2 Mensualidades' para nivel 10; '3 Mensualidades' para los demás niveles no-13. Para nivel 13, el elemento #mensualidadesText muestra las fechas (DD/MM/YYYY) de los pagos restantes después del primer pago, una por línea en formato HTML (con <span> y <br>).",
+    "fuente": "frontend/js/cargaDatos/resultados.js:698-706,310-316"
+  },
+  "nivelesDisponibles": {
+    "descripcion": "Catálogo completo de niveles obtenido del endpoint /api/nivel en staging",
+    "valores": [
+      "1 - Preparatoria Semestral (nivel_ed: MSUP)",
+      "2 - Profesional Semestral (plan 2018) (nivel_ed: SUP)",
+      "3 - Preparatoria Tetramestral (nivel_ed: MSUP)",
+      "4 - Profesional Semestral MAPS (nivel_ed: SUP)",
+      "5 - Profesional Asociado (nivel_ed: SUP)",
+      "6 - Ejecutivo (nivel_ed: SUP)",
+      "7 - Maestría y Especialidades (nivel_ed: POSG)",
+      "8 - Master (nivel_ed: POSG)",
+      "9 - MLP Connect (nivel_ed: POSG)",
+      "10 - MEDU+ (nivel_ed: POSG)",
+      "11 - MLP Presencial (nivel_ed: POSG)",
+      "12 - Connect Presencial Matutino (nivel_ed: SUP)",
+      "13 - Ejecutivo Bimestral MAPS (nivel_ed: SUP)"
+    ],
+    "fuente": "GET https://calculadora-tecmi-backend.carlos-tam-s-account.workers.dev/api/nivel (consultado 2026-06-09)"
+  },
+  "apoyoFinanciamientoEnUI": {
+    "descripcion": "El elemento #apoyoFinanciamiento muestra el descuento total como valor negativo '-$X,XXX.XX', calculado como costoTotal - totalContado (ambos del localStorage antes de sumar seguros). Si este descuento es 0 o negativo, la fila se oculta (style.display='none'). La fila se vuelve a mostrar si hay algún descuento aplicado.",
+    "fuente": "frontend/js/cargaDatos/resultados.js:733-753"
+  },
+  "colegiaturaEnUI": {
+    "descripcion": "El elemento #colegiatura muestra el costoTotal SIN descuentos (costo base antes de becas/préstamos). Solo se muestra si hay algún tipo de descuento activo (beca, apoyo estudiantil, apoyo fijo o finalAmount > 0); si no hay descuento, la fila se oculta. #totalContado siempre muestra el total final a pagar (con descuentos y seguros).",
+    "fuente": "frontend/js/cargaDatos/resultados.js:724-732"
+  },
+  "notas": [
+    "PENDIENTE-FASE3 (comentario en código, step1.js:143): materias 7 u 8 se cobran como 6 (calcularCostoTotal devuelve 6*costoMateria). No es claro si es promoción intencional o bug; comentario en código dice 'confirmar con cliente'.",
+    "PENDIENTE-FASE3 (comentario en código, resultados.js:221): posible doble descuento para nivel 13 si selectedPercentage ya se aplicó en finalAmount antes de aplicarse por bimestre. Pendiente validar con caso real.",
+    "PENDIENTE-FASE3 (comentario en código, step1.js:249): para nivel 4 MAPS, los pesos de cert=10, semana=2, inglés=10 están como fallback hardcodeado pero normalmente vienen como atributos HTML de las opciones del select (valor_certificado, valor_semana_sedi, valor_curso_ingles).",
+    "La regla de suma beca+préstamo <= 60% NO es un tope absoluto fijo en el código: es el resultado de la suma de todos los descuentos porcentuales. El código sólo bloquea opciones de préstamo que rompan ese tope, no hay validación de suma total en el submit.",
+    "El cálculo del interés (tasa por nivel) es un porcentaje obtenido del backend (/api/intereses/nivel/{id}); el valor exacto no está hardcodeado en el frontend. Para E2E habría que consultar el endpoint para cada nivel.",
+    "El apoyo estudiantil (porcentaje y fijo) para el flujo prospecto viene de los selects #txt-support-percentage y #txt-support-fix en step2.js (flujo original con promedio). En el flujo alumno (step2-students.js) NO hay apoyo estudiantil separado, solo beca% y préstamo%.",
+    "El elemento #beca en resultado.html muestra el porcentaje de beca seleccionado. Para flujo alumno lo lee de 'selectedPercentage' en localStorage; para flujo prospecto lo lee de 'selectedScholarshipValue' o 'retrievedPercentage'. El nombre de la beca va en #apoyoFinanciero."
+  ]
+}
