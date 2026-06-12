@@ -60,6 +60,11 @@
     }
 }
 
+/* Header solo con logo (feedback QA 2026-06-11): compensar altura del header fijo */
+main.solo-logo {
+    margin-top: 86px;
+}
+
 /* HU16/54: el botón continuar queda deshabilitado hasta llenar todos los campos */
 .btn[disabled] {
     opacity: 0.45;
@@ -68,6 +73,11 @@
 }
 
 /* ===== Radios sí/no de apoyos y seguros (Sprint 3) ===== */
+/* La pregunta no debe quedar pegada a los radios cuando rebasa el min-width */
+[id^="row-radio-"] > div:first-child {
+    padding-right: 1rem;
+}
+
 .radio-group {
     display: flex;
     flex-wrap: wrap;
