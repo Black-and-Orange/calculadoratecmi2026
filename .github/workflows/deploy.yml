@@ -24,6 +24,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.86.0"   # v4 soporta wrangler.jsonc (la 3.90 default no)
           workingDirectory: backend
           command: deploy
 
@@ -37,4 +38,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.86.0"
           command: pages deploy frontend --project-name=calculadora-tecmi --branch=fase-3
