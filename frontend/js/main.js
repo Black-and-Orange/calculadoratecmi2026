@@ -257,6 +257,18 @@ document.addEventListener("DOMContentLoaded", () => {
         setInterval(checkNivelCompleto, 700);
       }
 
+      // Campus es cascada del nivel: sus opciones (y cuáles aplican) dependen del
+      // nivel elegido. En el flujo alumno campus va primero (según el diseño),
+      // así que se mantiene deshabilitado con una pista hasta elegir nivel;
+      // entonces step1.js lo llena y aquí se habilita.
+      const campusHint = document.getElementById("campus-hint");
+      const syncCampusGate = () => {
+        const bloquear = perfilActual === "alumno" && (!selectGrade || selectGrade.value === "");
+        if (selectCampus) selectCampus.disabled = bloquear;
+        if (campusHint) campusHint.classList.toggle("hidden", !bloquear);
+      };
+      if (selectGrade) selectGrade.addEventListener("change", syncCampusGate);
+
       // PASO 0 (HU1): selección de perfil. Define qué variante del step 2 se usa
       // y muestra el wizard.
       const showWizard = () => {
@@ -294,6 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           showWizard();
+          syncCampusGate();
         });
       });
 
