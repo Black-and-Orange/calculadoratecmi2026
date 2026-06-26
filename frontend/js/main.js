@@ -148,6 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // El step 2 depende del perfil: alumno → #step-2-students, prospecto → #step-2
       let step2 = step2Students;
 
+      // Perfil activo. Alumno usa el paso 1 combinado (datos personales + nivel
+      // de estudios) → wizard de 4 pasos. Prospecto conserva el flujo de 5 pasos.
+      let perfilActual = localStorage.getItem("perfilUsuario") || "prospecto";
+
 
       const canContinue = () => {
         if (hasError) {
@@ -169,16 +173,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const stepCircles = [stepNumber1, stepNumber2, stepNumber3, stepNumber4, stepNumber5];
 
       const moveStep = () => {
-        // Paneles: 1=Datos personales, 2=Nivel de estudios, 3=Apoyos (variante
-        // según perfil), 4=Seguros, 5=Términos
-        const stepPanels = [stepDP, step1, step2, step3, step4];
+        const esAlumno = perfilActual === "alumno";
+
+        // Paneles por paso. Alumno (4 pasos): el paso 1 combina datos personales
+        // + nivel de estudios en una sola pantalla. Prospecto (5 pasos): flujo
+        // original. Un panel puede ser un arreglo (varios paneles en un paso).
+        const stepPanels = esAlumno
+          ? [[stepDP, step1], step2, step3, step4]
+          : [stepDP, step1, step2, step3, step4];
 
         // Ocultar ambas variantes del paso de apoyos; solo la activa se muestra
         if (step2Prospecto) step2Prospecto.classList.add("hidden");
         if (step2Students) step2Students.classList.add("hidden");
 
         stepPanels.forEach((panel, index) => {
-          if (panel) panel.classList.toggle("hidden", index !== currentStep - 1);
+          const visible = index === currentStep - 1;
+          const paneles = Array.isArray(panel) ? panel : [panel];
+          paneles.forEach((p) => { if (p) p.classList.toggle("hidden", !visible); });
         });
 
         stepCircles.forEach((circle, index) => {
@@ -187,19 +198,21 @@ document.addEventListener("DOMContentLoaded", () => {
           circle.classList.toggle("passed", index < currentStep - 1);
         });
 
+        // Barra de progreso: 4 pasos (alumno) o 5 (prospecto)
+        stepsContainer.classList.toggle("steps-alumno", esAlumno);
         stepsContainer.classList.toggle("step-2", currentStep >= 2);
         stepsContainer.classList.toggle("step-3", currentStep >= 3);
         stepsContainer.classList.toggle("step-4", currentStep >= 4);
         stepsContainer.classList.toggle("step-5", currentStep >= 5);
 
-        // HU16/54: al entrar al nivel de estudios, recalcular si el botón
-        // continuar debe estar habilitado
-        if (currentStep === 2) checkNivelCompleto();
+        // HU16/54: recalcular el gating del botón al entrar al nivel de estudios
+        // (alumno: paso 1; prospecto: paso 2)
+        if (currentStep === (esAlumno ? 1 : 2)) checkNivelCompleto();
 
-        // Disparar evento personalizado para que step2-students se inicialice
-        if (currentStep === 3 && step2 && step2.id === 'step-2-students') {
-          const event = new CustomEvent('stepChanged', { detail: { step: 2 } });
-          document.dispatchEvent(event);
+        // Inicializar step2-students al entrar al paso de apoyos
+        // (alumno: paso 2; prospecto: paso 3)
+        if (currentStep === (esAlumno ? 2 : 3) && step2 && step2.id === 'step-2-students') {
+          document.dispatchEvent(new CustomEvent('stepChanged', { detail: { step: 2 } }));
         }
       }
 
@@ -264,8 +277,12 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", () => {
           const perfil = btn.dataset.perfil; // 'alumno' | 'prospecto'
           localStorage.setItem("perfilUsuario", perfil);
+          perfilActual = perfil;
 
           step2 = (perfil === "prospecto" && step2Prospecto) ? step2Prospecto : step2Students;
+
+          // Rediseño del paso 1 (datos + nivel combinados, grid) solo para alumno
+          if (wizardRow) wizardRow.classList.toggle("flujo-alumno", perfil === "alumno");
 
           // Datos personales según perfil: alumno (HU4) o prospecto (HU42)
           if (datosAlumno) datosAlumno.classList.toggle("hidden", perfil !== "alumno");
@@ -349,7 +366,21 @@ document.addEventListener("DOMContentLoaded", () => {
       btnNextStep.forEach(function (elem, index) {
         // Evento para clic normal
         elem.addEventListener("click", (event) => {
-          switch (currentStep) {
+          // Mapear el paso VISIBLE al "paso lógico" del switch.
+          // Prospecto: 1:1 (sin cambios). Alumno (4 pasos): el paso 1 valida
+          // primero datos personales y, si pasan, continúa con la validación de
+          // nivel (case 2); los pasos 2/3/4 mapean a 3/4/5 (apoyos/seguros/términos).
+          let pasoLogico = currentStep;
+          if (perfilActual === "alumno") {
+            if (currentStep === 1) {
+              if (!validarDatosPersonales()) { hasError = true; canContinue(); return; }
+              pasoLogico = 2;
+            } else {
+              pasoLogico = currentStep + 1;
+            }
+          }
+
+          switch (pasoLogico) {
             /* ======== PASO 1: DATOS PERSONALES (HU4/HU42) ======== */
             case 1:
               hasError = !validarDatosPersonales();

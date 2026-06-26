@@ -75,6 +75,12 @@
                 <div class="flex flex-row flex-wrap justify-center hidden" id="wizard-row">
                     <div class="px-4 w-full md:w-8/12 lg:w-7/12">
                         <form action="resultado.html">
+                            <!-- Encabezado combinado del paso 1 para el flujo ALUMNO (datos + nivel) -->
+                            <div class="heading-alumno">
+                                <h3 class="text-write-color-3">Ayúdanos a identificarte</h3>
+                                <p class="text-[20px] leading-[28px]">Cuéntanos un poco sobre ti.</p>
+                                <hr class="mb-8">
+                            </div>
                             <!-- PASO 1: Datos personales (HU4 alumno / HU42 prospecto) -->
                             <div class="step-dp" id="step-dp">
                                 <h3 class="text-write-color-3">Datos personales</h3>
@@ -88,28 +94,28 @@
                                 <div id="datos-alumno">
                                     <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                         <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                            <label class="font-semibold" for="txt-matricula">Matrícula:</label>
+                                            <label class="font-semibold" for="txt-matricula">Matrícula</label>
                                         </div>
                                         <div class="flex-1">
-                                            <input type="text" id="txt-matricula" maxlength="8" autocomplete="off">
+                                            <input type="text" id="txt-matricula" maxlength="8" autocomplete="off" placeholder="Escribe aquí">
                                             <p class="msg" id="txt-matricula-msg">Ingresa tu matrícula de 8 caracteres (letras y números, sin caracteres especiales)</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                         <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                            <label class="font-semibold" for="txt-nombre-alumno">Nombre (s):</label>
+                                            <label class="font-semibold" for="txt-nombre-alumno">Nombre (s)</label>
                                         </div>
                                         <div class="flex-1">
-                                            <input type="text" id="txt-nombre-alumno" maxlength="100">
+                                            <input type="text" id="txt-nombre-alumno" maxlength="100" placeholder="Escribe aquí">
                                             <p class="msg" id="txt-nombre-alumno-msg">Este campo es necesario</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                         <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                            <label class="font-semibold" for="txt-apellido-alumno">Apellido:</label>
+                                            <label class="font-semibold" for="txt-apellido-alumno">Apellido</label>
                                         </div>
                                         <div class="flex-1">
-                                            <input type="text" id="txt-apellido-alumno" maxlength="100">
+                                            <input type="text" id="txt-apellido-alumno" maxlength="100" placeholder="Escribe aquí">
                                             <p class="msg" id="txt-apellido-alumno-msg">Este campo es necesario</p>
                                         </div>
                                     </div>
@@ -173,7 +179,7 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-row flex-wrap justify-center mb-6">
+                                <div class="botones-dp flex flex-row flex-wrap justify-center mb-6">
                                     <div class="px-4 mb-4">
                                         <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
                                     </div>
@@ -190,7 +196,7 @@
                                 <hr class="mb-8">
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-grade">Nivel:</label>
+                                        <label class="font-semibold" for="select-grade"><span class="lbl-def">Nivel:</span><span class="lbl-alu">Tu nivel de estudios</span></label>
                                     </div>
                                     <div class="flex-1">
                                         <div class="relative">
@@ -210,7 +216,7 @@
                                 </div>
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-plan">Programa:</label>
+                                        <label class="font-semibold" for="select-plan"><span class="lbl-def">Programa:</span><span class="lbl-alu">Tu programa de estudios</span></label>
                                     </div>
                                     <div class="flex-1">
                                         <div class="relative">
@@ -240,28 +246,31 @@
                                         <p class="msg" id="select-formato-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap mb-6 flex-col md:flex-row">
-                                    <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-campus">Campus:</label>
+                                <div id="row-campus-periodo" class="flex flex-wrap mb-6 flex-col md:flex-row">
+                                    <div class="campo-cell flex flex-wrap flex-col md:flex-row flex-1">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="select-campus"><span class="lbl-def">Campus:</span><span class="lbl-alu">Ingresa tu campus</span></label>
+                                        </div>
+                                        <div class="flex-1 mb-6 lg:mb-0">
+                                            <select name="select-campus" id="select-campus">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Opción 1</option>
+                                            </select>
+                                            <p class="msg" id="select-campus-msg">Este campo es necesario</p>
+                                        </div>
                                     </div>
-                                    <div class="flex-1 mb-6 lg:mb-0">
-                                        <select name="select-campus" id="select-campus">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Opción 1</option>
-                                        </select>
-                                        <p class="msg" id="select-campus-msg">Este campo es necesario</p>
+                                    <div class="campo-cell flex flex-wrap flex-col md:flex-row flex-1 md:ml-[30px]">
+                                        <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
+                                            <label class="font-semibold" for="select-period"><span class="lbl-def">Periodo:</span><span class="lbl-alu">Periodo</span></label>
+                                        </div>
+                                        <div class="flex-1">
+                                            <select name="select-period" id="select-period">
+                                                <option value="">Elige</option>
+                                                <option value="op1">Opción 1</option>
+                                            </select>
+                                            <p class="msg" id="select-period-msg">Este campo es necesario</p>
+                                        </div>
                                     </div>
-                                    <div class="min-w-[110px] mt-2 md:ml-[30px] mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-period">Periodo:</label>
-                                    </div>
-                                    <div class="flex-1">
-                                        <select name="select-period" id="select-period">
-                                            <option value="">Elige</option>
-                                            <option value="op1">Opción 1</option>
-                                        </select>
-                                        <p class="msg" id="select-period-msg">Este campo es necesario</p>
-                                    </div>
-
                                 </div>
 
                                 <div id="div-materiales" class="flex flex-wrap mb-6 flex-col md:flex-row">
@@ -345,12 +354,12 @@
                                         <p class="msg" id="select-ingles-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                                <div class="flex flex-row flex-wrap justify-center mb-6">
+                                <div class="botones-paso flex flex-row flex-wrap justify-center mb-6">
                                     <div class="px-4 mb-4">
-                                        <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
+                                        <button class="btn btn-main btn-prev-step" type="button"><span class="lbl-def">Anterior</span><span class="lbl-alu">← Regresar</span></button>
                                     </div>
                                     <div class="px-4 mb-4">
-                                        <button class="btn btn-main btn-next-step" type="button" id="step-1-next" disabled>Siguiente</button>
+                                        <button class="btn btn-main btn-next-step" type="button" id="step-1-next" disabled><span class="lbl-def">Siguiente</span><span class="lbl-alu">Continuar</span></button>
                                     </div>
                                 </div>
                             </div>

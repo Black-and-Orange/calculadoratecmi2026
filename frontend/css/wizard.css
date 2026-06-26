@@ -162,3 +162,91 @@ main.solo-logo {
         margin-top: 0;
     }
 }
+
+/* ===== Rediseño del PASO 1 — flujo ALUMNO (datos personales + nivel en un
+   solo paso, tipo grid). Solo aplica cuando #wizard-row tiene .flujo-alumno
+   (la añade main.js al elegir perfil "alumno"). El flujo prospecto no la lleva
+   y conserva su layout original. ===== */
+
+/* Encabezado combinado "Ayúdanos a identificarte": mostrarlo y ocultar los
+   encabezados/botones individuales de cada sub-paso. */
+.heading-alumno { display: none; }
+#wizard-row.flujo-alumno .heading-alumno { display: block; }
+#wizard-row.flujo-alumno #step-dp > h3,
+#wizard-row.flujo-alumno #step-dp > p,
+#wizard-row.flujo-alumno #step-dp > hr,
+#wizard-row.flujo-alumno #step-1 > h3,
+#wizard-row.flujo-alumno #step-1 > p,
+#wizard-row.flujo-alumno #step-1 > hr,
+#wizard-row.flujo-alumno .botones-dp { display: none; }
+
+/* Etiquetas duales: por defecto la versión con ":"; en alumno, la del diseño. */
+.lbl-alu { display: none; }
+#wizard-row.flujo-alumno .lbl-def { display: none; }
+#wizard-row.flujo-alumno .lbl-alu { display: inline; }
+
+/* Ensanchar la columna del wizard para que quepan 3-4 columnas de campos. */
+@media (min-width: 768px) {
+    #wizard-row.flujo-alumno > div {
+        width: 100%;
+        max-width: 1040px;
+    }
+}
+
+/* Grids: datos personales (matrícula/nombre/apellido) y nivel (campus/nivel/
+   programa/periodo + campos dinámicos). Etiqueta arriba del control. */
+#wizard-row.flujo-alumno #datos-alumno,
+#wizard-row.flujo-alumno #step-1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem 1.5rem;
+    align-items: start;
+}
+
+/* La fila campus/periodo aporta sus dos celdas directamente al grid de nivel. */
+#wizard-row.flujo-alumno #row-campus-periodo { display: contents; }
+/* Imagen: campus primero. El orden natural del resto queda nivel, programa,
+   periodo y, al final, los campos dinámicos (materias, etc.). */
+#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:first-child { order: -1; }
+
+/* Cada campo VISIBLE en columna; se excluyen los .hidden para no revelar los
+   campos dinámicos que no aplican al nivel elegido. */
+#wizard-row.flujo-alumno #datos-alumno > div:not(.hidden),
+#wizard-row.flujo-alumno #step-1 > div:not(.hidden):not(#row-campus-periodo),
+#wizard-row.flujo-alumno #step-1 .campo-cell {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
+/* La etiqueta deja de ocupar la columna fija de 140px y va sobre el control. */
+#wizard-row.flujo-alumno #datos-alumno > div > div:first-child,
+#wizard-row.flujo-alumno #step-1 > div:not(#row-campus-periodo) > div:first-child,
+#wizard-row.flujo-alumno #step-1 .campo-cell > div:first-child {
+    min-width: 0 !important;
+    width: auto;
+    margin-bottom: 4px;
+}
+
+/* Controles a ancho completo de su celda. */
+#wizard-row.flujo-alumno #datos-alumno input,
+#wizard-row.flujo-alumno #datos-alumno select,
+#wizard-row.flujo-alumno #step-1 input,
+#wizard-row.flujo-alumno #step-1 select {
+    width: 100%;
+}
+
+/* La fila de botones ocupa todo el ancho del grid y se alinea a la derecha,
+   no debe quedar como una celda más. */
+#wizard-row.flujo-alumno .botones-paso {
+    grid-column: 1 / -1 !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    margin-bottom: 0;
+}
+
+/* ===== Barra de pasos: variante de 4 pasos para alumno ===== */
+.steps-container.steps-alumno .step-num-5 { display: none; }
+.steps-container.steps-alumno.step-2::after { width: 33.33%; }
+.steps-container.steps-alumno.step-3::after { width: 66.66%; }
+.steps-container.steps-alumno.step-4::after { width: 100%; }
