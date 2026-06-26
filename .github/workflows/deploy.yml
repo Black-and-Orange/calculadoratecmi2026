@@ -1,0 +1,40 @@
+name: Deploy a Cloudflare (staging)
+
+# Despliega automáticamente en cada push a fase-3:
+#  - Backend  -> Cloudflare Worker (calculadora-tecmi-backend)
+#  - Frontend -> Cloudflare Pages  (calculadora-tecmi)
+#
+# Requiere 2 secrets en el repo (Settings > Secrets and variables > Actions):
+#  - CLOUDFLARE_API_TOKEN   (token con permisos: Workers Scripts:Edit, Cloudflare Pages:Edit, Account Settings:Read)
+#  - CLOUDFLARE_ACCOUNT_ID  (ID de la cuenta de Cloudflare)
+
+on:
+  push:
+    branches: [fase-3]
+  workflow_dispatch: {}   # permite lanzarlo a mano desde la pestaña Actions
+
+jobs:
+  backend:
+    name: Backend (Worker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: backend
+          command: deploy
+
+  frontend:
+    name: Frontend (Pages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy frontend --project-name=calculadora-tecmi --branch=fase-3
