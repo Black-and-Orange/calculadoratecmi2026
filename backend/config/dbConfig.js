@@ -63,7 +63,21 @@ if (isWorkers) {
         password: process.env.DB_PASSWORD,
         database: DATABASE,
         connectionLimit: 10,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 10000,
     });
+
+    // Mantener la conexión "caliente": la BD remota cierra las conexiones
+    // inactivas, lo que provocaba que la primera petición tras un rato de
+    // inactividad expirara y dejara vacío un dropdown de la cascada
+    // (nivel/programa/campus). Un ping periódico lo evita. Solo en Node; en
+    // Cloudflare Workers el pooling lo maneja Hyperdrive.
+    const keepAlive = setInterval(() => {
+        db.query('SELECT 1', (err) => {
+            if (err) console.error('DB keep-alive falló:', err.code || err.message);
+        });
+    }, 60 * 1000);
+    if (keepAlive.unref) keepAlive.unref();
 }
 
 module.exports = db;
