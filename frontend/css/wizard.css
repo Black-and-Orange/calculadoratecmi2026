@@ -259,3 +259,25 @@ main.solo-logo {
 .steps-container.steps-alumno.step-2::after { width: 33.33%; }
 .steps-container.steps-alumno.step-3::after { width: 66.66%; }
 .steps-container.steps-alumno.step-4::after { width: 100%; }
+
+/* ===== Paso 2 (alumno) — Apoyo estudiantil: pregunta | porcentaje lado a lado.
+   #step-2-students es exclusivo del flujo alumno, así que no afecta a prospecto. */
+#step-2-students .apoyo-fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+}
+#step-2-students .apoyo-pregunta,
+#step-2-students .apoyo-porcentaje {
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+}
+#step-2-students .apoyo-pregunta > label,
+#step-2-students .apoyo-porcentaje > label {
+    margin-bottom: 8px;
+}
+#step-2-students .apoyo-porcentaje select { width: 100%; }
+#step-2-students .radio-group { padding-top: 0; }

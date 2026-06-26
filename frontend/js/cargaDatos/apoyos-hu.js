@@ -110,6 +110,13 @@ const initAlumno = () => {
         if (rowBeca) rowBeca.classList.toggle('hidden', rBeca !== 'si');
         if (rBeca === 'no') seleccionarCero(becaSelect);
 
+        // El préstamo estudiantil solo aplica a profesional y posgrados; en
+        // preparatoria se oculta la pregunta y se deja en "no" para no bloquear.
+        const esPrepa = NIVELES_PREPA.includes(nivel());
+        const filaPrestamo = document.getElementById('fila-prestamo-alumno');
+        if (filaPrestamo) filaPrestamo.classList.toggle('hidden', esPrepa);
+        if (esPrepa) setRadio('radio-prestamo-alumno', 'no');
+
         // Préstamo disponible solo si el backend devolvió opciones para el nivel
         const hayPrestamos = prestamoSelect && Array.from(prestamoSelect.options).some(o => o.value !== '' && o.value !== '0');
         if (!hayPrestamos && prestamoSelect) {

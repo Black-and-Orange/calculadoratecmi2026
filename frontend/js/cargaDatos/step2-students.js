@@ -56,14 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const levelId = getLevelId();
         if (!levelId) {
-            percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            percentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
             return;
         }
 
         try {
             const porcentajes = await obtenerTodosLosPorcentajesBeca(levelId);
             
-            percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            percentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
             
             if (porcentajes.length > 0) {
                 porcentajes.forEach(porcentaje => {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error al cargar porcentajes de beca:', error);
-            percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            percentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
         }
     };
 
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (prestamoPercentageContainerStudents) {
                 prestamoPercentageContainerStudents.classList.add('hidden');
             }
-            prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            prestamoPercentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
             return;
         }
 
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // el radio "¿cuentas con préstamo?" (HU19)
 
                 if (prestamoPercentageSelectStudents) {
-                    prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+                    prestamoPercentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
 
                     prestamos.forEach(prestamo => {
                         const option = document.createElement('option');
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     prestamoPercentageContainerStudents.classList.add('hidden');
                 }
                 if (prestamoPercentageSelectStudents) {
-                    prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+                    prestamoPercentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
                 }
             }
         } catch (error) {
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (prestamoPercentageContainerStudents) {
                 prestamoPercentageContainerStudents.classList.add('hidden');
             }
-            prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+            prestamoPercentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
         }
     };
 
@@ -222,10 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Si no hay nivel, limpiar los selects
             if (percentageSelectStudents) {
-                percentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+                percentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
             }
             if (prestamoPercentageSelectStudents) {
-                prestamoPercentageSelectStudents.innerHTML = '<option value="">Elige</option>';
+                prestamoPercentageSelectStudents.innerHTML = '<option value="">Selecciona</option>';
             }
             if (prestamoPercentageContainerStudents) {
                 prestamoPercentageContainerStudents.classList.add('hidden');
