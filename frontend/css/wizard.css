@@ -205,6 +205,8 @@ main.solo-logo {
 
 /* La fila campus/periodo aporta sus dos celdas directamente al grid de nivel. */
 #wizard-row.flujo-alumno #row-campus-periodo { display: contents; }
+/* El control de campus arrastra un mb-6 que desbalancea el grid en tablet/móvil. */
+#wizard-row.flujo-alumno #row-campus-periodo .flex-1 { margin-bottom: 0; }
 /* Orden de campos: nivel → campus → programa → periodo y, al final, los campos
    dinámicos (materias, certificados…). Nivel va primero porque campus, programa
    y periodo dependen del nivel elegido (no todos los niveles están en todos los
