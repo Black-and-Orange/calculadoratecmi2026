@@ -170,8 +170,10 @@ main.solo-logo {
 
 /* Encabezado combinado "Ayúdanos a identificarte": mostrarlo y ocultar los
    encabezados/botones individuales de cada sub-paso. */
+/* El encabezado combinado solo se muestra en el PASO 1 (main.js le pone la
+   clase .en-paso-1); en los pasos 2-4 del alumno no debe aparecer. */
 .heading-alumno { display: none; }
-#wizard-row.flujo-alumno .heading-alumno { display: block; }
+#wizard-row.flujo-alumno .heading-alumno.en-paso-1 { display: block; }
 #wizard-row.flujo-alumno #step-dp > h3,
 #wizard-row.flujo-alumno #step-dp > p,
 #wizard-row.flujo-alumno #step-dp > hr,
@@ -202,6 +204,9 @@ main.solo-logo {
     gap: 1.25rem 1.5rem;
     align-items: start;
 }
+/* moveStep oculta #step-1 con .hidden en los pasos 2-4; .hidden debe ganar al
+   display:grid de arriba para que el paso 1 no se cuele en los demás pasos. */
+#wizard-row.flujo-alumno #step-1.hidden { display: none; }
 
 /* La fila campus/periodo aporta sus dos celdas directamente al grid de nivel. */
 #wizard-row.flujo-alumno #row-campus-periodo { display: contents; }
@@ -281,3 +286,8 @@ main.solo-logo {
 }
 #step-2-students .apoyo-porcentaje select { width: 100%; }
 #step-2-students .radio-group { padding-top: 0; }
+/* .hidden debe ganar a los display:flex de arriba: apoyos-hu.js oculta el
+   porcentaje hasta elegir "Sí" y la fila de préstamo cuando no aplica al nivel. */
+#step-2-students .apoyo-fila.hidden,
+#step-2-students .apoyo-pregunta.hidden,
+#step-2-students .apoyo-porcentaje.hidden { display: none; }

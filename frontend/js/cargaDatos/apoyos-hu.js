@@ -110,19 +110,18 @@ const initAlumno = () => {
         if (rowBeca) rowBeca.classList.toggle('hidden', rBeca !== 'si');
         if (rBeca === 'no') seleccionarCero(becaSelect);
 
-        // El préstamo estudiantil solo aplica a profesional y posgrados; en
-        // preparatoria se oculta la pregunta y se deja en "no" para no bloquear.
+        // El préstamo solo aplica a profesional y posgrados Y cuando el backend
+        // tiene opciones para el nivel. Si no aplica, se OCULTA la pregunta (no
+        // se muestra deshabilitada) y se deja en "no" para no bloquear el botón.
         const esPrepa = NIVELES_PREPA.includes(nivel());
-        const filaPrestamo = document.getElementById('fila-prestamo-alumno');
-        if (filaPrestamo) filaPrestamo.classList.toggle('hidden', esPrepa);
-        if (esPrepa) setRadio('radio-prestamo-alumno', 'no');
-
-        // Préstamo disponible solo si el backend devolvió opciones para el nivel
         const hayPrestamos = prestamoSelect && Array.from(prestamoSelect.options).some(o => o.value !== '' && o.value !== '0');
-        if (!hayPrestamos && prestamoSelect) {
+        const prestamoNoAplica = esPrepa || !hayPrestamos;
+
+        const filaPrestamo = document.getElementById('fila-prestamo-alumno');
+        if (filaPrestamo) filaPrestamo.classList.toggle('hidden', prestamoNoAplica);
+
+        if (prestamoNoAplica) {
             setRadio('radio-prestamo-alumno', 'no');
-            setRadioDisabled('radio-prestamo-alumno', true);
-            setInfo('radio-prestamo-alumno-info', 'El préstamo estudiantil no está disponible para tu nivel.');
         } else {
             aplicarRegla60('radio-prestamo-alumno', prestamoSelect, becaPct(), 'radio-prestamo-alumno-info');
         }

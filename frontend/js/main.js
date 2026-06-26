@@ -192,6 +192,11 @@ document.addEventListener("DOMContentLoaded", () => {
           paneles.forEach((p) => { if (p) p.classList.toggle("hidden", !visible); });
         });
 
+        // El encabezado "Ayúdanos a identificarte" (datos + nivel) solo va en el
+        // paso 1 del alumno; en los pasos 2-4 no debe aparecer.
+        const headingAlumno = document.querySelector(".heading-alumno");
+        if (headingAlumno) headingAlumno.classList.toggle("en-paso-1", esAlumno && currentStep === 1);
+
         stepCircles.forEach((circle, index) => {
           if (!circle) return;
           circle.classList.toggle("active", index === currentStep - 1);
