@@ -205,9 +205,15 @@ main.solo-logo {
 
 /* La fila campus/periodo aporta sus dos celdas directamente al grid de nivel. */
 #wizard-row.flujo-alumno #row-campus-periodo { display: contents; }
-/* Imagen: campus primero. El orden natural del resto queda nivel, programa,
-   periodo y, al final, los campos dinámicos (materias, etc.). */
-#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:first-child { order: -1; }
+/* Orden de campos: nivel → campus → programa → periodo y, al final, los campos
+   dinámicos (materias, certificados…). Nivel va primero porque campus, programa
+   y periodo dependen del nivel elegido (no todos los niveles están en todos los
+   campus). */
+#wizard-row.flujo-alumno #step-1 > div { order: 5; }
+#wizard-row.flujo-alumno #step-1 .orden-nivel { order: 1; }
+#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:first-child { order: 2; }
+#wizard-row.flujo-alumno #step-1 .orden-programa { order: 3; }
+#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:last-child { order: 4; }
 
 /* Cada campo VISIBLE en columna; se excluyen los .hidden para no revelar los
    campos dinámicos que no aplican al nivel elegido. */
@@ -243,6 +249,7 @@ main.solo-logo {
     flex-direction: row !important;
     justify-content: flex-end !important;
     margin-bottom: 0;
+    order: 10;
 }
 
 /* ===== Barra de pasos: variante de 4 pasos para alumno ===== */
