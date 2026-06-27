@@ -602,7 +602,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputs = formElement.querySelectorAll('input');
         inputs.forEach(input => {
             if (input.type === 'text' || input.type === 'number') {
-                if (input.id !== 'txt-name') {
+                // Conservar el nombre completo y los datos personales (matrícula,
+                // nombre, apellidos): ahora viven en el mismo paso que el nivel,
+                // así que NO deben borrarse al cambiar de nivel.
+                const esDatoPersonal = input.closest('#datos-alumno, #datos-prospecto');
+                if (input.id !== 'txt-name' && !esDatoPersonal) {
                     input.value = '';
                 }
             }
