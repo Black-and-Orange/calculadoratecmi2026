@@ -181,13 +181,13 @@
 
 /* ── Vigencia ── */
 .cotiz-vigencia {
-    background: rgb(246 141 46);   /* naranja del wizard, en vez del rosa del mockup */
+    background: #C0392B;           /* rojo: barra de vigencia / fecha límite */
     color: #fff;
     text-align: center;
     font-weight: 700;
-    padding: 12px;
+    padding: 13px;
     border-radius: 8px;
-    margin-bottom: 30px;
+    margin-bottom: 26px;
 }
 
 /* ── Notas ── */
