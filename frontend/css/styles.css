@@ -2215,170 +2215,108 @@ p.msg.error {
 /* ===== ESTILOS PARA STEP1.JS - PERÍODOS MÚLTIPLES ===== */
 
 /* Contenedor principal de períodos */
+/* ===== Selector de períodos para nivel 13 (Ejecutivo Bimestral MAPS) =====
+   Cada período es una TARJETA con su checkbox + Certificados + Semanas SEDI.
+   Paleta del proyecto: verde oscuro rgb(0 83 76) · teal rgb(0 164 153). */
 .periodos-row-container {
     grid-column: 1 / -1;
-    margin-top: 16px;
+    margin-top: 4px;
 }
 
-/* Label de períodos */
 .periodos-label {
     display: block;
     margin-bottom: 12px;
 }
 
-/* Contenedor de checkboxes de períodos */
-.periodos-checkbox-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
+/* Rejilla de tarjetas: tantas como quepan (mín. 165px); idealmente las 5 a lo ancho. */
+.periodos-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    gap: 14px;
 }
 
-/* Elemento individual del checkbox de período */
-.periodo-checkbox-item {
+.periodo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.periodo-card.active {
+    border-color: rgb(0 164 153);
+    box-shadow: 0 2px 8px rgba(0, 164, 153, 0.15);
+}
+
+.periodo-card-header {
     display: flex;
     align-items: center;
-    padding: 6px 8px;
-    background: white;
-    border: 2px solid #e9ecef;
-    border-radius: 6px;
+    gap: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    min-width: 90px;
+    font-weight: 600;
+    color: rgb(0 83 76);
+}
+
+.periodo-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: rgb(0 164 153);
+    cursor: pointer;
     flex-shrink: 0;
 }
 
-/* Checkbox de período */
-.periodo-checkbox {
-    margin-right: 6px;
-    transform: scale(1.1);
-}
-
-/* Label del checkbox de período */
 .periodo-checkbox-label {
     cursor: pointer;
-    font-weight: 500;
-    color: #495057;
-    flex: 1;
-    margin: 0;
 }
 
-/* Texto de ayuda para períodos */
+.periodo-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.periodo-campo-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.periodo-campo-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+}
+
+.periodo-campo-select:disabled {
+    background: #f1f3f5;
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+/* Ayuda y error ocupan toda la fila bajo las tarjetas. */
 .periodos-help-text {
-    margin-top: 8px;
+    grid-column: 1 / -1;
+    margin-top: 4px;
     font-size: 14px;
     color: #6c757d;
     font-style: italic;
 }
 
-/* Contenedor de configuraciones de períodos */
-.configuraciones-periodos {
-    margin-top: 16px;
-    display: none;
-    grid-column: 1 / -1;
-}
-
-/* Configuración individual de período */
-.periodo-config {
-    background: white;
-    border: 2px solid #007bff;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0,123,255,0.1);
-}
-
-/* Título de configuración de período */
-.periodo-config-titulo {
-    margin: 0 0 12px 0;
-    color: #007bff;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-/* Contenedor de controles de período */
-.periodo-controles-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-/* Div de certificados */
-.periodo-certificados-div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-/* Label de certificados */
-.periodo-certificados-label {
-    font-weight: 500;
-    color: #495057;
-    font-size: 14px;
-}
-
-/* Select de certificados */
-.periodo-certificados-select {
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-/* Div de semanas */
-.periodo-semanas-div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-/* Label de semanas */
-.periodo-semanas-label {
-    font-weight: 500;
-    color: #495057;
-    font-size: 14px;
-}
-
-/* Select de semanas */
-.periodo-semanas-select {
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-/* Mensaje de error para períodos */
 .periodos-error-msg {
+    grid-column: 1 / -1;
     margin-top: 8px;
     padding: 8px 12px;
     background: #f8d7da;
     border: 1px solid #f5c6cb;
-    border-radius: 4px;
+    border-radius: 6px;
     color: #721c24;
     font-size: 14px;
     font-weight: 500;
-}
-
-/* Estados hover para checkboxes de período */
-.periodo-checkbox-item:hover {
-    border-color: #007bff;
-    background-color: #f8f9ff;
-}
-
-/* Estados hover para checkboxes de período (clase específica) */
-.periodo-checkbox-item.hover {
-    border-color: #007bff;
-    background-color: #f8f9ff;
-}
-
-/* Estados activos para checkboxes de período */
-.periodo-checkbox-item.active {
-    border-color: #007bff;
-    background-color: #e3f2fd;
-    box-shadow: 0 2px 4px rgba(0,123,255,0.1);
 }
 

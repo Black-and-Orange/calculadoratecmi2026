@@ -221,6 +221,10 @@ main.solo-logo {
 #wizard-row.flujo-alumno #row-campus-periodo .campo-cell:first-child { order: 2; }
 #wizard-row.flujo-alumno #step-1 .orden-programa { order: 3; }
 #wizard-row.flujo-alumno #row-campus-periodo .campo-cell:last-child { order: 4; }
+/* El selector de periodos del nivel 13 (tarjetas) va a lo ancho, debajo de
+   los campos. Es hijo de #row-campus-periodo (display:contents), así que sin
+   un order explícito caería al inicio del grid. */
+#wizard-row.flujo-alumno #periodos-row-container { order: 6; grid-column: 1 / -1; }
 
 /* Cada campo VISIBLE en columna; se excluyen los .hidden para no revelar los
    campos dinámicos que no aplican al nivel elegido. */
@@ -241,13 +245,20 @@ main.solo-logo {
     margin-bottom: 4px;
 }
 
-/* Controles a ancho completo de su celda. */
+/* Controles a ancho completo de su celda. Se excluyen los checkboxes (los del
+   selector de periodos del nivel 13): si heredan width:100% se inflan y empujan
+   el nombre del mes fuera de la tarjeta. */
 #wizard-row.flujo-alumno #datos-alumno input,
 #wizard-row.flujo-alumno #datos-alumno select,
-#wizard-row.flujo-alumno #step-1 input,
+#wizard-row.flujo-alumno #step-1 input:not([type="checkbox"]),
 #wizard-row.flujo-alumno #step-1 select {
     width: 100%;
 }
+
+/* El ícono de ayuda "?" no debe encimar el texto del select en celdas angostas:
+   se deja padding a la derecha y se recorre el "?" a la izquierda de la flecha. */
+#wizard-row.flujo-alumno #step-1 .relative > select { padding-right: 3rem; }
+#wizard-row.flujo-alumno #step-1 .relative > .tooltip { right: 1.6rem !important; }
 
 /* La fila de botones ocupa todo el ancho del grid y se alinea a la derecha,
    no debe quedar como una celda más. */
@@ -291,3 +302,27 @@ main.solo-logo {
 #step-2-students .apoyo-fila.hidden,
 #step-2-students .apoyo-pregunta.hidden,
 #step-2-students .apoyo-porcentaje.hidden { display: none; }
+
+/* ===== Paso 3 — Seguros y coberturas (render por tipo en step3.js; aplica a
+   alumno y prospecto). Cada bloque: título + descripción + radios/dropdown. ===== */
+.seguro-bloque { margin-bottom: 1.75rem; }
+.seguro-titulo { font-size: 18px; margin-bottom: 4px; color: rgb(0 83 76); }
+.seguro-desc { font-size: 15px; line-height: 22px; color: #374151; margin-bottom: 8px; max-width: 760px; }
+.seguro-pregunta { font-weight: 600; margin: 10px 0 2px; }
+.seguro-nota { font-size: 14px; color: #6b7280; margin-bottom: 8px; }
+.seguro-interes-wrap { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; max-width: 360px; }
+.seguro-interes-wrap.hidden { display: none; }
+.seguro-interes-select { width: 100%; }
+.seguro-poliza { color: rgb(0 164 153); font-size: 14px; margin-top: 10px; max-width: 760px; }
+.seguro-poliza.hidden { display: none; }
+/* En la rejilla alumno el #step-3 no es grid, así que los radios se ven igual
+   que en prospecto; solo se asegura que los radios deshabilitados se distingan. */
+.seguro-bloque .radio-opcion input[type="radio"]:disabled + * ,
+.seguro-bloque input[type="radio"]:disabled { cursor: not-allowed; }
+
+/* ===== Paso 4 (alumno) — "Legales": subtítulos por sección, sin el párrafo
+   de intro, botones a la derecha. Solo aplica al flujo alumno. ===== */
+.subtitulo-legal { display: none; }
+#wizard-row.flujo-alumno .subtitulo-legal { display: block; margin-top: 1rem; margin-bottom: 0.5rem; }
+#wizard-row.flujo-alumno .intro-step4 { display: none; }
+#wizard-row.flujo-alumno .botones-step4 { justify-content: flex-end; }

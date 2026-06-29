@@ -237,6 +237,12 @@ const initProspecto = () => {
 
 /* ════════════════ SEGUROS (HU22-27 / HU60-65) ════════════════ */
 const initSeguros = () => {
+    // El paso 3 (seguros/coberturas) ahora lo construye y gobierna step3.js:
+    // render por tipo (VIVE/accidente/colegiatura) + reglas de negocio + cálculo +
+    // habilitación del botón. Se desactiva esta capa para no duplicar ni forzar los
+    // selects. Ver memoria calculadora-tecmi-paso3-seguros.
+    return;
+    /* eslint-disable no-unreachable */
     const panel = document.getElementById('step-3');
     const contenedor = document.getElementById('seguros-dinamicos-container');
     const rowRadio = document.getElementById('row-radio-seguro-interes');

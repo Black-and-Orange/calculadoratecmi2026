@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const periodoLabel = periodoContainer.previousElementSibling.querySelector('label');
         
         // Cambiar el label
-        if (periodoLabel) periodoLabel.textContent = 'Períodos:';
+        if (periodoLabel) periodoLabel.textContent = 'Períodos';
         
         // Ocultar el select original
         selectors.periodo.style.display = 'none';
@@ -621,12 +621,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 1. Crear checkboxes de períodos para nivel 13
-    function crearSelectPeriodosMultiples(bimestresUnicos) {
+    async function crearSelectPeriodosMultiples(bimestresUnicos) {
         const periodoContainer = selectors.periodo.parentElement;
         selectors.periodo.style.display = 'none';
 
         // Ocultar el contenedor original para que no interfiera con el layout
         periodoContainer.style.display = 'none';
+        // En la rejilla alumno, ocultar la CELDA completa del periodo para que no
+        // deje una columna vacía (así "Formato de estudios" sube junto a "programa").
+        const periodoCell = selectors.periodo.closest('.campo-cell');
+        if (periodoCell) periodoCell.style.display = 'none';
         
         // Ocultar el label original del período
         const periodoLabelOriginal = document.querySelector('label[for="select-period"]');
@@ -651,19 +655,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Crear label para períodos
         const periodosLabel = document.createElement('label');
-        periodosLabel.textContent = 'Períodos:';
+        periodosLabel.textContent = 'Selecciona los periodos de tu interés';
         periodosLabel.className = 'font-semibold periodos-label';
         periodosRowContainer.appendChild(periodosLabel);
 
         // Crear contenedor para checkboxes
         checkboxContainer = document.createElement('div');
         checkboxContainer.id = 'periodos-checkbox-container';
-        checkboxContainer.className = 'periodos-checkbox-grid periodos-checkbox-container';
+        checkboxContainer.className = 'periodos-cards periodos-checkbox-container';
 
-        // Crear checkboxes organizados
+        // Cargar opciones de Certificados y Semanas SEDI (nivel 13) una sola vez.
+        let certificadosData = [], semanasData = [];
+        try {
+            [certificadosData, semanasData] = await Promise.all([
+                fetch(`${API_BASE_URL}/certificados/nivel/13`).then(res => res.json()),
+                fetch(`${API_BASE_URL}/semanas/nivel/13`).then(res => res.json())
+            ]);
+        } catch (err) {
+            console.error('No se pudieron cargar las opciones de períodos:', err);
+        }
+
+        // Llena un <select> conservando el atributo de valor que usa el cálculo.
+        const llenarSelectPeriodo = (select, data, prop, attr, attrDefault) => {
+            select.innerHTML = '<option value="">Selecciona</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[prop];
+                option.textContent = item[prop];
+                option.setAttribute(attr, item[attr] || attrDefault);
+                select.appendChild(option);
+            });
+        };
+
+        // Una TARJETA por período: checkbox + Certificados + Semanas SEDI juntos.
         bimestresUnicos.forEach((bim, index) => {
-            const checkboxDiv = document.createElement('div');
-            checkboxDiv.className = 'periodo-checkbox-item';
+            const card = document.createElement('div');
+            card.className = 'periodo-card';
+            card.id = `periodo-card-${bim.codigo}`;
+
+            // Encabezado: <label> nativo, al hacer clic en el mes se marca el checkbox.
+            const header = document.createElement('label');
+            header.className = 'periodo-card-header';
+            header.htmlFor = `periodo-${bim.codigo}`;
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -673,52 +706,60 @@ document.addEventListener('DOMContentLoaded', () => {
             checkbox.setAttribute('data-index', index);
             checkbox.className = 'periodo-checkbox';
 
-            const label = document.createElement('label');
-            label.htmlFor = `periodo-${bim.codigo}`;
-            label.textContent = bim.mes;
-            label.className = 'periodo-checkbox-label';
+            const mesSpan = document.createElement('span');
+            mesSpan.textContent = bim.mes;
+            mesSpan.className = 'periodo-checkbox-label';
 
-                        // Agregar evento hover
-            checkboxDiv.addEventListener('mouseenter', () => {
-                if (!checkbox.checked) {
-                    checkboxDiv.classList.add('hover');
-                }
-            });
+            header.appendChild(checkbox);
+            header.appendChild(mesSpan);
+            card.appendChild(header);
 
-            checkboxDiv.addEventListener('mouseleave', () => {
-                if (!checkbox.checked) {
-                    checkboxDiv.classList.remove('hover');
-                }
-            });
+            // Campo Certificados (deshabilitado hasta marcar el período).
+            const certDiv = document.createElement('div');
+            certDiv.className = 'periodo-campo';
+            const certLabel = document.createElement('label');
+            certLabel.textContent = 'Certificados';
+            certLabel.className = 'periodo-campo-label';
+            certLabel.htmlFor = `certificados-${bim.codigo}`;
+            const certSelect = document.createElement('select');
+            certSelect.id = `certificados-${bim.codigo}`;
+            certSelect.className = 'periodo-campo-select';
+            certSelect.disabled = true;
+            llenarSelectPeriodo(certSelect, certificadosData, 'num_certificados', 'valor_certificado', 10);
+            certDiv.appendChild(certLabel);
+            certDiv.appendChild(certSelect);
+            card.appendChild(certDiv);
 
-            // Agregar evento de cambio
+            // Campo Semanas SEDI (deshabilitado hasta marcar el período).
+            const semDiv = document.createElement('div');
+            semDiv.className = 'periodo-campo';
+            const semLabel = document.createElement('label');
+            semLabel.textContent = 'Semanas SEDI';
+            semLabel.className = 'periodo-campo-label';
+            semLabel.htmlFor = `semanas-${bim.codigo}`;
+            const semSelect = document.createElement('select');
+            semSelect.id = `semanas-${bim.codigo}`;
+            semSelect.className = 'periodo-campo-select';
+            semSelect.disabled = true;
+            llenarSelectPeriodo(semSelect, semanasData, 'num_semanas', 'valor_semana_sedi', 1);
+            semDiv.appendChild(semLabel);
+            semDiv.appendChild(semSelect);
+            card.appendChild(semDiv);
+
+            // Al marcar/desmarcar: resaltar la tarjeta y habilitar/limpiar sus selects.
             checkbox.addEventListener('change', () => {
-                if (checkbox.checked) {
-                    checkboxDiv.classList.add('active');
-                    checkboxDiv.classList.remove('hover');
-                    // Mostrar configuración del período
-                    mostrarConfiguracionPeriodo(bim.codigo, bim.mes, index);
-                } else {
-                    checkboxDiv.classList.remove('active');
-                    checkboxDiv.classList.remove('hover');
-                    // Ocultar configuración del período
-                    ocultarConfiguracionPeriodo(bim.codigo);
-                }
+                const activo = checkbox.checked;
+                card.classList.toggle('active', activo);
+                certSelect.disabled = !activo;
+                semSelect.disabled = !activo;
+                if (!activo) { certSelect.value = ''; semSelect.value = ''; }
                 validarPeriodosConsecutivosCheckboxes();
                 updateCosto();
             });
+            certSelect.addEventListener('change', () => { updateCosto(); validarPeriodosConsecutivosCheckboxes(); });
+            semSelect.addEventListener('change', () => { updateCosto(); validarPeriodosConsecutivosCheckboxes(); });
 
-            // Permitir hacer clic en todo el div para marcar/desmarcar
-            checkboxDiv.addEventListener('click', (e) => {
-                if (e.target !== checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
-                }
-            });
-
-            checkboxDiv.appendChild(checkbox);
-            checkboxDiv.appendChild(label);
-            checkboxContainer.appendChild(checkboxDiv);
+            checkboxContainer.appendChild(card);
         });
 
         // Agregar mensaje de ayuda
@@ -730,15 +771,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         periodosRowContainer.appendChild(checkboxContainer);
         
-        // Insertar el contenedor de períodos después del contenedor de campus
-        const campusContainer = selectors.campus.parentElement;
-        campusContainer.parentElement.insertBefore(periodosRowContainer, campusContainer.nextSibling);
-
-        // Crear contenedor para configuraciones de períodos
-        const configContainer = document.createElement('div');
-        configContainer.id = 'configuraciones-periodos';
-        configContainer.className = 'configuraciones-periodos';
-        periodosRowContainer.appendChild(configContainer);
+        // Insertar como hijo DIRECTO de #step-1 (la rejilla en alumno / el contenedor
+        // en prospecto), justo después del bloque que contiene al campus. En alumno el
+        // campus va anidado (#row-campus-periodo > .campo-cell > … > select), así que
+        // subimos hasta el ancestro que sea hijo directo de #step-1; si no, al final.
+        const step1 = document.getElementById('step-1');
+        let anchor = selectors.campus;
+        while (anchor && anchor.parentElement && anchor.parentElement.id !== 'step-1') {
+            anchor = anchor.parentElement;
+        }
+        if (step1 && anchor && anchor.parentElement && anchor.parentElement.id === 'step-1') {
+            step1.insertBefore(periodosRowContainer, anchor.nextSibling);
+        } else if (step1) {
+            step1.appendChild(periodosRowContainer);
+        }
     }
 
     // Función para mostrar la configuración de un período específico
@@ -782,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
         certificadosDiv.className = 'periodo-certificados-div';
 
         const certificadosLabel = document.createElement('label');
-        certificadosLabel.textContent = 'Certificados:';
+        certificadosLabel.textContent = 'Certificados';
         certificadosLabel.className = 'periodo-certificados-label';
 
         const certificadosSelect = document.createElement('select');
@@ -807,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
         semanasDiv.className = 'periodo-semanas-div';
 
         const semanasLabel = document.createElement('label');
-        semanasLabel.textContent = 'Semanas SEDI:';
+        semanasLabel.textContent = 'Semanas SEDI';
         semanasLabel.className = 'periodo-semanas-label';
 
         const semanasSelect = document.createElement('select');
@@ -1087,9 +1133,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Cambiar el label según el nivel
         if (periodoLabel) {
             if (mappedLevel === 13) {
-                periodoLabel.textContent = 'Períodos:';
+                periodoLabel.textContent = 'Períodos';
             } else {
-                periodoLabel.textContent = 'Periodo:';
+                periodoLabel.textContent = 'Periodo';
             }
         }
 
@@ -1112,6 +1158,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (periodoLabelOriginal) {
             periodoLabelOriginal.style.display = '';
         }
+        // Restaurar la celda del periodo y su select (pudieron ocultarse para el nivel 13).
+        const periodoCellRestore = selectors.periodo.closest('.campo-cell');
+        if (periodoCellRestore) periodoCellRestore.style.display = '';
+        selectors.periodo.style.display = '';
+        if (selectors.periodo.parentElement) selectors.periodo.parentElement.style.display = '';
 
         if (mappedLevel === 13) {
             fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`)
@@ -1149,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Restaurar el select original para otros niveles
             selectors.periodo.style.display = 'block';
             const periodoLabel = selectors.periodo.parentElement.previousElementSibling.querySelector('label');
-            if (periodoLabel) periodoLabel.textContent = 'Periodo:';
+            if (periodoLabel) periodoLabel.textContent = 'Periodo';
             selectors.periodo.parentElement.style.display = 'block';
             const bimestreSelect = document.getElementById('select-bimestre');
             if (bimestreSelect) bimestreSelect.style.display = 'none';
@@ -1186,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if ([2, 6, 10, 12].includes(mappedLevel)) {
                             apiUrl = `${API_BASE_URL}/creditos/nivel/${mappedLevel}`;
                             property = 'credito';
-                            selectors.divMaterias.querySelector('label').textContent = 'Créditos:';
+                            selectors.divMaterias.querySelector('label').textContent = 'Créditos';
                             // Solo mostrar el tooltip para el nivel 2 (Profesional Semestral)
                             if (mappedLevel === 2) {
                                 mostrarTooltipCreditos(mappedLevel);
@@ -1196,10 +1247,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else if ([5, 8, 9].includes(mappedLevel)) {
                             apiUrl = `${API_BASE_URL}/certificados/nivel/${mappedLevel}`;
                             property = 'num_certificados';
-                            selectors.divMaterias.querySelector('label').textContent = 'Certificados:';
+                            selectors.divMaterias.querySelector('label').textContent = 'Certificados';
                             ocultarTooltipCreditos();
                         } else {
-                            selectors.divMaterias.querySelector('label').textContent = 'Materias:';
+                            selectors.divMaterias.querySelector('label').textContent = 'Materias';
                             ocultarTooltipCreditos();
                         }
                     }

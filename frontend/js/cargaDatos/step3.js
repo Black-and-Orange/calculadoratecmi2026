@@ -3,24 +3,192 @@ import { API_BASE_URL } from '../apiConfig.js';
 document.addEventListener('DOMContentLoaded', () => {
     const segurosContainer = document.getElementById('seguros-dinamicos-container');
     const anuncioPoliza = document.getElementById('anuncioPoliza');
-    const viveDiv = document.getElementById('div-vive'); // Mantener referencia por si se necesita
+    const btnNext = document.getElementById('step-3-next');
 
     let segurosData = [];
-    let segurosMap = new Map(); // Para acceso rápido por id_seguro
 
-    // Función para obtener el nivel actual
+    // ── Reglas de negocio (confirmadas con cliente; ver memoria calculadora-tecmi-paso3-seguros) ──
+    const VIVE_FORZADA = [1, 2, 3, 4];                 // VIVE pre-marcada "sí"
+    const VIVE_OCULTA = [6, 7, 8, 9, 10, 11, 12];      // VIVE no se muestra
+    const COLEGIATURA_NIVELES = [1, 2, 3, 4];          // dónde aplica colegiatura
+
     const getLevelId = () => {
-        try {
-            return JSON.parse(localStorage.getItem('selectedNivel'));
-        } catch (e) {
-            return null;
-        }
+        try { return JSON.parse(localStorage.getItem('selectedNivel')); } catch (e) { return null; }
+    };
+    const getFormatCode = () => localStorage.getItem('codigoFormato');
+    // Sin formato (p.ej. prepa) se trata como presencial, igual que la lógica previa.
+    const esPresencial = () => { const f = getFormatCode(); return !f || f === 'P'; };
+
+    const tipoSeguro = (seguro) => {
+        const n = (seguro.nombre_seguro || '').toLowerCase();
+        if (n.includes('vive')) return 'vive';
+        if (n.includes('accidente')) return 'accidente';
+        // En la BD la "Cobertura de Colegiatura" del PDF se llama "Cobertura Estudiantil".
+        if (n.includes('colegiatura') || n.includes('estudiantil')) return 'colegiatura';
+        return 'otro';
     };
 
-    // Función para obtener el código de formato
-    const getFormatCode = () => {
-        return localStorage.getItem('codigoFormato');
+    // <select> oculto = fuente de verdad que lee calculateInsuranceCost (id intacto).
+    const crearSelectOculto = (idSeguro, valor) => {
+        const sel = document.createElement('select');
+        sel.id = `select-seguro-${idSeguro}`;
+        sel.name = `select-seguro-${idSeguro}`;
+        sel.style.display = 'none';
+        ['', 'si', 'no'].forEach(v => { const o = document.createElement('option'); o.value = v; sel.appendChild(o); });
+        sel.value = valor || '';
+        sel.addEventListener('change', () => { calculateInsuranceCost(); actualizarBoton(); });
+        return sel;
     };
+    const setOculto = (sel, v) => { if (sel && sel.value !== v) { sel.value = v; sel.dispatchEvent(new Event('change', { bubbles: true })); } };
+
+    const crearRadios = (name, valor, disabled, opciones, onChange) => {
+        const grp = document.createElement('div');
+        grp.className = 'radio-group';
+        opciones.forEach(({ v, txt }) => {
+            const lbl = document.createElement('label');
+            lbl.className = 'radio-opcion';
+            const inp = document.createElement('input');
+            inp.type = 'radio'; inp.name = name; inp.value = v;
+            if (valor === v) inp.checked = true;
+            if (disabled) inp.disabled = true;
+            inp.addEventListener('change', () => onChange(v));
+            lbl.appendChild(inp);
+            lbl.appendChild(document.createTextNode(' ' + txt));
+            grp.appendChild(lbl);
+        });
+        return grp;
+    };
+
+    const bloque = (titulo) => {
+        const div = document.createElement('div');
+        div.className = 'seguro-bloque';
+        const h = document.createElement('p');
+        h.className = 'font-semibold seguro-titulo';
+        h.textContent = titulo;
+        div.appendChild(h);
+        return div;
+    };
+    const parrafo = (texto, clase) => {
+        const p = document.createElement('p');
+        p.className = clase || 'seguro-desc';
+        p.textContent = texto;
+        return p;
+    };
+
+    // ── VIVE: Sí/No, pre-marcado según reglas, NO editable (disabled siempre) ──
+    function renderVive(seguro, levelId) {
+        const valor = 'si'; // solo se renderiza en niveles forzados (ver generarSelectsSeguros)
+        const div = bloque('Cobertura VIVE');
+        div.appendChild(parrafo('Permite enriquecer tu experiencia estudiantil ofreciéndote una oferta de talleres extracurriculares, vivir eventos memorables en campus y asistir a eventos nacionales.'));
+        const sel = crearSelectOculto(seguro.id_seguro, valor);
+        div.appendChild(crearRadios(`vive-${seguro.id_seguro}`, valor, true, [{ v: 'si', txt: 'Sí' }, { v: 'no', txt: 'No' }], () => {}));
+        div.appendChild(sel);
+        segurosContainer.appendChild(div);
+    }
+
+    // ── Seguro contra accidente: contratar/propio + dropdown condicional + nota póliza ──
+    function renderAccidente(seguro) {
+        const div = bloque('Seguro contra accidente');
+        div.appendChild(parrafo('Todos los estudiantes deberán contar con un seguro de accidentes, ya sea contratado con Tecmilenio o particular.'));
+        div.appendChild(parrafo('¿Cuentas con un seguro propio o deseas contratar con Tecmilenio?', 'seguro-pregunta'));
+
+        const sel = crearSelectOculto(seguro.id_seguro, '');
+
+        // Dropdown "Selecciona el seguro de tu interés" (solo al elegir contratar).
+        const wrapSelect = document.createElement('div');
+        wrapSelect.className = 'seguro-interes-wrap hidden';
+        const lblSel = document.createElement('label');
+        lblSel.className = 'font-semibold';
+        lblSel.textContent = 'Selecciona el seguro de tu interés';
+        const visibleSelect = document.createElement('select');
+        visibleSelect.className = 'seguro-interes-select';
+        const ph = document.createElement('option'); ph.value = ''; ph.textContent = 'Selecciona'; visibleSelect.appendChild(ph);
+        const opt = document.createElement('option'); opt.value = String(seguro.id_seguro); opt.textContent = seguro.nombre_seguro; visibleSelect.appendChild(opt);
+        visibleSelect.addEventListener('change', () => setOculto(sel, visibleSelect.value ? 'si' : ''));
+        wrapSelect.appendChild(lblSel);
+        wrapSelect.appendChild(visibleSelect);
+
+        // Nota de póliza: dentro del bloque, justo bajo accidente; solo con seguro propio.
+        const notaPoliza = document.createElement('p');
+        notaPoliza.className = 'seguro-poliza hidden';
+        notaPoliza.textContent = 'El alumno deberá presentar una copia de su póliza de seguro de gastos médicos mayores vigente.';
+
+        const radios = crearRadios(`accidente-${seguro.id_seguro}`, '', false, [
+            { v: 'tecmilenio', txt: 'Deseo contratarlo con Tecmilenio' },
+            { v: 'propio', txt: 'Cuento con mi propio seguro' }
+        ], (v) => {
+            if (v === 'tecmilenio') {
+                wrapSelect.classList.remove('hidden');
+                notaPoliza.classList.add('hidden');
+                setOculto(sel, visibleSelect.value ? 'si' : '');
+            } else {
+                wrapSelect.classList.add('hidden');
+                notaPoliza.classList.remove('hidden');
+                setOculto(sel, 'no');
+            }
+        });
+
+        div.appendChild(radios);
+        div.appendChild(wrapSelect);
+        div.appendChild(notaPoliza);
+        div.appendChild(sel);
+        segurosContainer.appendChild(div);
+    }
+
+    // ── Cobertura de Colegiatura: Sí/No + texto; forzada en presenciales de prepa/prof-semestral ──
+    function renderColegiatura(seguro, levelId) {
+        const forzada = esPresencial() && COLEGIATURA_NIVELES.includes(levelId);
+        const valor = forzada ? 'si' : '';
+        const div = bloque('Cobertura de Colegiatura');
+
+        const exclusiva = document.createElement('p');
+        exclusiva.className = 'seguro-desc';
+        exclusiva.innerHTML = '<strong>Cobertura exclusiva para alumnos de Tecmilenio.</strong> Por política de nuestra institución, la contratación de esta cobertura es obligatoria para los estudiantes presenciales de Preparatoria y Profesional Semestral. Cubre el pago del 100% de las colegiaturas en caso de fallecimiento del padre o tutor.';
+        div.appendChild(exclusiva);
+
+        const nota = document.createElement('p');
+        nota.className = 'seguro-nota';
+        nota.innerHTML = '<strong>Nota:</strong> Responsable del pago de colegiaturas.';
+        div.appendChild(nota);
+
+        const sel = crearSelectOculto(seguro.id_seguro, valor);
+        div.appendChild(crearRadios(`colegiatura-${seguro.id_seguro}`, valor, forzada, [{ v: 'si', txt: 'Sí' }, { v: 'no', txt: 'No' }], (v) => setOculto(sel, v)));
+        div.appendChild(sel);
+        segurosContainer.appendChild(div);
+    }
+
+    // Render principal: en el orden del PDF (VIVE → accidente → colegiatura).
+    function generarSelectsSeguros(seguros) {
+        if (!segurosContainer) return;
+        segurosContainer.innerHTML = '';
+        const levelId = getLevelId();
+        const buscar = (t) => seguros.find(s => s.estado && s.nombre_seguro && tipoSeguro(s) === t);
+
+        const vive = buscar('vive');
+        const accidente = buscar('accidente');
+        const colegiatura = buscar('colegiatura');
+
+        // VIVE solo se muestra donde está forzada (1-4): pre-marcada "Sí" y bloqueada.
+        // En el resto (5, 13, 6-12) no aplica → no se renderiza.
+        if (vive && VIVE_FORZADA.includes(levelId)) renderVive(vive, levelId);
+        if (accidente && esPresencial()) renderAccidente(accidente);
+        if (colegiatura && COLEGIATURA_NIVELES.includes(levelId)) renderColegiatura(colegiatura, levelId);
+
+        if (!segurosContainer.children.length) {
+            segurosContainer.innerHTML = '<p class="text-muted">No hay seguros disponibles para este nivel.</p>';
+        }
+
+        calculateInsuranceCost();
+        actualizarBoton();
+    }
+
+    // Continuar habilitado solo cuando todo lo requerido está respondido (sí/no).
+    function actualizarBoton() {
+        if (!btnNext) return;
+        const selects = Array.from(segurosContainer.querySelectorAll('select[id^="select-seguro-"]'));
+        const ok = selects.every(s => s.value === 'si' || s.value === 'no');
+        btnNext.disabled = !ok;
+    }
 
     // Función para cargar seguros desde el backend
     async function fetchSeguros() {
@@ -29,68 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('No hay nivel seleccionado');
             return;
         }
-
-        const selectedFormatCode = getFormatCode();
-
-        // Lógica especial para VIVE: ocultar en niveles 6-13
-        if (levelId >= 6 && levelId <= 13) {
-            // No mostrar VIVE en estos niveles
-        }
-
-        // Lógica para habilitar/deshabilitar según nivel y formato
-        // Por defecto, los seguros están habilitados
-        let shouldEnableSeguros = true;
-        
-        // Deshabilitar solo en casos específicos:
-        // 1. Niveles que no permiten seguros (5, 8, 9, 10, 11)
-        if (levelId === 5 || levelId === 8 || levelId === 9 || levelId === 10 || levelId === 11) {
-            shouldEnableSeguros = false;
-        } 
-        // 2. Para niveles 1-4, 7, 12: solo habilitar si es presencial (P) o null
-        else if ((levelId === 1 || levelId === 2 || levelId === 3 || levelId === 4 || levelId === 7 || levelId === 12)) {
-            if (selectedFormatCode && selectedFormatCode !== 'P') {
-                shouldEnableSeguros = false;
-            }
-        }
-        // 3. Para niveles 6 y 13: solo habilitar si es presencial (P)
-        else if (levelId === 6 || levelId === 13) {
-            if (selectedFormatCode !== 'P') {
-                shouldEnableSeguros = false;
-            }
-        }
-        
-        // Debug: mostrar en consola para verificar
-        console.log('Step 3 - Seguros:', {
-            levelId,
-            selectedFormatCode,
-            shouldEnableSeguros
-        });
-
         try {
             const response = await fetch(`${API_BASE_URL}/seguros/nivel/${levelId}`);
             if (!response.ok) throw new Error('Error al obtener los seguros');
-            
             const segurosArray = await response.json();
-            
             if (Array.isArray(segurosArray) && segurosArray.length > 0) {
                 segurosData = segurosArray;
-                // Crear mapa para acceso rápido
-                segurosMap.clear();
-                segurosData.forEach(seguro => {
-            if (!seguro.nombre_seguro) return;
-                    segurosMap.set(seguro.id_seguro, seguro);
-                });
-                
-                // Generar SELECTs dinámicamente
-                generarSelectsSeguros(segurosData, shouldEnableSeguros);
-                
-                // Calcular costos después de generar los SELECTs
-                setTimeout(() => {
-                    calculateInsuranceCost();
-                }, 100);
+                generarSelectsSeguros(segurosData);
             } else {
                 segurosData = [];
-                segurosMap.clear();
                 segurosContainer.innerHTML = '<p class="text-muted">No hay seguros disponibles para este nivel.</p>';
             }
         } catch (error) {
@@ -99,92 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para generar SELECTs dinámicamente
-    function generarSelectsSeguros(seguros, enabled) {
-        if (!segurosContainer) return;
-
-        segurosContainer.innerHTML = ''; // Limpiar contenedor
-
-        seguros.forEach(seguro => {
-            if (!seguro.nombre_seguro) return; // dato inválido en BD (reportado a cliente)
-            // Filtrar seguros deshabilitados
-            if (!seguro.estado) return;
-
-            // Lógica especial para "Cobertura VIVE": ocultar en niveles 6-12 (pero NO en 13)
-            const levelId = getLevelId();
-            if (seguro.nombre_seguro && seguro.nombre_seguro.toLowerCase().includes('vive')) {
-                if (levelId >= 6 && levelId <= 12) {
-                    return; // No mostrar VIVE en niveles 6-12
-                }
-                // El nivel 13 (Ejecutivo Bimestral MAPS) SÍ puede tener VIVE
-            }
-
-            const div = document.createElement('div');
-            div.className = 'flex flex-wrap mb-6 flex-col md:flex-row';
-            div.id = `seguro-container-${seguro.id_seguro}`;
-            
-            const selectId = `select-seguro-${seguro.id_seguro}`;
-            const msgId = `${selectId}-msg`;
-
-            div.innerHTML = `
-                <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                    <label class="font-semibold" for="${selectId}">${seguro.nombre_seguro}:</label>
-                </div>
-                <div class="flex-1">
-                    <div class="relative">
-                        <select name="${selectId}" id="${selectId}" ${enabled ? '' : 'disabled'}>
-                            <option value="">Elige</option>
-                            <option value="si">Sí</option>
-                            <option value="no">No aplica</option>
-                        </select>
-                        <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
-                            <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
-                            <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                ${getTooltipText(seguro.nombre_seguro)}
-                            </span>
-                        </div>
-                    </div>
-                    <p class="msg" id="${msgId}"></p>
-                </div>
-            `;
-
-            segurosContainer.appendChild(div);
-
-            // Agregar event listener al SELECT
-            const selectElement = document.getElementById(selectId);
-            if (selectElement) {
-                selectElement.addEventListener('change', () => {
-                    calculateInsuranceCost();
-                    // Mostrar/ocultar anuncio de póliza para "Seguro de Accidentes"
-                    if (seguro.nombre_seguro && seguro.nombre_seguro.toLowerCase().includes('accidente')) {
-                        if (selectElement.value === 'si') {
-                            if (anuncioPoliza) anuncioPoliza.classList.add('hidden');
-                        } else {
-                            if (anuncioPoliza) anuncioPoliza.classList.remove('hidden');
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    // Función para obtener texto del tooltip según el nombre del seguro
-    function getTooltipText(nombreSeguro) {
-        const nombre = (nombreSeguro || '').toLowerCase(); // registros con nombre null en BD no deben romper
-        
-        if (nombre.includes('accidente')) {
-            return 'Todos los estudiantes presenciales deberán contar con un seguro de accidentes, ya sea contratado con Tecmilenio o particular. Los estudiantes de Semestre Empresarial se deberá contratar el Seguro Plus como obligatorio.';
-        } else if (nombre.includes('vive')) {
-            return 'La Cobertura VIVE permite enriquecer tu experiencia estudiantil ofreciéndote una oferta de talleres extracurriculares, vivir eventos memorables en campus y asistir a eventos nacionales.';
-        } else if (nombre.includes('estudiantil') || nombre.includes('colegiatura')) {
-            return 'Cobertura estudiantil para protección durante tus estudios.';
-        } else {
-            return 'Selecciona si deseas incluir este seguro en tu cálculo.';
-        }
-    }
-
-    // Función para calcular el costo de seguros
-    async function calculateInsuranceCost() {
+    // Función para calcular el costo de seguros (MOTOR DE CÁLCULO: se conserva intacto)
+    function calculateInsuranceCost() {
         const levelId = getLevelId() || 1;
         let totalCost = 0;
         let totalConInteres = window.totalConInteres || 0;
@@ -208,11 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Verificar si el seguro está seleccionado (desde localStorage o DOM)
             const seleccionado = segurosSeleccionados[seguro.id_seguro];
             const selectElement = document.getElementById(`select-seguro-${seguro.id_seguro}`);
-            
+
             // Usar localStorage primero, luego DOM como respaldo
-            const estaSeleccionado = (seleccionado && seleccionado.valor === 'si') || 
+            const estaSeleccionado = (seleccionado && seleccionado.valor === 'si') ||
                                     (selectElement && selectElement.value === 'si');
-            
+
             if (estaSeleccionado) {
                 totalCost += parseFloat(seguro.valor) || 0;
             }
@@ -245,14 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         localStorage.setItem('segurosSeleccionados', JSON.stringify(segurosSeleccionadosActualizados));
-        
-        // Debug: mostrar en consola
-        console.log('Cálculo de seguros:', {
-            totalCost,
-            segurosSeleccionados: segurosSeleccionadosActualizados,
-            primeraCuota,
-            interesDividido
-        });
     }
 
     // Inicializar cuando el step 3 se muestre
@@ -268,10 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        observer.observe(step3, {
-            attributes: true,
-            attributeFilter: ['class']
-        });
+        observer.observe(step3, { attributes: true, attributeFilter: ['class'] });
 
         // También inicializar si ya está visible
         if (!step3.classList.contains('hidden')) {

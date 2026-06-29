@@ -230,9 +230,9 @@
                                         <p class="msg" id="select-plan-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                                <div id="div-formato" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
+                                <div id="div-formato" class="flex flex-wrap mb-6 flex-col md:flex-row" style="display: none;">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-formato">Formato:</label>
+                                        <label class="font-semibold" for="select-formato">Formato de estudios</label>
                                     </div>
                                     <div class="flex-1">
                                         <select name="select-formato" id="select-formato">
@@ -266,7 +266,7 @@
 
                                 <div id="div-materiales" class="flex flex-wrap mb-6 flex-col md:flex-row" style="display: none;">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px;">
-                                        <label class="font-semibold" for="select-subjects">Materias:</label>
+                                        <label class="font-semibold" for="select-subjects">Materias</label>
                                     </div>
                                     <div class="flex-1">
                                         <div class="relative">
@@ -283,9 +283,9 @@
                                     </div>
                                 </div>
 
-                                <div id="div-certificado" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
+                                <div id="div-certificado" class="flex flex-wrap mb-6 flex-col md:flex-row" style="display: none;">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
-                                        <label class="font-semibold" for="select-certificado">Certificados:</label>
+                                        <label class="font-semibold" for="select-certificado">Certificados</label>
                                     </div>
                                     <div class="flex-1">
                                         <div class="relative">
@@ -301,9 +301,9 @@
                                         <p class="msg" id="select-certificado-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                                <div id="div-semanas" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
+                                <div id="div-semanas" class="flex flex-wrap mb-6 flex-col md:flex-row" style="display: none;">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
-                                        <label class="font-semibold" for="select-semanas">Semanas de Desarrollo Integral:</label>
+                                        <label class="font-semibold" for="select-semanas">Semanas de desarrollo integral</label>
                                     </div>
                                     <div class="flex-1">
                                         <div class="relative">
@@ -319,9 +319,9 @@
                                         <p class="msg" id="select-semanas-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
-                                <div id="div-ingles" class="flex flex-wrap mb-6 flex-col md:flex-row hidden">
+                                <div id="div-ingles" class="flex flex-wrap mb-6 flex-col md:flex-row" style="display: none;">
                                     <div class="min-w-[110px] mt-2 mb-2 md:mb-0" style="min-width: 140px; max-width: 140px; width: 100%;">
-                                        <label class="font-semibold" for="select-ingles">Certificados de idioma:</label>
+                                        <label class="font-semibold" for="select-ingles">Certificado de idioma</label>
                                     </div>
                                     <div class="flex-1">
                                         <div class="relative">
@@ -590,7 +590,7 @@
                             </div>
 
                             <div class="step-3 hidden" id="step-3">
-                                <h3 class="text-write-color-3">Seguros y coberturas VIVE</h3>
+                                <h3 class="text-write-color-3">Seguros y coberturas</h3>
                                 <p class="text-[20px] leading-[28px]">Selecciona los seguros y coberturas que deseas
                                     incluir dentro del cálculo.</p>
                                 <hr class="mb-8">
@@ -635,30 +635,34 @@
 
                             <!-- PASO 4: Términos y condiciones (HU28/29/66/67/68) -->
                             <div class="step-4 hidden" id="step-4">
-                                <h3 class="text-write-color-3">Términos y condiciones</h3>
-                                <p class="text-[20px] leading-[28px]">Para continuar con tu cotización es necesario aceptar los siguientes términos.</p>
+                                <h3 class="text-write-color-3"><span class="lbl-def">Términos y condiciones</span><span class="lbl-alu">Legales</span></h3>
+                                <p class="intro-step4 text-[20px] leading-[28px]">Para continuar con tu cotización es necesario aceptar los siguientes términos.</p>
                                 <hr class="mb-8">
 
+                                <p class="subtitulo-legal font-semibold">Términos y condiciones</p>
                                 <div class="flex flex-row mb-6">
                                     <div class="pr-3 pt-1">
                                         <input type="checkbox" id="check-terminos" class="check-legal">
                                     </div>
                                     <div class="flex-1">
-                                        <label for="check-terminos">He leído y acepto los
-                                            <a class="link-legal" href="https://tecmilenio.mx/es/terminos-y-condiciones" target="_blank" rel="noopener">Términos y Condiciones</a>
-                                            de Tecmilenio.</label>
+                                        <label for="check-terminos">
+                                            <span class="lbl-def">He leído y acepto los <a class="link-legal" href="https://tecmilenio.mx/es/terminos-y-condiciones" target="_blank" rel="noopener">Términos y Condiciones</a> de Tecmilenio.</span>
+                                            <span class="lbl-alu">Acepto que he leído <a class="link-legal" href="https://tecmilenio.mx/es/terminos-y-condiciones" target="_blank" rel="noopener">los términos y condiciones</a> que Tecmilenio me presenta.</span>
+                                        </label>
                                         <p class="msg" id="check-terminos-msg">Debes aceptar los términos y condiciones para continuar</p>
                                     </div>
                                 </div>
 
+                                <p class="subtitulo-legal font-semibold">Aviso de privacidad</p>
                                 <div class="flex flex-row mb-6">
                                     <div class="pr-3 pt-1">
                                         <input type="checkbox" id="check-privacidad" class="check-legal">
                                     </div>
                                     <div class="flex-1">
-                                        <label for="check-privacidad">He leído y acepto el
-                                            <a class="link-legal" href="https://tecmilenio.mx/es/aviso-de-privacidad" target="_blank" rel="noopener">Aviso de Privacidad</a>
-                                            de Tecmilenio.</label>
+                                        <label for="check-privacidad">
+                                            <span class="lbl-def">He leído y acepto el <a class="link-legal" href="https://tecmilenio.mx/es/aviso-de-privacidad" target="_blank" rel="noopener">Aviso de Privacidad</a> de Tecmilenio.</span>
+                                            <span class="lbl-alu">Acepto que he leído <a class="link-legal" href="https://tecmilenio.mx/es/aviso-de-privacidad" target="_blank" rel="noopener">el aviso de privacidad</a> que Tecmilenio me presenta.</span>
+                                        </label>
                                         <p class="msg" id="check-privacidad-msg">Debes aceptar el aviso de privacidad para continuar</p>
                                     </div>
                                 </div>
@@ -673,13 +677,12 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-row flex-wrap justify-center mb-6">
+                                <div class="botones-step4 flex flex-row flex-wrap justify-center mb-6">
                                     <div class="px-4 mb-4">
-                                        <button class="btn btn-main btn-prev-step" type="button">Anterior</button>
+                                        <button class="btn btn-main btn-prev-step" type="button"><span class="lbl-def">Anterior</span><span class="lbl-alu">← Regresar</span></button>
                                     </div>
                                     <div class="px-4 mb-4">
-                                        <input class="btn btn-main btn-next-step" type="submit" id="step-4-next"
-                                            value="Calcular">
+                                        <button class="btn btn-main btn-next-step" type="submit" id="step-4-next"><span class="lbl-def">Calcular</span><span class="lbl-alu">Calcular mi colegiatura</span></button>
                                     </div>
                                 </div>
                             </div>
