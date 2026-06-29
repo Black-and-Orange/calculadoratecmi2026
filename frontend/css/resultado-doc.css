@@ -1,0 +1,294 @@
+/* ===== resultado.html — estilo DOCUMENTO de cotización (rediseño según mockup) =====
+   Paleta del proyecto: verde oscuro rgb(0 83 76) · teal rgb(0 164 153) · naranja rgb(246 141 46). */
+
+.cotiz-body {
+    background: #eef0f2;
+    color: #1f2937;
+    font-family: 'Cairo', sans-serif;
+}
+
+.cotiz-doc {
+    padding: 32px 16px;
+}
+
+.cotiz-sheet {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 40px 48px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Encabezado ── */
+.cotiz-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.cotiz-logo img {
+    height: 30px;
+}
+
+.cotiz-nueva {
+    color: rgb(0 164 153);
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.cotiz-nueva:hover {
+    text-decoration: underline;
+}
+
+.cotiz-h1 {
+    font-size: 30px;
+    font-weight: 700;
+    color: rgb(0 83 76);
+    margin: 0 0 12px;
+}
+
+.cotiz-intro {
+    font-size: 15px;
+    color: #4b5563;
+    line-height: 22px;
+    max-width: 820px;
+    margin-bottom: 30px;
+}
+
+/* ── Secciones ── */
+.cotiz-bloque {
+    margin-bottom: 30px;
+}
+
+.cotiz-h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: rgb(0 83 76);
+    margin: 0 0 14px;
+}
+
+/* ── Mi información ingresada ── */
+.cotiz-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px 28px;
+}
+
+/* Cada par etiqueta/valor (resultado-doc.js los inyecta) */
+.cotiz-info-item .cotiz-info-label {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 2px;
+}
+
+.cotiz-info-item .cotiz-info-valor {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+/* ── Tabla itemizada "Colegiatura" ── */
+.cotiz-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.cotiz-tabla th {
+    text-align: left;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 11px 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.cotiz-tabla td {
+    border: 1px solid #e5e7eb;
+    padding: 11px 14px;
+}
+
+.cotiz-importe {
+    white-space: nowrap;
+}
+
+.cotiz-fecha {
+    color: #6b7280;
+}
+
+/* ── Planes contado / financiamiento ── */
+.cotiz-planes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+    margin-bottom: 30px;
+}
+
+.cotiz-plan {
+    background: #eaf6ee;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.cotiz-plan-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.cotiz-plan-tabla td {
+    padding: 10px 18px;
+}
+
+.cotiz-plan-head {
+    background: #c9e7d2;
+    color: rgb(0 83 76);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px;
+}
+
+.cotiz-plan .cotiz-importe {
+    text-align: right;
+    font-weight: 700;
+}
+
+.cotiz-hr {
+    border: 0;
+    border-top: 1px solid #bcd9c5;
+    margin: 4px 0;
+}
+
+.cotiz-loading {
+    padding: 24px;
+    text-align: center;
+    color: rgb(246 141 46);
+    font-weight: 700;
+}
+
+/* ── Vigencia ── */
+.cotiz-vigencia {
+    background: #f7d7dc;
+    color: #9b2c3a;
+    text-align: center;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+/* ── Notas ── */
+.cotiz-notas p {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 18px;
+    margin: 0 0 6px;
+}
+
+/* ── Barra de acciones + footer ── */
+.cotiz-actions {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 18px 48px;
+    display: flex;
+    gap: 14px;
+    justify-content: flex-end;
+}
+
+.cotiz-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.cotiz-btn-primary {
+    background: rgb(0 83 76);
+    color: #fff;
+}
+
+.cotiz-btn-wa {
+    background: #fff;
+    color: rgb(0 83 76);
+    border-color: rgb(0 83 76);
+}
+
+.cotiz-btn:hover {
+    opacity: 0.92;
+}
+
+.cotiz-footer {
+    max-width: 1000px;
+    margin: 0 auto 32px;
+    padding: 16px 48px 0;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.cotiz-footer-links a {
+    color: #6b7280;
+    text-decoration: underline;
+    margin-left: 20px;
+}
+
+/* ── Botones del modal "Nueva cotización" (estructura del mockup) ── */
+.nc-botones {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 22px;
+}
+
+.nc-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.nc-btn-cero {
+    background: rgb(246 141 46);
+    color: #fff;
+}
+
+.nc-btn-conservar {
+    background: rgb(0 83 76);
+    color: #fff;
+}
+
+.nc-btn:hover {
+    opacity: 0.92;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .cotiz-sheet { padding: 28px 20px; }
+    .cotiz-planes { grid-template-columns: 1fr; }
+    .cotiz-actions, .cotiz-footer { flex-direction: column; gap: 12px; align-items: stretch; padding-left: 20px; padding-right: 20px; }
+}
+
+/* ── Impresión / PDF: solo el documento ── */
+@media print {
+    .no-print { display: none !important; }
+    .cotiz-body { background: #fff; }
+    .cotiz-sheet { box-shadow: none; max-width: none; }
+}
