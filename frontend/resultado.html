@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/wizard.css">
-    <!-- resultado-dashboard.css se conserva solo por los estilos de los modales
-         (.dash-modal, .modal-whatsapp-*); resultado-doc.css lo sobreescribe para el documento. -->
+    <!-- resultado-dashboard.css aporta el hero/paleta (--tec-*) y los modales;
+         resultado-doc.css ajusta el documento (estructura nueva). -->
     <link rel="stylesheet" href="css/resultado-dashboard.css">
     <link rel="stylesheet" href="css/resultado-doc.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -60,20 +60,33 @@
 
     <!-- ════════ DOCUMENTO DE COTIZACIÓN (capturado por html2canvas para el PDF) ════════ -->
     <main id="contenido" class="cotiz-doc">
-        <div class="cotiz-sheet">
 
-            <!-- Encabezado -->
-            <div class="cotiz-head">
-                <a class="cotiz-logo" href="index.html">
-                    <img src="./img/tecmilenio-logo.svg" alt="Universidad Tecmilenio">
-                </a>
-                <button id="btn-nueva-cotizacion" class="cotiz-nueva no-print" type="button">+ Nueva cotización</button>
+        <!-- HERO estilo dashboard (banda verde con saludo + vigencia) -->
+        <section class="dash-hero" id="banner-form-section">
+            <span class="dash-hero-orb dash-hero-orb-1"></span>
+            <span class="dash-hero-orb dash-hero-orb-2"></span>
+            <span class="dash-hero-orb dash-hero-orb-3"></span>
+            <div class="dash-hero-inner cotiz-hero-inner">
+                <div class="dash-hero-top">
+                    <a class="dash-hero-logo" href="index.html">
+                        <img src="./img/tecmilenio-logo.svg" alt="Universidad Tecmilenio">
+                    </a>
+                    <div class="cotiz-hero-acciones">
+                        <div class="dash-badge-vigencia">
+                            <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+                            <p id="fechaVencimiento" class="font-bold mb-0">Vigencia de la cotización:</p>
+                        </div>
+                        <button id="btn-nueva-cotizacion" class="cotiz-nueva-hero no-print" type="button">+ Nueva
+                            cotización</button>
+                    </div>
+                </div>
+                <p class="dash-eyebrow">Cotización personalizada</p>
+                <p class="dash-greeting">¡Hola<span class="dash-greeting-nombre" id="dash-greeting-nombre"></span>!</p>
+                <h1 id="titleBenefit" class="dash-title">Impulsa tu futuro desde hoy</h1>
             </div>
+        </section>
 
-            <h1 class="cotiz-h1">Calcula tu colegiatura</h1>
-            <p class="cotiz-intro">La información que se muestra a continuación corresponde al resultado de tu cálculo,
-                basado en los datos que proporcionaste. Estos valores son estimados y pueden variar dependiendo de
-                cambios en la información ingresada.</p>
+        <div class="cotiz-sheet">
 
             <!-- Mi información ingresada (la llena resultado-doc.js en #cotiz-info) -->
             <section class="cotiz-bloque">
@@ -81,7 +94,7 @@
                 <div id="cotiz-info" class="cotiz-info-grid"></div>
             </section>
 
-            <!-- Colegiatura: tabla itemizada (importes: colegiatura por resultados.js; resto por resultado-doc.js) -->
+            <!-- Colegiatura: tabla itemizada -->
             <section class="cotiz-bloque">
                 <h2 class="cotiz-h2">Colegiatura</h2>
                 <table class="cotiz-tabla">
@@ -127,16 +140,21 @@
                 </table>
             </section>
 
-            <!-- Planes: contado y financiamiento (montos los escribe resultados.js) -->
+            <!-- Planes: tarjetas con degradado (contado teal / financiamiento naranja) -->
             <div class="cotiz-planes">
                 <div class="cotiz-plan cotiz-plan-contado">
                     <table class="cotiz-plan-tabla">
                         <tr>
-                            <th class="cotiz-plan-head" colspan="3">Plan de contado</th>
+                            <th class="cotiz-plan-head" colspan="3">
+                                <span class="cotiz-plan-icono"><i class="fa-solid fa-hand-holding-dollar"
+                                        aria-hidden="true"></i></span>
+                                <span class="cotiz-plan-nombre">Plan de contado</span>
+                                <span class="cotiz-chip">Una sola exhibición</span>
+                            </th>
                         </tr>
                         <tr>
                             <td>Colegiatura total</td>
-                            <td id="totalContado" class="cotiz-importe">$0</td>
+                            <td id="totalContado" class="cotiz-importe cotiz-importe-grande">$0</td>
                             <td id="fecha-contado" class="cotiz-fecha"></td>
                         </tr>
                     </table>
@@ -147,11 +165,16 @@
                     <div id="financiamiento-content">
                         <table class="cotiz-plan-tabla">
                             <tr>
-                                <th class="cotiz-plan-head" colspan="3">Plan de financiamiento</th>
+                                <th class="cotiz-plan-head" colspan="3">
+                                    <span class="cotiz-plan-icono"><i class="fa-solid fa-calendar-days"
+                                            aria-hidden="true"></i></span>
+                                    <span class="cotiz-plan-nombre">Plan de financiamiento</span>
+                                    <span class="cotiz-chip">Paga mes a mes</span>
+                                </th>
                             </tr>
                             <tr>
                                 <td><p class="mb-0">Primer pago</p></td>
-                                <td id="primerPago" class="cotiz-importe">$0</td>
+                                <td id="primerPago" class="cotiz-importe cotiz-importe-grande">$0</td>
                                 <td class="cotiz-fecha"></td>
                             </tr>
                             <tr>
@@ -172,13 +195,10 @@
                 </div>
             </div>
 
-            <!-- Vigencia -->
-            <div class="cotiz-vigencia">
-                <span id="fechaVencimiento">Vigencia de la cotización:</span>
-            </div>
-
-            <!-- Notas / condiciones -->
+            <!-- Condiciones de la propuesta (caja naranja, estilo dashboard) -->
             <div class="cotiz-notas">
+                <p class="cotiz-notas-titulo"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Condiciones de
+                    la propuesta</p>
                 <p>*El simulador de costos de colegiaturas interno es un ejercicio de carácter informativo, sin validez,
                     sujeto a cambios y no representa la formalización de ningún acuerdo con Universidad Tecmilenio.</p>
                 <p>*Pago Fijo: Pago que corresponde a cubrir adeudo de Préstamo Educativo y que se realiza de manera
@@ -224,7 +244,6 @@
          elementos del diseño anterior que el documento ya no muestra. ════════ -->
     <div id="legacy-refs" style="display:none !important;" aria-hidden="true">
         <div id="info-grid"></div>
-        <span id="titleBenefit"></span>
         <div id="benefits-wrappers"></div>
         <div id="plan"></div>
         <div id="apoyos"></div>
@@ -263,7 +282,6 @@
         <span id="nivel"></span>
         <span id="periodo"></span>
         <span id="loading-overlay-cotizacion"></span>
-        <span id="dash-greeting-nombre"></span>
         <button id="btn-guardar-cotizacion" type="button"></button>
     </div>
 

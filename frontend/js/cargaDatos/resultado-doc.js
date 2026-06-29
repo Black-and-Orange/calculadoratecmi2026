@@ -16,9 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Mi información ingresada (campos del mockup; dinámica por nivel/programa) ──
     function cablearInfo() {
         const cont = document.getElementById('cotiz-info');
-        if (!cont) return;
         const url = new URLSearchParams(location.search);
         const dp = leer('datosPersonales') || {};
+
+        // Saludo del hero: "¡Hola, [Nombre]!"
+        const greeting = document.getElementById('dash-greeting-nombre');
+        if (greeting && dp.nombre) greeting.textContent = dp.nombre;
+
+        if (!cont) return;
         // Toma el valor del query string (uso real) o de localStorage (respaldo/demo).
         const val = (urlKey, ...lsKeys) => {
             const u = url.get(urlKey);

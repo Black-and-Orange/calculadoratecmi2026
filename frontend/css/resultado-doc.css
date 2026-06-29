@@ -300,3 +300,106 @@
     .cotiz-body { background: #fff; }
     .cotiz-sheet { box-shadow: none; max-width: none; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   LOOK DASHBOARD sobre la estructura documento: hero verde, tarjetas de planes
+   con degradado (teal/naranja), chips e íconos, y caja de condiciones naranja.
+   Reusa las variables --tec-* de resultado-dashboard.css. Va al final para
+   sobreescribir las reglas previas.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* El hero ocupa todo el ancho; la hoja blanca flota debajo. */
+.cotiz-doc { padding: 0 0 36px; }
+
+.cotiz-body .dash-hero { padding: 32px 0 80px; min-height: 0; }
+.cotiz-hero-inner { max-width: 1048px; margin: 0 auto; padding: 0 24px; }
+.cotiz-hero-acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.cotiz-nueva-hero {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor: pointer;
+}
+.cotiz-nueva-hero:hover { background: rgba(255, 255, 255, 0.24); }
+
+/* La hoja blanca se traslapa ligeramente sobre el hero. */
+.cotiz-sheet {
+    max-width: 1048px;
+    margin: -44px auto 0;
+    position: relative;
+    z-index: 30;
+}
+
+/* ── Tarjetas de planes con degradado ── */
+.cotiz-planes { gap: 28px; }
+.cotiz-plan {
+    background: #fff;
+    border: 1px solid rgba(0, 83, 76, 0.08);
+    border-radius: 16px;
+    box-shadow: var(--dash-sombra);
+    overflow: hidden;
+}
+.cotiz-plan-head {
+    color: #fff !important;
+    text-align: left;
+    padding: 18px 22px 15px;
+    position: relative;
+}
+.cotiz-plan-contado .cotiz-plan-head {
+    background: linear-gradient(120deg, var(--tec-verde) 0%, var(--tec-teal) 100%);
+}
+.cotiz-plan-fin .cotiz-plan-head {
+    background: linear-gradient(120deg, #C45F0A 0%, var(--tec-naranja) 58%, var(--tec-naranja-suave) 100%);
+}
+.cotiz-plan-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.22);
+    margin-bottom: 10px;
+}
+.cotiz-plan-nombre { display: block; font-size: 19px; font-weight: 800; }
+.cotiz-chip {
+    display: inline-block;
+    margin-top: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.cotiz-plan-tabla td { padding: 11px 22px; }
+.cotiz-importe-grande { font-size: 24px; font-weight: 800; }
+.cotiz-plan-contado .cotiz-importe-grande { color: var(--tec-verde); }
+.cotiz-plan-fin .cotiz-importe-grande { color: var(--tec-naranja); }
+
+/* ── Condiciones de la propuesta (caja naranja) ── */
+.cotiz-notas {
+    background: var(--tec-crema);
+    border: 1px solid rgba(246, 141, 46, 0.3);
+    border-radius: 14px;
+    padding: 18px 24px;
+}
+.cotiz-notas-titulo {
+    color: var(--tec-naranja);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.cotiz-notas-titulo i { margin-right: 6px; }
+
+@media (max-width: 768px) {
+    .cotiz-hero-acciones { align-items: flex-start; }
+    .cotiz-sheet { margin-top: -30px; }
+}
