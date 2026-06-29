@@ -135,10 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
         segurosContainer.appendChild(div);
     }
 
-    // ── Cobertura de Colegiatura: Sí/No + texto; forzada en presenciales de prepa/prof-semestral ──
+    // ── Cobertura de Colegiatura: Sí/No SELECCIONABLE + texto. Pre-marcada "Sí" en
+    //    presenciales de prepa/prof-semestral (obligatoria por política), pero el
+    //    usuario la puede cambiar (a diferencia de VIVE, esta NO se bloquea). ──
     function renderColegiatura(seguro, levelId) {
-        const forzada = esPresencial() && COLEGIATURA_NIVELES.includes(levelId);
-        const valor = forzada ? 'si' : '';
+        const preseleccionada = esPresencial() && COLEGIATURA_NIVELES.includes(levelId);
+        const valor = preseleccionada ? 'si' : '';
         const div = bloque('Cobertura de Colegiatura');
 
         const exclusiva = document.createElement('p');
@@ -152,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.appendChild(nota);
 
         const sel = crearSelectOculto(seguro.id_seguro, valor);
-        div.appendChild(crearRadios(`colegiatura-${seguro.id_seguro}`, valor, forzada, [{ v: 'si', txt: 'Sí' }, { v: 'no', txt: 'No' }], (v) => setOculto(sel, v)));
+        div.appendChild(crearRadios(`colegiatura-${seguro.id_seguro}`, valor, false, [{ v: 'si', txt: 'Sí' }, { v: 'no', txt: 'No' }], (v) => setOculto(sel, v)));
         div.appendChild(sel);
         segurosContainer.appendChild(div);
     }
