@@ -163,10 +163,13 @@ main.solo-logo {
     }
 }
 
-/* ===== Rediseño del PASO 1 — flujo ALUMNO (datos personales + nivel en un
-   solo paso, tipo grid). Solo aplica cuando #wizard-row tiene .flujo-alumno
-   (la añade main.js al elegir perfil "alumno"). El flujo prospecto no la lleva
-   y conserva su layout original. ===== */
+/* ===== Rediseño del PASO 1 — datos personales + nivel en un solo paso (grid).
+   Aplica cuando #wizard-row tiene .flujo-alumno (main.js la añade al elegir
+   perfil). La clase es histórica: nació en el flujo alumno y hoy la comparten
+   AMBOS perfiles (alumno "Soy alumno" y prospecto "Me interesa"), que usan el
+   mismo wizard de 4 pasos. Lo único que cambia por perfil es el bloque de datos
+   personales: #datos-alumno (matrícula/nombre/apellido) o #datos-prospecto
+   (nombre/apellidos/fecha/teléfono/correo). ===== */
 
 /* Encabezado combinado "Ayúdanos a identificarte": mostrarlo y ocultar los
    encabezados/botones individuales de cada sub-paso. */
@@ -195,18 +198,22 @@ main.solo-logo {
     }
 }
 
-/* Grids: datos personales (matrícula/nombre/apellido) y nivel (campus/nivel/
-   programa/periodo + campos dinámicos). Etiqueta arriba del control. */
+/* Grids: datos personales (alumno o prospecto) y nivel (campus/nivel/programa/
+   periodo + campos dinámicos). Etiqueta arriba del control. */
 #wizard-row.flujo-alumno #datos-alumno,
+#wizard-row.flujo-alumno #datos-prospecto,
 #wizard-row.flujo-alumno #step-1 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.25rem 1.5rem;
     align-items: start;
 }
-/* moveStep oculta #step-1 con .hidden en los pasos 2-4; .hidden debe ganar al
-   display:grid de arriba para que el paso 1 no se cuele en los demás pasos. */
-#wizard-row.flujo-alumno #step-1.hidden { display: none; }
+/* moveStep oculta #step-1 con .hidden en los pasos 2-4 y main.js oculta la
+   variante de datos que no corresponde al perfil; .hidden debe ganar al
+   display:grid de arriba para que esos bloques no se cuelen. */
+#wizard-row.flujo-alumno #step-1.hidden,
+#wizard-row.flujo-alumno #datos-alumno.hidden,
+#wizard-row.flujo-alumno #datos-prospecto.hidden { display: none; }
 
 /* La fila campus/periodo aporta sus dos celdas directamente al grid de nivel. */
 #wizard-row.flujo-alumno #row-campus-periodo { display: contents; }
@@ -229,6 +236,7 @@ main.solo-logo {
 /* Cada campo VISIBLE en columna; se excluyen los .hidden para no revelar los
    campos dinámicos que no aplican al nivel elegido. */
 #wizard-row.flujo-alumno #datos-alumno > div:not(.hidden),
+#wizard-row.flujo-alumno #datos-prospecto > div:not(.hidden),
 #wizard-row.flujo-alumno #step-1 > div:not(.hidden):not(#row-campus-periodo),
 #wizard-row.flujo-alumno #step-1 .campo-cell {
     display: flex;
@@ -238,6 +246,7 @@ main.solo-logo {
 
 /* La etiqueta deja de ocupar la columna fija de 140px y va sobre el control. */
 #wizard-row.flujo-alumno #datos-alumno > div > div:first-child,
+#wizard-row.flujo-alumno #datos-prospecto > div > div:first-child,
 #wizard-row.flujo-alumno #step-1 > div:not(#row-campus-periodo) > div:first-child,
 #wizard-row.flujo-alumno #step-1 .campo-cell > div:first-child {
     min-width: 0 !important;
@@ -250,6 +259,8 @@ main.solo-logo {
    el nombre del mes fuera de la tarjeta. */
 #wizard-row.flujo-alumno #datos-alumno input,
 #wizard-row.flujo-alumno #datos-alumno select,
+#wizard-row.flujo-alumno #datos-prospecto input,
+#wizard-row.flujo-alumno #datos-prospecto select,
 #wizard-row.flujo-alumno #step-1 input:not([type="checkbox"]),
 #wizard-row.flujo-alumno #step-1 select {
     width: 100%;

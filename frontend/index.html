@@ -351,6 +351,26 @@
                                 <p class="text-[20px] leading-[28px]">En Tecmilenio, creemos en apoyar a las personas por mérito propio y también a aquellas que tienen mayores necesidades económicas.</p>
                                 <hr class="mb-8">
 
+                                <!-- Promedio académico (del 1 al 100): visible solo en el flujo prospecto
+                                     ("Me interesa"); el alumno usa #step-2-students, que no lo lleva. -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-promedio">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold" for="txt-average-mark">Promedio académico actual (del 1 al 100):</label>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="relative">
+                                        <input type="number" name="txt-average-mark" id="txt-average-mark" min="1" max="100" placeholder="Del 1 al 100">
+                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
+                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
+                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
+                                                    Ingresa el promedio académico acumulado aproximado
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p class="msg" id="txt-average-mark-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
                                 <!-- HU56: ¿deseas una beca? -->
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-beca-prospecto">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
@@ -376,24 +396,6 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap mb-6 flex-col md:flex-row hidden" id="row-promedio">
-                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                                        <label class="font-semibold" for="txt-average-mark">Promedio:</label>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="relative">
-                                        <input type="number" name="txt-average-mark" id="txt-average-mark" min="0"
-                                            max="100">
-                                            <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
-                                                <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
-                                                <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                                    Ingresa el promedio académico acumulado aproximado
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <p class="msg" id="txt-average-mark-msg">Este campo es necesario</p>
-                                    </div>
-                                </div>
                                 <hr class="mb-8">
                                 <p class="text-[15px] leading-[23px]">Recuerda que para brindar una propuesta de beca, tu prospecto debió previamente completar su proceso de admisión.</p>
                                 
@@ -667,13 +669,18 @@
                                     </div>
                                 </div>
 
-                                <!-- Solo para prospectos: seguimiento por asesor (opcional) -->
-                                <div class="flex flex-row mb-6 hidden" id="row-contacto-asesor">
-                                    <div class="pr-3 pt-1">
-                                        <input type="checkbox" id="check-contacto" class="check-legal">
-                                    </div>
-                                    <div class="flex-1">
-                                        <label for="check-contacto">Me gustaría que un asesor de Tecmilenio me contacte para darme seguimiento. <span class="text-sm">(opcional)</span></label>
+                                <!-- Solo para prospectos: contacto por asesor (HU68). Por el PDF
+                                     "me interesa" va pre-marcado y NO es obligatorio. El subtítulo
+                                     vive dentro del bloque para que se oculte junto al check en alumno. -->
+                                <div class="hidden" id="row-contacto-asesor">
+                                    <p class="subtitulo-legal font-semibold">Contacto por parte de Tecmilenio</p>
+                                    <div class="flex flex-row mb-6">
+                                        <div class="pr-3 pt-1">
+                                            <input type="checkbox" id="check-contacto" class="check-legal" checked>
+                                        </div>
+                                        <div class="flex-1">
+                                            <label for="check-contacto">Me gustaría que un asesor me diera seguimiento para más información <span class="text-sm">(opcional)</span></label>
+                                        </div>
                                     </div>
                                 </div>
 

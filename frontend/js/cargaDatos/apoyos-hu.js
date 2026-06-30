@@ -167,24 +167,14 @@ const initProspecto = () => {
     const btnNext = document.getElementById('step-2-next');
     if (!panel || !btnNext) return;
 
-    let promedioInicializado = false;
-
     const becaPct = () => {
         try { return parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0; } catch { return 0; }
     };
 
     const sync = () => {
-        // HU56: las becas se muestran todas (sin filtro de promedio); se usa 100
-        // internamente para reutilizar los endpoints existentes por promedio.
-        if (!promedioInicializado && panel.offsetParent !== null) {
-            promedioInicializado = true;
-            if (promedio && promedio.value !== '100') {
-                promedio.value = '100';
-                promedio.dispatchEvent(new Event('input', { bubbles: true }));
-                promedio.dispatchEvent(new Event('change', { bubbles: true }));
-                promedio.dispatchEvent(new Event('keyup', { bubbles: true })); // main.js des-oculta .field-avg con keyup
-            }
-        }
+        // El promedio académico lo captura el usuario (campo visible en el flujo
+        // prospecto "Me interesa", según el PDF) y las becas se filtran por ese
+        // promedio vía step2.js. Antes se ocultaba y se forzaba a 100 (HU56).
 
         const rBeca = radioValor('radio-beca-prospecto');
         [tipoBeca, scholarshipSelect].forEach(el => el && el.classList.toggle('hidden', rBeca !== 'si'));
@@ -216,13 +206,15 @@ const initProspecto = () => {
         }
         if (radioValor('radio-prestamo-prospecto') === 'no' && prestamoSelect) seleccionarCero(prestamoSelect);
 
-        // HU58: continuar habilitado solo con todo respondido
+        // HU58: continuar habilitado solo con todo respondido (incluye el promedio)
+        const promedioOk = promedio && promedio.value !== '' &&
+            Number(promedio.value) >= 1 && Number(promedio.value) <= 100;
         const necesitaPorcentaje = percentageSelect && percentageSelect.offsetParent !== null;
         const becaOk = rBeca === 'no' || (rBeca === 'si' && scholarshipSelect && scholarshipSelect.value !== '' &&
             (!necesitaPorcentaje || percentageSelect.value !== ''));
         const rP = radioValor('radio-prestamo-prospecto');
         const prestamoOk = rP === 'no' || (rP === 'si' && prestamoSelect && prestamoSelect.value !== '' && prestamoSelect.value !== '0');
-        btnNext.disabled = !(becaOk && prestamoOk);
+        btnNext.disabled = !(promedioOk && becaOk && prestamoOk);
     };
 
     panel.addEventListener('change', sync);

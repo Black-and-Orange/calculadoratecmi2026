@@ -148,8 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // El step 2 depende del perfil: alumno → #step-2-students, prospecto → #step-2
       let step2 = step2Students;
 
-      // Perfil activo. Alumno usa el paso 1 combinado (datos personales + nivel
-      // de estudios) → wizard de 4 pasos. Prospecto conserva el flujo de 5 pasos.
+      // Perfil activo. Ambos perfiles (alumno "Soy alumno" y prospecto "Me
+      // interesa") usan el paso 1 combinado (datos personales + nivel de
+      // estudios) → wizard de 4 pasos. Solo cambia el contenido por perfil
+      // (datos personales, variante de apoyos y check de contacto por asesor).
       let perfilActual = localStorage.getItem("perfilUsuario") || "prospecto";
 
 
@@ -173,14 +175,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const stepCircles = [stepNumber1, stepNumber2, stepNumber3, stepNumber4, stepNumber5];
 
       const moveStep = () => {
-        const esAlumno = perfilActual === "alumno";
-
-        // Paneles por paso. Alumno (4 pasos): el paso 1 combina datos personales
-        // + nivel de estudios en una sola pantalla. Prospecto (5 pasos): flujo
-        // original. Un panel puede ser un arreglo (varios paneles en un paso).
-        const stepPanels = esAlumno
-          ? [[stepDP, step1], step2, step3, step4]
-          : [stepDP, step1, step2, step3, step4];
+        // Wizard de 4 pasos para ambos perfiles: el paso 1 combina datos
+        // personales + nivel de estudios en una sola pantalla. Un panel puede ser
+        // un arreglo (varios paneles que se muestran juntos en un mismo paso).
+        // El contenido por perfil (datos, variante de apoyos, contacto) se
+        // resuelve fuera de aquí; la navegación es idéntica para alumno y prospecto.
+        const stepPanels = [[stepDP, step1], step2, step3, step4];
 
         // Ocultar ambas variantes del paso de apoyos; solo la activa se muestra
         if (step2Prospecto) step2Prospecto.classList.add("hidden");
@@ -192,10 +192,10 @@ document.addEventListener("DOMContentLoaded", () => {
           paneles.forEach((p) => { if (p) p.classList.toggle("hidden", !visible); });
         });
 
-        // El encabezado "Ayúdanos a identificarte" (datos + nivel) solo va en el
-        // paso 1 del alumno; en los pasos 2-4 no debe aparecer.
+        // El encabezado combinado "Ayúdanos a identificarte" (datos + nivel) solo
+        // va en el paso 1; en los pasos 2-4 no debe aparecer.
         const headingAlumno = document.querySelector(".heading-alumno");
-        if (headingAlumno) headingAlumno.classList.toggle("en-paso-1", esAlumno && currentStep === 1);
+        if (headingAlumno) headingAlumno.classList.toggle("en-paso-1", currentStep === 1);
 
         stepCircles.forEach((circle, index) => {
           if (!circle) return;
@@ -203,20 +203,20 @@ document.addEventListener("DOMContentLoaded", () => {
           circle.classList.toggle("passed", index < currentStep - 1);
         });
 
-        // Barra de progreso: 4 pasos (alumno) o 5 (prospecto)
-        stepsContainer.classList.toggle("steps-alumno", esAlumno);
+        // Barra de progreso de 4 pasos (ambos perfiles ocultan el círculo 5)
+        stepsContainer.classList.add("steps-alumno");
         stepsContainer.classList.toggle("step-2", currentStep >= 2);
         stepsContainer.classList.toggle("step-3", currentStep >= 3);
         stepsContainer.classList.toggle("step-4", currentStep >= 4);
         stepsContainer.classList.toggle("step-5", currentStep >= 5);
 
         // HU16/54: recalcular el gating del botón al entrar al nivel de estudios
-        // (alumno: paso 1; prospecto: paso 2)
-        if (currentStep === (esAlumno ? 1 : 2)) checkNivelCompleto();
+        // (paso 1 combinado para ambos perfiles)
+        if (currentStep === 1) checkNivelCompleto();
 
-        // Inicializar step2-students al entrar al paso de apoyos
-        // (alumno: paso 2; prospecto: paso 3)
-        if (currentStep === (esAlumno ? 2 : 3) && step2 && step2.id === 'step-2-students') {
+        // Inicializar step2-students al entrar al paso de apoyos (paso 2). Solo
+        // aplica al alumno: su variante de apoyos es #step-2-students.
+        if (currentStep === 2 && step2 && step2.id === 'step-2-students') {
           document.dispatchEvent(new CustomEvent('stepChanged', { detail: { step: 2 } }));
         }
       }
@@ -263,12 +263,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Campus es cascada del nivel: sus opciones (y cuáles aplican) dependen del
-      // nivel elegido. En el flujo alumno campus va primero (según el diseño),
-      // así que se mantiene deshabilitado con una pista hasta elegir nivel;
-      // entonces step1.js lo llena y aquí se habilita.
+      // nivel elegido. En el paso 1 combinado (ambos perfiles) campus aparece
+      // junto al nivel, así que se mantiene deshabilitado con una pista hasta
+      // elegir nivel; entonces step1.js lo llena y aquí se habilita.
       const campusHint = document.getElementById("campus-hint");
       const syncCampusGate = () => {
-        const bloquear = perfilActual === "alumno" && (!selectGrade || selectGrade.value === "");
+        const bloquear = (!selectGrade || selectGrade.value === "");
         if (selectCampus) selectCampus.disabled = bloquear;
         if (campusHint) campusHint.classList.toggle("hidden", !bloquear);
       };
@@ -298,8 +298,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
           step2 = (perfil === "prospecto" && step2Prospecto) ? step2Prospecto : step2Students;
 
-          // Rediseño del paso 1 (datos + nivel combinados, grid) solo para alumno
-          if (wizardRow) wizardRow.classList.toggle("flujo-alumno", perfil === "alumno");
+          // Rediseño del paso 1 (datos + nivel combinados, grid) para ambos
+          // perfiles. La clase .flujo-alumno es histórica (el rediseño nació en el
+          // flujo alumno); hoy también la usa prospecto ("me interesa"), que
+          // comparte el mismo layout de 4 pasos.
+          if (wizardRow) wizardRow.classList.add("flujo-alumno");
 
           // Datos personales según perfil: alumno (HU4) o prospecto (HU42)
           if (datosAlumno) datosAlumno.classList.toggle("hidden", perfil !== "alumno");
@@ -425,18 +428,16 @@ document.addEventListener("DOMContentLoaded", () => {
       btnNextStep.forEach(function (elem, index) {
         // Evento para clic normal
         elem.addEventListener("click", (event) => {
-          // Mapear el paso VISIBLE al "paso lógico" del switch.
-          // Prospecto: 1:1 (sin cambios). Alumno (4 pasos): el paso 1 valida
-          // primero datos personales y, si pasan, continúa con la validación de
-          // nivel (case 2); los pasos 2/3/4 mapean a 3/4/5 (apoyos/seguros/términos).
-          let pasoLogico = currentStep;
-          if (perfilActual === "alumno") {
-            if (currentStep === 1) {
-              if (!validarDatosPersonales()) { hasError = true; canContinue(); return; }
-              pasoLogico = 2;
-            } else {
-              pasoLogico = currentStep + 1;
-            }
+          // Mapear el paso VISIBLE al "paso lógico" del switch. Wizard de 4 pasos
+          // (ambos perfiles): el paso 1 combinado valida primero datos personales
+          // y, si pasan, continúa con la validación de nivel (case 2); los pasos
+          // visibles 2/3/4 mapean a los casos 3/4/5 (apoyos/seguros/términos).
+          let pasoLogico;
+          if (currentStep === 1) {
+            if (!validarDatosPersonales()) { hasError = true; canContinue(); return; }
+            pasoLogico = 2;
+          } else {
+            pasoLogico = currentStep + 1;
           }
 
           switch (pasoLogico) {
