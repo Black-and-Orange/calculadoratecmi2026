@@ -315,6 +315,47 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      // HU40/79 "Conservar mis datos": al volver de "Nueva cotización" conservando
+      // datos, reutilizar perfil + datos personales: saltar el selector de perfil y
+      // pre-llenar los campos, dejando al usuario solo re-elegir el plan de estudios.
+      const reusarDatosConservados = () => {
+        if (localStorage.getItem("reusarDatos") !== "1") return;
+        localStorage.removeItem("reusarDatos"); // one-shot: no afectar navegación normal
+
+        const perfil = localStorage.getItem("perfilUsuario");
+        if (!perfil) return;
+
+        // Auto-seleccionar el perfil guardado (reusa el handler del botón → showWizard,
+        // de modo que se salta el paso 0 de selección de perfil).
+        const btn = [...btnPerfil].find((b) => b.dataset.perfil === perfil);
+        if (btn) btn.click();
+
+        // Pre-llenar los datos personales según el perfil.
+        let dp = null;
+        try { dp = JSON.parse(localStorage.getItem("datosPersonales") || "null"); } catch (e) { dp = null; }
+        if (!dp) return;
+
+        const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        if (perfil === "alumno") {
+          set("txt-matricula", dp.matricula);
+          set("txt-nombre-alumno", dp.nombre);
+          set("txt-apellido-alumno", dp.apellidos);
+        } else {
+          set("txt-nombre-prospecto", dp.nombre);
+          set("txt-apellido-paterno", dp.apellidoPaterno);
+          set("txt-apellido-materno", dp.apellidoMaterno);
+          set("txt-fecha-nacimiento", dp.fechaNacimiento);
+          set("txt-telefono", dp.telefono);
+          set("txt-correo", dp.correo);
+        }
+        // El nombre completo oculto (#txt-name) que usa resultados.js/saludo.
+        const nombreCompleto = perfil === "alumno"
+          ? [dp.nombre, dp.apellidos].filter(Boolean).join(" ")
+          : [dp.nombre, dp.apellidoPaterno, dp.apellidoMaterno].filter(Boolean).join(" ");
+        set("txt-name", nombreCompleto);
+      };
+      reusarDatosConservados();
+
       // ===== Validación de datos personales (HU4 / HU42) =====
       const marcarCampo = (input, valido) => {
         const msg = document.getElementById(input.id + "-msg");

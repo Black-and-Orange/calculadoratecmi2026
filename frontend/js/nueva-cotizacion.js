@@ -92,6 +92,11 @@ function conservarDatosYReiniciar() {
         localStorage.setItem(llave, conservadas[llave]);
     });
 
+    // Señal one-shot para que index.html (main.js) reutilice perfil + datos
+    // personales: saltar el selector de perfil y pre-llenar los campos, dejando
+    // al usuario solo re-elegir el plan de estudios.
+    localStorage.setItem('reusarDatos', '1');
+
     window.location.href = 'index.html';
 }
 
