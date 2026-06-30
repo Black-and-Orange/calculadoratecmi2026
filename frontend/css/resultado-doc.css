@@ -6,6 +6,15 @@
     color: #1f2937;
     /* El texto del cuerpo hereda .font-display (Source Sans Pro) del wizard y los
        encabezados h1/h2 usan Cairo vía styles.css — igual que los demás pasos. */
+    /* Espacio para que la barra de acciones fija (#dash-actions, position:fixed)
+       no tape el footer al llegar al final de la página. */
+    padding-bottom: 92px;
+}
+
+/* En móvil la barra de acciones se apila (texto arriba + botones abajo) y es más
+   alta, así que el colchón inferior debe ser mayor. */
+@media (max-width: 767px) {
+    .cotiz-body { padding-bottom: 150px; }
 }
 
 .cotiz-doc {
