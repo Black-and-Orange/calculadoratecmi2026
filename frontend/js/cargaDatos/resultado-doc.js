@@ -33,14 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const nivelNombre = val('select-grade', 'selectedNivelNombre') || (leer('selectedNivel') ? 'Nivel ' + leer('selectedNivel') : '');
 
-        const campos = [
-            ['Matrícula', dp.matricula || ''],
+        // La matrícula solo aplica al flujo alumno; el prospecto ("Me interesa") no la tiene.
+        const perfil = dp.perfil || leer('perfilUsuario');
+        const campos = [];
+        if (perfil === 'alumno') campos.push(['Matrícula', dp.matricula || '']);
+        campos.push(
             ['Nombre', ((dp.nombre || '') + ' ' + (dp.apellidos || dp.apellido || '')).trim()],
             ['Campus', val('select-campus', 'selectedCampus', 'campus')],
             ['Nivel de estudios', nivelNombre],
             ['Programa de estudios', val('select-plan', 'selectedPrograma', 'programa')],
             ['Periodo', val('select-period', 'selectedPeriodo', 'periodo')],
-        ];
+        );
         // Campo(s) académico(s) dinámico(s): se muestran solo los que aplican al nivel.
         [
             ['Materias', val('select-subjects', 'materias')],
@@ -116,9 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
         new MutationObserver(arreglar).observe(el, { childList: true, characterData: true, subtree: true });
     }
 
+    // ── Beneficios de estudiar en Tecmilenio: solo en el flujo prospecto ("Me interesa") ──
+    function cablearBeneficios() {
+        const dp = leer('datosPersonales') || {};
+        const perfil = dp.perfil || leer('perfilUsuario');
+        const sec = document.getElementById('cotiz-beneficios');
+        if (sec) sec.classList.toggle('hidden', perfil !== 'prospecto');
+    }
+
     cablearInfo();
     cablearSeguros();
     cablearPrestamo();
     cablearBeca();
+    cablearBeneficios();
     normalizarVigencia();
 });

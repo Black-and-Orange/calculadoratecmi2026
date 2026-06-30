@@ -412,3 +412,57 @@
     .cotiz-hero-acciones { align-items: flex-start; }
     .cotiz-sheet { margin-top: -30px; }
 }
+
+/* ── Beneficios de estudiar en Tecmilenio (solo prospecto "Me interesa") ──
+   Tarjetas con ícono circular naranja superpuesto, borde naranja y texto centrado. */
+.cotiz-beneficios.hidden { display: none; }
+.cotiz-beneficios-titulo {
+    text-align: center;
+    font-size: 22px;
+    color: var(--tec-verde, rgb(0 83 76));
+    margin-bottom: 26px;
+}
+.cotiz-beneficios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 22px;
+    padding-top: 28px;
+}
+.cotiz-beneficio-card {
+    position: relative;
+    border: 1.5px solid var(--tec-naranja, rgb(246 141 46));
+    border-radius: 10px;
+    padding: 46px 18px 24px;
+    text-align: center;
+    background: #fff;
+}
+.cotiz-beneficio-icono {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--tec-naranja, rgb(246 141 46));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+.cotiz-beneficio-nombre {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--tec-tinta, #11302C);
+    margin: 0 0 10px;
+}
+.cotiz-beneficio-texto {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--tec-gris, #6B7C79);
+    margin: 0;
+}
+@media (max-width: 768px) {
+    .cotiz-beneficios-grid { grid-template-columns: 1fr 1fr; }
+}
