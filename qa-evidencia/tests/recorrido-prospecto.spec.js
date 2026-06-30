@@ -17,6 +17,8 @@ const w = require('../helpers/wizard');
 async function completarApoyosProspecto(page, { beca = 'si', prestamo = 'si' } = {}) {
   // Esperar a que el panel esté visible y sync() haya corrido
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
 
   // --- BECA ---
   await page.locator(`#row-radio-beca-prospecto input[value="${beca}"]`).check();
@@ -92,42 +94,44 @@ async function seleccionarPorcentajeBecaConReintento(page) {
   await expect(btnNext).toBeEnabled({ timeout: 15_000 });
 }
 
-// Completa step-3 (seguros) — reutilizado del patrón alumno (misma lógica).
+// Completa step-3 (seguros). El paso puede regenerarse (fetchSeguros) al re-entrar
+// desde otro paso, así que se reintenta responder hasta que el botón continuar quede
+// habilitado (evita la race conocida al volver a step-3).
 async function completarSeguros(page) {
   const contenedorSeguros = page.locator('#seguros-dinamicos-container');
-  const rowRadio = page.locator('#row-radio-seguro-interes');
+  const btnNext = page.locator('#step-3-next');
 
   await expect(contenedorSeguros.locator('select').first())
     .toBeAttached({ timeout: 15_000 })
     .catch(() => {});
 
-  const numSelects = await contenedorSeguros.locator('select').count();
-  if (numSelects === 0) return;
+  if (await contenedorSeguros.locator('select').count() === 0) return;
 
-  const radioVisible = await expect(rowRadio).toBeVisible({ timeout: 3_000 })
-    .then(() => true).catch(() => false);
-  if (radioVisible) {
-    await page.locator('#row-radio-seguro-interes input[value="si"]').check();
-    await page.waitForTimeout(800);
-  }
+  for (let intento = 0; intento < 6; intento++) {
+    // Seguro contra accidente (UI por radios del rediseño step3.js): "propio" lo deja
+    // respondido ("no") sin requerir selección. VIVE y colegiatura obligatorias ya
+    // vienen pre-marcadas en "Sí" y bloqueadas.
+    const accidentePropio = page.locator('input[type="radio"][name^="accidente-"][value="propio"]');
+    if (await accidentePropio.count() > 0 && !(await accidentePropio.first().isChecked().catch(() => false))) {
+      await accidentePropio.first().check().catch(() => {});
+    }
 
-  const selectsSeguros = contenedorSeguros.locator('select');
-  const total = await selectsSeguros.count();
-  for (let i = 0; i < total; i++) {
-    const sel = selectsSeguros.nth(i);
-    if (await sel.isVisible() && !await sel.isDisabled()) {
-      const currentVal = await sel.inputValue();
-      if (currentVal !== '') continue;
-      const opSi = sel.locator('option[value="si"]');
-      if (await opSi.count() > 0) {
-        await sel.selectOption('si');
-      } else {
-        const opts = sel.locator('option:not([value=""]):not([disabled])');
-        if (await opts.count() > 0) {
-          await sel.selectOption(await opts.first().getAttribute('value'));
-        }
+    // Compatibilidad con UI por radio de interés / selects visibles (si existieran).
+    if (await page.locator('#row-radio-seguro-interes').isVisible().catch(() => false)) {
+      await page.locator('#row-radio-seguro-interes input[value="si"]').check().catch(() => {});
+    }
+    const selectsSeguros = contenedorSeguros.locator('select');
+    const total = await selectsSeguros.count();
+    for (let i = 0; i < total; i++) {
+      const sel = selectsSeguros.nth(i);
+      if (await sel.isVisible() && !await sel.isDisabled() && (await sel.inputValue()) === '') {
+        const opSi = sel.locator('option[value="si"]');
+        if (await opSi.count() > 0) await sel.selectOption('si').catch(() => {});
       }
     }
+
+    if (await btnNext.isEnabled().catch(() => false)) return;
+    await page.waitForTimeout(700);
   }
 }
 
@@ -196,32 +200,40 @@ test('[HU42] validaciones de datos de prospecto', async ({ page }, testInfo) => 
   await w.seleccionarPerfil(page, 'prospecto');
   await expect(page.locator('#datos-prospecto')).toBeVisible();
 
-  // Teléfono corto ('123') → debe mostrar mensaje de error
+  // Paso 1 combinado: datos personales y nivel comparten pantalla. La validación
+  // de datos se dispara al pulsar "Continuar" (#step-1-next), que requiere el
+  // nivel completo; por eso se completa el nivel antes de probar datos inválidos.
   await page.locator('#txt-nombre-prospecto').fill(w.DATOS_PRUEBA.nombre);
   await page.locator('#txt-apellido-paterno').fill(w.DATOS_PRUEBA.apellido);
   await page.locator('#txt-apellido-materno').fill(w.DATOS_PRUEBA.apellidoMaterno);
   await page.locator('#txt-fecha-nacimiento').fill(w.DATOS_PRUEBA.fechaNacimiento);
-  await page.locator('#txt-telefono').fill('123');
   await page.locator('#txt-correo').fill(w.DATOS_PRUEBA.correo);
-  await page.locator('#step-dp-next').click();
+  // Teléfono corto ('123') → debe bloquear el avance y mostrar error
+  await page.locator('#txt-telefono').fill('123');
 
+  // completarNivel habilita y pulsa "Continuar"; el teléfono inválido bloquea el
+  // avance y muestra el error (seguimos en el paso 1).
+  await w.completarNivel(page);
   const msgTelefono = page.locator('#txt-telefono-msg');
   await expect(msgTelefono).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#step-1')).toBeVisible();
   await w.capturar(page, testInfo, '4-datos-personales', 'prospecto-telefono-invalido-error');
 
   // Correo inválido ('no-es-correo') → debe mostrar mensaje de error
   await page.locator('#txt-telefono').fill(w.DATOS_PRUEBA.telefono);
   await page.locator('#txt-correo').fill('no-es-correo');
-  await page.locator('#step-dp-next').click();
+  await page.locator('#step-1-next').click();
 
   const msgCorreo = page.locator('#txt-correo-msg');
   await expect(msgCorreo).toBeVisible({ timeout: 10_000 });
   await w.capturar(page, testInfo, '4-datos-personales', 'prospecto-correo-invalido-error');
 
-  // Datos válidos → avanzar a step-1
+  // Datos válidos → avanza al paso 2 (apoyos)
   await page.locator('#txt-correo').fill(w.DATOS_PRUEBA.correo);
-  await page.locator('#step-dp-next').click();
-  await expect(page.locator('#step-1')).toBeVisible({ timeout: 15_000 });
+  await page.locator('#step-1-next').click();
+  await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   await w.capturar(page, testInfo, '4-datos-personales', 'prospecto-datos-validos-avanza');
 });
 
@@ -245,6 +257,8 @@ test('[HU42,HU43,HU44,HU45,HU46,HU47,HU54,HU56,HU57,HU58,HU60,HU61,HU62,HU64,HU6
 
   // --- Apoyos (step-2) HU56-HU58 ---
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   await w.capturar(page, testInfo, '6-apoyos', 'completo-apoyos-inicio');
 
   // Beca = sí
@@ -340,6 +354,8 @@ test('[HU56,HU57] recorrido prospecto sin apoyos', async ({ page }, testInfo) =>
   await w.completarNivel(page);
 
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
 
   // Beca = no
   await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
@@ -381,19 +397,21 @@ test('[HU55,HU59,HU65,HU70] botones regresar con precarga', async ({ page }, tes
   await w.seleccionarPerfil(page, 'prospecto');
   await w.llenarDatosProspecto(page);
 
-  // En step-1 (nivel): regresar a step-dp y verificar precarga de nombre (HU55)
+  // Paso 1 combinado: "Regresar" vuelve a la selección de perfil; al re-entrar,
+  // los datos personales se conservan (HU55).
   await expect(page.locator('#step-1')).toBeVisible();
   await page.locator('#step-1 .btn-prev-step').click();
-  await expect(page.locator('#step-dp')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#step-0')).toBeVisible({ timeout: 10_000 });
+  await page.locator('button[data-perfil="prospecto"]').click();
   await expect(page.locator('#txt-nombre-prospecto')).toHaveValue(w.DATOS_PRUEBA.nombre);
-  await w.capturar(page, testInfo, '4-datos-personales', 'regresar-desde-nivel-precarga-nombre');
+  await w.capturar(page, testInfo, '4-datos-personales', 'regresar-a-perfil-precarga-nombre');
 
-  // Avanzar de nuevo hasta step-2 para probar regresar (HU59)
-  await page.locator('#step-dp-next').click();
-  await expect(page.locator('#step-1')).toBeVisible();
+  // Avanzar hasta step-2 (apoyos) para probar regresar (HU59)
   await w.completarNivel(page);
 
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   // Marcar beca=no y préstamo=no para poder avanzar
   await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
   await page.waitForTimeout(900);
@@ -409,6 +427,8 @@ test('[HU55,HU59,HU65,HU70] botones regresar con precarga', async ({ page }, tes
   await expect(page.locator('#step-1-next')).toBeEnabled({ timeout: 15_000 });
   await page.locator('#step-1-next').click();
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   // Responder beca=no y préstamo=no de nuevo
   await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
   await page.waitForTimeout(900);
@@ -516,6 +536,8 @@ test('[HU66,HU67] checks legales obligatorios en prospecto', async ({ page }, te
   await w.completarNivel(page);
 
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   // Beca=no, préstamo=no para avanzar rápido
   await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
   await page.waitForTimeout(900);

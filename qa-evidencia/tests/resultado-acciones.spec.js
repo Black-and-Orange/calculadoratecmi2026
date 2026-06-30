@@ -50,6 +50,8 @@ const w = require('../helpers/wizard');
 
 async function completarApoyosProspectoMinimo(page) {
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
   const radioPrestamoNo = page.locator('#row-radio-prestamo-prospecto input[value="no"]');
   if (!await radioPrestamoNo.isDisabled()) await radioPrestamoNo.check();

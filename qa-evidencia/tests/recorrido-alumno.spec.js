@@ -40,21 +40,24 @@ test('[HU3] barra de pasos tras selección de perfil', async ({ page }, testInfo
 test('[HU4] validación de matrícula — inválida y luego corregida', async ({ page }, testInfo) => {
   await w.seleccionarPerfil(page, 'alumno');
 
-  // Ingresar matrícula inválida (< 8 chars)
+  // Paso 1 combinado: la validación de datos se dispara al pulsar "Continuar"
+  // (#step-1-next), que requiere el nivel completo. Matrícula inválida (< 8):
   await page.locator('#txt-matricula').fill('ABC');
   await page.locator('#txt-nombre-alumno').fill(w.DATOS_PRUEBA.nombre);
   await page.locator('#txt-apellido-alumno').fill(w.DATOS_PRUEBA.apellido);
-  await page.locator('#step-dp-next').click();
 
-  // El mensaje de error de matrícula debe aparecer
+  // completarNivel habilita y pulsa "Continuar"; la matrícula inválida bloquea el
+  // avance y muestra el error (seguimos en el paso 1).
+  await w.completarNivel(page);
   const msgMatricula = page.locator('#txt-matricula-msg');
   await expect(msgMatricula).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('#step-1')).toBeVisible();
   await w.capturar(page, testInfo, '4-datos-personales', 'matricula-invalida-error');
 
-  // Corregir a matrícula válida y verificar que avanza
+  // Corregir a matrícula válida y verificar que avanza al paso 2
   await page.locator('#txt-matricula').fill('QA000001');
-  await page.locator('#step-dp-next').click();
-  await expect(page.locator('#step-1')).toBeVisible({ timeout: 15_000 });
+  await page.locator('#step-1-next').click();
+  await expect(page.locator('#step-2-students')).toBeVisible({ timeout: 15_000 });
   await w.capturar(page, testInfo, '4-datos-personales', 'matricula-valida-avanza');
 });
 
@@ -325,17 +328,16 @@ test('[HU17,HU21,HU27,HU31] botones regresar conservan valores (precarga)', asyn
   await w.seleccionarPerfil(page, 'alumno');
   await w.llenarDatosAlumno(page);
 
-  // En step-1 (nivel): regresar a step-dp y verificar precarga de matrícula
+  // Paso 1 combinado: "Regresar" vuelve a la selección de perfil; al re-entrar,
+  // la matrícula se conserva (HU17).
   await expect(page.locator('#step-1')).toBeVisible();
   await page.locator('#step-1 .btn-prev-step').click();
-  await expect(page.locator('#step-dp')).toBeVisible({ timeout: 10_000 });
-  // Verificar que la matrícula sigue precargada (HU17)
+  await expect(page.locator('#step-0')).toBeVisible({ timeout: 10_000 });
+  await page.locator('button[data-perfil="alumno"]').click();
   await expect(page.locator('#txt-matricula')).toHaveValue(w.DATOS_PRUEBA.matricula);
-  await w.capturar(page, testInfo, '4-datos-personales', 'regresar-desde-nivel-precarga-matricula');
+  await w.capturar(page, testInfo, '4-datos-personales', 'regresar-a-perfil-precarga-matricula');
 
-  // Avanzar de nuevo hasta step-2-students para probar regresar (HU21)
-  await page.locator('#step-dp-next').click();
-  await expect(page.locator('#step-1')).toBeVisible();
+  // Avanzar hasta step-2-students para probar regresar (HU21)
   await w.completarNivel(page);
 
   await expect(page.locator('#step-2-students')).toBeVisible({ timeout: 15_000 });

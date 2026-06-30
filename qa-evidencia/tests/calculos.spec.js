@@ -23,6 +23,8 @@ const BACKEND = 'https://calculadora-tecmi-backend.carlos-tam-s-account.workers.
  */
 async function completarApoyosProspecto(page, testInfo, { beca = 'si', prestamo = 'no', nivelId = null } = {}) {
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
 
   let becaPct = 0;
   let prestamoPct = 0;
@@ -493,6 +495,8 @@ test('[HU22,HU60] tope préstamo 20% en nivel profesional con beca (fix a054003)
 
     // Step-2: seleccionar beca = sí
     await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+    // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+    await page.locator('#txt-average-mark').fill('100');
     await page.locator('#row-radio-beca-prospecto input[value="si"]').check();
     await expect(page.locator('#tipo-beca')).toBeVisible({ timeout: 10_000 });
     const optsScholarship = page.locator('#txt-scholarship option:not([value=""]):not([value="0"])');
@@ -587,6 +591,8 @@ test('[HU18,HU56] regla suma beca+préstamo ≤ 60% — opciones ofrecidas respe
   await w.completarNivel(page);
 
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
 
   // Seleccionar beca = sí
   await page.locator('#row-radio-beca-prospecto input[value="si"]').check();
@@ -714,6 +720,8 @@ test('[HU19,HU57] prepa sin préstamo — préstamo no disponible en niveles de 
     if (!nivelSeleccionado) continue;
 
     await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+    // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+    await page.locator('#txt-average-mark').fill('100');
     // Responder beca=no para aislar la regla prepa
     await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
     await page.waitForTimeout(1200); // esperar sync() del intervalo 700ms
@@ -757,6 +765,8 @@ test('[HU33,HU72] beca mostrada en resultado coincide con la elegida', async ({ 
   await w.completarNivel(page);
 
   await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+  // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+  await page.locator('#txt-average-mark').fill('100');
   await page.locator('#row-radio-beca-prospecto input[value="si"]').check();
   await expect(page.locator('#tipo-beca')).toBeVisible({ timeout: 10_000 });
   const optsScholarship = page.locator('#txt-scholarship option:not([value=""]):not([value="0"])');
@@ -991,6 +1001,8 @@ test('[HU22,HU25,HU60,HU63] seguros forzados en Prepa (VIVE y colegiatura) — s
         await page.locator('#step-2-students-next').click();
       } else {
         await expect(page.locator('#step-2')).toBeVisible({ timeout: 15_000 });
+        // Promedio académico: obligatorio en prospecto (antes apoyos-hu lo forzaba a 100).
+        await page.locator('#txt-average-mark').fill('100');
         const radioPrestamoNo = page.locator('#row-radio-prestamo-prospecto input[value="no"]');
         await page.locator('#row-radio-beca-prospecto input[value="no"]').check();
         await page.waitForTimeout(900);

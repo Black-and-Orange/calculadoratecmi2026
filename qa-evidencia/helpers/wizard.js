@@ -30,11 +30,14 @@ async function seleccionarPerfil(page, perfil) {
   await expect(page.locator('#step-dp')).toBeVisible();
 }
 
+// Paso 1 combinado (rediseño 4 pasos): datos personales y nivel comparten
+// pantalla, no hay botón intermedio "Siguiente" (#step-dp-next quedó oculto). El
+// helper solo llena los datos; el nivel se completa con completarNivel() y se
+// avanza con "Continuar" (#step-1-next).
 async function llenarDatosAlumno(page, datos = DATOS_PRUEBA) {
   await page.locator('#txt-matricula').fill(datos.matricula);
   await page.locator('#txt-nombre-alumno').fill(datos.nombre);
   await page.locator('#txt-apellido-alumno').fill(datos.apellido);
-  await page.locator('#step-dp-next').click();
   await expect(page.locator('#step-1')).toBeVisible();
 }
 
@@ -45,7 +48,6 @@ async function llenarDatosProspecto(page, datos = DATOS_PRUEBA) {
   await page.locator('#txt-fecha-nacimiento').fill(datos.fechaNacimiento);
   await page.locator('#txt-telefono').fill(datos.telefono);
   await page.locator('#txt-correo').fill(datos.correo);
-  await page.locator('#step-dp-next').click();
   await expect(page.locator('#step-1')).toBeVisible();
 }
 
