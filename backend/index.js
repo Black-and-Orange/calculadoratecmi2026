@@ -62,6 +62,7 @@ const corsOptions = {
 
             // Staging en Cloudflare Pages
             'https://calculadora-tecmi.pages.dev',
+            'https://calculadora-tecmi-admin.pages.dev',
         ];
         
         // Verificar si el origin está en la lista de permitidos
@@ -69,7 +70,7 @@ const corsOptions = {
             callback(null, true);
         } else {
             // También permitir subdominios de testingbo.com y tecmilenio.mx
-            if (origin.includes('.testingbo.com') || origin.includes('.tecmilenio.mx') || origin.endsWith('calculadora-tecmi.pages.dev')) {
+            if (origin.includes('.testingbo.com') || origin.includes('.tecmilenio.mx') || origin.endsWith('calculadora-tecmi.pages.dev') || origin.endsWith('calculadora-tecmi-admin.pages.dev')) {
                 callback(null, true);
             } else {
                 console.log('CORS bloqueado para origin:', origin);

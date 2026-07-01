@@ -40,3 +40,16 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.86.0"
           command: pages deploy frontend --project-name=calculadora-tecmi --branch=fase-3
+
+  admin:
+    name: Admin (Pages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Pages (admin)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.86.0"
+          command: pages deploy admin --project-name=calculadora-tecmi-admin --branch=fase-3
