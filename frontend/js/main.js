@@ -229,9 +229,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let completo = true;
 
-        // Todos los selects visibles del panel deben tener valor
+        // Todos los selects visibles Y HABILITADOS del panel deben tener valor.
+        // Se excluyen los deshabilitados (p.ej. Certificados/Semanas SEDI de los
+        // periodos NO marcados del nivel 13 Ejecutivo Bimestral MAPS): el usuario
+        // no puede llenarlos, así que no deben bloquear "Continuar".
         step1.querySelectorAll("select").forEach((select) => {
-          if (select.offsetParent !== null && select.value === "") completo = false;
+          if (select.offsetParent !== null && !select.disabled && select.value === "") completo = false;
         });
 
         // Nivel 13 (bimestral): el periodo es un grupo de checkboxes (de 2 a 5)
