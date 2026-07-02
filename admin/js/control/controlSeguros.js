@@ -92,53 +92,54 @@ function createSeguro(level, nombre, valor, estado, callback) {
             return response.json();
         })
         .then(data => {
+            window.tecToast('Seguro creado');
             if (callback) callback();
         })
         .catch(error => {
             console.error('Error al crear el seguro:', error.message);
-            alert(`Error al crear el seguro: ${error.message}`);
+            window.tecToast(`Error al crear el seguro: ${error.message}`, 'error');
         });
 }
 
 // Función para editar seguro
-function editSeguro(id_seguro, currentNombre, currentValor, level) {
-    const newNombre = prompt('Nuevo nombre del seguro:', currentNombre);
-    if (!newNombre) return;
-
-    const newValor = prompt('Nuevo valor del seguro:', currentValor);
-    if (!newValor || isNaN(newValor)) {
-        alert('El valor debe ser un número válido');
+async function editSeguro(id_seguro, currentNombre, currentValor, level) {
+    const valores = await window.tecFormModal('Editar seguro', [
+        { name: 'nombre', label: 'Nuevo nombre del seguro', value: currentNombre },
+        { name: 'valor', label: 'Nuevo valor del seguro', value: currentValor, type: 'number' },
+    ]);
+    if (!valores || !valores.nombre) return;
+    if (!valores.valor || isNaN(valores.valor)) {
+        window.tecToast('El valor debe ser un número válido', 'error');
         return;
     }
 
-    if (newNombre && newValor) {
-        fetch(`${apiUrlSeguros}/${id_seguro}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                nombre_seguro: newNombre,
-                valor: parseFloat(newValor),
-                id_nivel: level
-            }),
+    fetch(`${apiUrlSeguros}/${id_seguro}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            nombre_seguro: valores.nombre,
+            valor: parseFloat(valores.valor),
+            id_nivel: level
+        }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || `Error en la petición: ${response.status}`);
+                });
+            }
+            return response.json();
         })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.error || `Error en la petición: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                loadSeguros(level, '#segurosNivel' + level);
-            })
-            .catch(error => {
-                console.error('Error al editar el seguro:', error.message);
-                alert(`Error al editar el seguro: ${error.message}`);
-            });
-    }
+        .then(data => {
+            loadSeguros(level, '#segurosNivel' + level);
+            window.tecToast('Seguro actualizado');
+        })
+        .catch(error => {
+            console.error('Error al editar el seguro:', error.message);
+            window.tecToast(`Error al editar el seguro: ${error.message}`, 'error');
+        });
 }
 
 // Función para cambiar el estado de un seguro
@@ -163,18 +164,18 @@ function toggleEstadoSeguro(id_seguro, level, nuevoEstado) {
         })
         .then(data => {
             loadSeguros(level, '#segurosNivel' + level);
+            window.tecToast('Estado del seguro actualizado');
         })
         .catch(error => {
             console.error('Error al cambiar el estado del seguro:', error.message);
-            alert(`Error al cambiar el estado: ${error.message}`);
+            window.tecToast(`Error al cambiar el estado: ${error.message}`, 'error');
         });
 }
 
 // Función para eliminar seguro (solo la relación con el nivel)
-function deleteSeguro(id_seguro, level) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este seguro de este nivel?')) {
-        return;
-    }
+async function deleteSeguro(id_seguro, level) {
+    const confirmado = await window.tecConfirm('Se eliminará este seguro de este nivel de forma permanente.');
+    if (!confirmado) return;
 
     fetch(`${apiUrlSeguros}/${id_seguro}?id_nivel=${level}`, {
         method: 'DELETE',
@@ -189,10 +190,11 @@ function deleteSeguro(id_seguro, level) {
         })
         .then(data => {
             loadSeguros(level, '#segurosNivel' + level);
+            window.tecToast('Seguro eliminado');
         })
         .catch(error => {
             console.error('Error al eliminar el seguro:', error.message);
-            alert(`Error al eliminar el seguro: ${error.message}`);
+            window.tecToast(`Error al eliminar el seguro: ${error.message}`, 'error');
         });
 }
 
@@ -218,12 +220,12 @@ $(document).ready(function () {
         const estado = $(`#segurosNivel${level}Estado`).is(':checked');
 
         if (!nombre) {
-            alert('El nombre del seguro es requerido');
+            window.tecToast('El nombre del seguro es requerido', 'error');
             return;
         }
 
         if (!valor || isNaN(valor)) {
-            alert('El valor debe ser un número válido');
+            window.tecToast('El valor debe ser un número válido', 'error');
             return;
         }
 

@@ -161,24 +161,25 @@ async function actualizarDiasVigencia() {
     const diasInput = document.getElementById('diasVigencia');
     const dias = diasInput ? diasInput.value : null;
     if (!dias || dias < 1 || dias > 365) {
-        alert('Por favor ingrese un número válido entre 1 y 365 días');
+        window.tecToast('Por favor ingrese un número válido entre 1 y 365 días', 'error');
         return;
     }
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/configuracion-vigencia/dias-vigencia`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ dias_vigencia: parseInt(dias) })
         });
-        
+
         if (response.ok) {
-            await cargarDiasVigencia(); 
+            await cargarDiasVigencia();
+            window.tecToast('Días de vigencia actualizados');
         } else {
-            alert('Error al actualizar días de vigencia');
+            window.tecToast('Error al actualizar días de vigencia', 'error');
         }
     } catch (error) {
-        alert('Error al actualizar días de vigencia');
+        window.tecToast('Error al actualizar días de vigencia', 'error');
     }
 }
 

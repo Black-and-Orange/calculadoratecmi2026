@@ -1,0 +1,478 @@
+/* ══════════════════════════════════════════════════════════════════
+   admin-theme.css — Tema visual del panel de administración.
+   Reestiliza el admin con la identidad del frontend (paleta --tec-*,
+   tipografía Cairo). Es SOLO capa visual: no cambia estructura HTML ni
+   lógica JS. Debe cargarse DESPUÉS de bootstrap.min.css para poder
+   sobrescribir sus estilos.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+    --tec-verde: #00534C;
+    --tec-verde-profundo: #003A35;
+    --tec-teal: #00A499;
+    --tec-teal-claro: #5ECEC6;
+    --tec-naranja: #F68D2E;
+    --tec-naranja-suave: #FFB549;
+    --tec-menta: #26D07C;
+    --tec-crema: #FFF7EE;
+    --tec-marfil: #FAF8F4;
+    --tec-tinta: #11302C;
+    --tec-gris: #6B7C79;
+    --tec-linea: #E4EBE9;
+    --tec-rojo: #D64550;
+    --radio: 14px;
+    --sombra: 0 10px 30px rgba(17, 48, 44, 0.08);
+    --sombra-suave: 0 4px 14px rgba(17, 48, 44, 0.06);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+body {
+    font-family: "Cairo", sans-serif !important;
+    background:
+        radial-gradient(1200px 480px at 90% -10%, rgba(0, 164, 153, 0.07), transparent 60%),
+        var(--tec-marfil) !important;
+    color: var(--tec-tinta);
+    min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.header {
+    background: linear-gradient(118deg, var(--tec-verde-profundo) 0%, var(--tec-verde) 55%, #00756C 100%) !important;
+    box-shadow: var(--sombra-suave);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+.header img { height: 34px; }
+.header .btn-danger {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    font-weight: 600;
+    padding: 8px 18px;
+}
+.header .btn-danger:hover { background: rgba(255, 255, 255, 0.24); }
+
+/* ── Tarjetas de sección ────────────────────────────────── */
+.card {
+    border: 1px solid var(--tec-linea) !important;
+    border-radius: var(--radio) !important;
+    box-shadow: var(--sombra) !important;
+    overflow: hidden;
+}
+.card-header {
+    background: #fff !important;
+    border-bottom: 1px solid var(--tec-linea) !important;
+    padding: 20px 24px !important;
+    cursor: pointer;
+}
+.card-header h3 {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--tec-verde);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+/* Ícono redondo antes del título (por sección) */
+.card-header h3::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: var(--tec-teal);
+    background: rgba(0, 164, 153, 0.12);
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.configuracion-vigencia .card-header h3::before { content: "\f073"; }   /* calendario */
+section:nth-of-type(3) .card-header h3::before { content: "\f5fd"; }     /* capas (niveles) */
+section:nth-of-type(4) .card-header h3::before { content: "\f571"; }     /* documento (cotizaciones) */
+
+.card-body { padding: 24px !important; }
+
+/* Botón de colapsar (chevron) */
+.card-header .btn-outline-secondary {
+    border-radius: 10px;
+    border-color: var(--tec-linea);
+    color: var(--tec-gris);
+    width: 40px;
+    height: 40px;
+}
+.card-header .btn-outline-secondary:hover {
+    background: var(--tec-crema);
+    color: var(--tec-verde);
+    border-color: var(--tec-teal-claro);
+}
+
+/* ── Botones ────────────────────────────────────────────── */
+.btn { border-radius: 10px; font-weight: 600; }
+.btn-primary,
+.btn-success {
+    background: linear-gradient(120deg, var(--tec-verde) 0%, var(--tec-teal) 100%) !important;
+    border: none !important;
+    color: #fff !important;
+}
+.btn-primary:hover,
+.btn-success:hover { filter: brightness(1.05); box-shadow: var(--sombra-suave); }
+.btn-secondary {
+    background: #fff !important;
+    border: 1px solid var(--tec-linea) !important;
+    color: var(--tec-tinta) !important;
+}
+.btn-secondary:hover { background: var(--tec-crema) !important; }
+/* Acción de fila: editar = outline neutro; borrar = rojo sobrio */
+.btn-warning {
+    background: #fff !important;
+    border: 1px solid var(--tec-linea) !important;
+    color: var(--tec-gris) !important;
+}
+.btn-warning:hover { color: var(--tec-verde) !important; border-color: var(--tec-teal-claro) !important; }
+.btn-danger {
+    background: var(--tec-rojo) !important;
+    border: none !important;
+    color: #fff !important;
+}
+.btn-danger:hover { filter: brightness(1.05); }
+td .btn { padding: 6px 11px; border-radius: 9px; }
+
+/* ── Pestañas de nivel (tabs) ───────────────────────────── */
+.nav-tabs { border-bottom: none; gap: 8px; }
+.nav-tabs .nav-link {
+    border: 1px solid var(--tec-linea) !important;
+    border-radius: 11px !important;
+    color: var(--tec-gris) !important;
+    font-weight: 600;
+    background: #fff !important;
+    padding: 10px 16px !important;
+    min-height: auto !important;
+    transition: all .15s ease;
+}
+.nav-tabs .nav-link:hover { border-color: var(--tec-teal-claro) !important; color: var(--tec-verde) !important; }
+.nav-tabs .nav-link.active {
+    background: linear-gradient(120deg, var(--tec-verde) 0%, var(--tec-teal) 100%) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: var(--sombra-suave);
+}
+
+/* Sub-pestañas (pills) */
+.nav-pills { gap: 6px; }
+.nav-pills .nav-link {
+    border-radius: 999px !important;
+    color: var(--tec-gris) !important;
+    font-weight: 600;
+    padding: 6px 14px !important;
+    background: var(--tec-marfil) !important;
+}
+.nav-pills .nav-link.active { background: var(--tec-verde) !important; color: #fff !important; }
+
+/* ── Tablas ─────────────────────────────────────────────── */
+.table { border-collapse: separate; border-spacing: 0; }
+.table thead th,
+.thead-dark th {
+    background: var(--tec-crema) !important;
+    color: var(--tec-verde) !important;
+    border: none !important;
+    text-transform: uppercase;
+    font-size: .72rem;
+    letter-spacing: .04em;
+    font-weight: 700;
+    padding: 14px 16px;
+}
+.table td { border-color: var(--tec-linea) !important; vertical-align: middle; padding: 14px 16px; }
+.table-striped tbody tr:nth-of-type(odd) { background: rgba(250, 248, 244, 0.5); }
+.table-hover tbody tr:hover { background: var(--tec-crema); }
+
+/* ── Formularios ────────────────────────────────────────── */
+.form-control {
+    border-radius: 11px;
+    border: 1px solid var(--tec-linea);
+    padding: 11px 14px;
+    color: var(--tec-tinta);
+    margin-bottom: 10px;
+}
+.form-control:focus {
+    border-color: var(--tec-teal);
+    box-shadow: 0 0 0 3px rgba(0, 164, 153, 0.15);
+}
+label { font-weight: 600; color: var(--tec-tinta); }
+.form-text { color: var(--tec-gris) !important; }
+
+/* Bloque "crear registro" separado visualmente de la tabla */
+form[id^="create"] {
+    background: var(--tec-marfil);
+    border: 1px dashed var(--tec-linea);
+    border-radius: var(--radio);
+    padding: 18px;
+    margin-top: 16px;
+}
+
+/* ── Tarjeta contador (Total Cotizaciones) ──────────────── */
+.card.bg-primary {
+    background: linear-gradient(120deg, var(--tec-verde) 0%, var(--tec-teal) 100%) !important;
+    border: none !important;
+    border-radius: var(--radio) !important;
+}
+.card.bg-primary h4 { font-weight: 800; font-size: 2rem; }
+
+/* ── Estados vacíos / spinner ───────────────────────────── */
+#noData p, #loading p { color: var(--tec-gris); }
+.spinner-border.text-primary { color: var(--tec-teal) !important; }
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYOUT DASHBOARD (Fase B): sidebar + topbar + páginas
+   ══════════════════════════════════════════════════════════════════ */
+
+.tec-layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.tec-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, var(--tec-verde-profundo) 0%, var(--tec-verde) 100%);
+    color: #fff;
+    padding: 22px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 40;
+}
+.tec-sidebar-logo img { height: 30px; margin: 4px 8px 26px; }
+.tec-nav-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255, 255, 255, .45);
+    margin: 18px 12px 8px;
+}
+.tec-side-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 11px;
+    color: rgba(255, 255, 255, .82);
+    font-weight: 600;
+    font-size: .95rem;
+    cursor: pointer;
+    margin-bottom: 4px;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+.tec-side-link i { width: 20px; text-align: center; }
+.tec-side-link:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.tec-side-link.active { background: rgba(94, 206, 198, .22); color: #fff; }
+.tec-sidebar-foot { margin-top: auto; }
+.tec-sidebar-foot .tec-side-link { color: rgba(255, 255, 255, .6); }
+
+/* ── Main / topbar ── */
+.tec-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tec-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--tec-linea);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+.tec-crumb { color: var(--tec-gris); font-size: .9rem; }
+.tec-crumb b { color: var(--tec-tinta); }
+.tec-user { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--tec-tinta); }
+.tec-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(120deg, var(--tec-verde), var(--tec-teal));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+.tec-content { padding: 28px 32px; }
+.tec-page { display: none; }
+.tec-page.active { display: block; }
+.tec-page-title { font-weight: 800; color: var(--tec-verde); font-size: 1.5rem; margin-bottom: 4px; }
+.tec-page-sub { color: var(--tec-gris); margin-bottom: 22px; }
+
+/* ── Barra selector de nivel ── */
+.tec-nivel-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid var(--tec-linea);
+    border-radius: var(--radio);
+    padding: 16px 20px;
+    box-shadow: var(--sombra-suave);
+    margin-bottom: 8px;
+}
+.tec-nivel-bar label { margin: 0; color: var(--tec-gris); font-size: .85rem; }
+.tec-nivel-select {
+    border: 1px solid var(--tec-linea);
+    border-radius: 11px;
+    padding: 10px 16px;
+    font-weight: 700;
+    color: var(--tec-verde);
+    background: #fff;
+    min-width: 280px;
+}
+
+/* ── Chips de catálogo agrupados ── */
+.tec-cat-title {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--tec-gris);
+    margin: 14px 4px 6px;
+    font-weight: 700;
+}
+.tec-cat-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.tec-chip {
+    border: 1px solid var(--tec-linea);
+    background: #fff;
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-weight: 600;
+    font-size: .9rem;
+    color: var(--tec-gris);
+    cursor: pointer;
+}
+.tec-chip:hover { border-color: var(--tec-teal-claro); color: var(--tec-verde); }
+.tec-chip.active { background: var(--tec-verde); color: #fff; border-color: transparent; }
+
+/* ── Tarjeta de catálogo (tabla + header con acciones) ── */
+.tec-panel-card {
+    background: #fff;
+    border: 1px solid var(--tec-linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    margin-top: 20px;
+    overflow: hidden;
+}
+.tec-panel-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--tec-linea);
+}
+.tec-panel-card-head h4 { margin: 0; font-weight: 800; color: var(--tec-tinta); font-size: 1.05rem; }
+.tec-panel-card .table { margin: 0; }
+.tec-pane { display: none; }
+.tec-pane.active { display: block; }
+
+/* En el layout nuevo los formularios de creación viven en modales */
+.tec-modal form[id^="create"] {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ── Stat cards (Resumen) ── */
+.tec-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+.tec-stat {
+    flex: 1;
+    min-width: 210px;
+    background: #fff;
+    border: 1px solid var(--tec-linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-suave);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.tec-stat-ico {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: rgba(0, 164, 153, 0.12);
+    color: var(--tec-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+.tec-stat-num { font-weight: 800; font-size: 1.6rem; color: var(--tec-tinta); line-height: 1.1; }
+.tec-stat-label { color: var(--tec-gris); font-size: .85rem; }
+
+/* ── Modales tec ── */
+.tec-modal { border: none; border-radius: var(--radio); box-shadow: var(--sombra); }
+.tec-modal-titulo { font-weight: 800; color: var(--tec-verde); }
+.tec-modal-texto { color: var(--tec-gris); }
+.tec-modal-icono {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+}
+.tec-modal-icono.peligro { background: rgba(214, 69, 80, 0.12); color: var(--tec-rojo); }
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .tec-layout { flex-direction: column; }
+    .tec-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        padding: 12px;
+    }
+    .tec-sidebar-logo img { margin: 0 10px 0 4px; height: 26px; }
+    .tec-nav-label { display: none; }
+    .tec-side-link { width: auto; padding: 8px 12px; font-size: .88rem; }
+    .tec-sidebar-foot { margin-top: 0; margin-left: auto; }
+    .tec-content { padding: 18px 14px; }
+    .tec-topbar { padding: 12px 14px; }
+    .tec-nivel-select { min-width: 100%; }
+}
+
+/* ══ Toast de feedback (reutilizable en Fase B) ══ */
+.tec-toast-wrap {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1080;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.tec-toast {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+    box-shadow: var(--sombra);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-weight: 600;
+    color: var(--tec-tinta);
+    border-left: 4px solid var(--tec-menta);
+}
+.tec-toast.error { border-left-color: var(--tec-rojo); }
+.tec-toast .tec-toast-ico { color: var(--tec-menta); }
+.tec-toast.error .tec-toast-ico { color: var(--tec-rojo); }

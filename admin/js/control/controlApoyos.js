@@ -77,40 +77,57 @@ $(document).ready(function () {
             body: JSON.stringify({ porcentaje: percentage, nivel_id: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating apoyos:', error));
+            .then(data => {
+                window.tecToast('Apoyo creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating apoyos:', error);
+                window.tecToast('No se pudo crear el apoyo', 'error');
+            });
     }
 });
 
 // Función para eliminar apoyos
-function deleteApoyos(id, level) {
+async function deleteApoyos(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el apoyo de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlApoyos}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
             loadApoyos(level, '#apoyosNivel' + level);
+            window.tecToast('Apoyo eliminado');
         })
-        .catch(error => console.error('Error deleting apoyos:', error));
+        .catch(error => {
+            console.error('Error deleting apoyos:', error);
+            window.tecToast('No se pudo eliminar el apoyo', 'error');
+        });
 }
 
 // Función para editar apoyos
-function editApoyos(id, currentName, currentPercentage, level) {
-    const newPercentage = prompt('Nuevo porcentaje del apoyo:', currentPercentage);
-    if (newPercentage) {
-        fetch(`${apiUrlApoyos}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ porcentaje: newPercentage }),
+async function editApoyos(id, currentName, currentPercentage, level) {
+    const valores = await window.tecFormModal('Editar apoyo', [
+        { name: 'porcentaje', label: 'Nuevo porcentaje del apoyo', value: currentPercentage, type: 'number' },
+    ]);
+    if (!valores || !valores.porcentaje) return;
+    fetch(`${apiUrlApoyos}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ porcentaje: valores.porcentaje }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            loadApoyos(level, '#apoyosNivel' + level);
+            window.tecToast('Apoyo actualizado');
         })
-            .then(response => response.json())
-            .then(data => {
-                loadApoyos(level, '#apoyosNivel' + level);
-            })
-            .catch(error => console.error('Error editing apoyos:', error));
-    }
+        .catch(error => {
+            console.error('Error editing apoyos:', error);
+            window.tecToast('No se pudo actualizar el apoyo', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

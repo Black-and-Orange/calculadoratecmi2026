@@ -108,13 +108,21 @@ $(document).ready(function () {
                 }
                 return response.json();
             })
-            .then(data => callback())
-            .catch(error => console.error('Error al crear la beca variable:', error.message));
+            .then(data => {
+                window.tecToast('Beca creada');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error al crear la beca variable:', error.message);
+                window.tecToast('No se pudo crear la beca', 'error');
+            });
     }
 });
 
 // Función para eliminar beca variable
-function deleteBecaVariable(id, level) {
+async function deleteBecaVariable(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará la beca de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlBecas}/${id}`, {
         method: 'DELETE',
     })
@@ -126,43 +134,51 @@ function deleteBecaVariable(id, level) {
         })
         .then(data => {
             loadBecaVariable(level, '#becasNivel' + level);
+            window.tecToast('Beca eliminada');
         })
-        .catch(error => console.error('Error al eliminar la beca variable:', error.message));
+        .catch(error => {
+            console.error('Error al eliminar la beca variable:', error.message);
+            window.tecToast('No se pudo eliminar la beca', 'error');
+        });
 }
 
 // Función para editar beca variable
-function editBecaVariable(id, currentTipo, currentPorcentajeMin, currentPorcentajeMax, currentPromedioMin, currentPromedioMax, level) {
-    const newTipo = prompt('Nuevo Tipo:', currentTipo);
-    const newPorcentajeMin = prompt('Nuevo Porcentaje Mínimo:', currentPorcentajeMin);
-    const newPorcentajeMax = prompt('Nuevo Porcentaje Máximo:', currentPorcentajeMax);
-    const newPromedioMin = prompt('Nuevo Promedio Mínimo:', currentPromedioMin);
-    const newPromedioMax = prompt('Nuevo Promedio Máximo:', currentPromedioMax);
-
-    if (newTipo && newPorcentajeMin && newPorcentajeMax && newPromedioMin && newPromedioMax) {
-        fetch(`${apiUrlBecas}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                tipo: newTipo,
-                porcentaje_min: String(newPorcentajeMin),
-                porcentaje_max: String(newPorcentajeMax),
-                promedio_min: String(newPromedioMin),
-                promedio_max: String(newPromedioMax)
-            }),
+async function editBecaVariable(id, currentTipo, currentPorcentajeMin, currentPorcentajeMax, currentPromedioMin, currentPromedioMax, level) {
+    const valores = await window.tecFormModal('Editar beca', [
+        { name: 'tipo', label: 'Nuevo Tipo', value: currentTipo },
+        { name: 'porcentaje_min', label: 'Nuevo Porcentaje Mínimo', value: currentPorcentajeMin, type: 'number' },
+        { name: 'porcentaje_max', label: 'Nuevo Porcentaje Máximo', value: currentPorcentajeMax, type: 'number' },
+        { name: 'promedio_min', label: 'Nuevo Promedio Mínimo', value: currentPromedioMin, type: 'number' },
+        { name: 'promedio_max', label: 'Nuevo Promedio Máximo', value: currentPromedioMax, type: 'number' },
+    ]);
+    if (!valores || !valores.tipo || !valores.porcentaje_min || !valores.porcentaje_max || !valores.promedio_min || !valores.promedio_max) return;
+    fetch(`${apiUrlBecas}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            tipo: valores.tipo,
+            porcentaje_min: String(valores.porcentaje_min),
+            porcentaje_max: String(valores.porcentaje_max),
+            promedio_min: String(valores.promedio_min),
+            promedio_max: String(valores.promedio_max)
+        }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                loadBecaVariable(level, '#becasNivel' + level);
-            })
-            .catch(error => console.error('Error al editar la beca variable:', error));
-    }
+        .then(data => {
+            loadBecaVariable(level, '#becasNivel' + level);
+            window.tecToast('Beca actualizada');
+        })
+        .catch(error => {
+            console.error('Error al editar la beca variable:', error);
+            window.tecToast('No se pudo actualizar la beca', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

@@ -77,13 +77,21 @@ $(document).ready(function () {
             body: JSON.stringify({ num_certificados: numeroCertificados, nivel_id: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating certificados:', error));
+            .then(data => {
+                window.tecToast('Certificados creados');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating certificados:', error);
+                window.tecToast('No se pudieron crear los certificados', 'error');
+            });
     }
 });
 
 // Función para eliminar certificados
-function deleteCertificados(id, level) {
+async function deleteCertificados(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el registro de certificados de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlCertificados}/${id}`, {
         method: 'DELETE',
     })
@@ -95,32 +103,41 @@ function deleteCertificados(id, level) {
         })
         .then(data => {
             loadCertificados(level, '#certificadosNivel' + level);
+            window.tecToast('Certificados eliminados');
         })
-        .catch(error => console.error('Error al eliminar certificados:', error));
+        .catch(error => {
+            console.error('Error al eliminar certificados:', error);
+            window.tecToast('No se pudieron eliminar los certificados', 'error');
+        });
 }
 
 // Función para editar certificados
-function editCertificados(id, currentNumero, level) {
-    const newNumero = prompt('Nuevo número de certificados:', currentNumero);
-    if (newNumero) {
-        fetch(`${apiUrlCertificados}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ num_certificados: newNumero }),
+async function editCertificados(id, currentNumero, level) {
+    const valores = await window.tecFormModal('Editar certificados', [
+        { name: 'numero', label: 'Nuevo número de certificados', value: currentNumero, type: 'number' },
+    ]);
+    if (!valores || !valores.numero) return;
+    fetch(`${apiUrlCertificados}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ num_certificados: valores.numero }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error al editar el certificado con id: ${id}. Status: ${response.status}`);
+            }
+            return response.json();
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error al editar el certificado con id: ${id}. Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                loadCertificados(level, '#certificadosNivel' + level);
-            })
-            .catch(error => console.error('Error al editar certificados:', error));
-    }
+        .then(data => {
+            loadCertificados(level, '#certificadosNivel' + level);
+            window.tecToast('Certificados actualizados');
+        })
+        .catch(error => {
+            console.error('Error al editar certificados:', error);
+            window.tecToast('No se pudieron actualizar los certificados', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

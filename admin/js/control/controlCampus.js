@@ -86,13 +86,21 @@ $(document).ready(function () {
             body: JSON.stringify({ nombre: name, categoria_coleg: category, nivel_id: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating campus:', error));
+            .then(data => {
+                window.tecToast('Campus creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating campus:', error);
+                window.tecToast('No se pudo crear el campus', 'error');
+            });
     }
 });
 
 // Función para eliminar campus
-function deleteCampus(id, level) {
+async function deleteCampus(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el campus de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/campus/${id}`, {
         method: 'DELETE',
     })
@@ -100,35 +108,44 @@ function deleteCampus(id, level) {
             if (response.ok) {
                 // Recargar lista de campus para el nivel específico
                 loadCampus(level, '#campusNivel' + level);
+                window.tecToast('Campus eliminado');
             } else {
                 return response.json().then(err => { throw new Error(err.message); });
             }
         })
-        .catch(error => console.error('Error deleting campus:', error));
+        .catch(error => {
+            console.error('Error deleting campus:', error);
+            window.tecToast('No se pudo eliminar el campus', 'error');
+        });
 }
 
 // Función para editar campus
-function editCampus(id, currentName, currentCategory, level) {
-    const newName = prompt('Nuevo nombre del campus:', currentName);
-    const newCategory = prompt('Nueva categoría del campus:', currentCategory);
-    if (newName && newCategory) {
-        fetch(`${API_BASE_URL}/campus/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ nombre: newName, categoria_coleg: newCategory }),
+async function editCampus(id, currentName, currentCategory, level) {
+    const valores = await window.tecFormModal('Editar campus', [
+        { name: 'nombre', label: 'Nombre del campus', value: currentName },
+        { name: 'categoria', label: 'Categoría del campus', value: currentCategory },
+    ]);
+    if (!valores || !valores.nombre || !valores.categoria) return;
+    fetch(`${API_BASE_URL}/campus/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ nombre: valores.nombre, categoria_coleg: valores.categoria }),
+    })
+        .then(response => {
+            if (response.ok) {
+                // Recargar lista de campus para el nivel específico
+                loadCampus(level, '#campusNivel' + level);
+                window.tecToast('Campus actualizado');
+            } else {
+                return response.json().then(err => { throw new Error(err.message); });
+            }
         })
-            .then(response => {
-                if (response.ok) {
-                    // Recargar lista de campus para el nivel específico
-                    loadCampus(level, '#campusNivel' + level);
-                } else {
-                    return response.json().then(err => { throw new Error(err.message); });
-                }
-            })
-            .catch(error => console.error('Error editing campus:', error));
-    }
+        .catch(error => {
+            console.error('Error editing campus:', error);
+            window.tecToast('No se pudo actualizar el campus', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

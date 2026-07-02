@@ -40,7 +40,9 @@ function loadApoyosFijos(nivelId, containerId) {
 window.loadApoyosFijos = loadApoyosFijos;
 
 // Función para eliminar un apoyo fijo (scope global)
-function deleteApoyosFijos(id, nivelId) {
+async function deleteApoyosFijos(id, nivelId) {
+    const confirmado = await window.tecConfirm('Se eliminará el apoyo fijo de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/apoyosFijos/${id}`, {
         method: 'DELETE',
     })
@@ -48,30 +50,39 @@ function deleteApoyosFijos(id, nivelId) {
         .then(data => {
             $(`#apoyosfijosNivel${nivelId}`).empty();
             loadApoyosFijos(nivelId, `#apoyosfijosNivel${nivelId}`);
+            window.tecToast('Apoyo fijo eliminado');
         })
-        .catch(error => console.error('Error deleting apoyo fijo:', error));
+        .catch(error => {
+            console.error('Error deleting apoyo fijo:', error);
+            window.tecToast('No se pudo eliminar el apoyo fijo', 'error');
+        });
 }
 window.deleteApoyosFijos = deleteApoyosFijos;
 
 // Función para editar un apoyo fijo (scope global)
 function editApoyosFijos(id, nivelId) {
     fetch(`${API_BASE_URL}/apoyosFijos/${id}`)
-        .then(response => response.json())
-        .then(apoyo => {
-            const valor = prompt('Nuevo valor del apoyo fijo:', apoyo.valor);
-            if (valor !== null && valor !== '') {
-                fetch(`${API_BASE_URL}/apoyosFijos/${id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ valor: parseFloat(valor), nivel_id: nivelId })
+        .then(async apoyoResponse => {
+            const apoyo = await apoyoResponse.json();
+            const valores = await window.tecFormModal('Editar apoyo fijo', [
+                { name: 'valor', label: 'Nuevo valor del apoyo fijo', value: apoyo.valor, type: 'number' },
+            ]);
+            if (!valores || valores.valor === '') return;
+            fetch(`${API_BASE_URL}/apoyosFijos/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ valor: parseFloat(valores.valor), nivel_id: nivelId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $(`#apoyosfijosNivel${nivelId}`).empty();
+                    loadApoyosFijos(nivelId, `#apoyosfijosNivel${nivelId}`);
+                    window.tecToast('Apoyo fijo actualizado');
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        $(`#apoyosfijosNivel${nivelId}`).empty();
-                        loadApoyosFijos(nivelId, `#apoyosfijosNivel${nivelId}`);
-                    })
-                    .catch(error => console.error('Error editing apoyo fijo:', error));
-            }
+                .catch(error => {
+                    console.error('Error editing apoyo fijo:', error);
+                    window.tecToast('No se pudo actualizar el apoyo fijo', 'error');
+                });
         })
         .catch(error => console.error('Error fetching apoyo fijo:', error));
 }
@@ -113,8 +124,14 @@ $(document).ready(function () {
             body: JSON.stringify({ valor: parseFloat(valor), nivel_id: nivelId })
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating apoyo fijo:', error));
+            .then(data => {
+                window.tecToast('Apoyo fijo creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating apoyo fijo:', error);
+                window.tecToast('No se pudo crear el apoyo fijo', 'error');
+            });
     }
 
     // Manejar el formulario de creación

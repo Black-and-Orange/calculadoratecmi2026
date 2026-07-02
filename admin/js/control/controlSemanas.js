@@ -99,18 +99,21 @@ $(document).ready(function () {
                 return response.json();
             })
             .then(data => {
+                window.tecToast('Semanas creadas');
                 callback();
             })
             .catch(error => {
                 console.error('Error creating semanas:', error);
-                alert('Error al crear las semanas: ' + error.message);
+                window.tecToast('Error al crear las semanas: ' + error.message, 'error');
             });
     }
 });
 
 // Función para eliminar semanas
-function deleteSemanas(id, level) {
-    
+async function deleteSemanas(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el registro de semanas de forma permanente.');
+    if (!confirmado) return;
+
     fetch(`${apiUrlSemanas}/${id}`, {
         method: 'DELETE',
     })
@@ -122,39 +125,41 @@ function deleteSemanas(id, level) {
         })
         .then(data => {
             loadSemanas(level, '#semanasNivel' + level);
+            window.tecToast('Semanas eliminadas');
         })
         .catch(error => {
             console.error('Error deleting semanas:', error);
-            alert('Error al eliminar la semana: ' + error.message);
+            window.tecToast('Error al eliminar la semana: ' + error.message, 'error');
         });
 }
 
 // Función para editar semanas
-function editSemanas(id, currentNumero, level) {
-    
-    const newNumero = prompt('Nuevo número de semanas:', currentNumero);
-    if (newNumero) {
-        fetch(`${apiUrlSemanas}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ num_semanas: newNumero }),
+async function editSemanas(id, currentNumero, level) {
+    const valores = await window.tecFormModal('Editar semanas', [
+        { name: 'numero', label: 'Nuevo número de semanas', value: currentNumero, type: 'number' },
+    ]);
+    if (!valores || !valores.numero) return;
+    fetch(`${apiUrlSemanas}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ num_semanas: valores.numero }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                loadSemanas(level, '#semanasNivel' + level);
-            })
-            .catch(error => {
-                console.error('Error editing semanas:', error);
-                alert('Error al editar la semana: ' + error.message);
-            });
-    }
+        .then(data => {
+            loadSemanas(level, '#semanasNivel' + level);
+            window.tecToast('Semanas actualizadas');
+        })
+        .catch(error => {
+            console.error('Error editing semanas:', error);
+            window.tecToast('Error al editar la semana: ' + error.message, 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

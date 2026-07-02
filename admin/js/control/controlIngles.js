@@ -54,10 +54,11 @@ $(document).ready(function () {
     }
 
     // Delegación de eventos para formularios de creación de inglés
-    $(document).on('submit', 'form[id^="createInglesNivel"][id$="Form"]', function(event) {
+    // OJO: los ids generados van en minúsculas (createinglesNivelNForm)
+    $(document).on('submit', 'form[id^="createinglesNivel"][id$="Form"]', function(event) {
         event.preventDefault();
         const formId = $(this).attr('id');
-        const nivelMatch = formId.match(/createInglesNivel(\d+)Form/);
+        const nivelMatch = formId.match(/createinglesNivel(\d+)Form/);
         if (!nivelMatch) return;
         const level = parseInt(nivelMatch[1]);
         const numeroIngles = $(`#inglesNivel${level}Ingles`).val();
@@ -86,40 +87,57 @@ $(document).ready(function () {
             body: JSON.stringify({ num_ingles: numeroIngles, nivel_id: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating ingles:', error));
+            .then(data => {
+                window.tecToast('Certificados de inglés creados');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating ingles:', error);
+                window.tecToast('No se pudieron crear los certificados de inglés', 'error');
+            });
     }
 });
 
 // Función para eliminar ingles
-function deleteIngles(id, level) {
+async function deleteIngles(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el registro de certificados de inglés de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlIngles}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
             loadIngles(level, '#inglesNivel' + level);
+            window.tecToast('Certificados de inglés eliminados');
         })
-        .catch(error => console.error('Error deleting ingles:', error));
+        .catch(error => {
+            console.error('Error deleting ingles:', error);
+            window.tecToast('No se pudieron eliminar los certificados de inglés', 'error');
+        });
 }
 
 // Función para editar ingles
-function editIngles(id, currentNumero, level) {
-    const newNumero = prompt('Nuevo número de ingles:', currentNumero);
-    if (newNumero) {
-        fetch(`${apiUrlIngles}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ num_ingles: newNumero }),
+async function editIngles(id, currentNumero, level) {
+    const valores = await window.tecFormModal('Editar certificados de inglés', [
+        { name: 'numero', label: 'Nuevo número de certificados de inglés', value: currentNumero, type: 'number' },
+    ]);
+    if (!valores || !valores.numero) return;
+    fetch(`${apiUrlIngles}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ num_ingles: valores.numero }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            loadIngles(level, '#inglesNivel' + level);
+            window.tecToast('Certificados de inglés actualizados');
         })
-            .then(response => response.json())
-            .then(data => {
-                loadIngles(level, '#inglesNivel' + level);
-            })
-            .catch(error => console.error('Error editing ingles:', error));
-    }
+        .catch(error => {
+            console.error('Error editing ingles:', error);
+            window.tecToast('No se pudieron actualizar los certificados de inglés', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

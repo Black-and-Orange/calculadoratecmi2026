@@ -84,48 +84,64 @@ $(document).ready(function () {
             body: JSON.stringify({ descripcion: descripcion, codigo: codigo, id_nivel: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating formato:', error));
+            .then(data => {
+                window.tecToast('Formato creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating formato:', error);
+                window.tecToast('No se pudo crear el formato', 'error');
+            });
     }
 });
 
 // Función para eliminar formato
-function deleteFormato(id, level) {
+async function deleteFormato(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el formato de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/formato/${id}`, {
         method: 'DELETE',
     })
         .then(response => {
             if (response.ok) {
                 loadFormatos(level, '#formatoNivel' + level);
+                window.tecToast('Formato eliminado');
             } else {
                 return response.json().then(err => { throw new Error(err.message); });
             }
         })
-        .catch(error => console.error('Error deleting formato:', error));
+        .catch(error => {
+            console.error('Error deleting formato:', error);
+            window.tecToast('No se pudo eliminar el formato', 'error');
+        });
 }
 
 // Función para editar formato
-function editFormato(id, currentDescripcion, currentCodigo, level) {
-    const newDescripcion = prompt('Nueva descripción del formato:', currentDescripcion);
-    const newCodigo = prompt('Nuevo código del formato:', currentCodigo);
-
-    if (newDescripcion && newCodigo) {
-        fetch(`${API_BASE_URL}/formato/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ descripcion: newDescripcion, codigo: newCodigo }),
+async function editFormato(id, currentDescripcion, currentCodigo, level) {
+    const valores = await window.tecFormModal('Editar formato', [
+        { name: 'descripcion', label: 'Nueva descripción del formato', value: currentDescripcion },
+        { name: 'codigo', label: 'Nuevo código del formato', value: currentCodigo },
+    ]);
+    if (!valores || !valores.descripcion || !valores.codigo) return;
+    fetch(`${API_BASE_URL}/formato/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ descripcion: valores.descripcion, codigo: valores.codigo }),
+    })
+        .then(response => {
+            if (response.ok) {
+                loadFormatos(level, '#formatoNivel' + level);
+                window.tecToast('Formato actualizado');
+            } else {
+                return response.json().then(err => { throw new Error(err.message); });
+            }
         })
-            .then(response => {
-                if (response.ok) {
-                    loadFormatos(level, '#formatoNivel' + level);
-                } else {
-                    return response.json().then(err => { throw new Error(err.message); });
-                }
-            })
-            .catch(error => console.error('Error editing formato:', error));
-    }
+        .catch(error => {
+            console.error('Error editing formato:', error);
+            window.tecToast('No se pudo actualizar el formato', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

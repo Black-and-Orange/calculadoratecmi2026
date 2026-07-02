@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -5,77 +6,203 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrativo</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/panel.css">
+    <link rel="stylesheet" href="css/admin-theme.css">
 </head>
 
 <body>
 
-    <section class="header">
-        <div class="container py-3">
-            <div class="row">
-                <div class="col-12 d-flex justify-content-between">
-                    <img src="https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/tecmilenio-logo.svg">
-                    <div>
-                        <!-- <button class="btn btn-secondary" data-toggle="modal"
-                            data-target="#registerModal">Registrarse</button> -->
-                        <button id="logoutButton" class="btn btn-danger">Cerrar Sesión</button>
-                        <!-- Modal para el registro -->
-                        <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="registerModalLabel">Registro de Usuario</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="registerForm">
-                                            <div class="form-group">
-                                                <label for="register_usuario">Usuario</label>
-                                                <input type="text" class="form-control" id="register_usuario"
-                                                    name="register_usuario" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="register_contrasena">Contraseña</label>
-                                                <input type="password" class="form-control" id="register_contrasena"
-                                                    name="register_contrasena" required>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary">Registrarse</button>
-                                        </form>
-                                    </div>
+    <div class="tec-layout">
+
+        <!-- ══════════ SIDEBAR ══════════ -->
+        <aside class="tec-sidebar">
+            <div class="tec-sidebar-logo">
+                <img src="https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/tecmilenio-logo.svg"
+                    alt="Tecmilenio">
+            </div>
+
+            <div class="tec-nav-label">Principal</div>
+            <button class="tec-side-link" data-page="resumen" type="button">
+                <i class="fa-solid fa-chart-line"></i> Resumen
+            </button>
+            <button class="tec-side-link active" data-page="catalogos" type="button">
+                <i class="fa-solid fa-layer-group"></i> Catálogos por nivel
+            </button>
+            <button class="tec-side-link" data-page="cotizaciones" type="button">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Cotizaciones
+            </button>
+
+            <div class="tec-nav-label">Configuración</div>
+            <button class="tec-side-link" data-page="vigencia" type="button">
+                <i class="fa-solid fa-calendar-check"></i> Vigencia
+            </button>
+            <button class="tec-side-link" data-page="usuarios" type="button">
+                <i class="fa-solid fa-users"></i> Usuarios
+            </button>
+
+            <div class="tec-sidebar-foot">
+                <button id="logoutButton" class="tec-side-link" type="button">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- ══════════ MAIN ══════════ -->
+        <div class="tec-main">
+
+            <div class="tec-topbar">
+                <div class="tec-crumb" id="tecBreadcrumb"><b>Catálogos por nivel</b></div>
+                <div class="tec-user">
+                    <div class="tec-avatar"><i class="fa-solid fa-user-shield"></i></div>
+                    Admin
+                </div>
+            </div>
+
+            <div class="tec-content">
+
+                <!-- ════ PÁGINA: RESUMEN ════ -->
+                <div class="tec-page" id="page-resumen">
+                    <h1 class="tec-page-title">Resumen</h1>
+                    <p class="tec-page-sub">Vista general de la calculadora de colegiaturas.</p>
+
+                    <div class="tec-stats">
+                        <div class="tec-stat">
+                            <span class="tec-stat-ico"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                            <div>
+                                <div class="tec-stat-num" id="statCotizaciones">—</div>
+                                <div class="tec-stat-label">Cotizaciones generadas</div>
+                            </div>
+                        </div>
+                        <div class="tec-stat">
+                            <span class="tec-stat-ico"><i class="fa-solid fa-layer-group"></i></span>
+                            <div>
+                                <div class="tec-stat-num" id="statNiveles">—</div>
+                                <div class="tec-stat-label">Niveles educativos</div>
+                            </div>
+                        </div>
+                        <div class="tec-stat">
+                            <span class="tec-stat-ico"><i class="fa-solid fa-calendar-check"></i></span>
+                            <div>
+                                <div class="tec-stat-num" id="statVigencia">—</div>
+                                <div class="tec-stat-label">Días de vigencia de propuestas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tec-panel-card">
+                        <div class="tec-panel-card-head">
+                            <h4>Accesos rápidos</h4>
+                        </div>
+                        <div class="p-4 d-flex flex-wrap" style="gap:12px;">
+                            <button class="btn btn-primary" data-goto="catalogos" type="button">
+                                <i class="fa-solid fa-layer-group mr-1"></i> Administrar catálogos
+                            </button>
+                            <button class="btn btn-secondary" data-goto="cotizaciones" type="button">
+                                <i class="fa-solid fa-file-invoice-dollar mr-1"></i> Ver cotizaciones
+                            </button>
+                            <button class="btn btn-secondary" data-goto="vigencia" type="button">
+                                <i class="fa-solid fa-calendar-check mr-1"></i> Configurar vigencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ PÁGINA: CATÁLOGOS POR NIVEL ════ -->
+                <div class="tec-page active" id="page-catalogos">
+                    <h1 class="tec-page-title">Catálogos por nivel</h1>
+                    <p class="tec-page-sub">Administra los parámetros que alimentan el cálculo de colegiaturas para
+                        cada nivel educativo.</p>
+
+                    <div class="tec-nivel-bar">
+                        <label for="nivelSelect">Nivel educativo</label>
+                        <select class="tec-nivel-select" id="nivelSelect"></select>
+                        <span class="tec-crumb" id="nivelInfo"></span>
+                    </div>
+
+                    <!-- Los paneles por nivel (chips agrupados + tablas + modales de crear)
+                         los genera el script de abajo, conservando los ids que esperan
+                         los archivos js/control/*.js -->
+                    <div id="nivelesPaneles"></div>
+                </div>
+
+                <!-- ════ PÁGINA: COTIZACIONES ════ -->
+                <div class="tec-page" id="page-cotizaciones">
+                    <h1 class="tec-page-title">Cotizaciones</h1>
+                    <p class="tec-page-sub">Consulta, exporta y administra las cotizaciones generadas.</p>
+
+                    <div class="row mb-4 align-items-center justify-content-between mx-0">
+                        <div class="col-md-8 d-flex justify-content-md-start justify-content-center mb-2 mb-md-0 px-0">
+                            <button id="btnRefresh" class="btn btn-secondary mr-3">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                            <button id="btnExportCSV" class="btn btn-success">
+                                <i class="fas fa-download"></i> Exportar CSV
+                            </button>
+                        </div>
+                        <div class="col-md-4 d-flex justify-content-md-end justify-content-center px-0">
+                            <div class="card bg-primary text-white" style="min-width: 180px;">
+                                <div class="card-body text-center p-3">
+                                    <h4 id="totalCotizaciones" class="mb-0">0</h4>
+                                    <small>Total Cotizaciones</small>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <section class="configuracion-vigencia">
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0">Configuración de Vigencia</h3>
-                            <button id="toggleVigenciaBtn" class="btn btn-sm btn-outline-secondary" title="Mostrar/Ocultar">
-                                <i id="toggleVigenciaIcon" class="fas fa-eye"></i>
-                            </button>
+                    <div class="tec-panel-card">
+                        <div class="table-responsive">
+                            <table id="tablaCotizaciones" class="table table-striped table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Estudiante</th>
+                                        <th>Nivel</th>
+                                        <th>Campus</th>
+                                        <th>Programa</th>
+                                        <th>Total Contado</th>
+                                        <th>Total Financiado</th>
+                                        <th>Fecha Creación</th>
+                                        <th>Detalle</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cotizacionesTableBody">
+                                    <!-- Los datos se cargarán dinámicamente -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="card-body" id="vigenciaConfigSection" style="display:none;">
+                        <div id="loading" class="text-center py-4" style="display:none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Cargando cotizaciones...</p>
+                        </div>
+                        <div id="noData" class="text-center text-muted py-4" style="display:none;">
+                            <p class="mb-0">No se encontraron cotizaciones</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════ PÁGINA: VIGENCIA ════ -->
+                <div class="tec-page" id="page-vigencia">
+                    <h1 class="tec-page-title">Configuración de Vigencia</h1>
+                    <p class="tec-page-sub">Define cuántos días es válida una propuesta desde su fecha de creación.</p>
+
+                    <div class="tec-panel-card">
+                        <div class="p-4">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label id="labelDiasActuales" class="font-weight-bold mb-2">Días actuales de vigencia: ...</label>
+                                        <label id="labelDiasActuales" class="font-weight-bold mb-2">Días actuales de
+                                            vigencia: ...</label>
                                         <label for="diasVigencia">Días de vigencia de la propuesta:</label>
-                                        <input type="number" class="form-control" id="diasVigencia" min="1" max="365" value="" placeholder="Nuevo valor">
-                                        <small class="form-text text-muted">Número de días que será válida la propuesta desde la fecha actual.</small>
+                                        <input type="number" class="form-control" id="diasVigencia" min="1" max="365"
+                                            value="" placeholder="Nuevo valor">
+                                        <small class="form-text text-muted">Número de días que será válida la propuesta
+                                            desde la fecha actual.</small>
                                     </div>
-                                    <label id="labelFechaVigencia" class="font-weight-bold mb-2">Fecha de vigencia actual: ...</label>
+                                    <label id="labelFechaVigencia" class="font-weight-bold mb-2">Fecha de vigencia
+                                        actual: ...</label>
                                 </div>
                                 <div class="col-md-6 d-flex align-items-end">
                                     <button class="btn btn-primary" onclick="actualizarDiasVigencia()">
@@ -86,104 +213,71 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <section>
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0">Gestión de Niveles</h3>
-                            <button id="toggleNivelesBtn" class="btn btn-sm btn-outline-secondary" title="Mostrar/Ocultar">
-                                <i id="toggleNivelesIcon" class="fas fa-eye"></i>
-                            </button>
+                <!-- ════ PÁGINA: USUARIOS ════ -->
+                <div class="tec-page" id="page-usuarios">
+                    <h1 class="tec-page-title">Usuarios</h1>
+                    <p class="tec-page-sub">Da de alta administradores del panel.</p>
+
+                    <div class="tec-panel-card" style="max-width: 520px;">
+                        <div class="tec-panel-card-head">
+                            <h4><i class="fa-solid fa-user-plus mr-2" style="color:var(--tec-teal)"></i>Registrar nuevo
+                                usuario</h4>
                         </div>
-                        <div class="card-body" id="nivelesSection" style="display:none;">
-                            <ul class="nav nav-tabs align-middle" id="myTab" role="tablist"></ul>
-                            <div class="tab-content" id="myTabContent"></div>
+                        <div class="p-4">
+                            <form id="registerForm">
+                                <div class="form-group">
+                                    <label for="register_usuario">Usuario</label>
+                                    <input type="text" class="form-control" id="register_usuario"
+                                        name="register_usuario" placeholder="Nombre de usuario" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="register_contrasena">Contraseña</label>
+                                    <input type="password" class="form-control" id="register_contrasena"
+                                        name="register_contrasena" placeholder="Contraseña" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-user-plus mr-1"></i> Registrar
+                                </button>
+                            </form>
+                            <p class="text-muted mt-3 mb-0" style="font-size:.85rem;">
+                                <i class="fa-solid fa-circle-info mr-1"></i>
+                                El listado y la eliminación de usuarios requieren un endpoint adicional en el backend
+                                (pendiente).
+                            </p>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
-    </section>
+    </div>
 
-    <section>
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0">Administración de Cotizaciones</h3>
-                            <button id="toggleCotizacionesBtn" class="btn btn-sm btn-outline-secondary" title="Mostrar/Ocultar">
-                                <i id="toggleCotizacionesIcon" class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <div class="card-body" id="cotizacionesSection" style="display:none;">
-                            
-                            <div class="row mb-4 align-items-center justify-content-between">
-                                <div class="col-md-8 d-flex justify-content-md-start justify-content-center mb-2 mb-md-0">
-                                    <button id="btnRefresh" class="btn btn-secondary mr-3">
-                                        <i class="fas fa-sync-alt"></i> Actualizar
-                                    </button>
-                                    <button id="btnExportCSV" class="btn btn-success">
-                                        <i class="fas fa-download"></i> Exportar CSV
-                                    </button>
-                                </div>
-                                <div class="col-md-4 d-flex justify-content-md-end justify-content-center">
-                                    <div class="card bg-primary text-white" style="min-width: 180px;">
-                                        <div class="card-body text-center p-3">
-                                            <h4 id="totalCotizaciones" class="mb-0">0</h4>
-                                            <small>Total Cotizaciones</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- ══════════ Verificación de sesión + logout ══════════ -->
+    <script>
+        // Función para verificar si el usuario tiene una sesión activa
+        function checkSession() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Si no hay token, redirigir al login
+                window.location.href = 'login.html';
+            }
+        }
+        checkSession();
 
-                            <!-- Tabla de Cotizaciones -->
-                            <div class="table-responsive">
-                                <table id="tablaCotizaciones" class="table table-striped table-hover">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Estudiante</th>
-                                            <th>Nivel</th>
-                                            <th>Campus</th>
-                                            <th>Programa</th>
-                                            <th>Total Contado</th>
-                                            <th>Total Financiado</th>
-                                            <th>Fecha Creación</th>
-                                            <th>Detalle</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cotizacionesTableBody">
-                                        <!-- Los datos se cargarán dinámicamente -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div id="loading" class="text-center" style="display:none;">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Cargando...</span>
-                                </div>
-                                <p class="mt-2">Cargando cotizaciones...</p>
-                            </div>
-                            <div id="noData" class="text-center text-muted" style="display:none;">
-                                <p>No se encontraron cotizaciones</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+    </script>
 
-
+    <!-- ══════════ Generación de catálogos por nivel ══════════
+         IMPORTANTE: este módulo debe ejecutarse ANTES que los js/control/*.js
+         (los módulos corren en orden de documento). Genera, por cada nivel y
+         pestaña, el contenedor de tabla y el formulario de creación con los
+         MISMOS ids que ya esperan los control*.js — la lógica no cambia. -->
     <script type="module">
         import { niveles } from './js/control/tabs.js';
-        import { API_BASE_URL } from './js/apiConfig.js';
 
         // Función utilitaria para generar el id del div de cada pestaña
         function getTabDivId(pestaña, nivel) {
@@ -203,17 +297,18 @@
                     { id: `createpagosbimestralesNivel${nivel.id}PorcentajeInteres`, name: 'porcentaje_interes', placeholder: '% Interés Financiero' }
                 ];
                 return `
-                <div id="pagosbimestralesNivel${nivel.id}"></div>
                     <form id="createpagosbimestralesNivel${nivel.id}Form">
                     ${pagosFields.map(field => `
-                    <input type="text" class="form-control" id="${field.id}" name="${field.name}" placeholder="${field.placeholder}" required>`).join('')}
+                        <div class="form-group mb-2">
+                            <label for="${field.id}">${field.placeholder}</label>
+                            <input type="text" class="form-control" id="${field.id}" name="${field.name}" placeholder="${field.placeholder}" required>
+                        </div>`).join('')}
                         <button type="submit" class="btn btn-success">Crear ${pestaña.nombre}</button>
                     </form>
                 `;
             }
             // Para los demás, poner name igual al id del campo
             return `
-            <div id="${getTabDivId(pestaña, nivel)}"></div>
                 <form id="create${getTabDivId(pestaña, nivel)}Form">
                 ${fields.map(field => {
                     if (field.type === 'checkbox') {
@@ -224,7 +319,10 @@
                         </div>`;
                     } else {
                         return `
-                        <input type="text" class="form-control mb-2" id="${getTabDivId(pestaña, nivel)}${field.id}" name="${field.id}" placeholder="${field.placeholder}" required>`;
+                        <div class="form-group mb-2">
+                            <label for="${getTabDivId(pestaña, nivel)}${field.id}">${field.placeholder}</label>
+                            <input type="text" class="form-control" id="${getTabDivId(pestaña, nivel)}${field.id}" name="${field.id}" placeholder="${field.placeholder}" required>
+                        </div>`;
                     }
                 }).join('')}
                     <button type="submit" class="btn btn-success">Crear ${pestaña.nombre}</button>
@@ -232,197 +330,281 @@
             `;
         };
 
-
-        const createTabContent = (nivel, pestaña) => {
-            const fieldsMap = {
-                'campus': [
-                    { id: 'Name', placeholder: 'Nombre del Campus' },
-                    { id: 'Category', placeholder: 'Categoría del Campus' }
-                ],
-                'programas': [
-                    { id: 'Name', placeholder: 'Nombre del Programa' },
-                    { id: 'Type', placeholder: 'Tipo de Programa' }
-                ],
-                'periodo': [
-                    { id: 'Name', placeholder: 'Periodo' },
-                    { id: 'Type', placeholder: 'Código' }
-                ],
-                'seguros': [
-                    { id: 'Nombre', placeholder: 'Nombre del Seguro' },
-                    { id: 'Valor', placeholder: 'Valor (ej: 1500.00)' },
-                    { id: 'Estado', placeholder: 'Estado', type: 'checkbox', label: 'Habilitado' }
-                ],
-                'becas': [
-                    { id: 'Tipo', placeholder: 'Tipo de Beca' },
-                    { id: 'PorcMinimo', placeholder: 'Porcentaje Mínimo' },
-                    { id: 'PorcMaximo', placeholder: 'Porcentaje Máximo' },
-                    { id: 'PromMinimo', placeholder: 'Promedio Mínimo' },
-                    { id: 'PromMaximo', placeholder: 'Promedio Máximo' }
-                ],
-                'apoyos': [
-                    { id: 'Porcentaje', placeholder: 'Porcentaje de Apoyo Estudiantil' }
-                ],
-                'apoyos-fijos': [
-                    { id: 'Valor', placeholder: 'Valor de Apoyo Estudiantil' }
-                ],
-                'prestamos': [
-                    { id: 'Porcentaje', placeholder: 'Porcentaje Prestamo Educativo' }
-                ],
-                'interes': [
-                    { id: 'Porcentaje', placeholder: 'Porcentaje de Interés' }
-                ],
-                'carga-materias': [
-                    { id: 'Materias', placeholder: 'Número de materias' }
-                ],
-                'certificados': [
-                    { id: 'Certificados', placeholder: 'Número de certificados' }
-                ],
-                'ingles': [
-                    { id: 'Ingles', placeholder: 'Número de certificados de inglés' }
-                ],
-                'semanas': [
-                    { id: 'Semanas', placeholder: 'Número de semanas de desarrollo integral' }
-                ],
-                'carga-creditos': [
-                    { id: 'Creditos', placeholder: 'Número de créditos' }
-                ],
-                'costo-materias': [
-                    { id: 'Clave', placeholder: 'Clave' },
-                    { id: 'Costo', placeholder: 'Costo' }
-                ],
-                'beneficios': [
-                    { id: 'Nombre', placeholder: 'Nombre del beneficio' },
-                    { id: 'Descripcion', placeholder: 'Descripción del beneficio' },
-                    { id: 'Icono', placeholder: 'Link del icono' }
-                ],
-                'formato': [
-                    { id: 'Formato', placeholder: 'Formato' },
-                    { id: 'Codigo', placeholder: 'Código' }
-                ],
-                'formato_asociado': [
-                    { id: 'Formato', placeholder: 'Formato Asociado' },
-                    { id: 'Costo', placeholder: 'Costo' }
-                ],
-                'pagos-bimestrales': [
-                    { id: 'Codigo', placeholder: 'Código' },
-                    { id: 'Bimestre', placeholder: 'Bimestre (número)' },
-                    { id: 'Mes', placeholder: 'Mes (ej: Agosto, Octubre)' },
-                    { id: 'Orden', placeholder: 'Orden de pago (número)' },
-                    { id: 'PorcentajeParcialidad', placeholder: '% Parcialidad' },
-                    { id: 'PorcentajeInteres', placeholder: '% Interés Financiero' },
-                    { id: 'FechaVencimiento', placeholder: 'Fecha de vencimiento (YYYY-MM-DD)' }
-                ]
-            };
-
-
-            const fields = fieldsMap[pestaña.id];
-            if (!fields) return ''; // Si no hay campos para esta pestaña, retorna vacío.
-
-            return `
-            <div class="tab-pane fade ${pestaña.id === 'campus' ? 'show active' : ''}" id="${pestaña.id}-${nivel.id}" role="tabpanel">
-                ${createForm(nivel, pestaña, fields)}
-            </div>`;
+        const fieldsMap = {
+            'campus': [
+                { id: 'Name', placeholder: 'Nombre del Campus' },
+                { id: 'Category', placeholder: 'Categoría del Campus' }
+            ],
+            'programas': [
+                { id: 'Name', placeholder: 'Nombre del Programa' },
+                { id: 'Type', placeholder: 'Tipo de Programa' }
+            ],
+            'periodo': [
+                { id: 'Name', placeholder: 'Periodo' },
+                { id: 'Type', placeholder: 'Código' }
+            ],
+            'seguros': [
+                { id: 'Nombre', placeholder: 'Nombre del Seguro' },
+                { id: 'Valor', placeholder: 'Valor (ej: 1500.00)' },
+                { id: 'Estado', placeholder: 'Estado', type: 'checkbox', label: 'Habilitado' }
+            ],
+            'becas': [
+                { id: 'Tipo', placeholder: 'Tipo de Beca' },
+                { id: 'PorcMinimo', placeholder: 'Porcentaje Mínimo' },
+                { id: 'PorcMaximo', placeholder: 'Porcentaje Máximo' },
+                { id: 'PromMinimo', placeholder: 'Promedio Mínimo' },
+                { id: 'PromMaximo', placeholder: 'Promedio Máximo' }
+            ],
+            'apoyos': [
+                { id: 'Porcentaje', placeholder: 'Porcentaje de Apoyo Estudiantil' }
+            ],
+            'apoyos-fijos': [
+                { id: 'Valor', placeholder: 'Valor de Apoyo Estudiantil' }
+            ],
+            'prestamos': [
+                { id: 'Porcentaje', placeholder: 'Porcentaje Prestamo Educativo' }
+            ],
+            'interes': [
+                { id: 'Porcentaje', placeholder: 'Porcentaje de Interés' }
+            ],
+            'carga-materias': [
+                { id: 'Materias', placeholder: 'Número de materias' }
+            ],
+            'certificados': [
+                { id: 'Certificados', placeholder: 'Número de certificados' }
+            ],
+            'ingles': [
+                { id: 'Ingles', placeholder: 'Número de certificados de inglés' }
+            ],
+            'semanas': [
+                { id: 'Semanas', placeholder: 'Número de semanas de desarrollo integral' }
+            ],
+            'carga-creditos': [
+                { id: 'Creditos', placeholder: 'Número de créditos' }
+            ],
+            'costo-materias': [
+                { id: 'Clave', placeholder: 'Clave' },
+                { id: 'Costo', placeholder: 'Costo' }
+            ],
+            'beneficios': [
+                { id: 'Nombre', placeholder: 'Nombre del beneficio' },
+                { id: 'Descripcion', placeholder: 'Descripción del beneficio' },
+                { id: 'Icono', placeholder: 'Link del icono' }
+            ],
+            'formato': [
+                { id: 'Formato', placeholder: 'Formato' },
+                { id: 'Codigo', placeholder: 'Código' }
+            ],
+            'formato_asociado': [
+                { id: 'Formato', placeholder: 'Formato Asociado' },
+                { id: 'Costo', placeholder: 'Costo' }
+            ],
+            'pagos-bimestrales': [
+                { id: 'Codigo', placeholder: 'Código' },
+                { id: 'Bimestre', placeholder: 'Bimestre (número)' },
+                { id: 'Mes', placeholder: 'Mes (ej: Agosto, Octubre)' },
+                { id: 'Orden', placeholder: 'Orden de pago (número)' },
+                { id: 'PorcentajeParcialidad', placeholder: '% Parcialidad' },
+                { id: 'PorcentajeInteres', placeholder: '% Interés Financiero' },
+                { id: 'FechaVencimiento', placeholder: 'Fecha de vencimiento (YYYY-MM-DD)' }
+            ]
         };
 
+        // Agrupación de catálogos para los chips (solo presentación)
+        const GRUPOS = [
+            { titulo: 'Campus y planes', ids: ['campus', 'programas', 'periodo', 'formato', 'formato_asociado'] },
+            { titulo: 'Becas y apoyos', ids: ['becas', 'apoyos', 'apoyos-fijos', 'prestamos'] },
+            { titulo: 'Carga académica', ids: ['carga-materias', 'carga-creditos', 'certificados', 'ingles', 'semanas'] },
+            { titulo: 'Costos y pagos', ids: ['costo-materias', 'interes', 'pagos-bimestrales'] },
+            { titulo: 'Seguros y beneficios', ids: ['seguros', 'beneficios'] },
+        ];
 
-        const createTabs = () => {
-            let tabs = '';
-            let tabContent = '';
+        const select = document.getElementById('nivelSelect');
+        const panelesWrap = document.getElementById('nivelesPaneles');
+        const breadcrumb = document.getElementById('tecBreadcrumb');
+        const nivelInfo = document.getElementById('nivelInfo');
 
-            niveles.forEach((nivel, nivelIndex) => {
-                // Crear la pestaña del nivel (tab principal)
-                tabs += `
-        <li class="nav-item">
-            <a class="nav-link ${nivelIndex === 0 ? 'active' : ''}" id="${nivel.id}-tab" data-toggle="tab"
-                href="#nivel-${nivel.id}" role="tab" aria-controls="nivel-${nivel.id}">${nivel.nombre}</a>
-        </li>`;
+        // ── Construir el DOM de todos los niveles (ocultos; se muestra el activo) ──
+        niveles.forEach((nivel, idx) => {
+            // Opción del selector
+            const opt = document.createElement('option');
+            opt.value = nivel.id;
+            opt.textContent = nivel.nombre;
+            select.appendChild(opt);
 
-                // Crear el contenedor del nivel y los tabs secundarios
-                tabContent += `
-        <div class="tab-pane fade ${nivelIndex === 0 ? 'show active' : ''}" id="nivel-${nivel.id}" role="tabpanel"
-            aria-labelledby="${nivel.id}-tab">
-            <ul class="nav nav-pills mb-3" id="pills-tab-${nivel.id}" role="tablist">
-                ${nivel.pestañas.map((pestaña, pestañaIndex) => `
-                <li class="nav-item">
-                    <a class="nav-link ${pestañaIndex === 0 ? 'active' : ''}" id="${pestaña.id}-${nivel.id}-tab"
-                        data-toggle="pill" href="#${pestaña.id}-${nivel.id}" role="tab"
-                        aria-controls="${pestaña.id}-${nivel.id}">
-                        ${pestaña.nombre}
-                    </a>
-                </li>`).join('')}
-            </ul>
-            <div class="tab-content" id="pills-tabContent-${nivel.id}">
-                ${nivel.pestañas.map((pestaña, pestañaIndex) => createTabContent(nivel, pestaña)).join('')}
-            </div>
-        </div>`;
+            const panel = document.createElement('div');
+            panel.className = 'tec-nivel-panel';
+            panel.dataset.nivel = nivel.id;
+            panel.style.display = idx === 0 ? '' : 'none';
+
+            // Chips agrupados (solo los catálogos que este nivel tiene)
+            let chipsHtml = '';
+            GRUPOS.forEach(grupo => {
+                const presentes = nivel.pestañas.filter(p => grupo.ids.includes(p.id));
+                if (!presentes.length) return;
+                chipsHtml += `<div class="tec-cat-title">${grupo.titulo}</div>
+                    <div class="tec-cat-chips">
+                    ${presentes.map(p => `<button type="button" class="tec-chip" data-pane="${p.id}">${p.nombre}</button>`).join('')}
+                    </div>`;
             });
 
-            document.getElementById('myTab').innerHTML = tabs;
-            document.getElementById('myTabContent').innerHTML = tabContent;
-        };
+            // Panes: tarjeta con tabla (contenedor con id que usan los control*.js)
+            // + modal de creación con el formulario original
+            let panesHtml = '';
+            nivel.pestañas.forEach(pestaña => {
+                const fields = fieldsMap[pestaña.id];
+                if (!fields) return;
+                const divId = getTabDivId(pestaña, nivel);
+                panesHtml += `
+                <div class="tec-pane" data-pane="${pestaña.id}">
+                    <div class="tec-panel-card">
+                        <div class="tec-panel-card-head">
+                            <h4>${pestaña.nombre}</h4>
+                            <div class="d-flex align-items-center" style="gap:12px;">
+                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalCrear${divId}">
+                                    <i class="fa-solid fa-plus mr-1"></i> Nuevo
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3" id="${divId}"></div>
+                    </div>
 
-        // Llamar a la función para crear las pestañas
-        createTabs();
-    </script>
+                    <!-- Modal de creación (conserva el form con los ids originales) -->
+                    <div class="modal fade" id="modalCrear${divId}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content tec-modal">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title tec-modal-titulo">Nuevo — ${pestaña.nombre} · ${nivel.nombre}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                                </div>
+                                <div class="modal-body pt-2">
+                                    ${createForm(nivel, pestaña, fields)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
 
-    <script>
-        // Función para verificar si el usuario tiene una sesión activa
-        function checkSession() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                // Si no hay token, redirigir al login
-                window.location.href = 'login.html';
-            }
+            panel.innerHTML = chipsHtml + panesHtml;
+            panelesWrap.appendChild(panel);
+        });
+
+        // ── Interacción: nivel activo + chip activo + breadcrumb ──
+        function nombreNivel(id) {
+            const n = niveles.find(x => String(x.id) === String(id));
+            return n ? n.nombre : '';
         }
 
-        // Llamar a la función de verificación de sesión cuando se carga la página
-        checkSession();
+        function activarPane(panel, paneId) {
+            panel.querySelectorAll('.tec-chip').forEach(c =>
+                c.classList.toggle('active', c.dataset.pane === paneId));
+            panel.querySelectorAll('.tec-pane').forEach(p =>
+                p.classList.toggle('active', p.dataset.pane === paneId));
+            const chip = panel.querySelector(`.tec-chip[data-pane="${paneId}"]`);
+            breadcrumb.innerHTML = `Catálogos por nivel &nbsp;›&nbsp; <b>${nombreNivel(panel.dataset.nivel)}</b>&nbsp;›&nbsp; ${chip ? chip.textContent : ''}`;
+        }
 
-        // Función de cierre de sesión
-        document.getElementById('logoutButton').addEventListener('click', () => {  
-            
-            // Eliminar el token de la sesión
-            localStorage.removeItem('token');
-            // Redirigir al login
-            window.location.href = 'login.html';
+        function mostrarNivel(nivelId) {
+            document.querySelectorAll('.tec-nivel-panel').forEach(p => {
+                p.style.display = p.dataset.nivel === String(nivelId) ? '' : 'none';
+            });
+            const panel = panelesWrap.querySelector(`.tec-nivel-panel[data-nivel="${nivelId}"]`);
+            if (!panel) return;
+            const nivel = niveles.find(n => String(n.id) === String(nivelId));
+            nivelInfo.innerHTML = `<i class="fa-solid fa-circle-info mr-1" style="color:var(--tec-teal)"></i> ${panel.querySelectorAll('.tec-chip').length} catálogos disponibles para este nivel`;
+            // Activar el pane ya seleccionado o el primero
+            const activo = panel.querySelector('.tec-chip.active') || panel.querySelector('.tec-chip');
+            if (activo) activarPane(panel, activo.dataset.pane);
+        }
+
+        select.addEventListener('change', () => mostrarNivel(select.value));
+        panelesWrap.addEventListener('click', (e) => {
+            const chip = e.target.closest('.tec-chip');
+            if (!chip) return;
+            activarPane(chip.closest('.tec-nivel-panel'), chip.dataset.pane);
+        });
+
+        // Estado inicial
+        mostrarNivel(niveles[0].id);
+
+        // Cerrar el modal de creación al enviar el formulario (la lógica de los
+        // control*.js sigue manejando el submit por delegación; aquí solo UI)
+        panelesWrap.addEventListener('submit', (e) => {
+            const modal = e.target.closest('.modal');
+            if (modal) $(modal).modal('hide');
         });
     </script>
 
+    <!-- ══════════ Navegación entre páginas (sidebar) ══════════ -->
     <script type="module">
-        // Manejar el formulario de registro
-        document.getElementById('registerForm').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Previene el envío del formulario
+        import { API_BASE_URL } from './js/apiConfig.js';
+        (function () {
+            const TITULOS = {
+                resumen: 'Resumen',
+                catalogos: 'Catálogos por nivel',
+                cotizaciones: 'Cotizaciones',
+                vigencia: 'Vigencia',
+                usuarios: 'Usuarios',
+            };
 
-            const username = document.getElementById('register_usuario').value;
-            const password = document.getElementById('register_contrasena').value;
+            function irAPagina(pagina) {
+                document.querySelectorAll('.tec-page').forEach(p =>
+                    p.classList.toggle('active', p.id === 'page-' + pagina));
+                document.querySelectorAll('.tec-side-link[data-page]').forEach(l =>
+                    l.classList.toggle('active', l.dataset.page === pagina));
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ user: username, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert('Registro exitoso');
-                    $('#registerModal').modal('hide'); // Cerrar el modal después del registro
+                if (pagina === 'catalogos') {
+                    // El breadcrumb detallado lo maneja el módulo de catálogos;
+                    // re-disparar la selección actual para refrescarlo
+                    const select = document.getElementById('nivelSelect');
+                    if (select && select.value) select.dispatchEvent(new Event('change'));
                 } else {
-                    alert('Error: ' + data.message);
+                    document.getElementById('tecBreadcrumb').innerHTML = '<b>' + TITULOS[pagina] + '</b>';
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Hubo un problema con la solicitud');
+
+                // Cargas bajo demanda
+                if (pagina === 'cotizaciones' && typeof window.cargarCotizaciones === 'function') {
+                    window.cargarCotizaciones();
+                }
+                if (pagina === 'resumen') cargarResumen();
             }
-        });
+
+            document.querySelectorAll('.tec-side-link[data-page]').forEach(link =>
+                link.addEventListener('click', () => irAPagina(link.dataset.page)));
+            document.querySelectorAll('[data-goto]').forEach(btn =>
+                btn.addEventListener('click', () => irAPagina(btn.dataset.goto)));
+
+            // ── Resumen: estadísticas ligeras (solo lecturas) ──
+            let resumenCargado = false;
+            async function cargarResumen() {
+                if (resumenCargado) return;
+                resumenCargado = true;
+                const API = API_BASE_URL;
+                try {
+                    const r = await fetch(`${API}/cotizaciones`);
+                    const data = await r.json();
+                    const lista = Array.isArray(data) ? data : (data.data || []);
+                    document.getElementById('statCotizaciones').textContent = lista.length;
+                } catch { document.getElementById('statCotizaciones').textContent = '—'; }
+                try {
+                    const r = await fetch(`${API}/configuracion-vigencia/dias-vigencia`);
+                    const data = await r.json();
+                    document.getElementById('statVigencia').textContent = data.dias_vigencia ?? '—';
+                } catch { document.getElementById('statVigencia').textContent = '—'; }
+                try {
+                    const r = await fetch(`${API}/nivel`);
+                    const data = await r.json();
+                    document.getElementById('statNiveles').textContent = Array.isArray(data) ? data.length : '—';
+                } catch { document.getElementById('statNiveles').textContent = '—'; }
+            }
+        })();
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js/admin-ui.js"></script>
     <script type="module" src="js/control/controlCampus.js"></script>
     <script type="module" src="js/control/controlBecas.js"></script>
     <script type="module" src="js/control/controlBeneficios.js"></script>
@@ -445,91 +627,49 @@
     <script type="module" src="js/admin.js"></script>
     <script type="module" src="js/admin-cotizaciones-panel.js"></script>
 
-
-    </script>
-
-    <!-- Script de prueba para debug -->
+    <!-- ══════════ Registro de usuarios ══════════ -->
     <script type="module">
         import { API_BASE_URL } from './js/apiConfig.js';
-        
-        // Prueba simple de conexión
-        fetch(`${API_BASE_URL}/nivel`)
-            .then(response => {
-                return response.json();
-            })
-            .catch(error => {
-                console.error('Error en la conexión:', error);
-            });
-    </script>
 
-    <script type="module">
-    // Script para mostrar/ocultar la sección de vigencia
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('toggleVigenciaBtn');
-        const section = document.getElementById('vigenciaConfigSection');
-        const icon = document.getElementById('toggleVigenciaIcon');
-        if (btn && section && icon) {
-            btn.addEventListener('click', () => {
-                if (section.style.display === 'none') {
-                    section.style.display = '';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    section.style.display = 'none';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            });
-        }
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-        // Script para mostrar/ocultar la sección de niveles
-        const btnNiveles = document.getElementById('toggleNivelesBtn');
-        const sectionNiveles = document.getElementById('nivelesSection');
-        const iconNiveles = document.getElementById('toggleNivelesIcon');
-        if (btnNiveles && sectionNiveles && iconNiveles) {
-            btnNiveles.addEventListener('click', () => {
-                if (sectionNiveles.style.display === 'none') {
-                    sectionNiveles.style.display = '';
-                    iconNiveles.classList.remove('fa-eye');
-                    iconNiveles.classList.add('fa-eye-slash');
-                } else {
-                    sectionNiveles.style.display = 'none';
-                    iconNiveles.classList.remove('fa-eye-slash');
-                    iconNiveles.classList.add('fa-eye');
-                }
-            });
-        }
+            const username = document.getElementById('register_usuario').value;
+            const password = document.getElementById('register_contrasena').value;
 
-        // Script para mostrar/ocultar la sección de cotizaciones
-        const btnCotizaciones = document.getElementById('toggleCotizacionesBtn');
-        const sectionCotizaciones = document.getElementById('cotizacionesSection');
-        const iconCotizaciones = document.getElementById('toggleCotizacionesIcon');
-        if (btnCotizaciones && sectionCotizaciones && iconCotizaciones) {
-            btnCotizaciones.addEventListener('click', () => {
-                if (sectionCotizaciones.style.display === 'none') {
-                    sectionCotizaciones.style.display = '';
-                    iconCotizaciones.classList.remove('fa-eye');
-                    iconCotizaciones.classList.add('fa-eye-slash');
-                    // Cargar datos cuando se abre la sección
-                    if (typeof cargarCotizaciones === 'function') {
-                        cargarCotizaciones();
-                    }
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // El backend puede exigir sesión activa para dar de alta usuarios
+                        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                    },
+                    body: JSON.stringify({ user: username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    window.tecToast('Usuario registrado correctamente');
+                    document.getElementById('registerForm').reset();
                 } else {
-                    sectionCotizaciones.style.display = 'none';
-                    iconCotizaciones.classList.remove('fa-eye-slash');
-                    iconCotizaciones.classList.add('fa-eye');
+                    window.tecToast('Error: ' + (data.message || 'no se pudo registrar'), 'error');
                 }
-            });
-        }
-    });
+            } catch (error) {
+                console.error('Error:', error);
+                window.tecToast('Hubo un problema con la solicitud', 'error');
+            }
+        });
     </script>
 
     <!-- Modal para detalle de cotización -->
-    <div class="modal fade" id="detalleCotizacionModal" tabindex="-1" role="dialog" aria-labelledby="detalleCotizacionModalLabel" aria-hidden="true">
+    <div class="modal fade" id="detalleCotizacionModal" tabindex="-1" role="dialog"
+        aria-labelledby="detalleCotizacionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
+            <div class="modal-content tec-modal">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="detalleCotizacionModalLabel">Detalle de Cotización</h5>
+                    <h5 class="modal-title tec-modal-titulo" id="detalleCotizacionModalLabel">Detalle de Cotización</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -549,4 +689,4 @@
 
 </body>
 
-</div>
+</html>

@@ -6,63 +6,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/admin-theme.css">
+    <style>
+        /* --- Pantalla de login: tarjeta centrada --- */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                radial-gradient(900px 500px at 15% 10%, rgba(0, 164, 153, 0.18), transparent 55%),
+                radial-gradient(700px 500px at 95% 90%, rgba(246, 141, 46, 0.12), transparent 55%),
+                linear-gradient(135deg, #003A35 0%, #00534C 55%, #00756C 100%) !important;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 410px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+            padding: 40px 34px 34px;
+        }
+        .login-logo { text-align: center; margin-bottom: 8px; }
+        .login-logo span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(120deg, var(--tec-verde) 0%, var(--tec-teal) 100%);
+            padding: 14px 22px;
+            border-radius: 16px;
+            box-shadow: var(--sombra-suave);
+        }
+        .login-logo img { height: 34px; }
+        .login-title {
+            text-align: center;
+            font-weight: 800;
+            color: var(--tec-verde);
+            font-size: 1.5rem;
+            margin: 14px 0 2px;
+        }
+        .login-sub {
+            text-align: center;
+            color: var(--tec-gris);
+            font-size: .92rem;
+            margin-bottom: 26px;
+        }
+        .login-card label { font-size: .85rem; margin-bottom: 6px; }
+        .pw-wrap { position: relative; }
+        .pw-toggle {
+            position: absolute;
+            right: 12px;
+            top: 20px;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: var(--tec-gris);
+            cursor: pointer;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.02rem;
+            margin-top: 6px;
+        }
+        .login-alert {
+            display: none;
+            gap: 10px;
+            align-items: center;
+            background: #FDECEE;
+            color: #A32833;
+            border: 1px solid #F5C2C7;
+            border-radius: 11px;
+            padding: 10px 14px;
+            font-size: .88rem;
+            margin-bottom: 18px;
+        }
+        .login-alert.show { display: flex; }
+        .login-foot {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: .8rem;
+            margin-top: 18px;
+        }
+    </style>
 </head>
 
 <body>
-    <section class="header">
-        <div class="container py-3">
-            <div class="row">
-                <div class="col-12">
-                    <img src="https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/tecmilenio-logo.svg">
-                </div>
+    <div>
+        <div class="login-card">
+            <div class="login-logo">
+                <span><img src="https://universidad.tecmilenio.mx/hubfs/calculadora-ago24/tecmilenio-logo.svg"
+                        alt="Tecmilenio"></span>
             </div>
-        </div>
-    </section>
+            <h1 class="login-title">Panel Administrativo</h1>
+            <p class="login-sub">Calculadora de Colegiaturas</p>
 
-    <div class="container">
-        <h2 class="mt-5">CALCULADORA DE BECAS</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="nombre_usuario">Usuario</label>
-                <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required>
+            <div id="loginError" class="login-alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="loginErrorText">Usuario o contraseña incorrectos.</span>
             </div>
-            <div class="form-group">
-                <label for="contrasena">Contraseña</label>
-                <input type="password" class="form-control" id="contrasena" name="contrasena" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Ingresar</button>
-        </form>
-        
-    </div>
 
-    <!-- Modal para el registro -->
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="registerModalLabel">Registro de Usuario</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="nombre_usuario">Usuario</label>
+                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
+                        placeholder="Tu usuario" required>
                 </div>
-                <div class="modal-body">
-                    <form id="registerForm">
-                        <div class="form-group">
-                            <label for="register_usuario">Usuario</label>
-                            <input type="text" class="form-control" id="register_usuario" name="register_usuario"
-                                required>
-                        </div>
-                        <div class="form-group">
-                            <label for="register_contrasena">Contraseña</label>
-                            <input type="password" class="form-control" id="register_contrasena"
-                                name="register_contrasena" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Registrarse</button>
-                    </form>
+                <div class="form-group">
+                    <label for="contrasena">Contraseña</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="form-control" id="contrasena" name="contrasena"
+                            placeholder="Tu contraseña" required>
+                        <button type="button" class="pw-toggle" id="togglePassword" aria-label="Mostrar contraseña">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
+                <button type="submit" class="btn btn-primary btn-login" id="loginSubmit">
+                    <i class="fa-solid fa-right-to-bracket mr-1"></i> Ingresar
+                </button>
+            </form>
         </div>
+        <p class="login-foot">© Tecmilenio · Uso interno</p>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -71,13 +138,38 @@
 
     <script type="module">
         import { API_BASE_URL } from './js/apiConfig.js';
-        
+
+        const errorBox = document.getElementById('loginError');
+        const errorText = document.getElementById('loginErrorText');
+        const submitBtn = document.getElementById('loginSubmit');
+
+        const mostrarError = (mensaje) => {
+            errorText.textContent = mensaje;
+            errorBox.classList.add('show');
+        };
+        const ocultarError = () => errorBox.classList.remove('show');
+
+        // Toggle de visibilidad de la contraseña
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const input = document.getElementById('contrasena');
+            const icon = document.querySelector('#togglePassword i');
+            const oculto = input.type === 'password';
+            input.type = oculto ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', !oculto);
+            icon.classList.toggle('fa-eye-slash', oculto);
+        });
+
         // Manejar el formulario de inicio de sesión
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
             event.preventDefault(); // Previene el envío del formulario
+            ocultarError();
 
             const username = document.getElementById('nombre_usuario').value;
             const password = document.getElementById('contrasena').value;
+
+            const textoOriginal = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span> Ingresando...';
 
             try {
                 const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -94,15 +186,17 @@
                     localStorage.setItem('token', data.token);
                     window.location.href = 'panel.html';
                 } else {
-                    alert('Error: ' + data.message);
+                    mostrarError(data.message || 'Usuario o contraseña incorrectos.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = textoOriginal;
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Hubo un problema con la solicitud');
+                mostrarError('Hubo un problema con la solicitud. Intenta de nuevo.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = textoOriginal;
             }
         });
-
-        
     </script>
 </body>
 

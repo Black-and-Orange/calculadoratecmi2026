@@ -87,40 +87,57 @@ $(document).ready(function () {
             body: JSON.stringify(bodyData),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating materias:', error));
+            .then(data => {
+                window.tecToast('Materias creadas');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating materias:', error);
+                window.tecToast('No se pudieron crear las materias', 'error');
+            });
     }
 });
 
 // Función para eliminar materias
-function deleteMaterias(id, level) {
+async function deleteMaterias(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el registro de materias de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlMaterias}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
             loadMaterias(level, '#cargamateriasNivel' + level);
+            window.tecToast('Materias eliminadas');
         })
-        .catch(error => console.error('Error deleting materias:', error));
+        .catch(error => {
+            console.error('Error deleting materias:', error);
+            window.tecToast('No se pudieron eliminar las materias', 'error');
+        });
 }
 
 // Función para editar materias
-function editMaterias(id, currentNumero, level) {
-    const newNumero = prompt('Nuevo número de materias:', currentNumero);
-    if (newNumero) {
-        fetch(`${apiUrlMaterias}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ numero: newNumero }),
+async function editMaterias(id, currentNumero, level) {
+    const valores = await window.tecFormModal('Editar materias', [
+        { name: 'numero', label: 'Nuevo número de materias', value: currentNumero, type: 'number' },
+    ]);
+    if (!valores || !valores.numero) return;
+    fetch(`${apiUrlMaterias}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ numero: valores.numero }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            loadMaterias(level, '#cargamateriasNivel' + level);
+            window.tecToast('Materias actualizadas');
         })
-            .then(response => response.json())
-            .then(data => {
-                loadMaterias(level, '#cargamateriasNivel' + level);
-            })
-            .catch(error => console.error('Error editing materias:', error));
-    }
+        .catch(error => {
+            console.error('Error editing materias:', error);
+            window.tecToast('No se pudieron actualizar las materias', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

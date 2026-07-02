@@ -95,46 +95,63 @@ $(document).ready(function () {
                 }
                 return response.json();
             })
-            .then(data => callback())
-            .catch(error => console.error('Error creando beneficio:', error));
+            .then(data => {
+                window.tecToast('Beneficio creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creando beneficio:', error);
+                window.tecToast('No se pudo crear el beneficio', 'error');
+            });
     }
 });
 
 // Función para eliminar beneficio
-function deleteBeneficio(id, level) {
+async function deleteBeneficio(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el beneficio de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlBeneficios}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
             loadBeneficios(level, '#beneficiosNivel' + level);
+            window.tecToast('Beneficio eliminado');
         })
-        .catch(error => console.error('Error deleting beneficio:', error));
+        .catch(error => {
+            console.error('Error deleting beneficio:', error);
+            window.tecToast('No se pudo eliminar el beneficio', 'error');
+        });
 }
 
 // Función para editar beneficio
-function editBeneficio(id, currentName, currentDescription, currentIcon, level) {
-    const newName = prompt('Nuevo nombre del beneficio:', currentName);
-    const newDescription = prompt('Nueva descripción del beneficio:', currentDescription);
-    const newIcon = prompt('Nuevo link del icono:', currentIcon);
-    if (newName && newDescription && newIcon) {
-        fetch(`${apiUrlBeneficios}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                nombre: newName, 
-                descripcion: newDescription, 
-                icono: newIcon 
-            }),
+async function editBeneficio(id, currentName, currentDescription, currentIcon, level) {
+    const valores = await window.tecFormModal('Editar beneficio', [
+        { name: 'nombre', label: 'Nuevo nombre del beneficio', value: currentName },
+        { name: 'descripcion', label: 'Nueva descripción del beneficio', value: currentDescription },
+        { name: 'icono', label: 'Nuevo link del icono', value: currentIcon },
+    ]);
+    if (!valores || !valores.nombre || !valores.descripcion || !valores.icono) return;
+    fetch(`${apiUrlBeneficios}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            nombre: valores.nombre,
+            descripcion: valores.descripcion,
+            icono: valores.icono
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            loadBeneficios(level, '#beneficiosNivel' + level);
+            window.tecToast('Beneficio actualizado');
         })
-            .then(response => response.json())
-            .then(data => {
-                loadBeneficios(level, '#beneficiosNivel' + level);
-            })
-            .catch(error => console.error('Error editing beneficio:', error));
-    }
+        .catch(error => {
+            console.error('Error editing beneficio:', error);
+            window.tecToast('No se pudo actualizar el beneficio', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

@@ -84,47 +84,64 @@ $(document).ready(function () {
             body: JSON.stringify({ descripcion: name, tipo_plan: category, id_nivel: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating planes:', error));
+            .then(data => {
+                window.tecToast('Plan creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating planes:', error);
+                window.tecToast('No se pudo crear el plan', 'error');
+            });
     }
 });
 
 // Función para eliminar planes
-function deletePlanes(id, level) {
+async function deletePlanes(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el plan de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlPlanes}/${id}`, {
         method: 'DELETE',
     })
         .then(response => {
             if (response.ok) {
                 loadPlanes(level, '#programasNivel' + level);
+                window.tecToast('Plan eliminado');
             } else {
                 return response.json().then(err => { throw new Error(err.message); });
             }
         })
-        .catch(error => console.error('Error deleting planes:', error));
+        .catch(error => {
+            console.error('Error deleting planes:', error);
+            window.tecToast('No se pudo eliminar el plan', 'error');
+        });
 }
 
 // Función para editar planes
-function editPlanes(id, currentName, currentCategory, level) {
-    const newName = prompt('Nuevo nombre del plan:', currentName);
-    const newCategory = prompt('Nueva categoría del plan:', currentCategory);
-    if (newName && newCategory) {
-        fetch(`${API_BASE_URL}/planes/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ descripcion: newName, tipo_plan: newCategory }),
+async function editPlanes(id, currentName, currentCategory, level) {
+    const valores = await window.tecFormModal('Editar plan', [
+        { name: 'nombre', label: 'Nuevo nombre del plan', value: currentName },
+        { name: 'categoria', label: 'Nueva categoría del plan', value: currentCategory },
+    ]);
+    if (!valores || !valores.nombre || !valores.categoria) return;
+    fetch(`${API_BASE_URL}/planes/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ descripcion: valores.nombre, tipo_plan: valores.categoria }),
+    })
+        .then(response => {
+            if (response.ok) {
+                loadPlanes(level, '#programasNivel' + level);
+                window.tecToast('Plan actualizado');
+            } else {
+                return response.json().then(err => { throw new Error(err.message); });
+            }
         })
-            .then(response => {
-                if (response.ok) {
-                    loadPlanes(level, '#programasNivel' + level);
-                } else {
-                    return response.json().then(err => { throw new Error(err.message); });
-                }
-            })
-            .catch(error => console.error('Error editing planes:', error));
-    }
+        .catch(error => {
+            console.error('Error editing planes:', error);
+            window.tecToast('No se pudo actualizar el plan', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

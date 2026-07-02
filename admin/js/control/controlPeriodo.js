@@ -42,7 +42,9 @@ function loadPeriodo(nivelId, containerId) {
 window.loadPeriodo = loadPeriodo;
 
 // Función para eliminar un período (scope global)
-function deletePeriodo(id, nivelId) {
+async function deletePeriodo(id, nivelId) {
+    const confirmado = await window.tecConfirm('Se eliminará el período de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/periodo/${id}`, {
         method: 'DELETE',
     })
@@ -50,35 +52,45 @@ function deletePeriodo(id, nivelId) {
         .then(data => {
             $(`#periodoNivel${nivelId}`).empty();
             loadPeriodo(nivelId, `#periodoNivel${nivelId}`);
+            window.tecToast('Período eliminado');
         })
-        .catch(error => console.error('Error deleting período:', error));
+        .catch(error => {
+            console.error('Error deleting período:', error);
+            window.tecToast('No se pudo eliminar el período', 'error');
+        });
 }
 window.deletePeriodo = deletePeriodo;
 
 // Función para editar un período (scope global)
 function editPeriodo(id, nivelId) {
     fetch(`${API_BASE_URL}/periodo/${id}`)
-        .then(response => response.json())
-        .then(periodo => {
-            const nuevoNombre = prompt('Nuevo nombre del período:', periodo.periodo_descripcion);
-            const nuevoCodigo = prompt('Nuevo código del período:', periodo.periodo_codigo);
-            if (nuevoNombre !== null && nuevoCodigo !== null && nuevoNombre !== '' && nuevoCodigo !== '') {
-                fetch(`${API_BASE_URL}/periodo/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        periodo_descripcion: nuevoNombre, 
-                        periodo_codigo: nuevoCodigo, 
-                        id_nivel: nivelId 
-                    })
+        .then(async periodoResponse => {
+            const periodo = await periodoResponse.json();
+            const valores = await window.tecFormModal('Editar período', [
+                { name: 'nombre', label: 'Nuevo nombre del período', value: periodo.periodo_descripcion },
+                { name: 'codigo', label: 'Nuevo código del período', value: periodo.periodo_codigo },
+            ]);
+            if (!valores || !valores.nombre || !valores.codigo) return;
+            fetch(`${API_BASE_URL}/periodo/${id}`, {
+                // El backend expone PATCH /periodo/:id (no existe ruta PUT)
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    periodo_descripcion: valores.nombre,
+                    periodo_codigo: valores.codigo,
+                    id_nivel: nivelId
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        $(`#periodoNivel${nivelId}`).empty();
-                        loadPeriodo(nivelId, `#periodoNivel${nivelId}`);
-                    })
-                    .catch(error => console.error('Error editing período:', error));
-            }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $(`#periodoNivel${nivelId}`).empty();
+                    loadPeriodo(nivelId, `#periodoNivel${nivelId}`);
+                    window.tecToast('Período actualizado');
+                })
+                .catch(error => {
+                    console.error('Error editing período:', error);
+                    window.tecToast('No se pudo actualizar el período', 'error');
+                });
         })
         .catch(error => console.error('Error fetching período:', error));
 }
@@ -101,8 +113,14 @@ function createPeriodo(nivelId, nombre, codigo, callback) {
             }
             return response.json();
         })
-        .then(data => callback())
-        .catch(error => console.error('Error al crear el período:', error.message));
+        .then(data => {
+            window.tecToast('Período creado');
+            callback();
+        })
+        .catch(error => {
+            console.error('Error al crear el período:', error.message);
+            window.tecToast('No se pudo crear el período', 'error');
+        });
 }
 window.createPeriodo = createPeriodo;
 

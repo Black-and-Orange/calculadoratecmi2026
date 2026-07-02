@@ -87,7 +87,9 @@ function loadPagosBimestrales(nivelId, containerId) {
 window.loadPagosBimestrales = loadPagosBimestrales;
 
 // Función para eliminar un pago bimestral (scope global)
-function deletePagoBimestral(id, nivelId) {
+async function deletePagoBimestral(id, nivelId) {
+    const confirmado = await window.tecConfirm('Se eliminará el pago bimestral de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/pagos-bimestrales/${id}`, {
         method: 'DELETE',
     })
@@ -95,32 +97,39 @@ function deletePagoBimestral(id, nivelId) {
         .then(data => {
             $(`#pagosbimestralesNivel${nivelId}`).empty();
             loadPagosBimestrales(nivelId, `#pagosbimestralesNivel${nivelId}`);
+            window.tecToast('Pago bimestral eliminado');
         })
-        .catch(error => console.error('Error deleting pago bimestral:', error));
+        .catch(error => {
+            console.error('Error deleting pago bimestral:', error);
+            window.tecToast('No se pudo eliminar el pago bimestral', 'error');
+        });
 }
 window.deletePagoBimestral = deletePagoBimestral;
 
 // Función para editar un pago bimestral (scope global)
 function editPagoBimestral(id, nivelId) {
     fetch(`${API_BASE_URL}/pagos-bimestrales/${id}`)
-        .then(response => response.json())
-        .then(pago => {
-            const codigo = prompt('Código:', pago.codigo);
-            const bimestre = prompt('Bimestre:', pago.bimestre);
-            const mes = prompt('Mes (ej: Agosto, Octubre):', pago.mes);
-            const pago_orden = prompt('Orden de pago:', pago.pago_orden);
-            const porcentaje_parcialidad = prompt('% Parcialidad:', pago.porcentaje_parcialidad);
-            const porcentaje_interes = prompt('% Int. Financiero:', pago.porcentaje_interes);
-            const fecha_vencimiento = prompt('Fecha de vencimiento (YYYY-MM-DD):', pago.fecha_vencimiento ? pago.fecha_vencimiento.split('T')[0] : '');
+        .then(async pagoResponse => {
+            const pago = await pagoResponse.json();
+            const valores = await window.tecFormModal('Editar pago bimestral', [
+                { name: 'codigo', label: 'Código', value: pago.codigo },
+                { name: 'bimestre', label: 'Bimestre', value: pago.bimestre, type: 'number' },
+                { name: 'mes', label: 'Mes (ej: Agosto, Octubre)', value: pago.mes },
+                { name: 'pago_orden', label: 'Orden de pago', value: pago.pago_orden, type: 'number' },
+                { name: 'porcentaje_parcialidad', label: '% Parcialidad', value: pago.porcentaje_parcialidad, type: 'number' },
+                { name: 'porcentaje_interes', label: '% Int. Financiero', value: pago.porcentaje_interes, type: 'number' },
+                { name: 'fecha_vencimiento', label: 'Fecha de vencimiento', value: pago.fecha_vencimiento ? pago.fecha_vencimiento.split('T')[0] : '', type: 'date', required: false },
+            ]);
+            if (!valores) return;
 
             const actualizado = {
-                codigo,
-                bimestre,
-                mes,
-                pago_orden,
-                porcentaje_parcialidad: parseFloat(porcentaje_parcialidad),
-                porcentaje_interes: parseFloat(porcentaje_interes),
-                fecha_vencimiento: fecha_vencimiento || null,
+                codigo: valores.codigo,
+                bimestre: valores.bimestre,
+                mes: valores.mes,
+                pago_orden: valores.pago_orden,
+                porcentaje_parcialidad: parseFloat(valores.porcentaje_parcialidad),
+                porcentaje_interes: parseFloat(valores.porcentaje_interes),
+                fecha_vencimiento: valores.fecha_vencimiento || null,
                 nivel_id: nivelId
             };
 
@@ -133,8 +142,12 @@ function editPagoBimestral(id, nivelId) {
                 .then(data => {
                     $(`#pagosbimestralesNivel${nivelId}`).empty();
                     loadPagosBimestrales(nivelId, `#pagosbimestralesNivel${nivelId}`);
+                    window.tecToast('Pago bimestral actualizado');
                 })
-                .catch(error => console.error('Error editing pago bimestral:', error));
+                .catch(error => {
+                    console.error('Error editing pago bimestral:', error);
+                    window.tecToast('No se pudo actualizar el pago bimestral', 'error');
+                });
         })
         .catch(error => console.error('Error fetching pago bimestral:', error));
 }
@@ -192,8 +205,14 @@ $(document).ready(function () {
             })
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating pago bimestral:', error));
+            .then(data => {
+                window.tecToast('Pago bimestral creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating pago bimestral:', error);
+                window.tecToast('No se pudo crear el pago bimestral', 'error');
+            });
     }
 
     // Manejar el formulario de creación

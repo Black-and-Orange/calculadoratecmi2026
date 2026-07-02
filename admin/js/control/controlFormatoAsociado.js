@@ -90,41 +90,58 @@ $(document).ready(function () {
             body: JSON.stringify({ descripcion: descripcion, costo: costo, nivel_id: level }),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creating formato asociado:', error));
+            .then(data => {
+                window.tecToast('Formato asociado creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creating formato asociado:', error);
+                window.tecToast('No se pudo crear el formato asociado', 'error');
+            });
     }
 });
 
 // Función para eliminar formato asociado
-function deleteFormatoAsociado(id_formato_asociado, level) {
+async function deleteFormatoAsociado(id_formato_asociado, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el formato asociado de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlFormatosAsociado}/${id_formato_asociado}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
             loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
+            window.tecToast('Formato asociado eliminado');
         })
-        .catch(error => console.error('Error deleting formato asociado:', error));
+        .catch(error => {
+            console.error('Error deleting formato asociado:', error);
+            window.tecToast('No se pudo eliminar el formato asociado', 'error');
+        });
 }
 
 // Función para editar formato asociado
-function editFormatoAsociado(id_formato_asociado, currentDescripcion, currentCosto, level) {
-    const newDescripcion = prompt('Nueva descripción del formato asociado:', currentDescripcion);
-    const newCosto = prompt('Nuevo costo del formato asociado:', currentCosto);
-    if (newDescripcion && newCosto) {
-        fetch(`${apiUrlFormatosAsociado}/${id_formato_asociado}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ descripcion: newDescripcion, costo: newCosto }),
+async function editFormatoAsociado(id_formato_asociado, currentDescripcion, currentCosto, level) {
+    const valores = await window.tecFormModal('Editar formato asociado', [
+        { name: 'descripcion', label: 'Nueva descripción del formato asociado', value: currentDescripcion },
+        { name: 'costo', label: 'Nuevo costo del formato asociado', value: currentCosto, type: 'number' },
+    ]);
+    if (!valores || !valores.descripcion || !valores.costo) return;
+    fetch(`${apiUrlFormatosAsociado}/${id_formato_asociado}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ descripcion: valores.descripcion, costo: valores.costo }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
+            window.tecToast('Formato asociado actualizado');
         })
-            .then(response => response.json())
-            .then(data => {
-                loadFormatoAsociado(level, '#formatoasociadoNivel' + level);
-            })
-            .catch(error => console.error('Error editing formato asociado:', error));
-    }
+        .catch(error => {
+            console.error('Error editing formato asociado:', error);
+            window.tecToast('No se pudo actualizar el formato asociado', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick

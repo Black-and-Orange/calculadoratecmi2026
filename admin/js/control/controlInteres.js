@@ -40,7 +40,9 @@ function loadInteres(nivelId, containerId) {
 window.loadInteres = loadInteres;
 
 // Función para eliminar un interés (scope global)
-function deleteInteres(id, nivelId) {
+async function deleteInteres(id, nivelId) {
+    const confirmado = await window.tecConfirm('Se eliminará el interés de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/intereses/${id}`, {
         method: 'DELETE',
     })
@@ -48,30 +50,40 @@ function deleteInteres(id, nivelId) {
         .then(data => {
             $(`#interesNivel${nivelId}`).empty();
             loadInteres(nivelId, `#interesNivel${nivelId}`);
+            window.tecToast('Interés eliminado');
         })
-        .catch(error => console.error('Error deleting interés:', error));
+        .catch(error => {
+            console.error('Error deleting interés:', error);
+            window.tecToast('No se pudo eliminar el interés', 'error');
+        });
 }
 window.deleteInteres = deleteInteres;
 
 // Función para editar un interés (scope global)
 function editInteres(id, nivelId) {
     fetch(`${API_BASE_URL}/intereses/${id}`)
-        .then(response => response.json())
-        .then(interes => {
-            const nuevoInteres = prompt('Nuevo porcentaje de interés:', interes.interes);
-            if (nuevoInteres !== null && nuevoInteres !== '') {
-                fetch(`${API_BASE_URL}/intereses/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ interes: parseFloat(nuevoInteres), nivel_id: nivelId })
+        .then(async interesResponse => {
+            const interes = await interesResponse.json();
+            const valores = await window.tecFormModal('Editar interés', [
+                { name: 'interes', label: 'Nuevo porcentaje de interés', value: interes.interes, type: 'number' },
+            ]);
+            if (!valores || valores.interes === '') return;
+            fetch(`${API_BASE_URL}/intereses/${id}`, {
+                // El backend expone PATCH /intereses/:id (no existe ruta PUT)
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ interes: parseFloat(valores.interes), nivel_id: nivelId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $(`#interesNivel${nivelId}`).empty();
+                    loadInteres(nivelId, `#interesNivel${nivelId}`);
+                    window.tecToast('Interés actualizado');
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        $(`#interesNivel${nivelId}`).empty();
-                        loadInteres(nivelId, `#interesNivel${nivelId}`);
-                    })
-                    .catch(error => console.error('Error editing interés:', error));
-            }
+                .catch(error => {
+                    console.error('Error editing interés:', error);
+                    window.tecToast('No se pudo actualizar el interés', 'error');
+                });
         })
         .catch(error => console.error('Error fetching interés:', error));
 }
@@ -85,8 +97,14 @@ function createInteres(nivelId, interes, callback) {
         body: JSON.stringify({ interes: parseFloat(interes), nivel_id: nivelId })
     })
         .then(response => response.json())
-        .then(data => callback())
-        .catch(error => console.error('Error creating interés:', error));
+        .then(data => {
+            window.tecToast('Interés creado');
+            callback();
+        })
+        .catch(error => {
+            console.error('Error creating interés:', error);
+            window.tecToast('No se pudo crear el interés', 'error');
+        });
 }
 window.createInteres = createInteres;
 

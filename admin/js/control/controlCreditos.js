@@ -40,7 +40,9 @@ function loadCreditos(nivelId, containerId) {
 window.loadCreditos = loadCreditos;
 
 // Función para eliminar un crédito (scope global)
-function deleteCreditos(id, nivelId) {
+async function deleteCreditos(id, nivelId) {
+    const confirmado = await window.tecConfirm('Se eliminará el registro de créditos de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/creditos/${id}`, {
         method: 'DELETE',
     })
@@ -48,30 +50,40 @@ function deleteCreditos(id, nivelId) {
         .then(data => {
             $(`#cargacreditosNivel${nivelId}`).empty();
             loadCreditos(nivelId, `#cargacreditosNivel${nivelId}`);
+            window.tecToast('Créditos eliminados');
         })
-        .catch(error => console.error('Error deleting crédito:', error));
+        .catch(error => {
+            console.error('Error deleting crédito:', error);
+            window.tecToast('No se pudieron eliminar los créditos', 'error');
+        });
 }
 window.deleteCreditos = deleteCreditos;
 
 // Función para editar un crédito (scope global)
 function editCreditos(id, nivelId) {
     fetch(`${API_BASE_URL}/creditos/${id}`)
-        .then(response => response.json())
-        .then(credito => {
-            const nuevoCredito = prompt('Nuevo número de créditos:', credito.credito);
-            if (nuevoCredito !== null && nuevoCredito !== '') {
-                fetch(`${API_BASE_URL}/creditos/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ credito: parseInt(nuevoCredito), id_nivel: nivelId })
+        .then(async creditoResponse => {
+            const credito = await creditoResponse.json();
+            const valores = await window.tecFormModal('Editar créditos', [
+                { name: 'credito', label: 'Nuevo número de créditos', value: credito.credito, type: 'number' },
+            ]);
+            if (!valores || valores.credito === '') return;
+            fetch(`${API_BASE_URL}/creditos/${id}`, {
+                // El backend expone PATCH /creditos/:id (no existe ruta PUT)
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credito: parseInt(valores.credito), id_nivel: nivelId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $(`#cargacreditosNivel${nivelId}`).empty();
+                    loadCreditos(nivelId, `#cargacreditosNivel${nivelId}`);
+                    window.tecToast('Créditos actualizados');
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        $(`#cargacreditosNivel${nivelId}`).empty();
-                        loadCreditos(nivelId, `#cargacreditosNivel${nivelId}`);
-                    })
-                    .catch(error => console.error('Error editing crédito:', error));
-            }
+                .catch(error => {
+                    console.error('Error editing crédito:', error);
+                    window.tecToast('No se pudieron actualizar los créditos', 'error');
+                });
         })
         .catch(error => console.error('Error fetching crédito:', error));
 }
@@ -86,9 +98,13 @@ function createCreditos(nivelId, numeroCreditos, callback) {
     })
         .then(response => response.json())
         .then(data => {
+            window.tecToast('Créditos creados');
             callback();
         })
-        .catch(error => console.error('Error creating crédito:', error));
+        .catch(error => {
+            console.error('Error creating crédito:', error);
+            window.tecToast('No se pudieron crear los créditos', 'error');
+        });
 }
 window.createCreditos = createCreditos;
 

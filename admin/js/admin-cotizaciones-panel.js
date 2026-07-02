@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const cotizacionesAExportar = cotizaciones.length > 0 ? cotizaciones : cotizacionesCompletas;
         
         if (cotizacionesAExportar.length === 0) {
-            alert('No hay datos para exportar');
+            window.tecToast('No hay datos para exportar', 'error');
             return;
         }
 
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para mostrar error
     function mostrarError(mensaje) {
-        alert(mensaje);
+        window.tecToast(mensaje, 'error');
     }
 
     // Función para formatear pesos
@@ -443,9 +443,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.eliminarCotizacion = async function(id) {
-        if (!confirm('¿Estás seguro de que quieres eliminar esta cotización?')) {
-            return;
-        }
+        const confirmado = await window.tecConfirm('Se eliminará la cotización de forma permanente.');
+        if (!confirmado) return;
 
         try {
             const response = await fetch(`${API_BASE_URL}/cotizaciones/${id}`, {
@@ -454,11 +453,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!response.ok) throw new Error('Error al eliminar cotización');
 
-            alert('Cotización eliminada exitosamente');
+            window.tecToast('Cotización eliminada');
             cargarCotizaciones();
         } catch (error) {
             console.error('Error al eliminar cotización:', error);
-            alert('Error al eliminar la cotización');
+            window.tecToast('No se pudo eliminar la cotización', 'error');
         }
     };
 

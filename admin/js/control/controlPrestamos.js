@@ -40,7 +40,9 @@ function loadPrestamos(nivelId, containerId) {
 window.loadPrestamos = loadPrestamos;
 
 // Función para eliminar un préstamo (scope global)
-function deletePrestamos(id, nivelId) {
+async function deletePrestamos(id, nivelId) {
+    const confirmado = await window.tecConfirm('Se eliminará el préstamo de forma permanente.');
+    if (!confirmado) return;
     fetch(`${API_BASE_URL}/prestamos/${id}`, {
         method: 'DELETE',
     })
@@ -48,30 +50,40 @@ function deletePrestamos(id, nivelId) {
         .then(data => {
             $(`#prestamosNivel${nivelId}`).empty();
             loadPrestamos(nivelId, `#prestamosNivel${nivelId}`);
+            window.tecToast('Préstamo eliminado');
         })
-        .catch(error => console.error('Error deleting préstamo:', error));
+        .catch(error => {
+            console.error('Error deleting préstamo:', error);
+            window.tecToast('No se pudo eliminar el préstamo', 'error');
+        });
 }
 window.deletePrestamos = deletePrestamos;
 
 // Función para editar un préstamo (scope global)
 function editPrestamos(id, nivelId) {
     fetch(`${API_BASE_URL}/prestamos/${id}`)
-        .then(response => response.json())
-        .then(prestamo => {
-            const nuevoPrestamo = prompt('Nuevo porcentaje de préstamo:', prestamo.prestamo);
-            if (nuevoPrestamo !== null && nuevoPrestamo !== '') {
-                fetch(`${API_BASE_URL}/prestamos/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prestamo: parseFloat(nuevoPrestamo), nivel_id: nivelId })
+        .then(async prestamoResponse => {
+            const prestamo = await prestamoResponse.json();
+            const valores = await window.tecFormModal('Editar préstamo', [
+                { name: 'prestamo', label: 'Nuevo porcentaje de préstamo', value: prestamo.prestamo, type: 'number' },
+            ]);
+            if (!valores || valores.prestamo === '') return;
+            fetch(`${API_BASE_URL}/prestamos/${id}`, {
+                // El backend expone PATCH /prestamos/:id (no existe ruta PUT)
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prestamo: parseFloat(valores.prestamo), nivel_id: nivelId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $(`#prestamosNivel${nivelId}`).empty();
+                    loadPrestamos(nivelId, `#prestamosNivel${nivelId}`);
+                    window.tecToast('Préstamo actualizado');
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        $(`#prestamosNivel${nivelId}`).empty();
-                        loadPrestamos(nivelId, `#prestamosNivel${nivelId}`);
-                    })
-                    .catch(error => console.error('Error editing préstamo:', error));
-            }
+                .catch(error => {
+                    console.error('Error editing préstamo:', error);
+                    window.tecToast('No se pudo actualizar el préstamo', 'error');
+                });
         })
         .catch(error => console.error('Error fetching préstamo:', error));
 }
@@ -85,8 +97,14 @@ function createPrestamos(nivelId, prestamo, callback) {
         body: JSON.stringify({ prestamo: parseFloat(prestamo), nivel_id: nivelId })
     })
         .then(response => response.json())
-        .then(data => callback())
-        .catch(error => console.error('Error creating préstamo:', error));
+        .then(data => {
+            window.tecToast('Préstamo creado');
+            callback();
+        })
+        .catch(error => {
+            console.error('Error creating préstamo:', error);
+            window.tecToast('No se pudo crear el préstamo', 'error');
+        });
 }
 window.createPrestamos = createPrestamos;
 

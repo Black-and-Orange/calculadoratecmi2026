@@ -91,41 +91,58 @@ $(document).ready(function () {
             body: JSON.stringify(requestData),
         })
             .then(response => response.json())
-            .then(data => callback())
-            .catch(error => console.error('Error creando costo de materia:', error));
+            .then(data => {
+                window.tecToast('Costo creado');
+                callback();
+            })
+            .catch(error => {
+                console.error('Error creando costo de materia:', error);
+                window.tecToast('No se pudo crear el costo', 'error');
+            });
     }
 });
 
 // Función para eliminar costos de materias
-function deleteCosto(id, level) {
+async function deleteCosto(id, level) {
+    const confirmado = await window.tecConfirm('Se eliminará el costo de materia de forma permanente.');
+    if (!confirmado) return;
     fetch(`${apiUrlCostos}/${id}`, {
         method: 'DELETE',
     })
         .then(response => response.json())
         .then(data => {
             loadCostos(level, '#costomateriasNivel' + level);
+            window.tecToast('Costo eliminado');
         })
-        .catch(error => console.error('Error eliminando costo de materia:', error));
+        .catch(error => {
+            console.error('Error eliminando costo de materia:', error);
+            window.tecToast('No se pudo eliminar el costo', 'error');
+        });
 }
 
 // Función para editar costos de materias
-function editCosto(id, currentClave, currentCosto, level) {
-    const newClave = prompt('Nueva clave de la materia:', currentClave);
-    const newCosto = prompt('Nuevo costo de la materia:', currentCosto);
-    if (newClave && newCosto) {
-        fetch(`${apiUrlCostos}/${id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ clave: newClave, costo: newCosto }),
+async function editCosto(id, currentClave, currentCosto, level) {
+    const valores = await window.tecFormModal('Editar costo de materia', [
+        { name: 'clave', label: 'Nueva clave de la materia', value: currentClave },
+        { name: 'costo', label: 'Nuevo costo de la materia', value: currentCosto, type: 'number' },
+    ]);
+    if (!valores || !valores.clave || !valores.costo) return;
+    fetch(`${apiUrlCostos}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ clave: valores.clave, costo: valores.costo }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            loadCostos(level, '#costomateriasNivel' + level);
+            window.tecToast('Costo actualizado');
         })
-            .then(response => response.json())
-            .then(data => {
-                loadCostos(level, '#costomateriasNivel' + level);
-            })
-            .catch(error => console.error('Error editando costo de materia:', error));
-    }
+        .catch(error => {
+            console.error('Error editando costo de materia:', error);
+            window.tecToast('No se pudo actualizar el costo', 'error');
+        });
 }
 
 // Exponer funciones al ámbito global para los botones onclick
