@@ -1028,7 +1028,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             error.classList.add('hidden');
-            const numeroWhatsApp = '57'+numeroUsuario;
+            // Lada de México (52); el número capturado es de 10 dígitos
+            const numeroWhatsApp = '52'+numeroUsuario;
             
             // Obtener el ID de la cotización desde la URL
             const urlParams = new URLSearchParams(window.location.search);

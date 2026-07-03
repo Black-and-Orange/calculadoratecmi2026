@@ -286,7 +286,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 const primeraFecha = fechasOrdenadas[0];
                 const fechasRestantes = fechasOrdenadas.slice(1);
-                
+
+                // La colegiatura de la tabla itemizada vence en la primera
+                // fecha del plan de financiamiento
+                const fechaColegiaturaElem = document.getElementById('fecha-colegiatura');
+                if (fechaColegiaturaElem && primeraFecha) {
+                    fechaColegiaturaElem.textContent = primeraFecha;
+                }
+
                 // Cambiar el texto "Primer pago" por la primera fecha
                 // Buscar el elemento que contiene "Primer pago" en la misma fila que primerPagoElem
                 if (primerPagoElem) {
@@ -601,26 +608,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const hayDescuento = hayBeca || hayApoyoEstudiantil || hayApoyoFijo || hayFinalAmount;
         
-        // 1. Mostrar/ocultar colegiatura según si hay descuento
+        // 1. La fila Colegiatura de la hoja se muestra siempre (mockup): con
+        // descuento es el costo sin ajustar; sin descuento coincide con el total.
         if (colegiatura) {
-            if (hayDescuento) {
-                // Mostrar el valor SIN descuento en colegiatura
-                const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));
-                colegiatura.textContent = formatearPesos(costoTotalRecuperado);
-                colegiatura.closest('tr').style.display = '';
-                
-                // REFUERZO: Asegurar que el valor se mantenga después de cualquier sobrescritura
-                setTimeout(() => {
-                    const valorActual = colegiatura.textContent;
-                    const valorEsperado = formatearPesos(costoTotalRecuperado);
-                    if (valorActual !== valorEsperado) {
-                        colegiatura.textContent = valorEsperado;
-                    }
-                }, 10);
-            } else {
-                colegiatura.closest('tr').style.display = 'none';
-            }
-        } 
+            const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal'));
+            colegiatura.textContent = formatearPesos(costoTotalRecuperado);
+            colegiatura.closest('tr').style.display = '';
+
+            // REFUERZO: Asegurar que el valor se mantenga después de cualquier sobrescritura
+            setTimeout(() => {
+                const valorActual = colegiatura.textContent;
+                const valorEsperado = formatearPesos(costoTotalRecuperado);
+                if (valorActual !== valorEsperado) {
+                    colegiatura.textContent = valorEsperado;
+                }
+            }, 10);
+        }
         
         // 2. Mostrar/ocultar apoyo financiamiento según si hay descuento (aplica para todos los niveles)
         if (apoyoFinanciamiento) {
@@ -1441,7 +1444,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         error.classList.add('hidden');
-        const numeroWhatsApp = '57'+numeroUsuario;
+        // Lada de México (52); el número capturado es de 10 dígitos
+        const numeroWhatsApp = '52'+numeroUsuario;
         
         // Asegurar que siempre haya un ID de cotización
         const cotizacionId = await asegurarCotizacionId();

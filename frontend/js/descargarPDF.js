@@ -6,6 +6,10 @@ function descargarPDF() {
     let viewportElem = document.querySelector("#viewportElem");
     viewportElem.setAttribute('content', 'width=1440');
 
+    // La hoja rediseñada (.cotiz-*) se acomoda sola a 1440; forzarle anchos
+    // hace que el grid y la tabla se desborden de la tarjeta en la captura.
+    const esHojaNueva = !!document.querySelector('.cotiz-planes');
+
     const bodyElem = document.querySelectorAll('body');
     bodyElem.forEach(el => {
         el.classList.add("capture");
@@ -14,7 +18,7 @@ function descargarPDF() {
     containerElems.forEach(el => {
         el.classList.add("capture-container");
     });
-    const sectionElems = document.querySelectorAll('section');
+    const sectionElems = esHojaNueva ? [] : document.querySelectorAll('section');
     sectionElems.forEach(el => {
         el.style.paddingBottom = "15px";
         el.style.paddingTop = "15px";
@@ -23,7 +27,7 @@ function descargarPDF() {
         el.style.position = "relative";
         el.style.zIndex = "10";
     });
-    const headerElems = document.querySelectorAll('header');
+    const headerElems = esHojaNueva ? [] : document.querySelectorAll('header');
     headerElems.forEach(el => {
         el.style.width = "1440px";
         el.style.margin = "0 auto";
@@ -32,12 +36,19 @@ function descargarPDF() {
     benefitCards.forEach(el => {
         el.style.width = "25%";
     });
-    const subTables = document.querySelectorAll('.sub-tables');
+    const subTables = esHojaNueva ? [] : document.querySelectorAll('.sub-tables');
     subTables.forEach(el => {
         el.style.width = "50%";
     });
     const bannerFormElem = document.querySelector('.banner-form-section');
     if (bannerFormElem) bannerFormElem.style.minHeight = "0px";
+
+    // Recortar los adornos que se desbordan a la derecha (igual que hace el
+    // viewport en pantalla); sin esto html2canvas captura más ancho que 1440
+    // y el PDF sale recortado del lado derecho.
+    element.style.width = "1440px";
+    element.style.margin = "0 auto";
+    element.style.overflow = "hidden";
 
     // Ocultar temporalmente ciertos elementos
     const elementosOcultos = document.querySelectorAll('.no-print');
@@ -51,23 +62,24 @@ function descargarPDF() {
         el.style.display = 'none';
     });
 
-    html2canvas(element).then((canvas) => {
+    // windowWidth debe coincidir con el ancho forzado (1440) o html2canvas
+    // recorta el contenido al ancho real de la ventana.
+    html2canvas(element, { scale: 2, useCORS: true, width: 1440, windowWidth: 1440 }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'pt', 'letter', true);
         const pageWidth = 612;
         const pageHeight = 792;
-        let imgHeight = 790;
-        const imgWidth = (canvas.width * imgHeight) / canvas.height;
+        // Ajustar la imagen al ancho de la hoja carta y paginar hacia abajo
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
         let heightLeft = imgHeight;
         let position = 0;
-        const marginX = (pageWidth - imgWidth) / 2;
-        pdf.addImage(imgData, 'PNG', marginX, 0, imgWidth, imgHeight, '', 'FAST');
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
         heightLeft -= pageHeight;
-        pdf.internal.scaleFactor = 10;
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
+        while (heightLeft > 0) {
+            position -= pageHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', marginX, 0, imgWidth, imgHeight, '', 'FAST');
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
             heightLeft -= pageHeight;
         }
         if (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())) {
@@ -113,6 +125,9 @@ function descargarPDF() {
         });
         const bannerFormElem = document.querySelector('.banner-form-section');
         if (bannerFormElem) bannerFormElem.style.removeProperty("min-height")
+        element.style.removeProperty("width");
+        element.style.removeProperty("margin");
+        element.style.removeProperty("overflow");
     }).catch((error) => {
         console.error('Error al intentar generar el PDF:', error);
     });
