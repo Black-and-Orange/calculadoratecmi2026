@@ -989,7 +989,8 @@ window.enviarWhatsApp = function() {
     
     if (cotizacionId) {
         // Crear URL de la cotización compartible
-        const urlCotizacion = `${window.location.origin}/Calculadora/frontend/cotizacion-compartida.html?id=${cotizacionId}`;
+        // Ruta relativa a la página actual: funciona igual en local, staging y producción.
+        const urlCotizacion = new URL(`cotizacion-compartida.html?id=${cotizacionId}`, window.location.href).href;
         const mensaje = `Hola, aquí tienes tu cotización de Tecmilenio: ${urlCotizacion}`;
         const mensajeCodificado = encodeURIComponent(mensaje);
         
@@ -1037,7 +1038,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let mensaje;
             if (cotizacionId) {
-                const urlCotizacion = `${window.location.origin}/Calculadora/frontend/cotizacion-compartida.html?id=${cotizacionId}`;
+                // Ruta relativa a la página actual: funciona igual en local, staging y producción.
+                const urlCotizacion = new URL(`cotizacion-compartida.html?id=${cotizacionId}`, window.location.href).href;
                 mensaje = `Hola, aquí tienes tu cotización de Tecmilenio: ${urlCotizacion}`;
             } else {
                 mensaje = 'Hola, aquí tienes tu cotización de Tecmilenio.';

@@ -1453,7 +1453,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (cotizacionId) {
             // Crear URL de la cotización compartible usando resultado.html
-            const urlCotizacion = `${window.location.origin}/Calculadora/frontend/cotizacion-compartida.html?id=${cotizacionId}`;
+            // Ruta relativa a la página actual: funciona igual en local, staging y producción.
+            const urlCotizacion = new URL(`cotizacion-compartida.html?id=${cotizacionId}`, window.location.href).href;
             mensaje = `Hola, aquí tienes tu cotización de Tecmilenio: ${urlCotizacion}`;
         } else {
             // Fallback si no hay ID de cotización
