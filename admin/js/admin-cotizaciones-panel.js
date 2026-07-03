@@ -421,13 +421,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Determinar la URL correcta según el entorno
                 let urlCotizacion;
                 const hostname = window.location.hostname;
-                
+
                 if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                    // Desarrollo local
-                    urlCotizacion = `http://localhost:5500/Calculadora/frontend/cotizacion-compartida.html?id=${cotizacion.id}`;
-                } else if (hostname.includes('testingbo.com')) {
-                    // Staging/Testing
-                    urlCotizacion = `https://universidad.tecmilenio.mx/cotizacion?id=${cotizacion.id}`;
+                    // Desarrollo local: el admin vive en /admin y el frontend en
+                    // /frontend, hermanos en el mismo servidor
+                    urlCotizacion = new URL(`../frontend/cotizacion-compartida.html?id=${cotizacion.id}`, window.location.href).href;
+                } else if (hostname.endsWith('pages.dev')) {
+                    // Admin en staging (Cloudflare Pages) → frontend de staging
+                    urlCotizacion = `https://fase-3.calculadora-tecmi.pages.dev/cotizacion-compartida.html?id=${cotizacion.id}`;
                 } else {
                     // Producción
                     urlCotizacion = `https://universidad.tecmilenio.mx/cotizacion?id=${cotizacion.id}`;
