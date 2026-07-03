@@ -659,11 +659,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (totalContadoText) {
                 if (!hayDescuento) {
-                    // Cuando NO hay descuento: unificar en un solo texto
-                    totalContadoText.innerHTML = 'Total Contado<br>Colegiatura 2025';
+                    // Mantener el formato de la hoja de colegiatura.
+                    totalContadoText.textContent = 'Colegiatura total';
                 } else {
-                    // Cuando SÍ hay descuento: mostrar solo "Total Contado"
-                    totalContadoText.innerHTML = 'Total Contado';
+                    totalContadoText.textContent = 'Colegiatura total';
                 }
                 
                 // Forzar actualización visual
@@ -696,14 +695,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Calcular factor multiplicador según el nivel
         let factorMultiplicador = 3;
-        let textoMensualidades = '3 Mensualidades';
+        let textoMensualidades = '3 mensualidades posteriores';
         
         if (levelId === 1 || levelId === 2 || levelId === 4) {
             factorMultiplicador = 4;
-            textoMensualidades = '4 Mensualidades';
+            textoMensualidades = '4 mensualidades posteriores';
         } else if (levelId === 10) {
             factorMultiplicador = 2;
-            textoMensualidades = '2 Mensualidades';
+            textoMensualidades = '2 mensualidades posteriores';
         }
 
         const totalfinanciado = calcularTotalFinanciado(valores, levelId);
@@ -759,11 +758,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const totalContadoText = document.getElementById('totalContadoText');
             if (totalContadoText) {
                 if (!hayDescuento) {
-                    // Cuando NO hay descuento: unificar en un solo texto
-                    totalContadoText.innerHTML = 'Total Contado<br>Colegiatura 2025';
+                    // Mantener el formato de la hoja de colegiatura.
+                    totalContadoText.textContent = 'Colegiatura total';
                 } else {
-                    // Cuando SÍ hay descuento: mostrar solo "Total Contado"
-                    totalContadoText.innerHTML = 'Total Contado';
+                    totalContadoText.textContent = 'Colegiatura total';
                 }
             }
         }

@@ -35,6 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // La matrícula solo aplica al flujo alumno; el prospecto ("Me interesa") no la tiene.
         const perfil = dp.perfil || leer('perfilUsuario');
+
+        // El nivel 13 (Ejecutivo Bimestral MAPS) elige bimestres con checkboxes:
+        // no viaja select-period, sino 'periodosSeleccionados' [{codigo, mes}].
+        const periodoTexto = (() => {
+            const directo = val('select-period', 'selectedPeriodo', 'periodo');
+            if (directo) return directo;
+            const bimestres = leer('periodosSeleccionados');
+            if (Array.isArray(bimestres) && bimestres.length) {
+                return bimestres.map(p => {
+                    const anio = (p.codigo || '').match(/\d{4}/);
+                    return anio ? `${p.mes} ${anio[0]}` : p.mes;
+                }).join(', ');
+            }
+            return '';
+        })();
+
         const campos = [];
         if (perfil === 'alumno') campos.push(['Matrícula', dp.matricula || '']);
         campos.push(
@@ -42,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Campus', val('select-campus', 'selectedCampus', 'campus')],
             ['Nivel de estudios', nivelNombre],
             ['Programa de estudios', val('select-plan', 'selectedPrograma', 'programa')],
-            ['Periodo', val('select-period', 'selectedPeriodo', 'periodo')],
+            ['Periodo', periodoTexto],
         );
         // Campo(s) académico(s) dinámico(s): se muestran solo los que aplican al nivel.
         [

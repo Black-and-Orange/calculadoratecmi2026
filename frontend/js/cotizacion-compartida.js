@@ -460,11 +460,10 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     // Cambiar el texto del label según si hay descuento
     if (totalContadoTextElem) {
         if (!hayDescuento) {
-            // Cuando NO hay descuento: unificar en un solo texto
-            totalContadoTextElem.innerHTML = 'Total Contado<br>Colegiatura 2025';
+            // Mantener el formato de la hoja de colegiatura.
+            totalContadoTextElem.textContent = 'Colegiatura total';
         } else {
-            // Cuando SÍ hay descuento: mostrar solo "Total Contado"
-            totalContadoTextElem.innerHTML = 'Total Contado';
+            totalContadoTextElem.textContent = 'Colegiatura total';
         }
     }
     
@@ -496,11 +495,11 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         if (totalFinanciadoElem) totalFinanciadoElem.textContent = formatearPesos(cotizacion.total_financiado || 0);
         
         // Mostrar mensualidades
-        let textoMensualidades = '3 Mensualidades';
+        let textoMensualidades = '3 mensualidades posteriores';
         if ([1, 2, 4].includes(nivelId)) {
-            textoMensualidades = '4 Mensualidades';
+            textoMensualidades = '4 mensualidades posteriores';
         } else if (nivelId === 10) {
-            textoMensualidades = '2 Mensualidades';
+            textoMensualidades = '2 mensualidades posteriores';
         }
         
         if (mensualidadesText) mensualidadesText.textContent = textoMensualidades;
