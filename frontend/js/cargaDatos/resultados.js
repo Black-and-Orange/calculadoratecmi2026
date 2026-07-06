@@ -723,15 +723,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const hayDescuento = hayBeca || hayApoyoEstudiantil || hayApoyoFijo || hayFinalAmount;
 
-        // Mostrar todos los campos para otros niveles
+        // La fila Colegiatura de la hoja se muestra siempre (mockup): con
+        // descuento es el costo sin ajustar; sin descuento coincide con el total.
         if (colegiatura) {
-            if (hayDescuento) {
-                colegiatura.textContent = valores.costoTotal;
-                colegiatura.closest('tr').style.display = '';
-            } else {
-                colegiatura.closest('tr').style.display = 'none';
-            }
-        } 
+            colegiatura.textContent = valores.costoTotal;
+            colegiatura.closest('tr').style.display = '';
+        }
         if (apoyoFinanciamiento) {
             // Calcular el descuento total como la diferencia entre costoTotal y totalContado
             const costoTotalRecuperado = JSON.parse(localStorage.getItem('costoTotal')) || 0;
