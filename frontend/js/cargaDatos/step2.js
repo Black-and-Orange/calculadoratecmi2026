@@ -201,29 +201,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Los handlers del promedio son asíncronos: si el usuario teclea rápido (o
+    // pega el valor) pueden resolverse fuera de orden y el valor viejo pisa al
+    // nuevo (p.ej. ocultando las becas ya cargadas). Solo el handler más
+    // reciente puede tocar el DOM.
+    let promedioReqSeq = 0;
+
     averageInput.addEventListener('input', async () => {
         const average = parseFloat(averageInput.value);
+        const reqSeq = ++promedioReqSeq;
+        const vigente = () => reqSeq === promedioReqSeq;
+        const promedioValido = !isNaN(average) && average >= 70 && average <= 100;
 
-        if (isNaN(average) || average < 70 || average > 100) {
+        if (!promedioValido) {
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.innerHTML = '<option value="">Elige</option>';
             supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
             supportFixSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.classList.add('hidden');
             percentageSelect2.classList.add('hidden');
+            scholarshipSelect.classList.add('hidden');
+            tipoBeca.classList.add('hidden');
         }
 
         const levelId = getLevelId();
 
         try {
+            // Con promedio inválido no hay nada que consultar (la API responde
+            // 404 y el catch escondería el select en un momento arbitrario).
+            const fixedScholarships = promedioValido
+                ? await (async () => {
+                    const r = await fetch(`${API_BASE_URL}/becasFijas/nivel/${levelId}/promedio?promedio=${average}`);
+                    if (!r.ok) throw new Error('Error al obtener becas fijas');
+                    return r.json();
+                })()
+                : [];
 
-            const fixedScholarshipsResponse = await fetch(`${API_BASE_URL}/becasFijas/nivel/${levelId}/promedio?promedio=${average}`);
-            if (!fixedScholarshipsResponse.ok) throw new Error('Error al obtener becas fijas');
-            const fixedScholarships = await fixedScholarshipsResponse.json();
+            const variableScholarships = promedioValido
+                ? await (async () => {
+                    const r = await fetch(`${API_BASE_URL}/becasVariables/nivel/${levelId}/promedio?promedio=${average}`);
+                    if (!r.ok) throw new Error('Error al obtener becas variables');
+                    return r.json();
+                })()
+                : [];
 
-            const variableScholarshipsResponse = await fetch(`${API_BASE_URL}/becasVariables/nivel/${levelId}/promedio?promedio=${average}`);
-            if (!variableScholarshipsResponse.ok) throw new Error('Error al obtener becas variables');
-            const variableScholarships = await variableScholarshipsResponse.json();
+            if (!vigente()) return;
 
             // Muestra el select si hay becas disponibles (fijas o variables)
 
@@ -261,7 +283,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 scholarshipSelect.classList.add('hidden');
                 tipoBeca.classList.add('hidden');
             }
-            scholarshipSelect.addEventListener('change', async () => {
+            // Reemplazar (no apilar) el listener: este handler se registra en
+            // cada tecleo del promedio y cierra sobre las becas recién cargadas.
+            if (scholarshipSelect._becaChangeHandler) {
+                scholarshipSelect.removeEventListener('change', scholarshipSelect._becaChangeHandler);
+            }
+            scholarshipSelect._becaChangeHandler = async () => {
                 const selectedScholarshipId = scholarshipSelect.value;
 
                 if (selectedScholarshipId === "0") {
@@ -303,7 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     percentageSelect2.classList.add('hidden');
                     percentageSelect.innerHTML = '<option value="">Elige</option>';
                 }
-            });
+            };
+            scholarshipSelect.addEventListener('change', scholarshipSelect._becaChangeHandler);
 
 
             const hideScholarshipSelectForLevel5 = () => {
@@ -370,6 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hideScholarshipSelectForLevel5();
 
         } catch (error) {
+            if (!vigente()) return;
             console.error('Error en la carga de datos:', error);
             scholarshipSelect.innerHTML = '<option value="">Elige</option>';
             percentageSelect.innerHTML = '<option value="">Elige</option>';
@@ -386,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const supportResponse = await fetch(`${API_BASE_URL}/apoyosFijos/nivel/${levelId}`);
             if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
             const supports = await supportResponse.json();
+            if (!vigente()) return;
             
             supports.sort((a, b) => a.valor - b.valor);
 
@@ -404,6 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
             if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
             const supports = await supportResponse.json();
+            if (!vigente()) return;
 
             supports.sort((a, b) => a.porcentaje - b.porcentaje);
 
@@ -423,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
             if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
             const supports = await supportResponse.json();
+            if (!vigente()) return;
 
             // Ordenar los apoyos de menor a mayor porcentaje
             supports.sort((a, b) => a.porcentaje - b.porcentaje);
@@ -442,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
             if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
             const supports = await supportResponse.json();
+            if (!vigente()) return;
 
             // Ordenar los apoyos de menor a mayor porcentaje
             supports.sort((a, b) => a.porcentaje - b.porcentaje);

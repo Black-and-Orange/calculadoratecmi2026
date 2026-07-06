@@ -176,6 +176,19 @@ const initProspecto = () => {
         // prospecto "Me interesa", según el PDF) y las becas se filtran por ese
         // promedio vía step2.js. Antes se ocultaba y se forzaba a 100 (HU56).
 
+        // Promedio por debajo del mínimo para beca (70): se bloquea la pregunta
+        // de beca con la leyenda correspondiente, igual que el préstamo por nivel.
+        const promedioVal = parseFloat(promedio && promedio.value);
+        const promedioBajo = !isNaN(promedioVal) && promedioVal < 70;
+        if (promedioBajo) {
+            setRadio('radio-beca-prospecto', 'no');
+            setRadioDisabled('radio-beca-prospecto', true);
+            setInfo('radio-beca-prospecto-info', 'Lo sentimos, pero tu promedio académico no cumple con el mínimo requerido para aplicar a una beca.');
+        } else {
+            setRadioDisabled('radio-beca-prospecto', false);
+            setInfo('radio-beca-prospecto-info', '');
+        }
+
         const rBeca = radioValor('radio-beca-prospecto');
         [tipoBeca, scholarshipSelect].forEach(el => el && el.classList.toggle('hidden', rBeca !== 'si'));
         if (rBeca !== 'si') {
