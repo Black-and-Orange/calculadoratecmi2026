@@ -4,7 +4,7 @@ const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 export const API_BASE_URL = isLocal
     ? 'http://localhost:3008/api'
-    : 'https://calculadora-tecmi-backend.carlos-tam-s-account.workers.dev/api';
+    : 'https://api-tecmi.blnolabs.dev/api';
 
 // Todas las llamadas del panel se hacen con fetch(). En lugar de tocar cada
 // módulo, se envuelve window.fetch para adjuntar el token JWT a las peticiones

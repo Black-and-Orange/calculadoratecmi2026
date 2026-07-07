@@ -5,6 +5,10 @@
   "main": "worker.js",
   "compatibility_date": "2025-12-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Dominio propio del backend (BnO) — evita el genérico *.workers.dev.
+  "routes": [
+    { "pattern": "api-tecmi.blnolabs.dev", "custom_domain": true }
+  ],
   "vars": {
     // En el Worker el puerto es solo una clave de ruteo interna.
     "PORT": "3008"
