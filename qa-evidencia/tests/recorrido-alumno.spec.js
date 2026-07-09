@@ -65,59 +65,11 @@ test('[HU4] validación de matrícula — inválida y luego corregida', async ({
 // HU4,HU5-9,HU16,HU18-20,HU22-24,HU26,HU28-30,HU32-37: recorrido completo
 // con beca y préstamo
 // ---------------------------------------------------------------------------
-// Helper: completa el paso de seguros (step-3).
-// Lógica:
-//   1. Espera a que fetchSeguros() termine (container tiene selects o mensaje "no hay")
-//   2. Si hay selects y #row-radio-seguro-interes es visible → responde el radio ('si')
-//      para que sync() habilite las filas de seguros opcionales.
-//   3. Rellena todos los selects visibles del container con 'si' (o primera opción válida).
-//   4. Si no hay selects, #step-3-next ya queda habilitado por sync().
+// Helper: completa el paso de seguros (step-3, UI por radios del rediseño).
 async function completarSeguros(page) {
-  const contenedorSeguros = page.locator('#seguros-dinamicos-container');
-  const rowRadio = page.locator('#row-radio-seguro-interes');
-
-  // Paso 1: esperar a que el container tenga contenido real
-  // (fetchSeguros() puede demorar ~500ms en cargar de la API)
-  await expect(contenedorSeguros.locator('select').first())
-    .toBeAttached({ timeout: 15_000 })
-    .catch(() => {}); // Si no hay selects (nivel sin seguros), continuar
-
-  const numSelects = await contenedorSeguros.locator('select').count();
-  if (numSelects === 0) {
-    // Sin seguros → sync() ya deshabilitó btnNext = false; nada más que hacer.
-    return;
-  }
-
-  // Paso 2: si el radio de interés es visible, responder 'si'
-  // Dar un momento para que sync() procese y decida si mostrar rowRadio
-  const radioVisible = await expect(rowRadio).toBeVisible({ timeout: 3_000 })
-    .then(() => true).catch(() => false);
-  if (radioVisible) {
-    // Responder 'si' → sync() mostrará las filas de seguros opcionales
-    await page.locator('#row-radio-seguro-interes input[value="si"]').check();
-    // Dar tiempo para que sync() actualice la visibilidad de las filas
-    await page.waitForTimeout(800);
-  }
-
-  // Paso 3: rellenar todos los selects visibles
-  const selectsSeguros = contenedorSeguros.locator('select');
-  const total = await selectsSeguros.count();
-  for (let i = 0; i < total; i++) {
-    const sel = selectsSeguros.nth(i);
-    if (await sel.isVisible() && !await sel.isDisabled()) {
-      const currentVal = await sel.inputValue();
-      if (currentVal !== '') continue; // Ya tiene valor (p.ej. forced por sync)
-      const opSi = sel.locator('option[value="si"]');
-      if (await opSi.count() > 0) {
-        await sel.selectOption('si');
-      } else {
-        const opts = sel.locator('option:not([value=""]):not([disabled])');
-        if (await opts.count() > 0) {
-          await sel.selectOption(await opts.first().getAttribute('value'));
-        }
-      }
-    }
-  }
+  // Paso 3 por radios (rediseño step3.js): delega en el helper compartido, que
+  // contrata todo lo disponible (accidente con Tecmilenio, coberturas en 'sí').
+  await w.completarSeguros(page, { modo: 'maximo' });
 }
 
 // Alias para compatibilidad con código existente
@@ -189,9 +141,13 @@ test('[HU4,HU5,HU6,HU7,HU8,HU9,HU16,HU18,HU19,HU20,HU22,HU23,HU24,HU26,HU28,HU29
   testInfo.annotations.push({ type: 'beca-pct-valor', description: `valor: ${becaValActual}` });
   await w.capturar(page, testInfo, '6-apoyos', 'completo-beca-si');
 
-  // Préstamo = sí (si no está deshabilitado por nivel prepa o regla 60%)
+  // Préstamo = sí (si no está deshabilitado por nivel prepa o regla 60%).
+  // Esperar un ciclo de sync() (intervalo 700ms): puede deshabilitar el préstamo
+  // DESPUÉS de elegir la beca (regla beca+préstamo ≤ 60%) y dejar colgado el check().
+  await page.waitForTimeout(1000);
   const radioPrestamoSi = page.locator('#row-radio-prestamo-alumno input[value="si"]');
-  const radioPrestamoSiDisabled = await radioPrestamoSi.isDisabled();
+  const radioPrestamoSiDisabled = await radioPrestamoSi.isDisabled() ||
+    !(await radioPrestamoSi.check({ timeout: 5_000 }).then(() => true).catch(() => false));
   if (radioPrestamoSiDisabled) {
     testInfo.annotations.push({ type: 'info', description: 'Préstamo deshabilitado para este nivel (prepa o regla 60%); se omite selección de préstamo' });
     const radioPrestamoNo = page.locator('#row-radio-prestamo-alumno input[value="no"]');
@@ -199,7 +155,6 @@ test('[HU4,HU5,HU6,HU7,HU8,HU9,HU16,HU18,HU19,HU20,HU22,HU23,HU24,HU26,HU28,HU29
       await radioPrestamoNo.check();
     }
   } else {
-    await radioPrestamoSi.check();
     const containerPrestamo = page.locator('#prestamo-students-container');
     const prestamoVisible = await containerPrestamo.isVisible({ timeout: 5_000 }).catch(() => false);
     if (prestamoVisible) {

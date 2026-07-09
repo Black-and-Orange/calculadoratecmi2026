@@ -105,6 +105,64 @@ async function aceptarLegales(page) {
   await page.locator('#check-privacidad').check();
 }
 
+// Paso 3 (rediseño por radios, eba4783): cada cobertura es un .seguro-bloque con
+// radios visibles y un <select id="select-seguro-{id}"> OCULTO como fuente de
+// verdad; #step-3-next se habilita cuando todos los ocultos tienen 'si'/'no'.
+//   - VIVE y Cobertura de Colegiatura obligatoria: pre-marcadas 'si' y disabled.
+//   - Accidente: radios 'tecmilenio' (+ dropdown de interés) / 'propio' (→ 'no').
+//   - Colegiatura no obligatoria: radios Sí/No.
+// modo 'minimo' → responde sin contratar (accidente: propio; opcionales: no).
+// modo 'maximo' → contrata todo (accidente: tecmilenio + select; opcionales: sí).
+async function completarSeguros(page, { modo = 'maximo' } = {}) {
+  const cont = page.locator('#seguros-dinamicos-container');
+  const btnNext = page.locator('#step-3-next');
+  // Esperar a que fetchSeguros() pinte bloques o el mensaje "no hay seguros"
+  await cont.locator('.seguro-bloque, .text-muted').first()
+    .waitFor({ state: 'attached', timeout: 15_000 }).catch(() => {});
+
+  // El paso puede regenerarse (fetchSeguros) al re-entrar desde otro paso:
+  // reintentar responder hasta que el botón continuar quede habilitado.
+  for (let intento = 0; intento < 6; intento++) {
+    const bloques = cont.locator('.seguro-bloque');
+    const total = await bloques.count();
+    if (total === 0) return; // nivel sin seguros → el botón ya queda habilitado
+
+    for (let i = 0; i < total; i++) {
+      const bloque = bloques.nth(i);
+      const oculto = bloque.locator('select[id^="select-seguro-"]');
+      if (await oculto.count() === 0) continue;
+      const valor = await oculto.inputValue().catch(() => '');
+      if (valor === 'si' || valor === 'no') continue; // forzado o ya respondido
+
+      // Bloque de accidente: radios tecmilenio/propio
+      const radioTecmilenio = bloque.locator('input[type="radio"][value="tecmilenio"]');
+      if (await radioTecmilenio.count() > 0) {
+        if (modo === 'maximo') {
+          await radioTecmilenio.check().catch(() => {});
+          const selInteres = bloque.locator('select.seguro-interes-select');
+          const opciones = selInteres.locator('option:not([value=""])');
+          if (await opciones.count() > 0) {
+            await selInteres.selectOption(await opciones.first().getAttribute('value')).catch(() => {});
+          }
+        } else {
+          await bloque.locator('input[type="radio"][value="propio"]').check().catch(() => {});
+        }
+        continue;
+      }
+
+      // Bloques Sí/No (cobertura de colegiatura no obligatoria)
+      const respuesta = modo === 'maximo' ? 'si' : 'no';
+      const radio = bloque.locator(`input[type="radio"][value="${respuesta}"]`);
+      if (await radio.count() > 0 && !(await radio.isDisabled())) {
+        await radio.check().catch(() => {});
+      }
+    }
+
+    if (await btnNext.isEnabled().catch(() => false)) return;
+    await page.waitForTimeout(700);
+  }
+}
+
 function parsearMonto(texto) {
   return parseFloat(texto.replace(/[^0-9.-]/g, ''));
 }
@@ -116,5 +174,5 @@ async function leerMonto(page, selector) {
 module.exports = {
   DATOS_PRUEBA, capturar, seleccionarPerfil, llenarDatosAlumno,
   llenarDatosProspecto, elegirOpcion, completarNivel, aceptarLegales,
-  parsearMonto, leerMonto,
+  completarSeguros, parsearMonto, leerMonto,
 };

@@ -36,8 +36,9 @@
  *   Para prospecto: datosPersonales.nombre → #txt-nombre-prospecto, .correo → #txt-correo.
  *
  * Resumen (HU32/71):
- *   resultados.js genera #info-grid dinámicamente con campos id='nombre', 'campus',
- *   'nivel', 'periodo', 'materias' / 'certificados', etc.
+ *   resultado-doc.js llena #cotiz-info ("Mi información ingresada") con pares
+ *   .cotiz-info-label / .cotiz-info-valor: Matrícula (alumno), Nombre, Campus,
+ *   Nivel de estudios, Programa de estudios, Periodo y unidades por nivel.
  */
 
 const { test, expect } = require('@playwright/test');
@@ -68,40 +69,8 @@ async function completarApoyosAlumnoMinimo(page) {
 }
 
 async function completarSegurosMinimo(page) {
-  const contenedorSeguros = page.locator('#seguros-dinamicos-container');
-  await contenedorSeguros.locator('select').first()
-    .waitFor({ state: 'attached', timeout: 15_000 }).catch(() => {});
-
-  const numSelects = await contenedorSeguros.locator('select').count();
-  if (numSelects === 0) return;
-
-  const rowRadio = page.locator('#row-radio-seguro-interes');
-  if (await rowRadio.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    const radioNo = page.locator('#row-radio-seguro-interes input[value="no"]');
-    if (!await radioNo.isDisabled()) {
-      await radioNo.check();
-      await page.waitForTimeout(600);
-    }
-  }
-
-  const selectsSeguros = contenedorSeguros.locator('select');
-  const total = await selectsSeguros.count();
-  for (let i = 0; i < total; i++) {
-    const sel = selectsSeguros.nth(i);
-    if (await sel.isVisible() && !await sel.isDisabled()) {
-      const currentVal = await sel.inputValue();
-      if (currentVal !== '') continue;
-      const opSi = sel.locator('option[value="si"]');
-      if (await opSi.count() > 0) {
-        await sel.selectOption('si');
-      } else {
-        const opts = sel.locator('option:not([value=""]):not([disabled])');
-        if (await opts.count() > 0) {
-          await sel.selectOption(await opts.first().getAttribute('value'));
-        }
-      }
-    }
-  }
+  // Paso 3 por radios (rediseño step3.js): delega en el helper compartido.
+  await w.completarSeguros(page, { modo: 'minimo' });
 }
 
 /**
@@ -370,9 +339,10 @@ test('[HU39,HU78] compartir por WhatsApp — modal, URL wa.me con cotizacion-com
 
   await page.goto(urlCompartidaFinal);
 
-  // Esperar a que cargue: cotizacion-compartida.js muestra #basic-info-section cuando carga bien
+  // Esperar a que cargue: cotizacion-compartida.js muestra la hoja documento
+  // (#financial-plan-section) cuando la cotización carga bien
   const errorSection = page.locator('#error-section');
-  const basicInfoSection = page.locator('#basic-info-section');
+  const basicInfoSection = page.locator('#financial-plan-section');
 
   // Dar tiempo al fetch del backend
   await page.waitForTimeout(4_000);
@@ -387,13 +357,13 @@ test('[HU39,HU78] compartir por WhatsApp — modal, URL wa.me con cotizacion-com
     `[HU39,HU78] La página cotizacion-compartida no debe mostrar sección de error para id="${cotizacionId}"`,
   ).toBe(false);
 
-  // Verificar que #basic-info-section o #totalContado tienen contenido
+  // Verificar que la hoja (#financial-plan-section) o #totalContado tienen contenido
   const basicInfoVisible = await basicInfoSection.isVisible().catch(() => false);
   const totalContadoVisible = await page.locator('#totalContado').isVisible().catch(() => false);
 
   testInfo.annotations.push({
     type: 'cotizacion-compartida-estado',
-    description: `basicInfoSection visible: ${basicInfoVisible}, totalContado visible: ${totalContadoVisible}`,
+    description: `hoja documento visible: ${basicInfoVisible}, totalContado visible: ${totalContadoVisible}`,
   });
 
   expect(
@@ -432,8 +402,9 @@ test('[HU40,HU79] nueva cotización — modal con opciones conservar y desde cer
   const textoCero = await btnCero.textContent();
   testInfo.annotations.push({ type: 'opciones-modal', description: `conservar: "${textoConservar.trim()}", cero: "${textoCero.trim()}"` });
 
-  expect(textoConservar, '[HU40,HU79] Debe existir opción de conservar datos').toContain('Conservar');
-  expect(textoCero, '[HU40,HU79] Debe existir opción de empezar desde cero').toContain('cero');
+  // Wording actual: "Sí, conservar datos" / "Empezar desde cero" — comparar sin caso
+  expect(textoConservar.toLowerCase(), '[HU40,HU79] Debe existir opción de conservar datos').toContain('conservar');
+  expect(textoCero.toLowerCase(), '[HU40,HU79] Debe existir opción de empezar desde cero').toContain('cero');
 
   await w.capturar(page, testInfo, '9-resultado', 'nueva-cot-modal-visible');
 });
@@ -462,12 +433,18 @@ test('[HU41,HU80] nueva cotización conservar datos — prospecto pre-llenado', 
 
   testInfo.annotations.push({ type: 'redireccion-index', description: page.url() });
 
-  // El selector de perfil debe estar visible
-  await expect(page.locator('button[data-perfil="prospecto"]')).toBeVisible({ timeout: 10_000 });
-
-  // Seleccionar perfil prospecto para verificar que el paso de datos personales
-  // está pre-llenado con datosPersonales guardados
-  await page.locator('button[data-perfil="prospecto"]').click();
+  // "Conservar mis datos" reutiliza el perfil (fix 6d57521): index puede saltarse
+  // el selector de perfil y entrar directo al paso de datos personales. Si el
+  // selector sigue visible, elegir prospecto; si no, ya estamos en el wizard.
+  const btnPerfil = page.locator('button[data-perfil="prospecto"]');
+  const perfilVisible = await btnPerfil.isVisible({ timeout: 5_000 }).catch(() => false);
+  testInfo.annotations.push({
+    type: 'selector-perfil',
+    description: perfilVisible ? 'visible (se elige prospecto)' : 'omitido (perfil reutilizado por conservar datos)',
+  });
+  if (perfilVisible) {
+    await btnPerfil.click();
+  }
   await expect(page.locator('#step-dp')).toBeVisible({ timeout: 10_000 });
 
   await w.capturar(page, testInfo, '9-resultado', 'nc-conservar-step-dp');
@@ -516,25 +493,29 @@ test('[HU41,HU80] nueva cotización conservar datos — prospecto pre-llenado', 
 
 // ---------------------------------------------------------------------------
 // TEST 5: [HU32,HU71] Resumen de información ingresada en resultado
-// El #info-grid dinámico debe mostrar nombre, campus y nivel (u otro campo) que
-// corresponden a la configuración elegida en el wizard.
+// La hoja documento (mockup jul-2026) llena #cotiz-info con pares label/valor
+// (.cotiz-info-item) que corresponden a la configuración elegida en el wizard.
 // ---------------------------------------------------------------------------
 test('[HU32,HU71] resumen de información ingresada refleja la configuración elegida', async ({ page }, testInfo) => {
   const eleccion = await llegarAResultadoAlumnoSimple(page, testInfo);
   const datos = w.DATOS_PRUEBA;
 
-  // Esperar a que resultados.js llene #info-grid
-  const infoGrid = page.locator('#info-grid');
+  // Esperar a que resultado-doc.js llene #cotiz-info ("Mi información ingresada")
+  const infoGrid = page.locator('#cotiz-info');
   await expect(infoGrid).toBeVisible({ timeout: 15_000 });
 
-  // Esperar a que haya al menos un hijo (resultados.js crea los campos dinámicamente)
-  await expect(infoGrid.locator('> div').first()).toBeAttached({ timeout: 15_000 });
+  // Esperar a que haya al menos un campo (resultado-doc.js los crea dinámicamente)
+  await expect(infoGrid.locator('.cotiz-info-item').first()).toBeAttached({ timeout: 15_000 });
 
   await w.capturar(page, testInfo, '9-resultado', 'resumen-info-grid');
 
-  // Leer campos del resumen
-  const campoNombre = page.locator('#info-grid #nombre');
-  const campoCampus = page.locator('#info-grid #campus');
+  // Leer campos del resumen: cada .cotiz-info-item tiene .cotiz-info-label y .cotiz-info-valor
+  const itemPorLabel = (label) => infoGrid
+    .locator('.cotiz-info-item')
+    .filter({ has: page.locator('.cotiz-info-label', { hasText: new RegExp(`^${label}$`) }) })
+    .locator('.cotiz-info-valor');
+  const campoNombre = itemPorLabel('Nombre');
+  const campoCampus = itemPorLabel('Campus');
 
   const nombreVisible = await campoNombre.isVisible().catch(() => false);
   const campusVisible = await campoCampus.isVisible().catch(() => false);
@@ -553,10 +534,10 @@ test('[HU32,HU71] resumen de información ingresada refleja la configuración el
       `[HU32,HU71] El nombre en el resumen debe incluir el nombre ingresado ("${datos.nombre}")`,
     ).toContain(datos.nombre);
   } else {
-    testInfo.annotations.push({ type: 'hallazgo', description: '[HU32,HU71] El campo #nombre no está visible en #info-grid' });
+    testInfo.annotations.push({ type: 'hallazgo', description: '[HU32,HU71] El campo Nombre no está visible en #cotiz-info' });
     // Verificar que al menos el grid tiene contenido
     const gridContent = await infoGrid.textContent();
-    expect(gridContent.trim().length, '[HU32,HU71] #info-grid debe tener contenido').toBeGreaterThan(0);
+    expect(gridContent.trim().length, '[HU32,HU71] #cotiz-info debe tener contenido').toBeGreaterThan(0);
   }
 
   // Verificar campus si está en el resumen y la elección lo registró
@@ -569,7 +550,7 @@ test('[HU32,HU71] resumen de información ingresada refleja la configuración el
   }
 
   // Verificar que el número total de campos en el grid es razonable (≥ 2)
-  const numCampos = await infoGrid.locator('> div').count();
+  const numCampos = await infoGrid.locator('.cotiz-info-item').count();
   testInfo.annotations.push({ type: 'num-campos-info-grid', description: `${numCampos}` });
   expect(numCampos, '[HU32,HU71] El resumen debe mostrar al menos 2 campos de información').toBeGreaterThanOrEqual(2);
 
