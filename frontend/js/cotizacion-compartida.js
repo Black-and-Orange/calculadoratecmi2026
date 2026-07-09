@@ -541,6 +541,10 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
                 .fill(FECHA_PENDIENTE)
                 .join('<br>');
         }
+
+        // Si el período de la cotización tiene fechas configuradas en el admin,
+        // sustituyen los placeholders.
+        await cablearFechasPagoPeriodo(cotizacion, numeroMensualidades);
         
         // Para otros niveles, mostrar el contenido de financiamiento y ocultar el loading
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -552,6 +556,45 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         if (financiamientoContent) {
             financiamientoContent.style.display = 'block';
         }
+    }
+}
+
+// ── Fechas de pago reales por período (configuradas en el admin) ──
+// La primera fecha es el vencimiento del contado y del primer pago; las
+// siguientes, las mensualidades en orden. Nivel 13 usa sus pagos bimestrales.
+async function cablearFechasPagoPeriodo(cotizacion, numMensualidades) {
+    try {
+        const periodoCotizacion = (cotizacion.periodo || '').trim();
+        if (!periodoCotizacion || periodoCotizacion === 'N/A') return;
+
+        const resp = await fetch(`${API_BASE_URL}/fechas-pago/nivel/${cotizacion.nivel_id}`);
+        if (!resp.ok) return;
+        const filas = await resp.json();
+        const fechas = (Array.isArray(filas) ? filas : [])
+            .filter(f => (f.periodo_descripcion || '').trim() === periodoCotizacion)
+            .sort((a, b) => a.pago_orden - b.pago_orden)
+            .map(f => {
+                // La API serializa DATE como ISO UTC: formatear con getters UTC
+                // para no correr el día por zona horaria.
+                const d = new Date(f.fecha_vencimiento);
+                return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+            });
+        if (!fechas.length) return;
+
+        const setTexto = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+        setTexto('fecha-contado', fechas[0]);
+        setTexto('fecha-primer-pago', fechas[0]);
+
+        const fechasMensualidadesElem = document.getElementById('fechas-mensualidades');
+        if (fechasMensualidadesElem) {
+            const lineas = [];
+            for (let i = 0; i < numMensualidades; i++) {
+                lineas.push(fechas[i + 1] || 'DD/MM/AAAA');
+            }
+            fechasMensualidadesElem.innerHTML = lineas.join('<br>');
+        }
+    } catch (e) {
+        console.warn('[compartida] fechas de pago por período no disponibles:', e.message);
     }
 }
 

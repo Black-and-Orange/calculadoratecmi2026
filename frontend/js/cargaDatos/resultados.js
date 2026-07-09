@@ -766,9 +766,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             primerPago.textContent = valores.primeraCuota;
         }
         // Mockup jul-2026: cada pago del plan lleva su fecha de vencimiento y las
-        // mensualidades se listan una por línea. Las fechas reales saldrán de la
-        // configuración de fechas de pago por período (admin, pendiente); mientras
-        // tanto se muestra el placeholder DD/MM/AAAA.
+        // mensualidades se listan una por línea. Se pinta el placeholder DD/MM/AAAA
+        // y, si el período tiene fechas configuradas en el admin, se sustituyen
+        // (cablearFechasPagoPeriodo corre async).
         const FECHA_PENDIENTE = 'DD/MM/AAAA';
         const fechaContadoElem = document.getElementById('fecha-contado');
         if (fechaContadoElem) fechaContadoElem.textContent = FECHA_PENDIENTE;
@@ -785,6 +785,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .fill(FECHA_PENDIENTE)
                 .join('<br>');
         }
+        cablearFechasPagoPeriodo(factorMultiplicador);
         if (totalFinanciado) {
             totalFinanciado.textContent = formatearPesos(totalfinanciado);
         }
@@ -807,6 +808,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Mostrar apoyos y seguros
         mostrarApoyosYSeguros(valores);
+    }
+
+    // ── Fechas de pago reales por período (configuradas en el admin) ──
+    // Consulta /fechas-pago/nivel/:id y, si el período seleccionado tiene fechas,
+    // sustituye los placeholders DD/MM/AAAA: la primera fecha es el vencimiento
+    // del contado y del primer pago; las siguientes, las mensualidades en orden.
+    // Nivel 13 no pasa por aquí (usa sus fechas de pagos bimestrales).
+    async function cablearFechasPagoPeriodo(numMensualidades) {
+        try {
+            const periodoSeleccionado = (urlParams.get('select-period') || localStorage.getItem('selectedPeriodo') || '').trim();
+            if (!periodoSeleccionado || periodoSeleccionado === 'N/A') return;
+
+            const resp = await fetch(`${API_BASE_URL}/fechas-pago/nivel/${levelId}`);
+            if (!resp.ok) return;
+            const filas = await resp.json();
+            const fechas = (Array.isArray(filas) ? filas : [])
+                .filter(f => (f.periodo_descripcion || '').trim() === periodoSeleccionado)
+                .sort((a, b) => a.pago_orden - b.pago_orden)
+                .map(f => {
+                    // La API serializa DATE como ISO UTC: formatear con getters UTC
+                    // para no correr el día por zona horaria.
+                    const d = new Date(f.fecha_vencimiento);
+                    return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+                });
+            if (!fechas.length) return;
+
+            const setTexto = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+            setTexto('fecha-contado', fechas[0]);
+            setTexto('fecha-primer-pago', fechas[0]);
+
+            const fechasMensualidadesElem = document.getElementById('fechas-mensualidades');
+            if (fechasMensualidadesElem) {
+                const lineas = [];
+                for (let i = 0; i < numMensualidades; i++) {
+                    lineas.push(fechas[i + 1] || 'DD/MM/AAAA');
+                }
+                fechasMensualidadesElem.innerHTML = lineas.join('<br>');
+            }
+        } catch (e) {
+            console.warn('[resultado] fechas de pago por período no disponibles:', e.message);
+        }
     }
 
     // FUNCIÓN AUXILIAR PARA APOYOS Y SEGUROS (común para todos los niveles)

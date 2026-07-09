@@ -28,6 +28,7 @@ const authRoutes = require('./routes/authRoutes');
 const pagosBimestralesRoutes = require('./routes/pagosBimestralesRoutes');
 const configuracionVigenciaRoutes = require('./routes/configuracionVigenciaRoutes');
 const cotizacionesRoutes = require('./routes/cotizacionesRoutes');
+const fechasPagoPeriodoRoutes = require('./routes/fechasPagoPeriodoRoutes');
 
 const app = express();
 
@@ -138,6 +139,7 @@ app.use('/api/creditos', creditosRoutes);
 app.use('/api/prestamos', prestamosRoutes);
 app.use('/api/pagos-bimestrales', pagosBimestralesRoutes);
 app.use('/api/configuracion-vigencia', configuracionVigenciaRoutes);
+app.use('/api/fechas-pago', fechasPagoPeriodoRoutes);
 app.use('/api/cotizaciones', cotizacionesRoutes);
 
 const PORT = process.env.PORT || 3002;

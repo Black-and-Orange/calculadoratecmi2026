@@ -28,6 +28,7 @@ function loadPeriodo(nivelId, containerId) {
                             <td>
                                 <button onclick="deletePeriodo(${periodo.id_periodo}, ${nivelId})" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
                                 <button onclick="editPeriodo(${periodo.id_periodo}, ${nivelId})" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                                <button onclick="fechasPagoPeriodo(${periodo.id_periodo})" class="btn btn-info btn-sm" title="Fechas de pago"><i class="far fa-calendar-alt"></i> Fechas de pago</button>
                             </td>
                         </tr>`;
                 });
@@ -123,6 +124,118 @@ function createPeriodo(nivelId, nombre, codigo, callback) {
         });
 }
 window.createPeriodo = createPeriodo;
+
+// ── Fechas de pago por período (minuta jul-2026) ─────────────────────────────
+// Se configuran a nivel período; cada período guarda su propia lista, así el
+// período anterior queda como consulta al crear uno nuevo. Convención: la
+// primera fecha es la del plan de contado / primer pago; las siguientes, las
+// mensualidades. El guardado reemplaza la lista completa (PUT).
+async function fechasPagoPeriodo(idPeriodo) {
+    try {
+        const [periodo, fechas] = await Promise.all([
+            fetch(`${API_BASE_URL}/periodo/${idPeriodo}`).then(r => r.json()),
+            fetch(`${API_BASE_URL}/fechas-pago/periodo/${idPeriodo}`).then(r => r.json()),
+        ]);
+
+        const id = 'tecFechasPagoModal';
+        document.getElementById(id)?.remove();
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = id;
+        modal.setAttribute('tabindex', '-1');
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content tec-modal">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title tec-modal-titulo">Fechas de pago — <span class="tec-fp-periodo"></span></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                    </div>
+                    <form class="tec-modal-form">
+                        <div class="modal-body">
+                            <p class="text-muted mb-3" style="font-size: 13px;">
+                                La <strong>primera fecha</strong> es el vencimiento del plan de contado y del primer
+                                pago del financiamiento; las siguientes corresponden a las mensualidades, en orden.
+                                Al guardar, las fechas se ordenan cronológicamente.
+                            </p>
+                            <div class="tec-fp-lista"></div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-accion="agregar">
+                                <i class="fas fa-plus"></i> Agregar fecha
+                            </button>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar fechas</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+        modal.querySelector('.tec-fp-periodo').textContent =
+            `${periodo.periodo_descripcion || ''} (${periodo.periodo_codigo || ''})`;
+        document.body.appendChild(modal);
+
+        const lista = modal.querySelector('.tec-fp-lista');
+        const agregarFila = (valor = '') => {
+            const fila = document.createElement('div');
+            fila.className = 'form-group d-flex align-items-center';
+            fila.style.gap = '8px';
+            fila.innerHTML = `
+                <span class="tec-fp-orden text-muted" style="min-width: 72px; font-size: 13px;"></span>
+                <input type="date" class="form-control" required>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-accion="quitar" title="Quitar fecha">
+                    <i class="fas fa-times"></i>
+                </button>`;
+            fila.querySelector('input').value = valor;
+            fila.querySelector('[data-accion="quitar"]').addEventListener('click', () => {
+                fila.remove();
+                renumerar();
+            });
+            lista.appendChild(fila);
+            renumerar();
+        };
+        const renumerar = () => {
+            lista.querySelectorAll('.tec-fp-orden').forEach((el, i) => {
+                el.textContent = i === 0 ? 'Primer pago' : `Pago ${i + 1}`;
+            });
+        };
+
+        // Filas iniciales: las fechas guardadas (YYYY-MM-DD en UTC) o una vacía
+        if (Array.isArray(fechas) && fechas.length) {
+            fechas.forEach(f => agregarFila(String(f.fecha_vencimiento).slice(0, 10)));
+        } else {
+            agregarFila();
+        }
+
+        modal.querySelector('[data-accion="agregar"]').addEventListener('click', () => agregarFila());
+
+        modal.querySelector('.tec-modal-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const valores = Array.from(lista.querySelectorAll('input[type="date"]'))
+                .map(inp => inp.value)
+                .filter(Boolean)
+                .sort();
+            try {
+                const resp = await fetch(`${API_BASE_URL}/fechas-pago/periodo/${idPeriodo}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fechas: valores }),
+                });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                window.tecToast(valores.length ? `Fechas de pago guardadas (${valores.length})` : 'Fechas de pago eliminadas');
+                $(modal).modal('hide');
+            } catch (error) {
+                console.error('Error guardando fechas de pago:', error);
+                window.tecToast('No se pudieron guardar las fechas de pago', 'error');
+            }
+        });
+
+        $(modal).on('hidden.bs.modal', () => modal.remove());
+        $(modal).modal('show');
+    } catch (error) {
+        console.error('Error cargando fechas de pago:', error);
+        window.tecToast('No se pudieron cargar las fechas de pago', 'error');
+    }
+}
+window.fechasPagoPeriodo = fechasPagoPeriodo;
 
 // Inicialización y binds de eventos
 $(document).ready(function () {
