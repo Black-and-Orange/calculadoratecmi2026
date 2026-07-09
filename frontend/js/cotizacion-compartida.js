@@ -269,11 +269,11 @@ async function cargarCotizacion(cotizacionId) {
                 const mes = (fechaVigencia.getUTCMonth() + 1).toString().padStart(2, '0');
                 const año = fechaVigencia.getUTCFullYear();
                 const fechaVigenciaFormateada = `${dia}/${mes}/${año}`;
-                fechaVencimientoElem.textContent = `Vigencia de la propuesta: ${fechaVigenciaFormateada}`;
+                fechaVencimientoElem.textContent = `Vigencia de la cotización: ${fechaVigenciaFormateada}`;
             } else {
                 // Fallback: calcular dinámicamente si no hay fecha guardada
                 const vigenciaInfo = await cargarVigencia();
-                fechaVencimientoElem.textContent = `Vigencia de la propuesta: ${vigenciaInfo.fechaVencimiento}`;
+                fechaVencimientoElem.textContent = `Vigencia de la cotización: ${vigenciaInfo.fechaVencimiento}`;
             }
         }
         
@@ -357,14 +357,30 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     
     const hayDescuento = hayBeca || hayApoyoEstudiantil || hayApoyoFijo || hayFinalAmount;
     
-    // Mostrar colegiatura (costo total sin descuento)
+    // Desglose de colegiatura (mockup jul-2026): la fila Colegiatura se muestra
+    // siempre; con descuento es el costo sin ajustar, sin descuento coincide con
+    // el total.
     if (colegiaturaElem) {
-        if (hayDescuento) {
-            colegiaturaElem.textContent = formatearPesos(cotizacion.costo_total || 0);
-            colegiaturaElem.closest('tr').style.display = '';
-        } else {
-            colegiaturaElem.closest('tr').style.display = 'none';
-        }
+        colegiaturaElem.textContent = formatearPesos(cotizacion.costo_total || 0);
+        const filaColegiatura = colegiaturaElem.closest('tr');
+        if (filaColegiatura) filaColegiatura.style.display = '';
+    }
+
+    // Resto de la tabla itemizada: seguros, pago fijo de préstamo y beca
+    const setImporte = (id, monto) => {
+        const elem = document.getElementById(id);
+        if (elem) elem.textContent = monto > 0 ? formatearPesos(monto) : 'No Aplica';
+    };
+    setImporte('tc-accidentes', parseFloat(cotizacion.seguro_accidentes) || 0);
+    setImporte('tc-cobertura', parseFloat(cotizacion.seguro_estudiantil) || 0);
+    setImporte('tc-vive', parseFloat(cotizacion.cobertura_vive) || 0);
+    // Pago Fijo: $65 por cada 10% de préstamo (misma regla que resultado-doc.js)
+    const prestamoPct = parseFloat(cotizacion.prestamo_porcentaje) || 0;
+    setImporte('tc-prestamo', (prestamoPct / 10) * 65);
+    const tcBeca = document.getElementById('tc-beca');
+    if (tcBeca) {
+        const becaPct = parseFloat(cotizacion.beca_porcentaje) || 0;
+        tcBeca.textContent = becaPct > 0 ? `-${becaPct}%` : 'No Aplica';
     }
     
     // Mostrar apoyo educativo (descuento)
@@ -490,20 +506,41 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         const totalFinanciadoElem = document.getElementById('totalFinanciado');
         const mensualidadesText = document.getElementById('mensualidadesText');
         const mensualidades = document.getElementById('mensualidades');
-        
+
         if (primerPagoElem) primerPagoElem.textContent = formatearPesos(cotizacion.primera_cuota || 0);
         if (totalFinanciadoElem) totalFinanciadoElem.textContent = formatearPesos(cotizacion.total_financiado || 0);
-        
-        // Mostrar mensualidades
+
+        // Mockup jul-2026: cada pago lleva su fecha de vencimiento y las mensualidades
+        // se listan una por línea. Las fechas reales saldrán de la configuración de
+        // fechas de pago por período (admin, pendiente); mientras, placeholder.
+        const FECHA_PENDIENTE = 'DD/MM/AAAA';
+        let numeroMensualidades = 3;
         let textoMensualidades = '3 mensualidades posteriores';
         if ([1, 2, 4].includes(nivelId)) {
+            numeroMensualidades = 4;
             textoMensualidades = '4 mensualidades posteriores';
         } else if (nivelId === 10) {
+            numeroMensualidades = 2;
             textoMensualidades = '2 mensualidades posteriores';
         }
-        
+
+        const fechaContadoElem = document.getElementById('fecha-contado');
+        if (fechaContadoElem) fechaContadoElem.textContent = FECHA_PENDIENTE;
+        const fechaPrimerPagoElem = document.getElementById('fecha-primer-pago');
+        if (fechaPrimerPagoElem) fechaPrimerPagoElem.textContent = FECHA_PENDIENTE;
+
         if (mensualidadesText) mensualidadesText.textContent = textoMensualidades;
-        if (mensualidades) mensualidades.textContent = formatearPesos(cotizacion.mensualidades || 0);
+        if (mensualidades) {
+            mensualidades.innerHTML = Array(numeroMensualidades)
+                .fill(`<b>${formatearPesos(cotizacion.mensualidades || 0)}</b>`)
+                .join('<br>');
+        }
+        const fechasMensualidadesElem = document.getElementById('fechas-mensualidades');
+        if (fechasMensualidadesElem) {
+            fechasMensualidadesElem.innerHTML = Array(numeroMensualidades)
+                .fill(FECHA_PENDIENTE)
+                .join('<br>');
+        }
         
         // Para otros niveles, mostrar el contenido de financiamiento y ocultar el loading
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -773,37 +810,41 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
         const primeraFecha = fechasOrdenadas[0];
         const fechasRestantes = fechasOrdenadas.slice(1);
         
-        // Cambiar el texto "Primer pago" por la primera fecha
+        // Mockup jul-2026: la fecha de cada pago va en la columna de fechas
+        // (el label "Primer pago" se conserva).
         const primerPagoElem = document.getElementById('primerPago');
-        if (primerPagoElem) {
-            const primerPagoRow = primerPagoElem.closest('tr');
-            if (primerPagoRow) {
-                const primerPagoLabel = primerPagoRow.querySelector('td:first-child p');
-                if (primerPagoLabel && primerPagoLabel.textContent.includes('Primer pago')) {
-                    primerPagoLabel.textContent = primeraFecha;
-                }
-            }
+        const fechaPrimerPagoElem = document.getElementById('fecha-primer-pago');
+        if (fechaPrimerPagoElem && primeraFecha) {
+            fechaPrimerPagoElem.textContent = primeraFecha;
         }
-        
+
+        // El plan de contado vence en la primera fecha del financiamiento
+        const fechaContadoElem = document.getElementById('fecha-contado');
+        if (fechaContadoElem && primeraFecha) {
+            fechaContadoElem.textContent = primeraFecha;
+        }
+
         // Mostrar el valor del primer pago (primer pago de la lista ordenada)
         if (primerPagoElem && fechasOrdenadas.length > 0) {
             primerPagoElem.textContent = formatearPesos(pagosAgrupados[primeraFecha] || 0);
         }
-        
-        // Mostrar solo las fechas restantes en mensualidades
-        let pagosTextHtml = '';
+
+        // Pagos restantes: montos en la columna de importes y fechas en la de fechas
+        let pagosFechaHtml = '';
         let pagosValorHtml = '';
         fechasRestantes.forEach(fecha => {
-            pagosTextHtml += `<span>${fecha}</span><br>`;
+            pagosFechaHtml += `<span>${fecha}</span><br>`;
             pagosValorHtml += `<b>${formatearPesos(pagosAgrupados[fecha])}</b><br>`;
         });
-        
+
         const mensualidadesText = document.getElementById('mensualidadesText');
         const mensualidades = document.getElementById('mensualidades');
+        const fechasMensualidadesElem = document.getElementById('fechas-mensualidades');
         const totalFinanciadoElem = document.getElementById('totalFinanciado');
-        
-        if (mensualidadesText) mensualidadesText.innerHTML = pagosTextHtml;
+
+        if (mensualidadesText) mensualidadesText.textContent = fechasRestantes.length ? 'Pagos posteriores' : '';
         if (mensualidades) mensualidades.innerHTML = pagosValorHtml;
+        if (fechasMensualidadesElem) fechasMensualidadesElem.innerHTML = pagosFechaHtml;
         if (totalFinanciadoElem) totalFinanciadoElem.textContent = formatearPesos(totalPagos);
         
         // Mostrar el contenido de financiamiento y ocultar el loading
@@ -819,13 +860,14 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
 } 
 
 // Función para organizar campos automáticamente según el nivel
+// (llena #cotiz-info de la hoja documento, mismo formato que resultado-doc.js)
 function organizarCamposPorNivel(nivelId, cotizacion) {
-    const infoGrid = document.getElementById('info-grid');
+    const infoGrid = document.getElementById('cotiz-info');
     if (!infoGrid) {
-        console.error('No se encontró el contenedor info-grid');
+        console.error('No se encontró el contenedor cotiz-info');
         return;
     }
-    
+
     // Limpiar el grid
     infoGrid.innerHTML = '';
     
@@ -853,33 +895,32 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
         return num.toFixed(2);
     }
     
-    // Definir los campos base que siempre se muestran
+    // Campos base en el orden del mockup jul-2026:
+    // Nombre, Campus, Nivel de estudios, Programa de estudios, Formato, Periodo
     const camposBase = [
-        { id: 'nombre', label: 'Nombre', valor: cotizacion.nombre_estudiante || 'N/A' }
+        { id: 'nombre', label: 'Nombre', valor: cotizacion.nombre_estudiante || 'N/A' },
+        { id: 'campus', label: 'Campus', valor: cotizacion.campus || 'N/A' }
     ];
-    
-    // Agregar programa y formato si tienen valor (después del nombre)
-    if (cotizacion.programa && cotizacion.programa !== 'N/A' && cotizacion.programa !== '') {
-        camposBase.push({ id: 'programa', label: 'Programa', valor: cotizacion.programa });
-    }
-    
-    if (cotizacion.formato && cotizacion.formato !== 'N/A' && cotizacion.formato !== '') {
-        camposBase.push({ id: 'formato', label: 'Formato', valor: cotizacion.formato });
-        }
-        
-    // Agregar periodo (después de programa y formato)
-    camposBase.push({ id: 'periodo', label: 'Periodo', valor: cotizacion.periodo || 'N/A' });
-    
-    // Agregar nivel solo para niveles que no sean 4 ni 13 (después del periodo)
+
+    // Nivel solo para niveles que no sean 4 ni 13 (el programa ya los describe)
     if (nivelId !== 4 && nivelId !== 13) {
         // Buscar el nombre del nivel en el array de niveles
         const nivel = niveles.find(n => n.id_nivel == nivelId || n.id == nivelId || n.id == parseInt(nivelId));
         const nivelNombre = nivel ? nivel.descripcion : `Nivel ${nivelId}`;
-        camposBase.push({ id: 'nivel', label: 'Nivel', valor: nivelNombre });
+        camposBase.push({ id: 'nivel', label: 'Nivel de estudios', valor: nivelNombre });
     }
-    
-    // Agregar campus (después del nivel)
-    camposBase.push({ id: 'campus', label: 'Campus', valor: cotizacion.campus || 'N/A' });
+
+    // Agregar programa y formato si tienen valor
+    if (cotizacion.programa && cotizacion.programa !== 'N/A' && cotizacion.programa !== '') {
+        camposBase.push({ id: 'programa', label: 'Programa de estudios', valor: cotizacion.programa });
+    }
+
+    if (cotizacion.formato && cotizacion.formato !== 'N/A' && cotizacion.formato !== '') {
+        camposBase.push({ id: 'formato', label: 'Formato', valor: cotizacion.formato });
+    }
+
+    // Agregar periodo
+    camposBase.push({ id: 'periodo', label: 'Periodo', valor: cotizacion.periodo || 'N/A' });
             
     // Definir campos adicionales según el nivel (unidades)
     let camposAdicionales = [];
@@ -934,52 +975,26 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
     // Combinar todos los campos
     const todosLosCampos = [...camposBase, ...camposAdicionales];
 
-    // Determinar la organización del grid
-    const totalCampos = todosLosCampos.length;
-    let gridClasses = '';
-    
-    if (totalCampos <= 6) {
-        // Una sola fila: distribuir uniformemente
-        if (totalCampos <= 2) {
-            gridClasses = 'grid-cols-1 md:grid-cols-2';
-        } else if (totalCampos <= 3) {
-            gridClasses = 'grid-cols-1 md:grid-cols-3';
-        } else if (totalCampos <= 4) {
-            gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
-        } else if (totalCampos <= 6) {
-            gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6';
-        }
-    } else {
-        // Dos filas: primeros 4 en la primera fila, resto en la segunda
-        gridClasses = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
-    }
-    
-    // Aplicar las clases del grid
-    infoGrid.className = `grid ${gridClasses} gap-4`;
-    
-    // Crear y agregar los elementos
-    todosLosCampos.forEach((campo, index) => {
-        const campoElement = crearElementoCampo(campo, index, totalCampos);
-        infoGrid.appendChild(campoElement);
+    // Crear y agregar los elementos (formato cotiz-info-item, como resultado-doc.js)
+    todosLosCampos.forEach((campo) => {
+        infoGrid.appendChild(crearElementoCampo(campo));
     });
 
 }
 
 // Función auxiliar para crear un elemento de campo
-function crearElementoCampo(campo, index, totalCampos) {
-    
+function crearElementoCampo(campo) {
+
     const div = document.createElement('div');
-    div.className = 'px-4 grow lg:w-auto';
-    
-    const htmlContent = `
-        <p class="text-[19px] leading-[27px] text-secondary-color-2 font-bold mb-2">${campo.label}</p>
-        <p id="${campo.id}" class="text-[21px] leading-[29px]">${campo.valor}</p>
+    div.className = 'cotiz-info-item';
+
+    div.innerHTML = `
+        <p class="cotiz-info-label">${campo.label}</p>
+        <p id="${campo.id}" class="cotiz-info-valor">${campo.valor || '—'}</p>
     `;
-    
-    div.innerHTML = htmlContent;
-    
+
     return div;
-} 
+}
 
 // Función para enviar cotización por WhatsApp
 window.enviarWhatsApp = function() {

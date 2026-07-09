@@ -14,31 +14,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/wizard.css">
+    <!-- resultado-dashboard.css aporta el hero/paleta (--tec-*) y los modales;
+         resultado-doc.css ajusta el documento (misma estructura que resultado.html). -->
     <link rel="stylesheet" href="css/resultado-dashboard.css">
+    <link rel="stylesheet" href="css/resultado-doc.css">
     <link rel="stylesheet" href="css/cotizacion-compartida-extra.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <title>Tu cotización | Calculadora Tecmilenio</title>
 </head>
 
-<body class="bg-white font-display dash-body">
+<body class="bg-white font-display cotiz-body">
 
-    <!-- ════════ CONTENIDO PRINCIPAL (capturado por html2canvas para el PDF) ════════ -->
-    <main id="contenido" class="dash-main">
+    <!-- ════════ DOCUMENTO DE COTIZACIÓN (capturado por html2canvas para el PDF) ════════ -->
+    <main id="contenido" class="cotiz-doc">
 
-        <!-- HERO: saludo + vigencia -->
-        <section class="banner-form-section dash-hero" id="banner-form-section">
+        <!-- HERO estilo documento (misma estructura que resultado.html; la vigencia
+             vive en la barra roja del documento) -->
+        <section class="dash-hero" id="banner-form-section">
             <span class="dash-hero-orb dash-hero-orb-1"></span>
             <span class="dash-hero-orb dash-hero-orb-2"></span>
             <span class="dash-hero-orb dash-hero-orb-3"></span>
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28 dash-hero-inner">
+            <div class="dash-hero-inner cotiz-hero-inner">
                 <div class="dash-hero-top">
                     <a class="dash-hero-logo" href="https://tecmilenio.mx/" target="_blank" rel="noopener">
                         <img src="./img/tecmilenio-logo.svg" alt="Universidad Tecmilenio">
                     </a>
-                    <div class="dash-badge-vigencia">
-                        <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
-                        <p id="fechaVencimiento" class="font-bold mb-0">Vigencia de la propuesta:</p>
-                    </div>
                 </div>
                 <p class="dash-eyebrow">Cotización personalizada</p>
                 <p class="dash-greeting">¡Tu cotización está lista!</p>
@@ -60,225 +60,176 @@
             </div>
         </section>
 
-        <!-- PLANES: contado vs financiado (los montos los escribe cotizacion-compartida.js) -->
-        <section class="plan-section dash-plans" id="plan-section">
-            <!-- id financial-plan-section: oculto por defecto; cotizacion-compartida.js
-                 lo muestra (display:block) cuando la cotización carga bien -->
-            <div id="financial-plan-section" style="display:none;">
-                <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                    <div class="flex flex-row flex-wrap justify-center dash-plans-grid">
+        <!-- HOJA DEL DOCUMENTO (misma estructura que resultado.html; oculta hasta que
+             cotizacion-compartida.js carga la cotización) -->
+        <div class="cotiz-sheet" id="financial-plan-section" style="display:none;">
 
-                        <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables dash-plan-col">
-                            <div class="dash-card dash-card-plan dash-card-contado h-full relative overflow-hidden">
-                                <table class="w-full">
-                                    <tr>
-                                        <th class="dash-plan-head" colspan="2">
-                                            <span class="dash-plan-icon"><i class="fa-solid fa-hand-holding-dollar"
-                                                    aria-hidden="true"></i></span>
-                                            <p class="dash-plan-head-title mb-0">Plan de contado</p>
-                                            <span class="dash-chip">Una sola exhibición</span>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <p id="colegiaturaText" class="dash-row-label mb-0">Colegiatura 2025</p>
-                                        </td>
-                                        <td>
-                                            <p id="colegiatura" class="dash-row-value mb-0 text-right">$0</p>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <p id="apoyosText" class="dash-row-label mb-0">Apoyo educativo</p>
-                                        </td>
-                                        <td>
-                                            <p id="apoyoFinanciamiento"
-                                                class="dash-row-value dash-row-descuento mb-0 text-right text-red-color">
-                                                -$0</p>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2">
-                                            <hr class="dash-hr border-t border-solid border-[#E6E6E6]">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <p id="totalContadoText" class="dash-total-label mb-0">Colegiatura total</p>
-                                        </td>
-                                        <td>
-                                            <p id="totalContado" class="dash-total-value mb-0 text-right">$0</p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+            <p class="cotiz-intro">La información que se muestra a continuación corresponde al resultado de tu
+                cálculo, basado en los datos que proporcionaste. Estos valores son estimados y pueden variar
+                dependiendo de cambios en la información ingresada.</p>
 
-                        <div class="px-4 w-full md:w-1/2 mb-6 lg:mb-0 sub-tables dash-plan-col">
-                            <div class="dash-card dash-card-plan dash-card-fin h-full relative overflow-hidden">
-                                <!-- Overlay de loading para plan de financiamiento (nivel 13) -->
-                                <div id="loading-overlay"
-                                    style="display:flex; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:1000; justify-content:center; align-items:center; font-size:1.4rem; color:#F68D2E; font-weight:bold;">
-                                    Cargando pagos...
-                                </div>
-                                <div id="financiamiento-content" style="display:none;">
-                                    <table class="w-full">
-                                        <tr>
-                                            <th class="dash-plan-head" colspan="2">
-                                                <span class="dash-plan-icon"><i class="fa-solid fa-calendar-days"
-                                                        aria-hidden="true"></i></span>
-                                                <p class="dash-plan-head-title mb-0">Plan de financiamiento</p>
-                                                <span class="dash-chip">Paga mes a mes</span>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <p class="dash-total-label dash-primer-pago-label mb-0">Primer pago</p>
-                                            </td>
-                                            <td>
-                                                <p id="primerPago"
-                                                    class="dash-total-value dash-primer-pago mb-0 text-right">
-                                                    $0</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <p id="mensualidadesText" class="dash-row-label mb-0">4 mensualidades posteriores
-                                                </p>
-                                            </td>
-                                            <td>
-                                                <p id="mensualidades" class="dash-row-value mb-0 text-right">$0</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <hr class="dash-hr border-t border-solid border-[#E6E6E6]">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <p class="dash-row-label mb-0">Total financiado</p>
-                                            </td>
-                                            <td>
-                                                <p id="totalFinanciado" class="dash-row-value mb-0 text-right">$0</p>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Mi información ingresada (la llena cotizacion-compartida.js en #cotiz-info) -->
+            <section class="cotiz-bloque">
+                <h2 class="cotiz-h2">Mi información ingresada</h2>
+                <div id="cotiz-info" class="cotiz-info-grid"></div>
+            </section>
+
+            <!-- Desglose de colegiatura: tabla itemizada (mockup jul-2026) -->
+            <section class="cotiz-bloque">
+                <h2 class="cotiz-h2">Desglose de colegiatura</h2>
+                <table class="cotiz-tabla">
+                    <thead>
+                        <tr>
+                            <th>Concepto</th>
+                            <th>Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Costo de colegiatura (+)</td>
+                            <td id="colegiatura" class="cotiz-importe">$0</td>
+                        </tr>
+                        <tr>
+                            <td>Costo de seguro de accidentes (+)</td>
+                            <td id="tc-accidentes" class="cotiz-importe">No Aplica</td>
+                        </tr>
+                        <tr>
+                            <td>Costo de cobertura de colegiatura (+)</td>
+                            <td id="tc-cobertura" class="cotiz-importe">No Aplica</td>
+                        </tr>
+                        <tr>
+                            <td>Costo de cobertura VIVE (+)</td>
+                            <td id="tc-vive" class="cotiz-importe">No Aplica</td>
+                        </tr>
+                        <tr>
+                            <td>Pago fijo de préstamo estudiantil (+)</td>
+                            <td id="tc-prestamo" class="cotiz-importe">No Aplica</td>
+                        </tr>
+                        <tr id="fila-beca">
+                            <td>Descuento por beca (-)</td>
+                            <td id="tc-beca" class="cotiz-importe">No Aplica</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Planes de pago (mismos ids que resultado.html) -->
+            <section class="cotiz-bloque">
+                <h2 class="cotiz-h2">Planes de pago</h2>
+                <div class="cotiz-planes">
+                    <div class="cotiz-plan cotiz-plan-contado">
+                        <table class="cotiz-plan-tabla">
+                            <tr>
+                                <th class="cotiz-plan-head" colspan="3">
+                                    <span class="cotiz-plan-icono"><i class="fa-solid fa-hand-holding-dollar"
+                                            aria-hidden="true"></i></span>
+                                    <span class="cotiz-plan-nombre">Plan de contado</span>
+                                    <span class="cotiz-chip">Una sola exhibición</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>Colegiatura total</td>
+                                <td id="totalContado" class="cotiz-importe cotiz-importe-grande">$0</td>
+                                <td id="fecha-contado" class="cotiz-fecha"></td>
+                            </tr>
+                        </table>
                     </div>
 
-                    <!-- DESGLOSE: tu plan incluye (apoyos, beca, préstamo, seguros) -->
-                    <div id="plan" class="flex flex-row flex-wrap justify-center dash-incluye-row">
-                        <div class="px-4 w-full pt-6">
-                            <div class="block table-print">
-                                <div id="alwas-included"
-                                    class="dash-card dash-card-incluye relative overflow-hidden h-full">
-                                    <div>
-                                        <div class="dash-incluye-head">
-                                            <p class="dash-incluye-title font-bold mb-0">Tu plan incluye</p>
-                                        </div>
-                                        <div class="flex flex-row flex-wrap justify-center dash-incluye-body">
-
-                                            <div class="w-full md:w-1/2 py-4 dash-incluye-col" id="apoyos">
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p id="apoyo-financiero" class="dash-incluye-grupo mb-0 pr-2">
-                                                        <img src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/check-elem.svg"
-                                                            alt="Apoyo Financiero" loading="lazy"
-                                                            class="inline-block">&nbsp;Apoyo financiero
-                                                    </p>
-                                                    <p id="apoyoFinanciero" class="dash-incluye-grupo-valor mb-0">
-                                                        Apoyo estudiantil</p>
-                                                </div>
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p id="label-beca" class="dash-incluye-label mb-0 desc-left">Beca
-                                                    </p>
-                                                    <p id="beca" class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        30%</p>
-                                                </div>
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p id="label-apoyoEstudiantil"
-                                                        class="dash-incluye-label mb-0 desc-left">
-                                                        Apoyo estudiantil %</p>
-                                                    <p id="apoyoEstudiantil"
-                                                        class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        0%</p>
-                                                </div>
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p id="label-apoyoEstudiantilFijo"
-                                                        class="dash-incluye-label mb-0 desc-left">
-                                                        Apoyo estudiantil $</p>
-                                                    <p id="apoyoEstudiantilFijo"
-                                                        class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        $3,050.00</p>
-                                                </div>
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p id="label-prestamo" class="dash-incluye-label mb-0 desc-left">
-                                                        Préstamo estudiantil %</p>
-                                                    <p id="prestamoPorcentaje"
-                                                        class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        0%</p>
-                                                </div>
-                                            </div>
-
-                                            <div id="seguros" class="w-full md:w-1/2 py-4 dash-incluye-col">
-                                                <div class="flex flex-row">
-                                                    <div class="w-full subtable-padding">
-                                                        <p class="dash-incluye-grupo mb-0">
-                                                            <img src="https://2429099.fs1.hubspotusercontent-na1.net/hubfs/2429099/check-elem.svg"
-                                                                alt="Seguros y cobertura VIVE" loading="lazy"
-                                                                class="inline-block">&nbsp;Seguros y cobertura VIVE
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p class="dash-incluye-label mb-0 desc-left">Seguro accidentes</p>
-                                                    <p id="seguroAccidentes"
-                                                        class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        $690.00</p>
-                                                </div>
-                                                <div class="flex flex-row justify-between subtable-padding">
-                                                    <p class="dash-incluye-label mb-0 desc-left">Cobertura estudiantil
-                                                    </p>
-                                                    <p id="coberturaEstudiantil"
-                                                        class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        $350.00</p>
-                                                </div>
-                                                <div id="div-vive"
-                                                    class="flex flex-row justify-between subtable-padding">
-                                                    <p class="dash-incluye-label mb-0 desc-left">Cobertura VIVE</p>
-                                                    <p id="vive" class="dash-incluye-valor mb-0 font-bold text-right">
-                                                        $970.00</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="cotiz-plan cotiz-plan-fin">
+                        <div id="loading-overlay" class="cotiz-loading" style="display:none;">Cargando pagos...</div>
+                        <div id="financiamiento-content">
+                            <table class="cotiz-plan-tabla">
+                                <tr>
+                                    <th class="cotiz-plan-head" colspan="3">
+                                        <span class="cotiz-plan-icono"><i class="fa-solid fa-calendar-days"
+                                                aria-hidden="true"></i></span>
+                                        <span class="cotiz-plan-nombre">Plan de financiamiento</span>
+                                        <span class="cotiz-chip">Paga mes a mes</span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td><p class="mb-0">Primer pago</p></td>
+                                    <td id="primerPago" class="cotiz-importe cotiz-importe-grande">$0</td>
+                                    <td id="fecha-primer-pago" class="cotiz-fecha"></td>
+                                </tr>
+                                <!-- Mockup jul-2026: una línea por mensualidad con su fecha de pago -->
+                                <tr>
+                                    <td id="mensualidadesText" class="cotiz-fecha"></td>
+                                    <td id="mensualidades" class="cotiz-importe"></td>
+                                    <td id="fechas-mensualidades" class="cotiz-fecha"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"><hr class="cotiz-hr"></td>
+                                </tr>
+                                <tr>
+                                    <td>Total financiado</td>
+                                    <td id="totalFinanciado" class="cotiz-importe">$0</td>
+                                    <td></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Vigencia de la cotización: barra roja, arriba de las condiciones -->
+            <div class="cotiz-vigencia">
+                <span id="fechaVencimiento">Vigencia de la cotización:</span>
+            </div>
+
+            <!-- Condiciones de la propuesta (mismas notas que resultado.html) -->
+            <div class="cotiz-notas">
+                <p class="cotiz-notas-titulo"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Condiciones de
+                    la propuesta</p>
+                <p>*El simulador de costos de colegiaturas interno es un ejercicio de carácter informativo, sin validez,
+                    sujeto a cambios y no representa la formalización de ningún acuerdo con Universidad Tecmilenio.</p>
+                <p>*Pago Fijo: Pago que corresponde a cubrir adeudo de Préstamo Educativo y que se realiza de manera
+                    adicional a la colegiatura. El pago fijo mensual es de $65 por cada 10% de Préstamo Educativo.</p>
+                <p>*Las fechas límite para el pago de cada mensualidad de colegiatura son el día 15 de cada mes durante
+                    el periodo en curso.</p>
+                <p>*En caso de que sea aplicado un descuento de Apoyo Estudiantil, éste se aplicará en el primer periodo
+                    de estudios, a partir del segundo periodo dejará de aplicarse.</p>
+                <p>*Para evitar el cargo automático del seguro de accidentes de Tecmilenio, se deberá entregar la póliza
+                    vigente del seguro contratado externamente antes del inicio de clases. Para validar esta información,
+                    se enviará un correo con los detalles.</p>
+                <p>*El importe de las colegiaturas consignado en este documento podrá incrementarse con base en la
+                    inflación anual.</p>
+                <p>*El seguro de accidentes Tecmilenio y la cobertura estudiantil entra en vigor a partir del primer día
+                    de clases.</p>
+                <p>*La cuota del seguro de accidentes Tecmilenio está sujeta a cambio por tarifas establecidas por la
+                    aseguradora.</p>
+                <p>*En caso de baja de materias se aplicará política de devolución de colegiaturas.</p>
+            </div>
+        </div>
+
+        <!-- Referencias legacy: elementos que el JS compartido (cargarApoyosYSeguros /
+             hideZeroPercentages) sigue escribiendo pero que ya no se muestran en el
+             documento (mismo mecanismo que #legacy-refs de resultado.html). -->
+        <div id="legacy-refs" style="display:none !important;" aria-hidden="true">
+            <div id="info-grid"></div>
+            <div id="plan">
+                <div id="apoyos">
+                    <span id="apoyo-financiero"></span>
+                    <span id="apoyoFinanciero"></span>
+                    <span id="label-beca"></span>
+                    <span id="beca"></span>
+                    <span id="label-apoyoEstudiantil"></span>
+                    <span id="apoyoEstudiantil"></span>
+                    <span id="label-apoyoEstudiantilFijo"></span>
+                    <span id="apoyoEstudiantilFijo"></span>
+                    <span id="label-prestamo"></span>
+                    <span id="prestamoPorcentaje"></span>
+                </div>
+                <div id="seguros">
+                    <span id="seguroAccidentes"></span>
+                    <span id="coberturaEstudiantil"></span>
+                    <span id="div-vive"><span id="vive"></span></span>
                 </div>
             </div>
-        </section>
-
-        <!-- RESUMEN DE LA INFORMACIÓN DE LA COTIZACIÓN -->
-        <!-- Oculto por defecto; cotizacion-compartida.js lo muestra al cargar la cotización -->
-        <section class="basic-info-section dash-section" id="basic-info-section" style="display:none;">
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                <div class="dash-section-head">
-                    <p class="dash-eyebrow dash-eyebrow-dark">Tus datos</p>
-                    <h2 class="dash-h2">Resumen de tu cotización</h2>
-                </div>
-                <div class="flex flex-row flex-wrap justify-center">
-                    <div class="w-full dash-card dash-card-resumen">
-                        <!-- Contenedor principal con grid responsivo (lo llena cotizacion-compartida.js) -->
-                        <div id="info-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <span id="apoyoFinanciamiento"></span>
+            <span id="colegiaturaText"></span>
+            <span id="totalContadoText"></span>
+        </div>
 
         <!-- BENEFICIOS (los llena cotizacion-compartida.js) -->
         <section class="benefits-section dash-section dash-benefits" id="benefits-section">
@@ -291,36 +242,6 @@
             </div>
         </section>
 
-        <!-- NOTAS / CONDICIONES -->
-        <section class="details-section dash-section dash-details" id="details-section">
-            <div class="container mx-auto relative z-20 px-4 sm:px-8 xl:px-28">
-                <div class="flex flex-row justify-center">
-                    <div class="px-4 w-full mb-10">
-                        <div class="dash-notes">
-                            <p class="dash-notes-title"><i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                                Condiciones de la propuesta</p>
-                            <p>*El simulador de costos de colegiaturas interno es un ejercicio de carácter informativo,
-                                sin validez, sujeto a cambios y no representa la formalización de ningún acuerdo con
-                                Universidad Tecmilenio.</p>
-                            <p>*Pago Fijo: Pago que corresponde a cubrir adeudo de Préstamo Educativo y que se realiza
-                                de manera adicional a la colegiatura. El pago fijo mensual es de $65 por cada 10% de
-                                préstamo.</p>
-                            <p>*Considerar que los adeudos anteriores del alumno deberán de cubrirse al momento de la
-                                inscripción.</p>
-                            <p>*El importe de las colegiaturas consignado en este documento podrá incrementarse con los
-                                impuestos Federales o Estatales correspondientes, si así lo establecieren las
-                                disposiciones fiscales en el futuro.</p>
-                            <p>*El seguro de accidentes y la cobertura estudiantil entra en vigor a partir del primer
-                                día de clases.</p>
-                            <p>*El precio del seguro de accidentes está sujeto a cambio por tarifas establecidas por la
-                                aseguradora.</p>
-                            <p>*El porcentaje de devolución de cuotas se aplicará sobre el costo total de cada materia
-                                y se determinará de acuerdo con la fecha en que la materia sea dada de baja.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- ════════ BARRA DE ACCIONES (sticky, fuera del PDF) ════════ -->
