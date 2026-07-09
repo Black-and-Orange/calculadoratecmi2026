@@ -274,9 +274,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     pagosAgrupados[pago.fecha] += pago.valor;
                 });
-                // Para nivel 13: cambiar "Primer pago" por la primera fecha y mostrar fechas restantes
+                // Para nivel 13: la fecha de cada pago va en la columna de fechas
+                // (mockup jul-2026: monto + fecha de vencimiento por línea).
                 const primerPagoElem = document.getElementById('primerPago');
-                
+
                 // Obtener las fechas ordenadas cronológicamente
                 const fechasOrdenadas = Object.keys(pagosAgrupados).sort((a, b) => {
                     // Convertir fechas de formato DD/MM/YYYY a objetos Date para comparación
@@ -287,41 +288,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const primeraFecha = fechasOrdenadas[0];
                 const fechasRestantes = fechasOrdenadas.slice(1);
 
-                // La colegiatura de la tabla itemizada vence en la primera
-                // fecha del plan de financiamiento
-                const fechaColegiaturaElem = document.getElementById('fecha-colegiatura');
-                if (fechaColegiaturaElem && primeraFecha) {
-                    fechaColegiaturaElem.textContent = primeraFecha;
+                // El plan de contado vence en la primera fecha del plan de
+                // financiamiento (misma regla que tenía la tabla itemizada).
+                const fechaContadoElem = document.getElementById('fecha-contado');
+                if (fechaContadoElem && primeraFecha) {
+                    fechaContadoElem.textContent = primeraFecha;
                 }
 
-                // Cambiar el texto "Primer pago" por la primera fecha
-                // Buscar el elemento que contiene "Primer pago" en la misma fila que primerPagoElem
-                if (primerPagoElem) {
-                    const primerPagoRow = primerPagoElem.closest('tr');
-                    if (primerPagoRow) {
-                        const primerPagoLabel = primerPagoRow.querySelector('td:first-child p');
-                        if (primerPagoLabel && primerPagoLabel.textContent.includes('Primer pago')) {
-                            primerPagoLabel.textContent = primeraFecha;
-                        }
-                    }
+                // Fecha del primer pago en su propia columna (el label se conserva)
+                const fechaPrimerPagoElem = document.getElementById('fecha-primer-pago');
+                if (fechaPrimerPagoElem && primeraFecha) {
+                    fechaPrimerPagoElem.textContent = primeraFecha;
                 }
-                
+
                 // Mostrar el valor del primer pago
                 if (primerPagoElem && pagosConFechas.length > 0) {
                     primerPagoElem.textContent = formatearPesos(pagosConFechas[0].valor || 0);
                 }
-                
-                // Mostrar solo las fechas restantes en mensualidades
-                let pagosTextHtml = '';
+
+                // Pagos restantes: montos en la columna de importes y fechas en la de fechas
+                let pagosFechaHtml = '';
                 let pagosValorHtml = '';
                 fechasRestantes.forEach(fecha => {
-                    pagosTextHtml += `<span>${fecha}</span><br>`;
+                    pagosFechaHtml += `<span>${fecha}</span><br>`;
                     pagosValorHtml += `<b>${formatearPesos(pagosAgrupados[fecha])}</b><br>`;
                 });
                 const mensualidadesTextElem = document.getElementById('mensualidadesText');
                 const mensualidadesValorElem = document.getElementById('mensualidades');
-                if (mensualidadesTextElem) mensualidadesTextElem.innerHTML = pagosTextHtml;
+                const fechasMensualidadesElem = document.getElementById('fechas-mensualidades');
+                if (mensualidadesTextElem) mensualidadesTextElem.textContent = fechasRestantes.length ? 'Pagos posteriores' : '';
                 if (mensualidadesValorElem) mensualidadesValorElem.innerHTML = pagosValorHtml;
+                if (fechasMensualidadesElem) fechasMensualidadesElem.innerHTML = pagosFechaHtml;
                 
                 // Guardar totalPagos en localStorage después de calcular todos los pagos (fuera de los ciclos)
                 localStorage.setItem('totalPagos', JSON.stringify(totalPagos));
@@ -768,8 +765,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (primerPago) {
             primerPago.textContent = valores.primeraCuota;
         }
+        // Mockup jul-2026: cada pago del plan lleva su fecha de vencimiento y las
+        // mensualidades se listan una por línea. Las fechas reales saldrán de la
+        // configuración de fechas de pago por período (admin, pendiente); mientras
+        // tanto se muestra el placeholder DD/MM/AAAA.
+        const FECHA_PENDIENTE = 'DD/MM/AAAA';
+        const fechaContadoElem = document.getElementById('fecha-contado');
+        if (fechaContadoElem) fechaContadoElem.textContent = FECHA_PENDIENTE;
+        const fechaPrimerPagoElem = document.getElementById('fecha-primer-pago');
+        if (fechaPrimerPagoElem) fechaPrimerPagoElem.textContent = FECHA_PENDIENTE;
         if (mensualidades) {
-            mensualidades.textContent = valores.interesDividido;
+            mensualidades.innerHTML = Array(factorMultiplicador)
+                .fill(`<b>${valores.interesDividido}</b>`)
+                .join('<br>');
+        }
+        const fechasMensualidadesElem = document.getElementById('fechas-mensualidades');
+        if (fechasMensualidadesElem) {
+            fechasMensualidadesElem.innerHTML = Array(factorMultiplicador)
+                .fill(FECHA_PENDIENTE)
+                .join('<br>');
         }
         if (totalFinanciado) {
             totalFinanciado.textContent = formatearPesos(totalfinanciado);

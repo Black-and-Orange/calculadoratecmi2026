@@ -71,7 +71,8 @@
                     <a class="dash-hero-logo" href="index.html">
                         <img src="./img/tecmilenio-logo.svg" alt="Universidad Tecmilenio">
                     </a>
-                    <!-- "Nueva cotización" se movió a la barra de acciones inferior (siempre visible) -->
+                    <!-- Mockup jul-2026: "Nueva cotización" vuelve arriba; se conserva también en la barra inferior. -->
+                    <button id="btn-nueva-cotizacion-hero" class="cotiz-nueva-hero no-print" type="button">+ Nueva cotización</button>
                 </div>
                 <p class="dash-eyebrow">Cotización personalizada</p>
                 <p class="dash-greeting">¡Hola<span class="dash-greeting-nombre" id="dash-greeting-nombre"></span>!</p>
@@ -80,6 +81,10 @@
         </section>
 
         <div class="cotiz-sheet">
+
+            <p class="cotiz-intro">La información que se muestra a continuación corresponde al resultado de tu
+                cálculo, basado en los datos que proporcionaste. Estos valores son estimados y pueden variar
+                dependiendo de cambios en la información ingresada.</p>
 
             <!-- Beneficios de estudiar en Tecmilenio: solo en el flujo prospecto
                  ("Me interesa"). resultado-doc.js lo muestra/oculta por perfil. -->
@@ -115,54 +120,50 @@
                 <div id="cotiz-info" class="cotiz-info-grid"></div>
             </section>
 
-            <!-- Colegiatura: tabla itemizada -->
+            <!-- Desglose de colegiatura: tabla itemizada (mockup jul-2026: sin columna de
+                 fecha de vencimiento; las fechas de pago viven en los planes de pago) -->
             <section class="cotiz-bloque">
-                <h2 class="cotiz-h2">Colegiatura</h2>
+                <h2 class="cotiz-h2">Desglose de colegiatura</h2>
                 <table class="cotiz-tabla">
                     <thead>
                         <tr>
                             <th>Concepto</th>
                             <th>Importe</th>
-                            <th>Fecha de vencimiento</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Colegiatura (+)</td>
+                            <td>Costo de colegiatura (+)</td>
                             <td id="colegiatura" class="cotiz-importe">$0</td>
-                            <td id="fecha-colegiatura" class="cotiz-fecha"></td>
                         </tr>
                         <tr>
-                            <td>Seguro de accidentes (+)</td>
+                            <td>Costo de seguro de accidentes (+)</td>
                             <td id="tc-accidentes" class="cotiz-importe">No Aplica</td>
-                            <td id="fecha-accidentes" class="cotiz-fecha"></td>
                         </tr>
                         <tr>
-                            <td>Cobertura de colegiatura (+)</td>
+                            <td>Costo de cobertura de colegiatura (+)</td>
                             <td id="tc-cobertura" class="cotiz-importe">No Aplica</td>
-                            <td id="fecha-cobertura" class="cotiz-fecha"></td>
                         </tr>
                         <tr>
-                            <td>Cobertura VIVE (+)</td>
+                            <td>Costo de cobertura VIVE (+)</td>
                             <td id="tc-vive" class="cotiz-importe">No Aplica</td>
-                            <td id="fecha-vive" class="cotiz-fecha"></td>
                         </tr>
                         <tr>
-                            <td>Pago Fijo de préstamo estudiantil (+)</td>
+                            <td>Pago fijo de préstamo estudiantil (+)</td>
                             <td id="tc-prestamo" class="cotiz-importe">No Aplica</td>
-                            <td id="fecha-prestamo" class="cotiz-fecha"></td>
                         </tr>
                         <tr id="fila-beca">
-                            <td>Beca (-)</td>
+                            <td>Descuento por beca (-)</td>
                             <td id="tc-beca" class="cotiz-importe">No Aplica</td>
-                            <td class="cotiz-fecha"></td>
                         </tr>
                     </tbody>
                 </table>
             </section>
 
-            <!-- Planes: tarjetas con degradado (contado teal / financiamiento naranja) -->
-            <div class="cotiz-planes">
+            <!-- Planes de pago: tarjetas con degradado (contado teal / financiamiento naranja) -->
+            <section class="cotiz-bloque">
+                <h2 class="cotiz-h2">Planes de pago</h2>
+                <div class="cotiz-planes">
                 <div class="cotiz-plan cotiz-plan-contado">
                     <table class="cotiz-plan-tabla">
                         <tr>
@@ -196,12 +197,13 @@
                             <tr>
                                 <td><p class="mb-0">Primer pago</p></td>
                                 <td id="primerPago" class="cotiz-importe cotiz-importe-grande">$0</td>
-                                <td class="cotiz-fecha"></td>
+                                <td id="fecha-primer-pago" class="cotiz-fecha"></td>
                             </tr>
+                            <!-- Mockup jul-2026: una línea por mensualidad con su fecha de pago -->
                             <tr>
                                 <td id="mensualidadesText" class="cotiz-fecha"></td>
                                 <td id="mensualidades" class="cotiz-importe"></td>
-                                <td></td>
+                                <td id="fechas-mensualidades" class="cotiz-fecha"></td>
                             </tr>
                             <tr>
                                 <td colspan="3"><hr class="cotiz-hr"></td>
@@ -215,6 +217,7 @@
                     </div>
                 </div>
             </div>
+            </section>
 
             <!-- Vigencia de la cotización: barra roja, arriba de las condiciones -->
             <div class="cotiz-vigencia">

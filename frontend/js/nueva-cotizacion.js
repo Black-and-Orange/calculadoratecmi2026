@@ -108,12 +108,14 @@ function empezarDesdeCero() {
 function inicializarModal() {
     const modal = document.getElementById('modal-nueva-cotizacion');
     const btnAbrir = document.getElementById('btn-nueva-cotizacion');
+    const btnAbrirHero = document.getElementById('btn-nueva-cotizacion-hero');
     const btnConservar = document.getElementById('btn-nc-conservar');
     const btnCero = document.getElementById('btn-nc-cero');
 
     if (!modal || !btnAbrir) return;
 
     btnAbrir.addEventListener('click', () => abrirModal(modal));
+    if (btnAbrirHero) btnAbrirHero.addEventListener('click', () => abrirModal(modal));
 
     modal.querySelectorAll('[data-nc-cerrar]').forEach((elem) => {
         elem.addEventListener('click', () => cerrarModal(modal));
