@@ -94,45 +94,12 @@ async function seleccionarPorcentajeBecaConReintento(page) {
   await expect(btnNext).toBeEnabled({ timeout: 15_000 });
 }
 
-// Completa step-3 (seguros). El paso puede regenerarse (fetchSeguros) al re-entrar
-// desde otro paso, así que se reintenta responder hasta que el botón continuar quede
-// habilitado (evita la race conocida al volver a step-3).
+// Completa step-3 (seguros, UI por radios): delega en el helper compartido
+// conservando el comportamiento histórico de este spec (accidente con seguro
+// propio, coberturas opcionales en "sí"). El helper reintenta hasta que el
+// botón continuar quede habilitado de forma estable (race al re-entrar).
 async function completarSeguros(page) {
-  const contenedorSeguros = page.locator('#seguros-dinamicos-container');
-  const btnNext = page.locator('#step-3-next');
-
-  await expect(contenedorSeguros.locator('select').first())
-    .toBeAttached({ timeout: 15_000 })
-    .catch(() => {});
-
-  if (await contenedorSeguros.locator('select').count() === 0) return;
-
-  for (let intento = 0; intento < 6; intento++) {
-    // Seguro contra accidente (UI por radios del rediseño step3.js): "propio" lo deja
-    // respondido ("no") sin requerir selección. VIVE y colegiatura obligatorias ya
-    // vienen pre-marcadas en "Sí" y bloqueadas.
-    const accidentePropio = page.locator('input[type="radio"][name^="accidente-"][value="propio"]');
-    if (await accidentePropio.count() > 0 && !(await accidentePropio.first().isChecked().catch(() => false))) {
-      await accidentePropio.first().check().catch(() => {});
-    }
-
-    // Compatibilidad con UI por radio de interés / selects visibles (si existieran).
-    if (await page.locator('#row-radio-seguro-interes').isVisible().catch(() => false)) {
-      await page.locator('#row-radio-seguro-interes input[value="si"]').check().catch(() => {});
-    }
-    const selectsSeguros = contenedorSeguros.locator('select');
-    const total = await selectsSeguros.count();
-    for (let i = 0; i < total; i++) {
-      const sel = selectsSeguros.nth(i);
-      if (await sel.isVisible() && !await sel.isDisabled() && (await sel.inputValue()) === '') {
-        const opSi = sel.locator('option[value="si"]');
-        if (await opSi.count() > 0) await sel.selectOption('si').catch(() => {});
-      }
-    }
-
-    if (await btnNext.isEnabled().catch(() => false)) return;
-    await page.waitForTimeout(700);
-  }
+  await w.completarSeguros(page, { accidente: 'propio', coberturas: 'si' });
 }
 
 // Helper completo de recorrido prospecto hasta resultado.

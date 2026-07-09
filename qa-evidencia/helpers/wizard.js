@@ -113,19 +113,23 @@ async function aceptarLegales(page) {
 //   - Colegiatura no obligatoria: radios Sí/No.
 // modo 'minimo' → responde sin contratar (accidente: propio; opcionales: no).
 // modo 'maximo' → contrata todo (accidente: tecmilenio + select; opcionales: sí).
-async function completarSeguros(page, { modo = 'maximo' } = {}) {
+// opts.accidente / opts.coberturas permiten mezclar (p.ej. accidente 'propio'
+// pero coberturas 'si', el comportamiento histórico del recorrido prospecto).
+async function completarSeguros(page, { modo = 'maximo', accidente, coberturas } = {}) {
+  const respAccidente = accidente || (modo === 'maximo' ? 'tecmilenio' : 'propio');
+  const respCoberturas = coberturas || (modo === 'maximo' ? 'si' : 'no');
   const cont = page.locator('#seguros-dinamicos-container');
   const btnNext = page.locator('#step-3-next');
   // Esperar a que fetchSeguros() pinte bloques o el mensaje "no hay seguros"
   await cont.locator('.seguro-bloque, .text-muted').first()
     .waitFor({ state: 'attached', timeout: 15_000 }).catch(() => {});
 
-  // El paso puede regenerarse (fetchSeguros) al re-entrar desde otro paso:
-  // reintentar responder hasta que el botón continuar quede habilitado.
-  for (let intento = 0; intento < 6; intento++) {
+  // El paso puede regenerarse (fetchSeguros) al re-entrar desde otro paso y
+  // borrar las respuestas: reintentar hasta que el botón quede habilitado en
+  // dos verificaciones seguidas (una re-render tardía puede resetearlo).
+  for (let intento = 0; intento < 8; intento++) {
     const bloques = cont.locator('.seguro-bloque');
     const total = await bloques.count();
-    if (total === 0) return; // nivel sin seguros → el botón ya queda habilitado
 
     for (let i = 0; i < total; i++) {
       const bloque = bloques.nth(i);
@@ -137,7 +141,7 @@ async function completarSeguros(page, { modo = 'maximo' } = {}) {
       // Bloque de accidente: radios tecmilenio/propio
       const radioTecmilenio = bloque.locator('input[type="radio"][value="tecmilenio"]');
       if (await radioTecmilenio.count() > 0) {
-        if (modo === 'maximo') {
+        if (respAccidente === 'tecmilenio') {
           await radioTecmilenio.check().catch(() => {});
           const selInteres = bloque.locator('select.seguro-interes-select');
           const opciones = selInteres.locator('option:not([value=""])');
@@ -151,14 +155,19 @@ async function completarSeguros(page, { modo = 'maximo' } = {}) {
       }
 
       // Bloques Sí/No (cobertura de colegiatura no obligatoria)
-      const respuesta = modo === 'maximo' ? 'si' : 'no';
-      const radio = bloque.locator(`input[type="radio"][value="${respuesta}"]`);
+      const radio = bloque.locator(`input[type="radio"][value="${respCoberturas}"]`);
       if (await radio.count() > 0 && !(await radio.isDisabled())) {
         await radio.check().catch(() => {});
       }
     }
 
-    if (await btnNext.isEnabled().catch(() => false)) return;
+    if (await btnNext.isEnabled().catch(() => false)) {
+      // Confirmar que sigue habilitado tras un ciclo de sync(): una re-render
+      // tardía de fetchSeguros puede borrar las respuestas recién dadas.
+      await page.waitForTimeout(900);
+      if (await btnNext.isEnabled().catch(() => false)) return;
+      continue; // se reseteó: volver a responder
+    }
     await page.waitForTimeout(700);
   }
 }
