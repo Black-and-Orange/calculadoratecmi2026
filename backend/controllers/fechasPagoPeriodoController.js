@@ -25,9 +25,13 @@ const replaceFechasForPeriodo = (req, res) => {
     if (invalida !== undefined) {
         return res.status(400).json({ error: `Fecha inválida: "${invalida}". Formato esperado: YYYY-MM-DD.` });
     }
-    fechasPagoModel.replaceFechasForPeriodo(req.params.periodoId, fechas, (err) => {
+    fechasPagoModel.replaceFechasForPeriodo(req.params.periodoId, fechas, (err, result = {}) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true, total: fechas.length });
+        res.json({
+            success: true,
+            total: fechas.length,
+            periodosActualizados: result.periodosActualizados || 1,
+        });
     });
 };
 

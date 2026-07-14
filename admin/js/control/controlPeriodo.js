@@ -153,6 +153,7 @@ async function fechasPagoPeriodo(idPeriodo) {
                     <form class="tec-modal-form">
                         <div class="modal-body">
                             <p class="text-muted mb-3" style="font-size: 13px;">
+                                Estas fechas aplican a todos los programas que usan este período.
                                 La <strong>primera fecha</strong> es el vencimiento del plan de contado y del primer
                                 pago del financiamiento; las siguientes corresponden a las mensualidades, en orden.
                                 Al guardar, las fechas se ordenan cronológicamente.
@@ -220,7 +221,11 @@ async function fechasPagoPeriodo(idPeriodo) {
                     body: JSON.stringify({ fechas: valores }),
                 });
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                window.tecToast(valores.length ? `Fechas de pago guardadas (${valores.length})` : 'Fechas de pago eliminadas');
+                const resultado = await resp.json();
+                const programas = resultado.periodosActualizados || 1;
+                window.tecToast(valores.length
+                    ? `Fechas de pago guardadas (${valores.length}) para ${programas} programa(s)`
+                    : `Fechas de pago eliminadas para ${programas} programa(s)`);
                 $(modal).modal('hide');
             } catch (error) {
                 console.error('Error guardando fechas de pago:', error);
