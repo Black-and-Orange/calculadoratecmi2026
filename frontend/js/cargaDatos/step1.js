@@ -12,10 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         materias: document.getElementById('select-subjects'),
         certificados: document.getElementById('select-certificado'),
         semanas: document.getElementById('select-semanas'),
-        ingles: document.getElementById('select-ingles'),
         divCertificado: document.querySelector('#select-certificado').closest('div.flex-wrap'),
         divSemanas: document.querySelector('#select-semanas').closest('div.flex-wrap'),
-        divIngles: document.querySelector('#select-ingles').closest('div.flex-wrap'),
         divMaterias: document.querySelector('#select-subjects').closest('div.flex-wrap'),
         formatoDiv: document.getElementById('div-formato'),
         formatoSelect: document.getElementById('select-formato')
@@ -29,8 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         periodo: { baseUrl: `${API_BASE_URL}/periodo/nivel/`, property: 'periodo_descripcion' },
         materias: { baseUrl: `${API_BASE_URL}/materias/nivel/`, property: 'numero' },
         certificados: { baseUrl: `${API_BASE_URL}/certificados/nivel/`, property: 'num_certificados' },
-        semanas: { baseUrl: `${API_BASE_URL}/semanas/nivel/`, property: 'num_semanas' },
-        ingles: { baseUrl: `${API_BASE_URL}/ingles/nivel/`, property: 'num_ingles' }
+        semanas: { baseUrl: `${API_BASE_URL}/semanas/nivel/`, property: 'num_semanas' }
     };
 
     let levelMapping = {};
@@ -249,11 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const valorCertificado = parseInt(selectors.certificados.options[selectors.certificados.selectedIndex].getAttribute('valor_certificado')) || 10;
             const numeroSemanasSEDI = parseInt(selectors.semanas.value);
             const valorSemanaSEDI = parseInt(selectors.semanas.options[selectors.semanas.selectedIndex].getAttribute('valor_semana_sedi')) || 2;
-            const numeroCursosIngles = parseInt(selectors.ingles.value);
-            const valorCursoIngles = parseInt(selectors.ingles.options[selectors.ingles.selectedIndex].getAttribute('valor_curso_ingles')) || 10;
+            // "Certificado de idioma" (inglés) se eliminó del formulario → no aporta al costo (0, 0).
             const costoUnidad = parseFloat(claveGenerada.costo);
-            
-            costoTotal = calcularCostoTotalCertificadosSemanasIngles(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, numeroCursosIngles, valorCursoIngles, costoUnidad);
+
+            costoTotal = calcularCostoTotalCertificadosSemanasIngles(numeroCertificados, valorCertificado, numeroSemanasSEDI, valorSemanaSEDI, 0, 0, costoUnidad);
         } else if (mappedLevel === 5) {
             const formatoSeleccionado = selectors.formatoSelect.options[selectors.formatoSelect.selectedIndex].textContent;
             const formatoAsociado = await fetchCostosFormato();
@@ -583,11 +579,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nivel === 13) {
             selectors.divCertificado.style.display = 'none';
             selectors.divSemanas.style.display = 'none';
-            selectors.divIngles.style.display = 'none';
         } else {
         selectors.divCertificado.style.display = display;
         selectors.divSemanas.style.display = display;
-        selectors.divIngles.style.display = (show && nivel !== 13) ? 'flex' : 'none';
         }
         
         selectors.divMaterias.style.display = displayMaterias;
@@ -1218,7 +1212,6 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleAdditionalSelectors(true, 4);
             loadOptions(selectors.certificados, `${API_BASE_URL}/certificados/nivel/${mappedLevel}`, 'num_certificados', true, true);
             loadOptions(selectors.semanas, `${API_BASE_URL}/semanas/nivel/${mappedLevel}`, 'num_semanas', true, true);
-            loadOptions(selectors.ingles, `${API_BASE_URL}/ingles/nivel/${mappedLevel}`, 'num_ingles', true, true);
         } else {
             toggleAdditionalSelectors(false);
         }

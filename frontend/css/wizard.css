@@ -198,36 +198,56 @@ main.solo-logo {
     }
 }
 
-/* Grids: datos personales (alumno o prospecto) y nivel (campus/nivel/programa/
-   periodo + campos dinámicos). Etiqueta arriba del control. */
-#wizard-row.flujo-alumno #datos-alumno,
-#wizard-row.flujo-alumno #datos-prospecto,
-#wizard-row.flujo-alumno #step-1 {
+/* Grid ÚNICO del paso 1: #paso1-grid envuelve datos personales (#step-dp →
+   #datos-alumno/#datos-prospecto) y nivel (#step-1). Esos contenedores usan
+   display:contents para que sus campos fluyan como celdas del MISMO grid y las
+   filas sean continuas (datos + nivel sin salto de grid en medio). */
+#wizard-row.flujo-alumno #paso1-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.25rem 1.5rem;
     align-items: start;
 }
-/* moveStep oculta #step-1 con .hidden en los pasos 2-4 y main.js oculta la
-   variante de datos que no corresponde al perfil; .hidden debe ganar al
-   display:grid de arriba para que esos bloques no se cuelen. */
+#wizard-row.flujo-alumno #step-dp,
+#wizard-row.flujo-alumno #datos-alumno,
+#wizard-row.flujo-alumno #datos-prospecto,
+#wizard-row.flujo-alumno #step-1 { display: contents; }
+/* moveStep oculta #step-dp/#step-1 con .hidden en los pasos 2-4 y main.js oculta
+   la variante de datos que no corresponde al perfil; .hidden debe ganar al
+   display:contents de arriba para que esos bloques no se cuelen en el grid. */
+#wizard-row.flujo-alumno #step-dp.hidden,
 #wizard-row.flujo-alumno #step-1.hidden,
 #wizard-row.flujo-alumno #datos-alumno.hidden,
 #wizard-row.flujo-alumno #datos-prospecto.hidden { display: none; }
 
-/* La fila campus/periodo aporta sus dos celdas directamente al grid de nivel. */
+/* La fila campus/periodo aporta sus dos celdas directamente al grid. */
 #wizard-row.flujo-alumno #row-campus-periodo { display: contents; }
 /* El control de campus arrastra un mb-6 que desbalancea el grid en tablet/móvil. */
 #wizard-row.flujo-alumno #row-campus-periodo .flex-1 { margin-bottom: 0; }
-/* Orden de campos: nivel → campus → programa → periodo y, al final, los campos
-   dinámicos (materias, certificados…). Nivel va primero porque campus, programa
-   y periodo dependen del nivel elegido (no todos los niveles están en todos los
-   campus). */
+/* Orden y filas de los campos del paso 1 (flujo prospecto, grid de 4 columnas):
+     Fila 1: nombre · ap. paterno · ap. materno · fecha de nacimiento
+     Fila 2: teléfono · correo · nivel
+     Fila 3: campus · programa · periodo (periodo a 2 columnas)
+     Fila 4+: campos dinámicos según el nivel (formato, materias, certificado…)
+   Los datos personales no llevan `order` (=0), así que preceden a los campos
+   académicos. Nivel (order 1) se une a la fila de teléfono/correo; campus fuerza
+   salto de fila (grid-column-start:1) y periodo ocupa 2 columnas para cerrar la
+   fila 3 y empujar los campos dinámicos a la fila 4. En alumno (solo 3 datos) el
+   mismo esquema deja nivel en la fila 1 y campus/programa/periodo en la fila 2. */
 #wizard-row.flujo-alumno #step-1 > div { order: 5; }
 #wizard-row.flujo-alumno #step-1 .orden-nivel { order: 1; }
-#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:first-child { order: 2; }
+#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:first-child { order: 2; grid-column-start: 1; }
 #wizard-row.flujo-alumno #step-1 .orden-programa { order: 3; }
-#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:last-child { order: 4; }
+#wizard-row.flujo-alumno #row-campus-periodo .campo-cell:last-child { order: 4; grid-column: span 2; }
+/* Prospecto (6 datos): "Tu nivel de estudios" cae en la 3ª columna de la fila de
+   teléfono/correo y deja la 4ª vacía. Que ocupe también esa columna sobrante
+   (span 2) para llenar la fila y alinearse con Periodo, que abajo también ocupa
+   2 columnas. En alumno (3 datos) el nivel ya cae en la última columna, así que
+   el span solo aplica cuando #datos-prospecto está visible. */
+#wizard-row.flujo-alumno:has(#datos-prospecto:not(.hidden)) .orden-nivel { grid-column: span 2; }
+/* "Semanas de desarrollo integral" tiene una etiqueta larga; que ocupe 2
+   columnas para que el texto quepa en una sola línea. */
+#wizard-row.flujo-alumno #div-semanas { grid-column: span 2; }
 /* El selector de periodos del nivel 13 (tarjetas) va a lo ancho, debajo de
    los campos. Es hijo de #row-campus-periodo (display:contents), así que sin
    un order explícito caería al inicio del grid. */
@@ -244,12 +264,16 @@ main.solo-logo {
     margin-bottom: 0;
 }
 
-/* La etiqueta deja de ocupar la columna fija de 140px y va sobre el control. */
+/* La etiqueta deja de ocupar la columna fija de 140px y va sobre el control.
+   Algunos campos dinámicos (certificado, semanas) traen un max-width:140px inline
+   que recorta etiquetas largas a 2 líneas; se anula para que usen el ancho de su
+   celda (p. ej. "Semanas de desarrollo integral" en una sola línea). */
 #wizard-row.flujo-alumno #datos-alumno > div > div:first-child,
 #wizard-row.flujo-alumno #datos-prospecto > div > div:first-child,
 #wizard-row.flujo-alumno #step-1 > div:not(#row-campus-periodo) > div:first-child,
 #wizard-row.flujo-alumno #step-1 .campo-cell > div:first-child {
     min-width: 0 !important;
+    max-width: none !important;
     width: auto;
     margin-bottom: 4px;
 }

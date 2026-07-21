@@ -1601,8 +1601,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Nivel 4: certificados, semanas SEDI e inglés
             camposAdicionales = [
                 { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.certificados) },
-                { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(datos.semanas) },
-                { id: 'ingles', label: 'Certificados de inglés', valor: formatearNumero(datos.ingles) }
+                { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(datos.semanas) }
             ];
         } else if (nivelId === 5) {
             // Nivel 5: certificados

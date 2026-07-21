@@ -87,14 +87,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Seguro contra accidente: contratar/propio + dropdown condicional + nota póliza ──
-    function renderAccidente(seguro) {
-        const div = bloque('Seguro contra accidente');
+    function renderAccidente(grupo) {
+        const div = bloque('Seguro de accidentes');
         div.appendChild(parrafo('Todos los estudiantes deberán contar con un seguro de accidentes, ya sea contratado con Tecmilenio o particular.'));
         div.appendChild(parrafo('¿Cuentas con un seguro propio o deseas contratar con Tecmilenio?', 'seguro-pregunta'));
 
-        const sel = crearSelectOculto(seguro.id_seguro, '');
+        // Un <select> oculto por cada seguro del grupo = fuente de verdad del cálculo
+        // (calculateInsuranceCost lee select-seguro-{id} con valor 'si'/'no').
+        const ocultos = {};
+        grupo.forEach(s => { ocultos[s.id_seguro] = crearSelectOculto(s.id_seguro, ''); });
 
-        // Dropdown "Selecciona el seguro de tu interés" (solo al elegir contratar).
+        // Aplica la selección del dropdown a los ocultos: el elegido = 'si', el
+        // resto = 'no'. Sin elegir (idElegido vacío) → todos '' para que el botón
+        // "Continuar" siga deshabilitado hasta que se elija una opción.
+        const aplicarSeleccion = (idElegido) => {
+            grupo.forEach(s => {
+                const v = idElegido ? (String(s.id_seguro) === idElegido ? 'si' : 'no') : '';
+                setOculto(ocultos[s.id_seguro], v);
+            });
+        };
+
+        // Dropdown "Selecciona el seguro de tu interés" (solo al elegir contratar),
+        // con TODAS las opciones del grupo (accidentes, premium, gastos médicos…).
         const wrapSelect = document.createElement('div');
         wrapSelect.className = 'seguro-interes-wrap hidden';
         const lblSel = document.createElement('label');
@@ -103,35 +117,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const visibleSelect = document.createElement('select');
         visibleSelect.className = 'seguro-interes-select';
         const ph = document.createElement('option'); ph.value = ''; ph.textContent = 'Selecciona'; visibleSelect.appendChild(ph);
-        const opt = document.createElement('option'); opt.value = String(seguro.id_seguro); opt.textContent = seguro.nombre_seguro; visibleSelect.appendChild(opt);
-        visibleSelect.addEventListener('change', () => setOculto(sel, visibleSelect.value ? 'si' : ''));
+        grupo.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = String(s.id_seguro);
+            opt.textContent = s.nombre_seguro;
+            visibleSelect.appendChild(opt);
+        });
+        visibleSelect.addEventListener('change', () => aplicarSeleccion(visibleSelect.value));
         wrapSelect.appendChild(lblSel);
         wrapSelect.appendChild(visibleSelect);
 
         // Nota de póliza: dentro del bloque, justo bajo accidente; solo con seguro propio.
         const notaPoliza = document.createElement('p');
         notaPoliza.className = 'seguro-poliza hidden';
-        notaPoliza.textContent = 'El alumno deberá presentar una copia de su póliza de seguro de gastos médicos mayores vigente.';
+        notaPoliza.textContent = 'Deberás presentar una copia de tu póliza vigente con una cobertura mínima de $150,000';
 
-        const radios = crearRadios(`accidente-${seguro.id_seguro}`, '', false, [
+        const radios = crearRadios('accidente-grupo', '', false, [
             { v: 'tecmilenio', txt: 'Deseo contratarlo con Tecmilenio' },
             { v: 'propio', txt: 'Cuento con mi propio seguro' }
         ], (v) => {
             if (v === 'tecmilenio') {
                 wrapSelect.classList.remove('hidden');
                 notaPoliza.classList.add('hidden');
-                setOculto(sel, visibleSelect.value ? 'si' : '');
+                aplicarSeleccion(visibleSelect.value); // '' si aún no elige → botón deshabilitado
             } else {
                 wrapSelect.classList.add('hidden');
                 notaPoliza.classList.remove('hidden');
-                setOculto(sel, 'no');
+                grupo.forEach(s => setOculto(ocultos[s.id_seguro], 'no')); // propio: ninguno contratado
             }
         });
 
         div.appendChild(radios);
         div.appendChild(wrapSelect);
         div.appendChild(notaPoliza);
-        div.appendChild(sel);
+        grupo.forEach(s => div.appendChild(ocultos[s.id_seguro]));
         segurosContainer.appendChild(div);
     }
 
@@ -169,13 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const buscar = (t) => seguros.find(s => s.estado && s.nombre_seguro && tipoSeguro(s) === t);
 
         const vive = buscar('vive');
-        const accidente = buscar('accidente');
         const colegiatura = buscar('colegiatura');
+        // Grupo del bloque "Seguro de accidentes": todos los seguros del nivel que
+        // NO sean VIVE ni Colegiatura/Estudiantil (es decir, accidentes + "otros",
+        // como premium o gastos médicos elite). Así, cualquier seguro que el admin
+        // agregue en el catálogo (que no sea VIVE/Colegiatura) aparece como opción
+        // del desplegable, sin volver a tocar código.
+        const grupoAccidente = seguros.filter(s => s.estado && s.nombre_seguro &&
+            (tipoSeguro(s) === 'accidente' || tipoSeguro(s) === 'otro'));
 
         // VIVE solo se muestra donde está forzada (1-4): pre-marcada "Sí" y bloqueada.
         // En el resto (5, 13, 6-12) no aplica → no se renderiza.
         if (vive && VIVE_FORZADA.includes(levelId)) renderVive(vive, levelId);
-        if (accidente && esPresencial()) renderAccidente(accidente);
+        if (grupoAccidente.length && esPresencial()) renderAccidente(grupoAccidente);
         if (colegiatura && COLEGIATURA_NIVELES.includes(levelId)) renderColegiatura(colegiatura, levelId);
 
         if (!segurosContainer.children.length) {

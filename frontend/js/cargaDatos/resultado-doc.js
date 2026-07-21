@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Materias', val('select-subjects', 'materias')],
             ['Certificados', val('select-certificado', 'certificados')],
             ['Semanas SEDI', val('select-semanas', 'semanasSEDI')],
-            ['Certificados de inglés', val('select-ingles', 'ingles')],
         ].forEach(([l, v]) => { if (v && v !== '0') campos.push([l, v]); });
 
         cont.innerHTML = campos.map(([label, value]) => `
