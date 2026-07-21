@@ -62,25 +62,60 @@ function descargarPDF() {
         el.style.display = 'none';
     });
 
+    // Puntos de corte "seguros" para paginar SIN partir tarjetas/tablas: el borde
+    // inferior de cada bloque de la hoja (hero + hijos directos de .cotiz-sheet).
+    // Se miden con los estilos de captura ya aplicados (ancho forzado a 1440).
+    const elementRect = element.getBoundingClientRect();
+    const cortesCss = [];
+    element.querySelectorAll('.dash-hero, .cotiz-sheet > *').forEach(b => {
+        cortesCss.push(b.getBoundingClientRect().bottom - elementRect.top);
+    });
+
     // windowWidth debe coincidir con el ancho forzado (1440) o html2canvas
     // recorta el contenido al ancho real de la ventana.
     html2canvas(element, { scale: 2, useCORS: true, width: 1440, windowWidth: 1440 }).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'pt', 'letter', true);
         const pageWidth = 612;
         const pageHeight = 792;
-        // Ajustar la imagen al ancho de la hoja carta y paginar hacia abajo
         const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
-        heightLeft -= pageHeight;
-        while (heightLeft > 0) {
-            position -= pageHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, '', 'FAST');
-            heightLeft -= pageHeight;
+        const pxPorPt = canvas.width / pageWidth;            // px de canvas por punto PDF
+        const pageHeightPx = pageHeight * pxPorPt;           // alto de página en px de canvas
+        const cssToCanvas = canvas.height / elementRect.height;
+        // Cortes seguros (en px de canvas), de arriba a abajo.
+        const cortes = cortesCss
+            .map(c => c * cssToCanvas)
+            .filter(y => y > 0 && y < canvas.height)
+            .sort((a, b) => a - b);
+
+        // Paginar hacia abajo: cada página toma lo máximo que cabe, pero se
+        // retrocede al último borde de bloque que quepa para no cortar contenido.
+        // Si un bloque es más alto que una página, se hace corte duro (fallback).
+        let renderedY = 0;
+        let primera = true;
+        while (renderedY < canvas.height - 1) {
+            let sliceEnd = renderedY + pageHeightPx;
+            if (sliceEnd >= canvas.height) {
+                sliceEnd = canvas.height;
+            } else {
+                const seguros = cortes.filter(y => y > renderedY + 20 && y <= sliceEnd);
+                if (seguros.length) sliceEnd = seguros[seguros.length - 1];
+            }
+            const sliceHeightPx = Math.max(1, Math.round(sliceEnd - renderedY));
+
+            // Recortar esa franja en un canvas propio y agregarla como página.
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = canvas.width;
+            pageCanvas.height = sliceHeightPx;
+            pageCanvas.getContext('2d').drawImage(
+                canvas, 0, renderedY, canvas.width, sliceHeightPx,
+                0, 0, canvas.width, sliceHeightPx
+            );
+            const pageImgHeight = sliceHeightPx / pxPorPt;   // alto de la franja en puntos
+
+            if (!primera) pdf.addPage();
+            pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, pageImgHeight, '', 'FAST');
+            primera = false;
+            renderedY = sliceEnd;
         }
         if (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())) {
             saveAs(pdf.output('bloburl'), "tecmilenio-plan-v2.pdf");
