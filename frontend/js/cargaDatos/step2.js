@@ -490,13 +490,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 supportPercentageSelect.appendChild(option);
             });
         } 
-        if (average < 70 || average > 100) {
-            // No ocultar apoyo de porcentaje para nivel 13 (Ejecutivo MAPS Bimestral)
-            if (levelId != 13) {
-                supportPercentageSelect.classList.add('hidden');
-                support.classList.add('hidden');
-                supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
-            }
+        // Garantizar la visibilidad de los apoyos según nivel + promedio en TODOS
+        // los casos (antes solo se ocultaban con promedio <70 o >100, por lo que
+        // el apoyo % quedaba visible al subir el promedio de 70-79 a 80-100).
+        // Regla:
+        //   Apoyo % → nivel 13 (siempre) · nivel 5 (70-100) · otros niveles (70-79)
+        //   Apoyo $ → niveles != 5 con promedio 70-100
+        const apoyoPctAplica =
+            levelId == 13 ||
+            (levelId == 5 && average >= 70 && average <= 100) ||
+            (levelId != 5 && average >= 70 && average <= 79);
+        if (!apoyoPctAplica) {
+            supportPercentageSelect.classList.add('hidden');
+            support.classList.add('hidden');
+            supportPercentageSelect.innerHTML = '<option value="">Elige</option>';
+        }
+
+        const apoyoFijoAplica = average >= 70 && average <= 100 && levelId != 5;
+        if (!apoyoFijoAplica) {
             supportFixSelect.classList.add('hidden');
             supportFix.classList.add('hidden');
             supportFixSelect.innerHTML = '<option value="">Elige</option>';

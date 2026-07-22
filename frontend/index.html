@@ -102,8 +102,8 @@
                                             <label class="font-semibold" for="txt-matricula">Matrícula</label>
                                         </div>
                                         <div class="flex-1">
-                                            <input type="text" id="txt-matricula" maxlength="8" autocomplete="off" placeholder="Escribe aquí">
-                                            <p class="msg" id="txt-matricula-msg">Ingresa tu matrícula de 8 caracteres (letras y números, sin caracteres especiales)</p>
+                                            <input type="text" id="txt-matricula" maxlength="8" autocomplete="off" placeholder="AL123456">
+                                            <p class="msg" id="txt-matricula-msg">La matrícula debe tener el formato AL123456 (2 letras y 6 números).</p>
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap mb-6 flex-col md:flex-row">
@@ -228,7 +228,7 @@
                                             <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
                                                 <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
                                                 <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                                    Selecciona el plan de estudios o carrera
+                                                    Selecciona el plan de estudios o carrera. Sujeto a disponibilidad en campus.
                                                 </span>
                                             </div>
                                         </div>
@@ -299,7 +299,7 @@
                                             <div class="tooltip absolute top-[10px] right-[10px]" style="right: 5px;">
                                                 <i class="fa-solid fa-circle-question text-write-color-3 bg-white rounded-full"></i>
                                                 <span class="tooltiptext tooltip-right text-[12px] leading-[20px]">
-                                                    Carga completa: 3 certificados (cada certificado es de 10 créditos)
+                                                    Carga completa: 4 certificados (cada certificado es de 10 créditos)
                                                 </span>
                                             </div>
                                         </div>
@@ -372,22 +372,6 @@
                                     </div>
                                 </div>
 
-                                <!-- HU57: ¿deseas un préstamo estudiantil? -->
-                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-prestamo-prospecto">
-                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                                        <label class="font-semibold">¿Deseas un préstamo estudiantil?</label>
-                                    </div>
-                                    <div class="flex-1 radio-group">
-                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-prospecto" value="si"> Sí</label>
-                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-prospecto" value="no"> No</label>
-                                        <p class="msg-info hidden" id="radio-prestamo-prospecto-info"></p>
-                                        <p class="msg" id="radio-prestamo-prospecto-msg">Este campo es necesario</p>
-                                    </div>
-                                </div>
-
-                                <hr class="mb-8">
-                                <p class="text-[15px] leading-[23px]">Recuerda que para brindar una propuesta de beca formal, debes completar tu proceso de admisión.</p>
-                                
                                 <div id="tipo-beca" class="flex flex-wrap mb-6 flex-col md:flex-row field-avg-1 hidden ">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
                                         <label class="font-semibold" for="txt-scholarship">Tipo de beca:</label>
@@ -442,7 +426,7 @@
                                 </div>
                                 <div id="support" class="flex flex-wrap mb-6 flex-col md:flex-row hidden field-avg-3">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                                        <label class="font-semibold" for="txt-support-percentage">Préstamo educativo
+                                        <label class="font-semibold" for="txt-support-percentage">Apoyo estudiantil
                                             %:</label>
                                     </div>
                                     <div class="flex-1">
@@ -462,7 +446,7 @@
                                 </div>
                                 <div id="support-fix" class="flex flex-wrap mb-6 flex-col md:flex-row hidden field-avg-3">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
-                                        <label class="font-semibold" for="txt-support-fix">Préstamo educativo
+                                        <label class="font-semibold" for="txt-support-fix">Apoyo estudiantil
                                             $:</label>
                                     </div>
                                     <div class="flex-1">
@@ -480,6 +464,19 @@
                                         <p class="msg" id="txt-support-fix-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
+                                <!-- HU57: ¿deseas un préstamo estudiantil? -->
+                                <div class="flex flex-wrap mb-6 flex-col md:flex-row" id="row-radio-prestamo-prospecto">
+                                    <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
+                                        <label class="font-semibold">¿Deseas un préstamo estudiantil?</label>
+                                    </div>
+                                    <div class="flex-1 radio-group">
+                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-prospecto" value="si"> Sí</label>
+                                        <label class="radio-opcion"><input type="radio" name="radio-prestamo-prospecto" value="no"> No</label>
+                                        <p class="msg-info hidden" id="radio-prestamo-prospecto-info"></p>
+                                        <p class="msg" id="radio-prestamo-prospecto-msg">Este campo es necesario</p>
+                                    </div>
+                                </div>
+
                                 <div class="flex flex-wrap mb-6 flex-col md:flex-row hidden field-avg-4">
                                     <div class="min-w-[190px] mt-2 mb-2 md:mb-0">
                                         <label class="font-semibold" for="txt-prestamo-percentage">
@@ -501,6 +498,8 @@
                                         <p class="msg" id="txt-prestamo-percentage-msg">Este campo es necesario</p>
                                     </div>
                                 </div>
+                                <hr class="mb-8">
+                                <p class="text-[15px] leading-[23px]" id="nota-beca-prospecto">Recuerda que para brindar una propuesta de beca formal, debes completar tu proceso de admisión.</p>
                                 <div class="flex flex-row flex-wrap justify-center mb-6">
                                     <div class="px-4 mb-4">
                                         <button class="btn btn-main btn-prev-step" type="button">Anterior</button>

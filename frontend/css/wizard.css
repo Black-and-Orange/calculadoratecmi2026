@@ -361,3 +361,20 @@ main.solo-logo {
 #wizard-row.flujo-alumno .subtitulo-legal { display: block; margin-top: 1rem; margin-bottom: 0.5rem; }
 #wizard-row.flujo-alumno .intro-step4 { display: none; }
 #wizard-row.flujo-alumno .botones-step4 { justify-content: flex-end; }
+
+/* ===== Paso 2 (prospecto) — columna de etiquetas uniforme para que las
+   preguntas (radios) y los selects de beca/apoyo/préstamo queden alineados
+   en desktop. Las etiquetas son más anchas que el min-w original del markup,
+   así que sin esto cada fila arrancaba en una posición distinta. ===== */
+@media (min-width: 768px) {
+  #step-2 #row-radio-beca-prospecto > div:first-child,
+  #step-2 #row-radio-prestamo-prospecto > div:first-child,
+  #step-2 #tipo-beca > div:first-child,
+  #step-2 #porcentaje-beca > div:first-child,
+  #step-2 #support > div:first-child,
+  #step-2 #support-fix > div:first-child,
+  #step-2 .field-avg-4 > div:first-child {
+    min-width: 290px;
+    flex: 0 0 290px;
+  }
+}

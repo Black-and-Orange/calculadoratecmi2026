@@ -100,23 +100,37 @@ document.addEventListener('DOMContentLoaded', () => {
         aplica('tc-vive', costoTipo(n => n.includes('vive')));
     }
 
-    // ── Pago Fijo de préstamo estudiantil: $65 por cada 10% (nota legal) ──
+    // Colegiatura bruta (sin descuentos ni seguros); base de los importes % ──
+    const colegiaturaBruta = () => num(leer('costoTotal') ?? 0);
+
+    // ── Préstamo educativo (descuento): préstamo% × colegiatura bruta, en negativo ──
     function cablearPrestamo() {
         const pct = num(leer('prestamoPorcentaje') ?? leer('selectedprestamo') ?? 0);
-        const pagoFijo = (pct / 10) * 65;
-        setText('tc-prestamo', pagoFijo > 0 ? fmt(pagoFijo) : 'No Aplica');
+        const importe = (pct / 100) * colegiaturaBruta();
+        setText('tc-prestamo-label', pct > 0 ? `Préstamo educativo (${pct}%)` : 'Préstamo educativo');
+        setText('tc-prestamo', importe > 0 ? `-${fmt(importe)}` : 'No Aplica');
     }
 
-    // ── Beca: se muestra el % (descuento); si no hay, "No Aplica" ──
+    // ── Beca (descuento): beca% × colegiatura bruta; la etiqueta incluye el nombre ──
     function cablearBeca() {
         const pct = num(leer('becaPorcentaje') ?? leer('selectedPercentage') ?? 0);
-        const filaBeca = document.getElementById('fila-beca');
-        if (pct > 0) {
-            setText('tc-beca', `-${pct}%`);
-            if (filaBeca) filaBeca.classList.remove('hidden');
-        } else {
-            setText('tc-beca', 'No Aplica');
-        }
+        const importe = (pct / 100) * colegiaturaBruta();
+        const nombre = (leer('selectedScholarshipName') || '').toString().trim();
+        const nombreValido = nombre && nombre !== '0' && !/^sin beca$/i.test(nombre);
+        // La etiqueta muestra el % de beca asignado en vez de "(descuento)".
+        const base = nombreValido ? `Costo de ${nombre}` : 'Costo de beca';
+        setText('tc-beca-label', pct > 0 ? `${base} (${pct}%)` : base);
+        setText('tc-beca', importe > 0 ? `-${fmt(importe)}` : 'No Aplica');
+    }
+
+    // ── Apoyo estudiantil: % (apoyo% × bruta) y monto fijo (directo, sin recalcular) ──
+    function cablearApoyo() {
+        const pct = num(leer('selectedSupportValue') ?? 0);
+        const importePct = (pct / 100) * colegiaturaBruta();
+        setText('tc-apoyo-pct', importePct > 0 ? `-${fmt(importePct)}` : 'No Aplica');
+
+        const fijo = num(leer('selectedSupportFixValue') ?? 0);
+        setText('tc-apoyo-fijo', fijo > 0 ? `-${fmt(fijo)}` : 'No Aplica');
     }
 
     // ── Wording de vigencia: el mockup dice "Vigencia de la cotización" ──
@@ -146,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cablearSeguros();
     cablearPrestamo();
     cablearBeca();
+    cablearApoyo();
     cablearBeneficios();
     normalizarVigencia();
 });

@@ -167,9 +167,15 @@ const initProspecto = () => {
     const btnNext = document.getElementById('step-2-next');
     if (!panel || !btnNext) return;
 
+    const support = document.getElementById('support');
+    const supportFix = document.getElementById('support-fix');
+
     const becaPct = () => {
         try { return parseFloat(JSON.parse(localStorage.getItem('selectedPercentage'))) || 0; } catch { return 0; }
     };
+
+    // Recordar el valor previo del radio de beca para reaccionar al cambiar a "sí".
+    let becaPrev = null;
 
     const sync = () => {
         // El promedio académico lo captura el usuario (campo visible en el flujo
@@ -191,13 +197,24 @@ const initProspecto = () => {
 
         const rBeca = radioValor('radio-beca-prospecto');
         [tipoBeca, scholarshipSelect].forEach(el => el && el.classList.toggle('hidden', rBeca !== 'si'));
+        // La nota "Recuerda..." vive al final del paso como pie fijo: siempre visible.
         if (rBeca !== 'si') {
             [porcentajeBeca, percentageSelect].forEach(el => el && el.classList.add('hidden'));
-        } else if (scholarshipSelect && scholarshipSelect.value && scholarshipSelect.value !== '0'
-            && percentageSelect && percentageSelect.options.length > 1) {
-            // Beca variable elegida: mostrar el select de % (HU56)
-            [porcentajeBeca, percentageSelect].forEach(el => el && el.classList.remove('hidden'));
+            // Sin beca, el apoyo estudiantil (% y $) también se oculta.
+            [support, supportFix].forEach(el => el && el.classList.add('hidden'));
+        } else {
+            if (scholarshipSelect && scholarshipSelect.value && scholarshipSelect.value !== '0'
+                && percentageSelect && percentageSelect.options.length > 1) {
+                // Beca variable elegida: mostrar el select de % (HU56)
+                [porcentajeBeca, percentageSelect].forEach(el => el && el.classList.remove('hidden'));
+            }
+            // Al (re)activar la beca, dejar que step2.js recalcule qué apoyos
+            // aplican según el promedio y el nivel (se ocultaron al elegir "No").
+            if (becaPrev !== 'si' && promedio) {
+                promedio.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         }
+        becaPrev = rBeca;
         if (rBeca === 'no' && scholarshipSelect) {
             const sinBeca = Array.from(scholarshipSelect.options).find(o => o.value === '0');
             if (sinBeca && scholarshipSelect.value !== '0') {

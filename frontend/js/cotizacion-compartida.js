@@ -374,14 +374,35 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     setImporte('tc-accidentes', parseFloat(cotizacion.seguro_accidentes) || 0);
     setImporte('tc-cobertura', parseFloat(cotizacion.seguro_estudiantil) || 0);
     setImporte('tc-vive', parseFloat(cotizacion.cobertura_vive) || 0);
-    // Pago Fijo: $65 por cada 10% de préstamo (misma regla que resultado-doc.js)
+
+    // Colegiatura bruta: base de los importes calculados por porcentaje
+    const colegiaturaBruta = parseFloat(cotizacion.costo_total) || 0;
+    // Importe con signo de descuento (bonificación / beca)
+    const setDescuento = (id, monto) => {
+        const elem = document.getElementById(id);
+        if (elem) elem.textContent = monto > 0 ? `-${formatearPesos(monto)}` : 'No Aplica';
+    };
+
+    // Préstamo educativo (descuento): préstamo% × colegiatura bruta, en negativo
     const prestamoPct = parseFloat(cotizacion.prestamo_porcentaje) || 0;
-    setImporte('tc-prestamo', (prestamoPct / 10) * 65);
-    const tcBeca = document.getElementById('tc-beca');
-    if (tcBeca) {
-        const becaPct = parseFloat(cotizacion.beca_porcentaje) || 0;
-        tcBeca.textContent = becaPct > 0 ? `-${becaPct}%` : 'No Aplica';
-    }
+    const tcPrestamoLabel = document.getElementById('tc-prestamo-label');
+    if (tcPrestamoLabel) tcPrestamoLabel.textContent = prestamoPct > 0 ? `Préstamo educativo (${prestamoPct}%)` : 'Préstamo educativo';
+    setDescuento('tc-prestamo', (prestamoPct / 100) * colegiaturaBruta);
+
+    // Beca (descuento): beca% × colegiatura bruta; la etiqueta incluye el nombre
+    const becaPct = parseFloat(cotizacion.beca_porcentaje) || 0;
+    const becaNombre = (cotizacion.beca_nombre || '').toString().trim();
+    const becaNombreValido = becaNombre && becaNombre !== '0' && !/^sin beca$/i.test(becaNombre);
+    const tcBecaLabel = document.getElementById('tc-beca-label');
+    // La etiqueta muestra el % de beca asignado en vez de "(descuento)".
+    const becaBase = becaNombreValido ? `Costo de ${becaNombre}` : 'Costo de beca';
+    if (tcBecaLabel) tcBecaLabel.textContent = becaPct > 0 ? `${becaBase} (${becaPct}%)` : becaBase;
+    setDescuento('tc-beca', (becaPct / 100) * colegiaturaBruta);
+
+    // Apoyo estudiantil: % (apoyo% × bruta) y monto fijo (directo, sin recalcular)
+    const apoyoPct = parseFloat(cotizacion.apoyo_estudiantil_porcentaje) || 0;
+    setDescuento('tc-apoyo-pct', (apoyoPct / 100) * colegiaturaBruta);
+    setDescuento('tc-apoyo-fijo', parseFloat(cotizacion.apoyo_estudiantil_fijo) || 0);
     
     // Mostrar apoyo educativo (descuento)
     if (apoyoEducativoElem) {
