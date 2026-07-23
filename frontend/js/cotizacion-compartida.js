@@ -10,7 +10,9 @@ import {
     actualizarBeneficios,
     cargarVigencia,
     agregarEstiloPorNivel,
-    hideZeroPercentages
+    hideZeroPercentages,
+    esNivelBimestralMaps,
+    creditosPorCertificado
 } from './utils/shared-utils.js';
 
 // Función helper para parsear JSON de manera segura
@@ -56,7 +58,8 @@ async function cargarNiveles() {
             { id: 10, descripcion: 'MEDU+' },
             { id: 11, descripcion: 'MLP Presencial' },
             { id: 12, descripcion: 'Connect Presencial Matutino' },
-            { id: 13, descripcion: 'Ejecutivo  Bimestral MAPS' }
+            { id: 13, descripcion: 'Ejecutivo  Bimestral MAPS' },
+            { id: 15, descripcion: 'Posgrados MAPS' }
         ];
     }
 }
@@ -410,7 +413,7 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         const costoTotal = parseFloat(cotizacion.costo_total) || 0;
         
         // Para nivel 13, calcular descuento dinámicamente usando los porcentajes guardados
-        if (nivelId === 13) {
+        if (esNivelBimestralMaps(nivelId)) {
             // Calcular descuento basado en los porcentajes guardados en la BD
             const becaPorcentaje = parseFloat(cotizacion.beca_porcentaje) || 0;
             const apoyoPorcentaje = parseFloat(cotizacion.apoyo_estudiantil_porcentaje) || 0;
@@ -470,7 +473,7 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
         let totalContadoFinal = parseFloat(cotizacion.total_contado) || 0;
         
         // Para nivel 13, recalcular total contado con descuentos aplicados dinámicamente
-        if (nivelId === 13) {
+        if (esNivelBimestralMaps(nivelId)) {
             const costoTotal = parseFloat(cotizacion.costo_total) || 0;
             const becaPorcentaje = parseFloat(cotizacion.beca_porcentaje) || 0;
             const apoyoPorcentaje = parseFloat(cotizacion.apoyo_estudiantil_porcentaje) || 0;
@@ -505,7 +508,7 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     }
     
     // Llenar información del plan de financiamiento
-    if (nivelId === 13) {
+    if (esNivelBimestralMaps(nivelId)) {
         
         // Configurar overlay de loading para nivel 13
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -623,8 +626,8 @@ async function cablearFechasPagoPeriodo(cotizacion, numMensualidades) {
 async function cargarPagosBimestralesNivel13(cotizacion) {
     try {
         // Obtener todos los pagos bimestrales del nivel 13
-        const pagos = await getCachedData(`pagos_bimestrales_13`, async () => {
-            const response = await fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`);
+        const pagos = await getCachedData(`pagos_bimestrales_${cotizacion.nivel_id}`, async () => {
+            const response = await fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/${cotizacion.nivel_id}`);
             if (!response.ok) throw new Error('Error al cargar pagos bimestrales');
             const data = await response.json();
             return data;
@@ -808,7 +811,7 @@ async function cargarPagosBimestralesNivel13(cotizacion) {
                         // Calcular créditos para este bimestre específico usando las configuraciones guardadas
                         const numeroCertificados = parseInt(configPeriodo.certificados) || 0;
                         const numeroSemanasSEDI = parseInt(configPeriodo.semanas) || 0;
-                        const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
+                        const totalCreditos = (numeroCertificados * creditosPorCertificado(cotizacion.nivel_id)) + (numeroSemanasSEDI * 1);
                         
                         // Buscar el costo usando solo el código del período
                         const costoPeriodo = costosMateria.find(item => item.clave.includes(codigo))?.costo || 0;
@@ -967,7 +970,7 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
     ];
 
     // Nivel solo para niveles que no sean 4 ni 13 (el programa ya los describe)
-    if (nivelId !== 4 && nivelId !== 13) {
+    if (nivelId !== 4 && !esNivelBimestralMaps(nivelId)) {
         // Buscar el nombre del nivel en el array de niveles
         const nivel = niveles.find(n => n.id_nivel == nivelId || n.id == nivelId || n.id == parseInt(nivelId));
         const nivelNombre = nivel ? nivel.descripcion : `Nivel ${nivelId}`;
@@ -996,7 +999,7 @@ function organizarCamposPorNivel(nivelId, cotizacion) {
             { id: 'semanas', label: 'Semanas de Desarrollo Integral', valor: formatearNumero(cotizacion.semanas_sedi) },
             { id: 'ingles', label: 'Certificados de inglés', valor: formatearNumero(cotizacion.ingles) }
         ];
-    } else if (nivelId === 13) {
+    } else if (esNivelBimestralMaps(nivelId)) {
         // Nivel 13: certificados y semanas SEDI
         camposAdicionales = [
             { id: 'certificados', label: 'Certificados', valor: formatearNumero(cotizacion.certificados) },
@@ -1151,12 +1154,12 @@ async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados
             let costoBimestre = 0;
             
             // Calcular costo base según el nivel
-            if (cotizacion.nivel_id === 13) {
-                // Nivel 13: certificados y semanas SEDI (misma lógica que step1.js)
+            if (esNivelBimestralMaps(cotizacion.nivel_id)) {
+                // Nivel 13 / 15: certificados y semanas SEDI (misma lógica que step1.js)
                 const numeroCertificados = parseInt(cotizacion.certificados) || 0;
                 const numeroSemanasSEDI = parseInt(cotizacion.semanas_sedi) || 0;
-                const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
-                
+                const totalCreditos = (numeroCertificados * creditosPorCertificado(cotizacion.nivel_id)) + (numeroSemanasSEDI * 1);
+
                 // Generar la clave correcta para este bimestre (misma lógica que step1.js)
                 // Usar el primer bimestre como referencia para generar la clave
                 const periodKey = codigo;
@@ -1167,7 +1170,7 @@ async function recalcularCostosPorBimestre(cotizacion, codigosBimestresOrdenados
                 // Buscar el costo usando solo el código del período dentro de la clave
                 const costoPorCredito = costosBase.find(c => c.clave.includes(codigo))?.costo || 0;
                 
-                const costoCertificados = numeroCertificados * 10 * costoPorCredito;
+                const costoCertificados = numeroCertificados * creditosPorCertificado(cotizacion.nivel_id) * costoPorCredito;
                 const costoSemanasSEDI = numeroSemanasSEDI * 1 * costoPorCredito;
                 costoBimestre = costoCertificados + costoSemanasSEDI;
             }

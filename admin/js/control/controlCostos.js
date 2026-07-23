@@ -50,7 +50,7 @@ function loadCostos(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 13;
+    const maxLevel = 15;
     for (let level = 1; level <= maxLevel; level++) {
         loadCostos(level, '#costomateriasNivel' + level);
     }

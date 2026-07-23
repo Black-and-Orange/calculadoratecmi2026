@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../apiConfig.js';
+import { esNivelBimestralMaps, creditosPorCertificado } from '../utils/shared-utils.js';
 
 // Espera a que el DOM se haya cargado completamente
 document.addEventListener('DOMContentLoaded', () => {
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let costoTotal;
 
         // --- CORRECCIÓN NIVEL 13 ---
-        if (mappedLevel === 13) {
+        if (esNivelBimestralMaps(mappedLevel)) {
             // Obtener períodos seleccionados de los checkboxes
             let periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
             // Obtener configuración por período
@@ -229,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const numeroCertificados = configPeriodo.certificados;
                     const numeroSemanasSEDI = configPeriodo.semanas;
                     
-                    const totalCreditos = (numeroCertificados * 10) + (numeroSemanasSEDI * 1);
+                    const totalCreditos = (numeroCertificados * creditosPorCertificado(mappedLevel)) + (numeroSemanasSEDI * 1);
                     const totalContadoBimestre = totalCreditos * costoPeriodo;
                     
                     costoTotal += totalContadoBimestre;
@@ -397,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Genera una clave única basada en las opciones seleccionadas
     const createKeyFromSelectors = () => {
-        const isNivel13 = parseInt(localStorage.getItem('selectedNivel')) === 13;
+        const isNivel13 = esNivelBimestralMaps(parseInt(localStorage.getItem('selectedNivel')));
         
         let periodKey = '';
         const nivelKey = selectors.grade.options[selectors.grade.selectedIndex].getAttribute('nivel_ed') || '';
@@ -575,8 +576,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const display = show ? 'flex' : 'none';
         const displayMaterias = show ? 'none' : 'flex';
         
-        // Para nivel 13, ocultar completamente los selects globales ya que cada período tiene sus propios controles
-        if (nivel === 13) {
+        // Para el nivel bimestral (13 / 15), ocultar completamente los selects globales ya que cada período tiene sus propios controles
+        if (esNivelBimestralMaps(nivel)) {
             selectors.divCertificado.style.display = 'none';
             selectors.divSemanas.style.display = 'none';
         } else {
@@ -660,10 +661,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Cargar opciones de Certificados y Semanas SEDI (nivel 13) una sola vez.
         let certificadosData = [], semanasData = [];
+        const nivelBim = JSON.parse(localStorage.getItem('selectedNivel')) || 13;
         try {
             [certificadosData, semanasData] = await Promise.all([
-                fetch(`${API_BASE_URL}/certificados/nivel/13`).then(res => res.json()),
-                fetch(`${API_BASE_URL}/semanas/nivel/13`).then(res => res.json())
+                fetch(`${API_BASE_URL}/certificados/nivel/${nivelBim}`).then(res => res.json()),
+                fetch(`${API_BASE_URL}/semanas/nivel/${nivelBim}`).then(res => res.json())
             ]);
         } catch (err) {
             console.error('No se pudieron cargar las opciones de períodos:', err);
@@ -725,33 +727,38 @@ document.addEventListener('DOMContentLoaded', () => {
             card.appendChild(certDiv);
 
             // Campo Semanas SEDI (deshabilitado hasta marcar el período).
-            const semDiv = document.createElement('div');
-            semDiv.className = 'periodo-campo';
-            const semLabel = document.createElement('label');
-            semLabel.textContent = 'Semanas SEDI';
-            semLabel.className = 'periodo-campo-label';
-            semLabel.htmlFor = `semanas-${bim.codigo}`;
-            const semSelect = document.createElement('select');
-            semSelect.id = `semanas-${bim.codigo}`;
-            semSelect.className = 'periodo-campo-select';
-            semSelect.disabled = true;
-            llenarSelectPeriodo(semSelect, semanasData, 'num_semanas', 'valor_semana_sedi', 1);
-            semDiv.appendChild(semLabel);
-            semDiv.appendChild(semSelect);
-            card.appendChild(semDiv);
+            // Solo se crea si el nivel tiene semanas SEDI configuradas. Posgrado MAPS no
+            // las usa (colegiatura = solo certificados), por lo que se omite el selector.
+            let semSelect = null;
+            if (semanasData.length > 0) {
+                const semDiv = document.createElement('div');
+                semDiv.className = 'periodo-campo';
+                const semLabel = document.createElement('label');
+                semLabel.textContent = 'Semanas SEDI';
+                semLabel.className = 'periodo-campo-label';
+                semLabel.htmlFor = `semanas-${bim.codigo}`;
+                semSelect = document.createElement('select');
+                semSelect.id = `semanas-${bim.codigo}`;
+                semSelect.className = 'periodo-campo-select';
+                semSelect.disabled = true;
+                llenarSelectPeriodo(semSelect, semanasData, 'num_semanas', 'valor_semana_sedi', 1);
+                semDiv.appendChild(semLabel);
+                semDiv.appendChild(semSelect);
+                card.appendChild(semDiv);
+                semSelect.addEventListener('change', () => { updateCosto(); validarPeriodosConsecutivosCheckboxes(); });
+            }
 
             // Al marcar/desmarcar: resaltar la tarjeta y habilitar/limpiar sus selects.
             checkbox.addEventListener('change', () => {
                 const activo = checkbox.checked;
                 card.classList.toggle('active', activo);
                 certSelect.disabled = !activo;
-                semSelect.disabled = !activo;
-                if (!activo) { certSelect.value = ''; semSelect.value = ''; }
+                if (semSelect) semSelect.disabled = !activo;
+                if (!activo) { certSelect.value = ''; if (semSelect) semSelect.value = ''; }
                 validarPeriodosConsecutivosCheckboxes();
                 updateCosto();
             });
             certSelect.addEventListener('change', () => { updateCosto(); validarPeriodosConsecutivosCheckboxes(); });
-            semSelect.addEventListener('change', () => { updateCosto(); validarPeriodosConsecutivosCheckboxes(); });
 
             checkboxContainer.appendChild(card);
         });
@@ -813,9 +820,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const controlesContainer = document.createElement('div');
         controlesContainer.className = 'periodo-controles-container';
 
-        // Cargar opciones de certificados
-        const certificadosData = await fetch(`${API_BASE_URL}/certificados/nivel/13`).then(res => res.json());
-        const semanasData = await fetch(`${API_BASE_URL}/semanas/nivel/13`).then(res => res.json());
+        // Cargar opciones de certificados (nivel bimestral actual: 13 / 15)
+        const nivelBim = JSON.parse(localStorage.getItem('selectedNivel')) || 13;
+        const certificadosData = await fetch(`${API_BASE_URL}/certificados/nivel/${nivelBim}`).then(res => res.json());
+        const semanasData = await fetch(`${API_BASE_URL}/semanas/nivel/${nivelBim}`).then(res => res.json());
 
         // Select de certificados
         const certificadosDiv = document.createElement('div');
@@ -960,10 +968,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const certificadosSelect = document.getElementById(`certificados-${codigo}`);
                 const semanasSelect = document.getElementById(`semanas-${codigo}`);
                 
-                if (!certificadosSelect || !semanasSelect) {
+                if (!certificadosSelect) {
                     configuracionCompleta = false;
                     mensajeError = '⚠️ Falta cargar la configuración de períodos';
-                } else if (!certificadosSelect.value || !semanasSelect.value) {
+                } else if (!certificadosSelect.value || (semanasSelect && !semanasSelect.value)) {
                     configuracionCompleta = false;
                     mensajeError = '⚠️ Debes completar la configuración de todos los períodos seleccionados';
                 }
@@ -1021,10 +1029,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 
 
                 
-                if (!certificadosSelect || !semanasSelect) {
+                if (!certificadosSelect) {
                     configuracionCompleta = false;
                     mensajeError = '⚠️ Falta cargar la configuración de períodos';
-                } else if (!certificadosSelect.value || !semanasSelect.value) {
+                } else if (!certificadosSelect.value || (semanasSelect && !semanasSelect.value)) {
                     configuracionCompleta = false;
                     mensajeError = '⚠️ Debes completar la configuración de todos los períodos seleccionados';
                 }
@@ -1126,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Cambiar el label según el nivel
         if (periodoLabel) {
-            if (mappedLevel === 13) {
+            if (esNivelBimestralMaps(mappedLevel)) {
                 periodoLabel.textContent = 'Períodos';
             } else {
                 periodoLabel.textContent = 'Periodo';
@@ -1158,8 +1166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         selectors.periodo.style.display = '';
         if (selectors.periodo.parentElement) selectors.periodo.parentElement.style.display = '';
 
-        if (mappedLevel === 13) {
-            fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`)
+        if (esNivelBimestralMaps(mappedLevel)) {
+            fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/${mappedLevel}`)
                 .then(res => res.json())
                 .then(pagos => {
                     const bimestresUnicos = [];
@@ -1179,14 +1187,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             selectors.periodo.style.display = 'none';
             // Ocultar selects globales ya que cada período tendrá sus propios controles
-            toggleAdditionalSelectors(true, 13);
+            toggleAdditionalSelectors(true, mappedLevel);
             selectors.divMaterias.style.display = 'none';
-            // Cargar otros selects necesarios para nivel 13
-            loadOptions(selectors.planes, `${API_BASE_URL}/planes/nivel/13`, 'descripcion', true, true);
-            loadOptions(selectors.campus, `${API_BASE_URL}/campus/nivel/13`, 'nombre', true, true);
-            // Mostrar y cargar opciones de formato para nivel 13
+            // Cargar otros selects necesarios para el nivel bimestral (13 / 15)
+            loadOptions(selectors.planes, `${API_BASE_URL}/planes/nivel/${mappedLevel}`, 'descripcion', true, true);
+            loadOptions(selectors.campus, `${API_BASE_URL}/campus/nivel/${mappedLevel}`, 'nombre', true, true);
+            // Mostrar y cargar opciones de formato para el nivel bimestral
             toggleFormatoDiv(true);
-            await loadFormatoOptions(13);
+            await loadFormatoOptions(mappedLevel);
             // Actualizar costo al final
             updateCosto();
             return;
@@ -1332,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cambiar la función de obtención de períodos seleccionados en el submit
     if (formElement) {
         formElement.addEventListener('submit', (event) => {
-            if (parseInt(localStorage.getItem('selectedNivel')) === 13) {
+            if (esNivelBimestralMaps(parseInt(localStorage.getItem('selectedNivel')))) {
                 const periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
                 const configuracionesPorPeriodo = obtenerConfiguracionPorPeriodo();
                 if (periodosSeleccionados.length > 0) {

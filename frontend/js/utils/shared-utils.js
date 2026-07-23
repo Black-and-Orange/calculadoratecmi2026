@@ -3,6 +3,22 @@
 
 import { API_BASE_URL } from '../apiConfig.js';
 
+// ===== NIVELES BIMESTRALES MAPS =====
+// Niveles con comportamiento "bimestral MAPS": costo por créditos (certificados + semana
+// SEDI), selección de múltiples bimestres y pagos bimestrales. 13 = Ejecutivo Bimestral MAPS,
+// 15 = Posgrados MAPS. Centralizado para no dispersar IDs por todo el código.
+export const NIVELES_BIMESTRAL_MAPS = [13, 15];
+export function esNivelBimestralMaps(nivelId) {
+    return NIVELES_BIMESTRAL_MAPS.includes(Number(nivelId));
+}
+
+// Créditos por certificado en el cálculo bimestral. Posgrados MAPS (15) = 1 crédito/cert
+// (colegiatura = certificados × $14,990). El resto de niveles (13, etc.) = 10, SIN cambios.
+// La tabla `certificados` no almacena este valor (PENDIENTE-FASE3: debería venir del admin).
+export function creditosPorCertificado(nivelId) {
+    return Number(nivelId) === 15 ? 1 : 10;
+}
+
 // ===== FUNCIONES DE FORMATEO =====
 
 /**
@@ -101,7 +117,7 @@ export function toggleFieldsByLevel(nivelId) {
     const semanasContainer = document.getElementById('semanas-container');
     const inglesContainer = document.getElementById('ingles-container');
 
-    if (nivelId === 4 || nivelId === 13) {
+    if (nivelId === 4 || esNivelBimestralMaps(nivelId)) {
         if (materiasContainer) materiasContainer.style.display = 'none';
         if (certificadosContainer) certificadosContainer.classList.remove('hidden');
         if (semanasContainer) semanasContainer.classList.remove('hidden');
@@ -273,6 +289,7 @@ export function agregarEstiloPorNivel(levelId) {
         11: 'css/style-icbi.css',
         12: 'css/style-universidad.css',
         13: 'css/style-universidad.css',
+        15: 'css/style-universidad.css',
     };
 
     if (styleMap[levelId]) {
@@ -309,6 +326,7 @@ export function getTituloPorNivel(nivel) {
         11: 'Crece como líder para transformar a tu equipo y tu entorno',
         12: 'Invierte en una educación para crecer como persona y como profesionista',
         13: 'Encuentra una carrera ejecutiva diseñada a tu medida',
+        15: 'Encuentra una carrera ejecutiva diseñada a tu medida',
     };
     return titulos[nivel] || 'N/A';
 }

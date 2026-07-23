@@ -6,7 +6,8 @@ import {
   mostrarEnteroSiEsDecimal,
   hideZeroPercentages,
   calcularTotalFinanciado,
-  agregarEstiloPorNivel
+  agregarEstiloPorNivel,
+  esNivelBimestralMaps
 } from '../utils/shared-utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Controlar overlay de loading solo para nivel 13
     const loadingOverlay = document.getElementById('loading-overlay');
     const financiamientoContent = document.getElementById('financiamiento-content');
-    if (levelId == 13) {
+    if (esNivelBimestralMaps(levelId)) {
         if (loadingOverlay) loadingOverlay.style.display = 'flex';
         if (financiamientoContent) financiamientoContent.style.display = 'none';
     } else {
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // }
 
     // --- AJUSTE PARA NIVEL 13 ---
-    if (levelId == 13) {
+    if (esNivelBimestralMaps(levelId)) {
         // Mostrar overlay de loading y ocultar contenido al inicio
         const loadingOverlay = document.getElementById('loading-overlay');
         const financiamientoContent = document.getElementById('financiamiento-content');
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             planFinanciamientoTrad.style.display = 'none';
         }
         // Mostrar solo el desglose de pagos bimestrales financiados para nivel 13
-        fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/13`)
+        fetch(`${API_BASE_URL}/pagos-bimestrales/nivel/${levelId}`)
             .then(res => res.json())
             .then(pagos => {
                 // Filtrar pagos para todos los períodos seleccionados
@@ -356,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let periodoFinal = periodo;
     
     // Para nivel 13, usar el período procesado
-    if (levelId === 13) {
+    if (esNivelBimestralMaps(levelId)) {
         const periodosSeleccionados = JSON.parse(localStorage.getItem('periodosSeleccionados') || '[]');
         if (periodosSeleccionados.length > 0) {
             periodoFinal = periodosSeleccionados.map(p => p.mes).join(', ');
@@ -375,7 +376,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let certificadosTotal = certificados;
     let semanasTotal = semanas;
     
-    if (levelId === 13) {
+    if (esNivelBimestralMaps(levelId)) {
         const configuracionesPorPeriodo = JSON.parse(localStorage.getItem('configuracionesPorPeriodo')) || {};
         certificadosTotal = 0;
         semanasTotal = 0;
@@ -416,8 +417,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 segurosData = segurosDataArray;
             }
 
-            // Lógica especial para VIVE: ocultar en niveles 6-13
-            if (levelId >= 6 && levelId <= 13) {
+            // Lógica especial para VIVE: ocultar en niveles 6-13 (y 15, que clona al 13)
+            if ((levelId >= 6 && levelId <= 13) || levelId === 15) {
                 if (viveDiv) viveDiv.style.display = 'none';
             } else {
                 if (viveDiv) viveDiv.style.display = 'flex';
@@ -553,7 +554,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Verificar si los datos vienen del backend
         const datosDesdeBackend = localStorage.getItem('datosDesdeBackend') === 'true';
         
-        if (levelId == 13) {
+        if (esNivelBimestralMaps(levelId)) {
             
             // No actualizar totalContado en el DOM para nivel 13
             originalMostrarValores({ ...valores, skipTotalContado: true });
@@ -582,7 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function mostrarValores(valores) {
 
         // DETERMINAR QUÉ FUNCIÓN USAR SEGÚN EL NIVEL
-        if (levelId === 13) {
+        if (esNivelBimestralMaps(levelId)) {
             mostrarValoresNivel13(valores);
         } else {
             mostrarValoresOtrosNiveles(valores);
@@ -1210,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // El resto del código (apoyos, becas, seguros, totales, etc.) se ejecuta siempre
     // Pero la lógica genérica de pagos (mensualidades, primerPago, totalFinanciado, etc.) solo se ejecuta si NO es nivel 13
-    if (levelId != 13) {
+    if (!esNivelBimestralMaps(levelId)) {
         // ... (lógica genérica de actualización de pagos)
     }
 
@@ -1283,7 +1284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 inglesValue = parseFloat(ingles) || 0;
                 materiasValue = 0;
                 creditosValue = 0;
-            } else if (levelId === 13) {
+            } else if (esNivelBimestralMaps(levelId)) {
                 // Nivel 13: certificados y semanas SEDI (suma total de todos los períodos)
                 const configuracionesPorPeriodo = JSON.parse(localStorage.getItem('configuracionesPorPeriodo')) || {};
                 certificadosValue = 0;
@@ -1342,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Preparar datos de la cotización
             let totalFinanciadoFinal = 0;
             let totalPagosRecuperado = 0;
-            if (levelId === 13) {
+            if (esNivelBimestralMaps(levelId)) {
                 // Recuperar el total de pagos desde localStorage
                 const totalPagosLS = localStorage.getItem('totalPagos');
                 if (totalPagosLS !== null && totalPagosLS !== undefined) {
@@ -1358,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             let periodoGuardar = periodo;
             let costosPorBimestre = {};
-            if (levelId === 13) {
+            if (esNivelBimestralMaps(levelId)) {
                 // Guardar los meses seleccionados separados por comas en el campo periodo
                 try {
                     const periodosSeleccionados = JSON.parse(localStorage.getItem('periodosSeleccionados'));
@@ -1405,8 +1406,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Guardar también los seguros dinámicos completos
                 seguros_dinamicos: JSON.parse(localStorage.getItem('segurosSeleccionados') || '{}'),
                 total_seguros: parseFloat(valoresAdicionales.totalCost) || 0,
-                costos_por_bimestre: levelId === 13 ? JSON.stringify(costosPorBimestre) : null,
-                configuraciones_por_periodo: levelId === 13 ? JSON.stringify(JSON.parse(localStorage.getItem('configuracionesPorPeriodo') || '{}')) : null,
+                costos_por_bimestre: esNivelBimestralMaps(levelId) ? JSON.stringify(costosPorBimestre) : null,
+                configuraciones_por_periodo: esNivelBimestralMaps(levelId) ? JSON.stringify(JSON.parse(localStorage.getItem('configuracionesPorPeriodo') || '{}')) : null,
                 fecha_vigencia: fechaVigencia
             };
 
@@ -1587,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         camposBase.push({ id: 'periodo', label: 'Periodo', valor: datos.periodo || 'N/A' });
         
         // Agregar nivel solo para niveles que no sean 4 ni 13 (después del periodo)
-        if (nivelId !== 4 && nivelId !== 13) {
+        if (nivelId !== 4 && !esNivelBimestralMaps(nivelId)) {
             camposBase.push({ id: 'nivel', label: 'Nivel', valor: datos.nivel || 'N/A' });
         }
         
@@ -1618,7 +1619,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             camposAdicionales = [
                 { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.materias) }
             ];
-        } else if (nivelId === 13) {
+        } else if (esNivelBimestralMaps(nivelId)) {
             // Nivel 13: certificados y semanas SEDI
             camposAdicionales = [
                 { id: 'certificados', label: 'Certificados', valor: formatearNumero(datos.certificados) },

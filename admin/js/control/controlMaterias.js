@@ -48,7 +48,7 @@ function loadMaterias(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 13;
+    const maxLevel = 15;
     for (let level = 1; level <= maxLevel; level++) {
         loadMaterias(level, '#cargamateriasNivel' + level);
     }

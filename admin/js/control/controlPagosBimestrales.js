@@ -156,7 +156,7 @@ window.editPagoBimestral = editPagoBimestral;
 // Inicialización y binds de eventos
 $(document).ready(function () {
     const apiUrl = `${API_BASE_URL}/pagos-bimestrales`;
-    const nivelesBimestrales = [13];
+    const nivelesBimestrales = [13, 15];
     
     // Cargar datos iniciales (igual que campus)
     nivelesBimestrales.forEach(nivelId => {

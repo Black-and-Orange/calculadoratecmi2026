@@ -457,7 +457,11 @@ document.addEventListener("DOMContentLoaded", () => {
               if (nivelValue) {
                 // Buscar el texto del nivel seleccionado
                 const selectedOption = nivelSelect.options[nivelSelect.selectedIndex];
-                if (selectedOption && selectedOption.textContent.toLowerCase().includes('ejecutivo bimestral maps')) {
+                // Niveles bimestrales MAPS (multi-período): 13 "Ejecutivo Bimestral MAPS" y 15 "Posgrados MAPS".
+                // main.js NO es módulo, así que se detecta por texto. OJO: si el cliente confirma otro
+                // nombre para el nivel 15, actualizar esta cadena.
+                const textoNivel = selectedOption ? selectedOption.textContent.toLowerCase() : '';
+                if (textoNivel.includes('ejecutivo bimestral maps') || textoNivel.includes('posgrado')) {
                   isNivel13 = true;
                 }
               }

@@ -237,4 +237,23 @@ export const niveles = [
             { id: 'pagos-bimestrales', nombre: 'Pagos Bimestrales' }
         ]
     },
+    {
+        // Nivel bimestral MAPS de posgrado. Colegiatura = certificados × $14,990 (1 crédito/cert).
+        // Apoyos: Becas, Apoyo estudiantil en $ y en %, y Préstamo. No aplica: seguros ni semana SEDI.
+        id: '15',
+        nombre: 'Posgrados MAPS',
+        pestañas: [
+            { id: 'campus', nombre: 'Campus' },
+            { id: 'programas', nombre: 'Planes' },
+            { id: 'formato', nombre: 'Formato' },
+            { id: 'becas', nombre: 'Becas' },
+            { id: 'apoyos', nombre: 'Apoyos' },
+            { id: 'apoyos-fijos', nombre: 'Apoyos Fijos' },
+            { id: 'prestamos', nombre: 'Prestamos' },
+            { id: 'beneficios', nombre: 'Beneficios' },
+            { id: 'certificados', nombre: 'Certificados' },
+            { id: 'costo-materias', nombre: 'Costos' },
+            { id: 'pagos-bimestrales', nombre: 'Pagos Bimestrales' }
+        ]
+    },
 ];

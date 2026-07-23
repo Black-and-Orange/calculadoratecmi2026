@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './apiConfig.js';
+import { esNivelBimestralMaps } from './utils/shared-utils.js';
 
 // Función principal que se ejecuta al cargar la página
 async function inicializarCotizacion() {
@@ -96,8 +97,8 @@ function cargarDatosEnLocalStorage(cotizacion) {
     localStorage.setItem('selectedFormato', cotizacion.formato || '');
     
     // Datos académicos según nivel
-    if (cotizacion.nivel_id === 13) {
-        // Nivel 13: Sistema bimestral
+    if (esNivelBimestralMaps(cotizacion.nivel_id)) {
+        // Nivel 13 / 15: Sistema bimestral
         localStorage.setItem('certificados', cotizacion.certificados || 0);
         localStorage.setItem('semanasSEDI', cotizacion.semanas_sedi || 0);
     } else if (cotizacion.nivel_id === 4) {
@@ -149,7 +150,7 @@ function cargarDatosEnLocalStorage(cotizacion) {
     }
     
     // Para nivel 13: datos de pagos bimestrales
-    if (cotizacion.nivel_id === 13 && cotizacion.periodos_seleccionados) {
+    if (esNivelBimestralMaps(cotizacion.nivel_id) && cotizacion.periodos_seleccionados) {
         localStorage.setItem('periodosSeleccionados', JSON.stringify(cotizacion.periodos_seleccionados));
         
         // Cargar totales por período si existen

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../apiConfig.js';
+import { esNivelBimestralMaps } from '../utils/shared-utils.js';
 
 function sortSelectOptions(selectElement) {
     const optionsArray = Array.from(selectElement.options);
@@ -365,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const mostrarPrestamoSelectSiNivel2 = async () => {
-                if (getLevelId() === 2 || getLevelId() === 4 || getLevelId() == 6 || getLevelId() == 7 || getLevelId() == 13) {
+                if (getLevelId() === 2 || getLevelId() === 4 || getLevelId() == 6 || getLevelId() == 7 || getLevelId() == 13 || getLevelId() == 15) {
                     try {
                         const prestamoResponse = await fetch(`${API_BASE_URL}/prestamos/nivel/${levelId}`);
                         if (!prestamoResponse.ok) throw new Error('Error al obtener Prestamos');
@@ -449,8 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 supportPercentageSelect.appendChild(option);
             });
         } 
-        // Para Ejecutivo MAPS Bimestral (nivel 13), siempre mostrar apoyo de porcentaje sin importar el promedio
-        if (levelId == 13) {
+        // Para Ejecutivo MAPS Bimestral (nivel 13) y Posgrados MAPS (15), siempre mostrar apoyo de porcentaje sin importar el promedio
+        if (esNivelBimestralMaps(levelId)) {
             const supportResponse = await fetch(`${API_BASE_URL}/apoyos/nivel/${levelId}`);
             if (!supportResponse.ok) throw new Error('Error al obtener apoyos');
             const supports = await supportResponse.json();
@@ -497,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
         //   Apoyo % → nivel 13 (siempre) · nivel 5 (70-100) · otros niveles (70-79)
         //   Apoyo $ → niveles != 5 con promedio 70-100
         const apoyoPctAplica =
-            levelId == 13 ||
+            esNivelBimestralMaps(levelId) ||
             (levelId == 5 && average >= 70 && average <= 100) ||
             (levelId != 5 && average >= 70 && average <= 79);
         if (!apoyoPctAplica) {

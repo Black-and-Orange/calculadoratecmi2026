@@ -111,7 +111,7 @@ window.createPrestamos = createPrestamos;
 // Inicialización y binds de eventos
 $(document).ready(function () {
     const apiUrl = `${API_BASE_URL}/prestamos`;
-    const nivelesPrestamos = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+    const nivelesPrestamos = [1,2,3,4,5,6,7,8,9,10,11,12,13,15];
 
     // Cargar datos iniciales
     nivelesPrestamos.forEach(nivelId => {
