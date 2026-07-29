@@ -501,12 +501,34 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Cargar las opciones del select de nivel
+    // Niveles que NO deben aparecer en el flujo "Me interesa" (prospecto). En "Soy alumno" sí se muestran.
+    const NIVELES_OCULTOS_PROSPECTO = ['Profesional Asociado', 'Ejecutivo', 'Maestría y Especialidades', 'Connect Presencial Matutino'];
+
+    // Muestra u oculta esos niveles según el perfil actual. Se aplica al cargar el dropdown
+    // y cada vez que se elige/cambia el perfil (main.js llama a window.aplicarFiltroNivelesPorPerfil).
+    const aplicarFiltroNivelesPorPerfil = () => {
+        if (!selectors.grade) return;
+        const ocultar = localStorage.getItem('perfilUsuario') === 'prospecto';
+        Array.from(selectors.grade.options).forEach(opt => {
+            if (NIVELES_OCULTOS_PROSPECTO.includes((opt.value || '').trim())) {
+                opt.hidden = ocultar;
+                opt.disabled = ocultar;
+                // Si estaba seleccionado y ahora se oculta, limpiar la selección.
+                if (ocultar && opt.selected) selectors.grade.value = '';
+            }
+        });
+    };
+    window.aplicarFiltroNivelesPorPerfil = aplicarFiltroNivelesPorPerfil;
+
     const loadGradeOptions = async () => {
         try {
             await loadOptions(selectors.grade, apiConfigs.grade.url, apiConfigs.grade.property);
 
             // Una vez cargadas las opciones, intercambiar opciones 2 y 3, y mover nivel 13 después del nivel 4
             swapOptions(selectors.grade);
+
+            // Ocultar los niveles no disponibles para prospecto (si el perfil ya está definido).
+            aplicarFiltroNivelesPorPerfil();
 
         } catch (error) {
             console.error('Error cargando las opciones del nivel:', error);
@@ -516,12 +538,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Carga las opciones en un elemento <select> desde la API y las ordena si es necesario
-    const loadOptions = async (selectElement, apiUrl, property, sort = true, skipUpdateCosto = false) => {
+    const loadOptions = async (selectElement, apiUrl, property, sort = true, skipUpdateCosto = false, filterFn = null) => {
         try {
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error('Network response was not ok');
 
             let data = await response.json();
+
+            // Filtro opcional sobre los datos (p. ej. planes nuevos de Preparatoria en el flujo prospecto)
+            if (typeof filterFn === 'function') {
+                data = data.filter(filterFn);
+            }
 
             // Si es el select de periodos, ordenar por el primer mes
             if (selectElement === selectors.periodo) {
@@ -1257,6 +1284,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     if (key === 'periodo') {
                         loadOptions(selectors.periodo, apiUrl, property, false, true);
+                    } else if (key === 'planes') {
+                        // Preparatoria (nivel_ed MSUP): en el flujo "Me interesa" (prospecto) solo se
+                        // muestran los planes nuevos; en "Soy alumno" se muestran todos (anteriores + nuevos).
+                        const nivelEd = selectors.grade.options[selectors.grade.selectedIndex]?.getAttribute('nivel_ed') || '';
+                        const perfil = localStorage.getItem('perfilUsuario');
+                        const soloNuevosPlanes = nivelEd === 'MSUP' && perfil === 'prospecto';
+                        const filtroPlanes = soloNuevosPlanes
+                            ? (plan) => /nuevo plan/i.test(plan.descripcion || '')
+                            : null;
+                        loadOptions(selectors.planes, apiUrl, property, true, true, filtroPlanes);
                     } else {
                         loadOptions(selectors[key], apiUrl, property, true, true);
                     }

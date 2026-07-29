@@ -296,6 +296,9 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("perfilUsuario", perfil);
           perfilActual = perfil;
 
+          // Ocultar/mostrar niveles no disponibles para prospecto (definido en step1.js).
+          if (window.aplicarFiltroNivelesPorPerfil) window.aplicarFiltroNivelesPorPerfil();
+
           step2 = (perfil === "prospecto" && step2Prospecto) ? step2Prospecto : step2Students;
 
           // Rediseño del paso 1 (datos + nivel combinados, grid) para ambos
