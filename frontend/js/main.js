@@ -408,8 +408,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const nombre = document.getElementById("txt-nombre-alumno");
           const apellido = document.getElementById("txt-apellido-alumno");
 
-          // Formato de matrícula: 2 letras seguidas de 6 números (p.ej. AL123456)
-          valido = marcarCampo(matricula, /^[A-Za-z]{2}\d{6}$/.test(matricula.value)) && valido;
+          // Formato de matrícula: 2 letras seguidas de 8 números (p.ej. AL12345678)
+          valido = marcarCampo(matricula, /^[A-Za-z]{2}\d{8}$/.test(matricula.value)) && valido;
           valido = marcarCampo(nombre, noVacio(nombre.value)) && valido;
           valido = marcarCampo(apellido, noVacio(apellido.value)) && valido;
 
