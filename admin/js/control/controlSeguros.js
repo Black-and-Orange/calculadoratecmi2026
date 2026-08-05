@@ -16,8 +16,8 @@ function loadSeguros(level, containerId) {
         })
         .then(data => {
             if (Array.isArray(data) && data.length > 0) {
-                // Ordenar por nombre
-                data.sort((a, b) => a.nombre_seguro.localeCompare(b.nombre_seguro));
+                // Ordenar por nombre (tolerante a nombre_seguro null: p. ej. nivel 3 tiene seguros sin nombre)
+                data.sort((a, b) => (a.nombre_seguro || '').localeCompare(b.nombre_seguro || ''));
 
                 let tableHtml = `
                     <table class="table table-striped">
@@ -34,9 +34,10 @@ function loadSeguros(level, containerId) {
                 data.forEach(seguro => {
                     const estadoTexto = seguro.estado ? 'Habilitado' : 'Deshabilitado';
                     const estadoClass = seguro.estado ? 'badge-success' : 'badge-secondary';
+                    const nombreSeguro = seguro.nombre_seguro || '(sin nombre)';
                     tableHtml += `
                         <tr>
-                            <td>${seguro.nombre_seguro}</td>
+                            <td>${nombreSeguro}</td>
                             <td>$${parseFloat(seguro.valor).toFixed(2)}</td>
                             <td><span class="badge ${estadoClass}">${estadoTexto}</span></td>
                             <td>
@@ -45,7 +46,7 @@ function loadSeguros(level, containerId) {
                                         title="${seguro.estado ? 'Deshabilitar' : 'Habilitar'}">
                                     <i class="fas fa-${seguro.estado ? 'eye-slash' : 'eye'}"></i>
                                 </button>
-                                <button onclick="editSeguro(${seguro.id_seguro}, '${seguro.nombre_seguro.replace(/'/g, "\\'")}', ${seguro.valor}, ${level})" 
+                                <button onclick="editSeguro(${seguro.id_seguro}, '${(seguro.nombre_seguro || '').replace(/'/g, "\\'")}', ${seguro.valor}, ${level})"
                                         class="btn btn-sm btn-warning" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>

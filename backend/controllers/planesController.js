@@ -104,11 +104,8 @@ const updatePlanWithNivel = (req, res) => {
         .then(results => {
             const [planResult, planNivelResult] = results;
             
-            if (planResult.affectedRows > 0 || planNivelResult.affectedRows > 0) {
-                res.json({ message: 'Plan y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Plan y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Plan y/o nivel actualizado' });
         })
         .catch(err => {
             res.status(500).json({ error: err.message });

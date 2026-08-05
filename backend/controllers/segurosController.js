@@ -125,11 +125,8 @@ const updateSeguroWithNivel = (req, res) => {
     Promise.all([seguroUpdatePromise, seguroNivelUpdatePromise])
         .then(results => {
             const [seguroResult, seguroNivelResult] = results;
-            if (seguroResult.affectedRows > 0 || seguroNivelResult.affectedRows > 0) {
-                res.json({ message: 'Seguro y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Seguro y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Seguro y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

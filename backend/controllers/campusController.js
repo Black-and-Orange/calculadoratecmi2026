@@ -97,11 +97,8 @@ const updateCampusWithNivel = (req, res) => {
     Promise.all([campusUpdatePromise, campusNivelUpdatePromise])
         .then(results => {
             const [campusResult, campusNivelResult] = results;
-            if (campusResult.affectedRows > 0 || campusNivelResult.affectedRows > 0) {
-                res.json({ message: 'Campus y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Campus y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Campus y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

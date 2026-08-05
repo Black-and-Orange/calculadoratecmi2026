@@ -99,11 +99,8 @@ const updateSemanasWithNivel = (req, res) => {
     Promise.all([semanasUpdatePromise, semanasNivelUpdatePromise])
         .then(results => {
             const [semanasResult, semanasNivelResult] = results;
-            if (semanasResult.affectedRows > 0 || semanasNivelResult.affectedRows > 0) {
-                res.json({ message: 'Semanas y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Semanas y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Semanas y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

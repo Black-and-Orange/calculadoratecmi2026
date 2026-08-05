@@ -122,11 +122,8 @@ const updateBecaFijaWithNivel = (req, res) => {
     Promise.all([becaFijaUpdatePromise, becaFijaNivelUpdatePromise])
         .then(results => {
             const [becaFijaResult, becaFijaNivelResult] = results;
-            if (becaFijaResult.affectedRows > 0 || becaFijaNivelResult.affectedRows > 0) {
-                res.json({ message: 'BecaFija y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'BecaFija y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'BecaFija y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

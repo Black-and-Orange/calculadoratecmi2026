@@ -97,11 +97,8 @@ const updateBeneficioWithNivel = (req, res) => {
     Promise.all([beneficioUpdatePromise, beneficioNivelUpdatePromise])
         .then(results => {
             const [beneficioResult, beneficioNivelResult] = results;
-            if (beneficioResult.affectedRows > 0 || beneficioNivelResult.affectedRows > 0) {
-                res.json({ message: 'Beneficio y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Beneficio y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Beneficio y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

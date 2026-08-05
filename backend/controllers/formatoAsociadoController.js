@@ -97,11 +97,8 @@ const updateFormatoWithNivel = (req, res) => {
     Promise.all([formatoUpdatePromise, formatoNivelUpdatePromise])
         .then(results => {
             const [formatoResult, formatoNivelResult] = results;
-            if (formatoResult.affectedRows > 0 || formatoNivelResult.affectedRows > 0) {
-                res.json({ message: 'Formato y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Formato y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Formato y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

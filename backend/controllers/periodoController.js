@@ -97,11 +97,8 @@ const updatePeriodoWithNivel = (req, res) => {
     Promise.all([periodoUpdatePromise, periodoNivelUpdatePromise])
         .then(results => {
             const [periodoResult, periodoNivelResult] = results;
-            if (periodoResult.affectedRows > 0 || periodoNivelResult.affectedRows > 0) {
-                res.json({ message: 'Periodo y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Periodo y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Periodo y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

@@ -97,11 +97,8 @@ const updateCreditoWithNivel = (req, res) => {
     Promise.all([creditoUpdatePromise, creditoNivelUpdatePromise])
         .then(results => {
             const [creditoResult, creditoNivelResult] = results;
-            if (creditoResult.affectedRows > 0 || creditoNivelResult.affectedRows > 0) {
-                res.json({ message: 'Credito y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Credito y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Credito y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

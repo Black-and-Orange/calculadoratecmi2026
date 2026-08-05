@@ -97,11 +97,8 @@ const updateCostoWithNivel = (req, res) => {
     Promise.all([costoUpdatePromise, costoNivelUpdatePromise])
         .then(results => {
             const [costoResult, costoNivelResult] = results;
-            if (costoResult.affectedRows > 0 || costoNivelResult.affectedRows > 0) {
-                res.json({ message: 'Costo y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Costo y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Costo y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

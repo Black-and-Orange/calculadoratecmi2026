@@ -97,11 +97,8 @@ const updateInteresWithNivel = (req, res) => {
     Promise.all([interesUpdatePromise, interesNivelUpdatePromise])
         .then(results => {
             const [interesResult, interesNivelResult] = results;
-            if (interesResult.affectedRows > 0 || interesNivelResult.affectedRows > 0) {
-                res.json({ message: 'Interes y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Interes y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Interes y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

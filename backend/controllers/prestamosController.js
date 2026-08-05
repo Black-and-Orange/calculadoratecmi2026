@@ -95,11 +95,8 @@ const updatePrestamoWithNivel = (req, res) => {
     Promise.all([prestamoUpdatePromise, prestamoNivelUpdatePromise])
         .then(results => {
             const [prestamoResult, prestamoNivelResult] = results;
-            if (prestamoResult.affectedRows > 0 || prestamoNivelResult.affectedRows > 0) {
-                res.json({ message: 'Prestamo y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Prestamo y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Prestamo y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

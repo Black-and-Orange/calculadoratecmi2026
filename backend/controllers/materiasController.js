@@ -101,11 +101,8 @@ const updateMateriaWithNivel = (req, res) => {
     Promise.all([apoyoUpdatePromise, apoyoNivelUpdatePromise])
         .then(results => {
             const [apoyoResult, apoyoNivelResult] = results;
-            if (apoyoResult.affectedRows > 0 || apoyoNivelResult.affectedRows > 0) {
-                res.json({ message: 'Materia y/o nivel actualizado' });
-            } else {
-                res.status(404).json({ error: 'Materia y/o nivel no encontrado' });
-            }
+            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+            res.json({ message: 'Materia y/o nivel actualizado' });
         })
         .catch(err => res.status(500).json({ error: err.message }));
 };

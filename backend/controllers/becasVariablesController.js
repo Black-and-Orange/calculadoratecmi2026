@@ -168,11 +168,8 @@ const updateBecaVariableWithNivel = (req, res) => {
             .then(results => {
                 const [becaVariableResult, becaVariableNivelResult] = results;
                 
-                if (becaVariableResult.affectedRows > 0 || becaVariableNivelResult.affectedRows > 0) {
-                    res.json({ message: 'BecaVariable y/o nivel actualizado' });
-                } else {
-                    res.status(404).json({ error: 'BecaVariable y/o nivel no encontrado' });
-                }
+                // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
+                res.json({ message: 'BecaVariable y/o nivel actualizado' });
             })
             .catch(err => res.status(500).json({ error: err.message }));
     });
