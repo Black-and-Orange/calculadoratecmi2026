@@ -256,4 +256,38 @@ export const niveles = [
             { id: 'pagos-bimestrales', nombre: 'Pagos Bimestrales' }
         ]
     },
+    {
+        id: '18',
+        nombre: 'Preparatoria Semestral - Nuevo Plan',
+        pestañas: [
+            { id: 'campus', nombre: 'Campus' },
+            { id: 'programas', nombre: 'Planes' },
+            { id: 'periodo', nombre: 'Periodo' },
+            { id: 'seguros', nombre: 'Seguros' },
+            { id: 'becas', nombre: 'Becas' },
+            { id: 'apoyos', nombre: 'Apoyos' },
+            { id: 'apoyos-fijos', nombre: 'Apoyos Fijos' },
+            { id: 'carga-materias', nombre: 'Materias' },
+            { id: 'costo-materias', nombre: 'Costos' },
+            { id: 'beneficios', nombre: 'Beneficios' },
+            { id: 'interes', nombre: 'Interes' },
+        ]
+    },
+    {
+        id: '19',
+        nombre: 'Preparatoria Tetramestral - Nuevo Plan',
+        pestañas: [
+            { id: 'campus', nombre: 'Campus' },
+            { id: 'programas', nombre: 'Planes' },
+            { id: 'periodo', nombre: 'Periodo' },
+            { id: 'seguros', nombre: 'Seguros' },
+            { id: 'becas', nombre: 'Becas' },
+            { id: 'apoyos', nombre: 'Apoyos' },
+            { id: 'apoyos-fijos', nombre: 'Apoyos Fijos' },
+            { id: 'carga-materias', nombre: 'Materias' },
+            { id: 'costo-materias', nombre: 'Costos' },
+            { id: 'beneficios', nombre: 'Beneficios' },
+            { id: 'interes', nombre: 'Interes' },
+        ]
+    },
 ];

@@ -52,7 +52,7 @@ function loadBeneficios(level, containerId) {
 }
 
 $(document).ready(function () {
-    const maxLevel = 15;
+    const maxLevel = 19;
     for (let level = 1; level <= maxLevel; level++) {
         loadBeneficios(level, '#beneficiosNivel' + level);
     }

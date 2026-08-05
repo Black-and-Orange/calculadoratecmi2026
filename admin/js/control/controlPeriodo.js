@@ -245,7 +245,7 @@ window.fechasPagoPeriodo = fechasPagoPeriodo;
 // Inicialización y binds de eventos
 $(document).ready(function () {
     const apiUrl = `${API_BASE_URL}/periodo`;
-    const nivelesPeriodo = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+    const nivelesPeriodo = [1,2,3,4,5,6,7,8,9,10,11,12,13,18,19];
 
     // Cargar datos iniciales
     nivelesPeriodo.forEach(nivelId => {

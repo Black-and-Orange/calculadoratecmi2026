@@ -135,12 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Calcula el costo total basado en el número de materias y el costo por materia
-    const calcularCostoTotal = (numeroMaterias, costoMateria, esPlanNuevo = false) => {
-        // Plan NUEVO (Preparatoria): costo lineal, sin tope → nº materias × costo por materia.
-        if (esPlanNuevo) {
+    const calcularCostoTotal = (numeroMaterias, costoMateria, esLineal = false) => {
+        // Cálculo LINEAL (niveles con calculo_materias='lineal', ej. "... - Nuevo Plan"):
+        // nº materias × costo por materia, sin tope ni tabla escalonada.
+        if (esLineal) {
             return numeroMaterias * costoMateria;
         }
-        // Plan ANTERIOR (modelo viejo, se mantiene como estaba):
+        // Cálculo ESCALONADO (niveles actuales; se mantiene exactamente igual):
         if ([1, 2, 3, 4, 5, 6].includes(numeroMaterias)) {
             return numeroMaterias * costoMateria;
         } // PENDIENTE-FASE3 (confirmar con cliente): materias 7 u 8 se cobran como 6.
@@ -267,11 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             costoTotal = calcularCostoTotal(numeroMaterias, costoFormatoAsociado);
         } else {
-            // El plan nuevo de Preparatoria cobra las materias de forma lineal (sin tope);
-            // el plan anterior mantiene el cálculo previo. Se distingue por el texto "Nuevo Plan".
-            const planTexto = selectors.planes.options[selectors.planes.selectedIndex]?.value || '';
-            const esPlanNuevo = /nuevo plan/i.test(planTexto);
-            costoTotal = calcularCostoTotal(numeroMaterias, costoMateria, esPlanNuevo);
+            // El tipo de cálculo de materias lo define la configuración del nivel
+            // (columna `calculo_materias`): 'lineal' → nº materias × costo; 'escalonado' → tabla previa.
+            const esLineal = selectors.grade.options[selectors.grade.selectedIndex]?.getAttribute('calculo_materias') === 'lineal';
+            costoTotal = calcularCostoTotal(numeroMaterias, costoMateria, esLineal);
         }
 
         // Guardar el costo total y el nivel seleccionado en localStorage
@@ -585,6 +585,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.textContent = displayValue;
                 if (property === 'descripcion') {
                     option.setAttribute('nivel_ed', item.nivel_ed || '');
+                    // Tipo de cálculo de materias del nivel: 'escalonado' (default) o 'lineal'.
+                    option.setAttribute('calculo_materias', item.calculo_materias || 'escalonado');
                 }
                 if (property === 'nombre') {
                     option.setAttribute('categoria_coleg', item.categoria_coleg || '');
@@ -1293,16 +1295,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     if (key === 'periodo') {
                         loadOptions(selectors.periodo, apiUrl, property, false, true);
-                    } else if (key === 'planes') {
-                        // Preparatoria (nivel_ed MSUP): POR AHORA se ocultan los planes "Nuevo Plan"
-                        // (se muestran solo los anteriores) para AMBOS perfiles, porque los planes
-                        // nuevos están causando problemas. Para reactivarlos, invertir este filtro
-                        // (mostrar solo nuevos en prospecto / todos en alumno).
-                        const nivelEd = selectors.grade.options[selectors.grade.selectedIndex]?.getAttribute('nivel_ed') || '';
-                        const filtroPlanes = nivelEd === 'MSUP'
-                            ? (plan) => !/nuevo plan/i.test(plan.descripcion || '')
-                            : null;
-                        loadOptions(selectors.planes, apiUrl, property, true, true, filtroPlanes);
                     } else {
                         loadOptions(selectors[key], apiUrl, property, true, true);
                     }
@@ -1319,29 +1311,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Limita las materias del plan ANTERIOR de Preparatoria a 8 (oculta la opción 10);
-    // el plan NUEVO ofrece todas. Solo aplica a Preparatoria (nivel_ed MSUP), así que no
-    // afecta a otros niveles. Se llama al cambiar el plan.
-    const filtrarMateriasPorPlan = () => {
-        if (!selectors.materias || !selectors.grade) return;
-        const nivelEd = selectors.grade.options[selectors.grade.selectedIndex]?.getAttribute('nivel_ed') || '';
-        const planTexto = selectors.planes?.options[selectors.planes.selectedIndex]?.value || '';
-        const limitarA8 = nivelEd === 'MSUP' && planTexto !== '' && !/nuevo plan/i.test(planTexto);
-        Array.from(selectors.materias.options).forEach(opt => {
-            const n = parseInt(opt.value);
-            const ocultar = limitarA8 && !isNaN(n) && n > 8;
-            opt.hidden = ocultar;
-            opt.disabled = ocultar;
-            if (ocultar && opt.selected) selectors.materias.value = '';
-        });
-    };
-
     // Itera sobre los selectores y añade eventos
     Object.keys(selectors).forEach(key => {
 
         if (selectors[key] !== null) {
             selectors[key].addEventListener('change', () => {
-                if (key === 'planes') filtrarMateriasPorPlan();
                 updateCosto();
                 if (key === 'grade') {
                     // lockSubjectsSelectIfPrepa(parseInt(localStorage.getItem('selectedNivel')));

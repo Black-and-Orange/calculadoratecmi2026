@@ -201,7 +201,7 @@ async function deleteSeguro(id_seguro, level) {
 
 // Inicialización cuando el documento está listo
 $(document).ready(function () {
-    const maxLevel = 15;
+    const maxLevel = 19;
     
     // Cargar seguros para todos los niveles
     for (let level = 1; level <= maxLevel; level++) {

@@ -91,7 +91,7 @@ window.editApoyosFijos = editApoyosFijos;
 // Inicialización y binds de eventos
 $(document).ready(function () {
     const apiUrl = `${API_BASE_URL}/apoyosFijos`;
-    const nivelesApoyosFijos = [1,2,3,4,5,6,7,8,9,10,11,12,13,15];
+    const nivelesApoyosFijos = [1,2,3,4,5,6,7,8,9,10,11,12,13,15,18,19];
 
     // Cargar datos iniciales
     nivelesApoyosFijos.forEach(nivelId => {

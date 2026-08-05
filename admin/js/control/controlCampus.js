@@ -54,7 +54,7 @@ function loadCampus(level, containerId) {
 
 $(document).ready(function () {
     
-    const maxLevel = 15;
+    const maxLevel = 19;
     for (let level = 1; level <= maxLevel; level++) {
         loadCampus(level, '#campusNivel' + level);
     }
