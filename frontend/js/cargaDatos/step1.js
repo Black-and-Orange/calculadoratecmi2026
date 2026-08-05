@@ -1294,13 +1294,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (key === 'periodo') {
                         loadOptions(selectors.periodo, apiUrl, property, false, true);
                     } else if (key === 'planes') {
-                        // Preparatoria (nivel_ed MSUP): en el flujo "Me interesa" (prospecto) solo se
-                        // muestran los planes nuevos; en "Soy alumno" se muestran todos (anteriores + nuevos).
+                        // Preparatoria (nivel_ed MSUP): POR AHORA se ocultan los planes "Nuevo Plan"
+                        // (se muestran solo los anteriores) para AMBOS perfiles, porque los planes
+                        // nuevos están causando problemas. Para reactivarlos, invertir este filtro
+                        // (mostrar solo nuevos en prospecto / todos en alumno).
                         const nivelEd = selectors.grade.options[selectors.grade.selectedIndex]?.getAttribute('nivel_ed') || '';
-                        const perfil = localStorage.getItem('perfilUsuario');
-                        const soloNuevosPlanes = nivelEd === 'MSUP' && perfil === 'prospecto';
-                        const filtroPlanes = soloNuevosPlanes
-                            ? (plan) => /nuevo plan/i.test(plan.descripcion || '')
+                        const filtroPlanes = nivelEd === 'MSUP'
+                            ? (plan) => !/nuevo plan/i.test(plan.descripcion || '')
                             : null;
                         loadOptions(selectors.planes, apiUrl, property, true, true, filtroPlanes);
                     } else {
