@@ -3,6 +3,7 @@
 // ajusta detalles del documento. La colegiatura, los planes y "Mi información
 // ingresada" (#info-grid) los puebla resultados.js; aquí solo se completa lo nuevo.
 import { API_BASE_URL } from '../apiConfig.js';
+import { clasificarSeguro, cargarBeneficios } from '../utils/shared-utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -84,20 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn('[resultado-doc] no se pudieron cargar seguros:', e.message);
             }
         }
-        // Costo del seguro de un tipo SOLO si está seleccionado en "sí".
-        const costoTipo = (pred) => {
+        // Costo del seguro SELECCIONADO ('sí') cuyo tipo canónico esté en `tipos`.
+        // Se clasifica con la MISMA función que usa el paso 3 (clasificarSeguro), de modo
+        // que el renglón "accidentes" agrupa 'accidente' + 'otro' (premium, gastos médicos,
+        // etc.) —igual que el desplegable del paso 3—, no por coincidencia del nombre.
+        const costoPorTipo = (...tipos) => {
             const s = (seguros || []).find(seg => {
-                const n = (seg.nombre_seguro || '').toLowerCase();
                 const sel = segSel[seg.id_seguro];
-                return sel && sel.valor === 'si' && pred(n);
+                return sel && sel.valor === 'si' && tipos.includes(clasificarSeguro(seg));
             });
             return s ? num(s.valor) : null;
         };
         const aplica = (id, costo) => setText(id, costo ? fmt(costo) : 'No Aplica');
 
-        aplica('tc-accidentes', costoTipo(n => n.includes('accidente')));
-        aplica('tc-cobertura', costoTipo(n => n.includes('estudiantil') || n.includes('colegiatura')));
-        aplica('tc-vive', costoTipo(n => n.includes('vive')));
+        aplica('tc-accidentes', costoPorTipo('accidente', 'otro'));
+        aplica('tc-cobertura', costoPorTipo('colegiatura'));
+        aplica('tc-vive', costoPorTipo('vive'));
     }
 
     // Colegiatura bruta (sin descuentos ni seguros); base de los importes % ──
@@ -148,12 +151,39 @@ document.addEventListener('DOMContentLoaded', () => {
         new MutationObserver(arreglar).observe(el, { childList: true, characterData: true, subtree: true });
     }
 
-    // ── Beneficios de estudiar en Tecmilenio: solo en el flujo prospecto ("Me interesa") ──
-    function cablearBeneficios() {
+    // ── Beneficios de estudiar en Tecmilenio: solo en el flujo prospecto ("Me interesa"),
+    //    y DINÁMICOS según el nivel cotizado (backend /beneficios/nivel/:id) ──
+    async function cablearBeneficios() {
         const dp = leer('datosPersonales') || {};
         const perfil = dp.perfil || leer('perfilUsuario');
         const sec = document.getElementById('cotiz-beneficios');
-        if (sec) sec.classList.toggle('hidden', perfil !== 'prospecto');
+        if (!sec) return;
+
+        // Los beneficios solo aplican al flujo prospecto.
+        const visible = perfil === 'prospecto';
+        sec.classList.toggle('hidden', !visible);
+        if (!visible || !nivel) return;
+
+        const grid = sec.querySelector('.cotiz-beneficios-grid');
+        if (!grid) return;
+
+        // Beneficios reales del nivel (no los de Preparatoria hardcodeados en el HTML).
+        const beneficios = await cargarBeneficios(nivel);
+        if (!Array.isArray(beneficios) || !beneficios.length) {
+            // Sin beneficios configurados para este nivel: no mostrar los estáticos.
+            sec.classList.add('hidden');
+            return;
+        }
+        grid.innerHTML = beneficios.map(b => `
+            <div class="cotiz-beneficio-card">
+                <span class="cotiz-beneficio-icono">
+                    ${b.icono
+                        ? `<img src="${b.icono}" alt="" style="width:30px;height:30px;object-fit:contain;">`
+                        : '<i class="fa-solid fa-star" aria-hidden="true"></i>'}
+                </span>
+                <h3 class="cotiz-beneficio-nombre">${b.nombre || ''}</h3>
+                <p class="cotiz-beneficio-texto">${b.descripcion || ''}</p>
+            </div>`).join('');
     }
 
     cablearInfo();

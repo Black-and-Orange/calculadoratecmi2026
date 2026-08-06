@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../apiConfig.js';
+import { clasificarSeguro } from '../utils/shared-utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const segurosContainer = document.getElementById('seguros-dinamicos-container');
@@ -19,14 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sin formato (p.ej. prepa) se trata como presencial, igual que la lógica previa.
     const esPresencial = () => { const f = getFormatCode(); return !f || f === 'P'; };
 
-    const tipoSeguro = (seguro) => {
-        const n = (seguro.nombre_seguro || '').toLowerCase();
-        if (n.includes('vive')) return 'vive';
-        if (n.includes('accidente')) return 'accidente';
-        // En la BD la "Cobertura de Colegiatura" del PDF se llama "Cobertura Estudiantil".
-        if (n.includes('colegiatura') || n.includes('estudiantil')) return 'colegiatura';
-        return 'otro';
-    };
+    // Clasificación canónica de seguros (fuente única en shared-utils, compartida con
+    // el desglose de la Hoja de Resultados). Se conserva el nombre local `tipoSeguro`.
+    const tipoSeguro = clasificarSeguro;
 
     // <select> oculto = fuente de verdad que lee calculateInsuranceCost (id intacto).
     const crearSelectOculto = (idSeguro, valor) => {

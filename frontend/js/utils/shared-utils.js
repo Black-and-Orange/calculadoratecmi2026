@@ -133,6 +133,25 @@ export function toggleFieldsByLevel(nivelId) {
 // ===== FUNCIONES DE APOYOS Y SEGUROS =====
 
 /**
+ * Clasifica un seguro por su nombre en el tipo canónico que usa el flujo:
+ * 'vive' | 'accidente' | 'colegiatura' | 'otro'. El bloque "Seguro de accidentes"
+ * del paso 3 agrupa 'accidente' + 'otro' (premium, gastos médicos, etc.), así que
+ * cualquier catálogo que agregue el admin cae en un grupo sin tocar código.
+ * Fuente única compartida entre step3.js (motor de selección) y resultado-doc.js
+ * (desglose de la Hoja de Resultados) para que el itemizado coincida con lo elegido.
+ * @param {Object} seguro - Fila de seguro del backend (usa nombre_seguro)
+ * @returns {'vive'|'accidente'|'colegiatura'|'otro'}
+ */
+export function clasificarSeguro(seguro) {
+    const n = (seguro && seguro.nombre_seguro || '').toLowerCase();
+    if (n.includes('vive')) return 'vive';
+    if (n.includes('accidente')) return 'accidente';
+    // En la BD la "Cobertura de Colegiatura" del PDF se llama "Cobertura Estudiantil".
+    if (n.includes('colegiatura') || n.includes('estudiantil')) return 'colegiatura';
+    return 'otro';
+}
+
+/**
  * Oculta elementos con valores de 0%
  */
 export function hideZeroPercentages() {
