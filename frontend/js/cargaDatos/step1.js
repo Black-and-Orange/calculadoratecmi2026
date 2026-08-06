@@ -514,7 +514,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cargar las opciones del select de nivel
     // Niveles que NO deben aparecer en el flujo "Me interesa" (prospecto). En "Soy alumno" sí se muestran.
-    const NIVELES_OCULTOS_PROSPECTO = ['Profesional Asociado', 'Ejecutivo', 'Maestría y Especialidades', 'Connect Presencial Matutino'];
+    // Las Preparatorias ANTERIORES (Semestral/Tetramestral) se ocultan en prospecto: los nuevos
+    // prospectos solo ven la Preparatoria "Nuevo Plan" (18/19). En "Soy alumno" se ven ambas
+    // (nueva y anterior). El match es por nombre EXACTO, así que "... - Nuevo Plan" no se oculta.
+    const NIVELES_OCULTOS_PROSPECTO = ['Profesional Asociado', 'Ejecutivo', 'Maestría y Especialidades', 'Connect Presencial Matutino', 'Preparatoria Semestral', 'Preparatoria Tetramestral'];
 
     // Muestra u oculta esos niveles según el perfil actual. Se aplica al cargar el dropdown
     // y cada vez que se elige/cambia el perfil (main.js llama a window.aplicarFiltroNivelesPorPerfil).
