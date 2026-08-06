@@ -463,8 +463,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.setAttribute('codigo', item.codigo || '');
                 selectors.formatoSelect.appendChild(option);
             });
+            // Nº de formatos reales cargados (para decidir si mostrar el selector).
+            return Array.isArray(data) ? data.length : 0;
         } catch (error) {
             console.error('Error al cargar los formatos:', error);
+            return 0;
         }
     };
 
@@ -1248,8 +1251,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (mappedLevel >= 5) {
-            toggleFormatoDiv(true);
-            await loadFormatoOptions(mappedLevel);
+            // El selector de "Formato de estudios" solo se muestra si el nivel tiene
+            // formatos configurados (data-driven). Evita bloquear el paso 1 en niveles
+            // sin formato —p. ej. las Preparatorias "Nuevo Plan" (18/19), que no manejan
+            // modalidad— donde el selector quedaba visible pero vacío y deshabilitaba
+            // el botón "Siguiente".
+            const numFormatos = await loadFormatoOptions(mappedLevel);
+            toggleFormatoDiv(numFormatos > 0);
         } else {
             toggleFormatoDiv(false);
         }
