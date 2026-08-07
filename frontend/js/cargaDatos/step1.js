@@ -511,18 +511,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // (nueva y anterior). El match es por nombre EXACTO, así que "... - Nuevo Plan" no se oculta.
     const NIVELES_OCULTOS_PROSPECTO = ['Profesional Asociado', 'Ejecutivo', 'Maestría y Especialidades', 'Connect Presencial Matutino', 'Preparatoria Semestral', 'Preparatoria Tetramestral'];
 
+    // Niveles ocultos SIEMPRE (ambos perfiles), por ahora. Para reactivarlos, quitarlos de aquí.
+    const NIVELES_OCULTOS_SIEMPRE = ['Profesional Asociado', 'Connect Presencial Matutino'];
+
     // Muestra u oculta esos niveles según el perfil actual. Se aplica al cargar el dropdown
     // y cada vez que se elige/cambia el perfil (main.js llama a window.aplicarFiltroNivelesPorPerfil).
     const aplicarFiltroNivelesPorPerfil = () => {
         if (!selectors.grade) return;
-        const ocultar = localStorage.getItem('perfilUsuario') === 'prospecto';
+        const esProspecto = localStorage.getItem('perfilUsuario') === 'prospecto';
         Array.from(selectors.grade.options).forEach(opt => {
-            if (NIVELES_OCULTOS_PROSPECTO.includes((opt.value || '').trim())) {
-                opt.hidden = ocultar;
-                opt.disabled = ocultar;
-                // Si estaba seleccionado y ahora se oculta, limpiar la selección.
-                if (ocultar && opt.selected) selectors.grade.value = '';
-            }
+            const nombre = (opt.value || '').trim();
+            if (!nombre) return;
+            const gestionado = NIVELES_OCULTOS_SIEMPRE.includes(nombre) || NIVELES_OCULTOS_PROSPECTO.includes(nombre);
+            if (!gestionado) return;
+            // Oculto siempre, o solo en prospecto según la lista correspondiente.
+            const ocultar = NIVELES_OCULTOS_SIEMPRE.includes(nombre) ||
+                            (esProspecto && NIVELES_OCULTOS_PROSPECTO.includes(nombre));
+            opt.hidden = ocultar;
+            opt.disabled = ocultar;
+            // Si estaba seleccionado y ahora se oculta, limpiar la selección.
+            if (ocultar && opt.selected) selectors.grade.value = '';
         });
     };
     window.aplicarFiltroNivelesPorPerfil = aplicarFiltroNivelesPorPerfil;
