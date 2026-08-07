@@ -472,44 +472,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Función para reorganizar las opciones del select de niveles
+    // Orden de presentación de los niveles en el dropdown (por descripción EXACTA).
+    // Los niveles que no estén en esta lista se conservan y se agregan al final,
+    // en su orden original, para no perder ninguno.
+    const ORDEN_NIVELES = [
+        'Preparatoria Semestral',
+        'Preparatoria Tetramestral',
+        'Preparatoria Semestral - Nuevo Plan',
+        'Preparatoria Tetramestral - Nuevo Plan',
+        'Profesional Semestral (plan 2018)',
+        'Profesional Semestral MAPS',
+        'Ejecutivo',
+        'Ejecutivo Bimestral MAPS',
+        'Maestría y Especialidades',
+        'Master',
+        'MLP Connect',
+        'MEDU+',
+        'MLP Presencial',
+        'Posgrados MAPS',
+    ];
     const swapOptions = (selectElement) => {
-        if (selectElement.options.length >= 4) {
-            // 1. Intercambiar las opciones 2 y 3 (como estaba originalmente)
-            const option2 = selectElement.options[2];
-            const option3 = selectElement.options[3];
-            selectElement.insertBefore(option3, option2);
-            
-            // 2. Buscar la opción del nivel 13 (Ejecutivo bimestral MAPS)
-            let nivel13Option = null;
-            let nivel4Index = -1;
-            
-
-            
-            // Encontrar la opción del nivel 13 y la posición del nivel 4 usando atributos + value exacto
-            for (let i = 0; i < selectElement.options.length; i++) {
-                const option = selectElement.options[i];
-                const value = option.value;
-                
-                // Nivel 13: value exacto "Ejecutivo MAPS Bimestral"
-                if (value === 'Ejecutivo Bimestral MAPS') {
-                    nivel13Option = option;
-                } 
-                // Nivel 4: value exacto "Profesional Semestral MAPS"
-                else if (value === 'Profesional Semestral MAPS') {
-                    nivel4Index = i;
-                }
-            }
-            
-            // Si encontramos ambas opciones, mover el nivel 13 después del nivel 4
-            if (nivel13Option && nivel4Index !== -1) {
-                // Remover la opción del nivel 13 de su posición actual
-                nivel13Option.remove();
-                
-                // Insertar después del nivel 4
-                const nivel4Option = selectElement.options[nivel4Index];
-                selectElement.insertBefore(nivel13Option, nivel4Option.nextSibling);
-            }
-        }
+        const opciones = Array.from(selectElement.options);
+        const placeholder = opciones.filter(o => !o.value);   // "Elige" u opción vacía
+        const reales = opciones.filter(o => o.value);
+        const rank = (o) => {
+            const i = ORDEN_NIVELES.indexOf((o.value || '').trim());
+            return i === -1 ? ORDEN_NIVELES.length : i;       // no listados → al final
+        };
+        // Array.sort es estable: los no listados conservan su orden relativo original.
+        reales.sort((a, b) => rank(a) - rank(b));
+        [...placeholder, ...reales].forEach(o => selectElement.appendChild(o));
     };
 
     // Cargar las opciones del select de nivel
