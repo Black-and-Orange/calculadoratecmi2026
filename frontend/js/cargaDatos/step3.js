@@ -9,9 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let segurosData = [];
 
     // ── Reglas de negocio (confirmadas con cliente; ver memoria calculadora-tecmi-paso3-seguros) ──
-    const VIVE_FORZADA = [1, 2, 3, 4];                 // VIVE pre-marcada "sí"
+    // 18/19 = Preparatoria "Nuevo Plan": se comportan igual que las Preparatorias 1/3
+    // (VIVE forzada y Cobertura de Colegiatura obligatoria).
+    const VIVE_FORZADA = [1, 2, 3, 4, 18, 19];         // VIVE pre-marcada "sí"
     const VIVE_OCULTA = [6, 7, 8, 9, 10, 11, 12];      // VIVE no se muestra
-    const COLEGIATURA_NIVELES = [1, 2, 3, 4];          // dónde aplica colegiatura
+    const COLEGIATURA_NIVELES = [1, 2, 3, 4, 18, 19];  // dónde aplica colegiatura
 
     const getLevelId = () => {
         try { return JSON.parse(localStorage.getItem('selectedNivel')); } catch (e) { return null; }
