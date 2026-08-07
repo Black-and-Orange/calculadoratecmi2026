@@ -186,11 +186,28 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`).join('');
     }
 
+    // ── Oculta del desglose las filas cuyo Importe sea "No Aplica" (SOLO visual; no
+    //    modifica datos ni cálculos). Deja el layout compacto sin espacios reservados;
+    //    re-evalúa todas las filas para que las que sí tienen valor permanezcan visibles. ──
+    function ocultarFilasNoAplica() {
+        const tabla = document.getElementById('tc-prestamo')?.closest('table');
+        if (!tabla) return;
+        tabla.querySelectorAll('td.cotiz-importe').forEach(td => {
+            const fila = td.closest('tr');
+            if (!fila) return;
+            const noAplica = td.textContent.trim().toLowerCase() === 'no aplica';
+            fila.style.display = noAplica ? 'none' : '';
+        });
+    }
+
     cablearInfo();
-    cablearSeguros();
     cablearPrestamo();
     cablearBeca();
     cablearApoyo();
     cablearBeneficios();
     normalizarVigencia();
+    // cablearSeguros es async (fetch de seguros): al resolver, todas las celdas de
+    // importe (seguros + beca/apoyo/préstamo, ya síncronas) tienen su valor final,
+    // así que ese es el momento correcto para ocultar las filas "No Aplica".
+    cablearSeguros().then(ocultarFilasNoAplica);
 });
