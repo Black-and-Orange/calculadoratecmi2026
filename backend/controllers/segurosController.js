@@ -155,23 +155,6 @@ const deleteSeguroWithNivel = (req, res) => {
     }
 };
 
-const changeColumnNames = (req, res) => {
-    const { column_changes } = req.body;
-
-    if (!column_changes || typeof column_changes !== 'object') {
-        return res.status(400).json({ error: 'Se requiere un objeto con los cambios de nombres de columnas.' });
-    }
-
-    seguroModel.changeColumnNames(column_changes, (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-
-        res.json({ message: 'Nombres de columnas actualizados con éxito' });
-    });
-};
-
-
 module.exports = {
     getAllSeguro,
     getSegurosByNivel,
@@ -179,6 +162,5 @@ module.exports = {
     getSeguroById,
     createSeguroWithNivel,
     updateSeguroWithNivel,
-    deleteSeguroWithNivel,
-    changeColumnNames
+    deleteSeguroWithNivel
 };

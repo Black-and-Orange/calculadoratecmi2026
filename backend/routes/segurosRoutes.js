@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const segurosController = require('../controllers/segurosController');
+const validarIdNumerico = require('../middlewares/validarIdNumerico');
+
+// :id debe ser numérico (Block 1 / P4): cierra el paso a ids no numéricos
+// (p. ej. la antigua ruta "cambiar-nombres" que caería en "/:id").
+router.param('id', validarIdNumerico);
 
 // Obtener todos los campus
 router.get('/', segurosController.getAllSeguro);
@@ -18,8 +23,6 @@ router.post('/', segurosController.createSeguroWithNivel);
 // Eliminar un campus y su nivel
 router.delete('/:id', segurosController.deleteSeguroWithNivel);
 
-// Actualizar nombre de los seguros
-router.patch('/cambiar-nombres', segurosController.changeColumnNames);
 
 // Actualizar un campus y su nivel
 router.patch('/:id', segurosController.updateSeguroWithNivel);
