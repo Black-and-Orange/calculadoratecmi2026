@@ -11,8 +11,11 @@ const limitLogin = rateLimit({ bucket: 'login', windowMs: 60 * 1000, max: 5 });
 const limitRegister = rateLimit({ bucket: 'register', windowMs: 60 * 1000, max: 3 });
 
 // Hash bcrypt de referencia para igualar el tiempo de respuesta cuando el usuario
-// no existe (evita enumeración por timing). Se genera al cargar; no es un secreto.
-const DUMMY_HASH = bcrypt.hashSync('dummy-password-for-timing', 10);
+// no existe (evita enumeración por timing). Precalculado como constante (no es un
+// secreto) en lugar de generarlo al cargar: en Cloudflare Workers la API de
+// criptografía no está disponible durante la evaluación del módulo, así que
+// bcrypt.hashSync() al arranque hacía fallar el despliegue del Worker (error 10021).
+const DUMMY_HASH = '$2b$10$JKRUmxsAr9Hc3GlT38cTx.CkTQ1eXIjkE51A.wpx5iBpyoKX8obo.';
 const MSG_CREDENCIALES = 'Credenciales inválidas.';
 
 router.post('/register', limitRegister, async (req, res) => {
