@@ -35,8 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const min = parseFloat(beca.porcentaje_min);
                 const max = parseFloat(beca.porcentaje_max);
                 if (!isNaN(min) && !isNaN(max)) {
-                    // Generar TODOS los valores del rango (incremento de 1)
-                    for (let i = min; i <= max; i += 1) {
+                    // Generar los valores del rango de 5 en 5 (consistente con el
+                    // flujo de prospecto en step2.js).
+                    for (let i = min; i <= max; i += 5) {
                         porcentajes.add(i);
                     }
                 }
