@@ -7,7 +7,8 @@ import {
   hideZeroPercentages,
   calcularTotalFinanciado,
   agregarEstiloPorNivel,
-  esNivelBimestralMaps
+  esNivelBimestralMaps,
+  clasificarSeguro
 } from '../utils/shared-utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -457,39 +458,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Mantener compatibilidad con código antiguo (si existe)
-        const insuranceValue = segurosSeleccionados[Object.keys(segurosSeleccionados).find(k => {
-            const s = segurosData.find(seg => seg.id_seguro == k);
-            return s && s.nombre_seguro && s.nombre_seguro.toLowerCase().includes('accidente');
-        })];
-        const coverageValue = segurosSeleccionados[Object.keys(segurosSeleccionados).find(k => {
-            const s = segurosData.find(seg => seg.id_seguro == k);
-            return s && s.nombre_seguro && (s.nombre_seguro.toLowerCase().includes('estudiantil') || s.nombre_seguro.toLowerCase().includes('colegiatura'));
-        })];
-        const viveValue = segurosSeleccionados[Object.keys(segurosSeleccionados).find(k => {
-            const s = segurosData.find(seg => seg.id_seguro == k);
-            return s && s.nombre_seguro && s.nombre_seguro.toLowerCase().includes('vive');
-        })];
+        // Clasificación canónica (misma que el paso 3 y resultado-doc.js): el renglón
+        // "accidentes" agrupa 'accidente' + 'otro' (Seguro Plus/Premium/gastos médicos),
+        // no por coincidencia del nombre. Esto se guarda en la cotización, así que la
+        // vista compartida/PDF guardado también muestra el seguro contratado.
+        const valorSeguroPorTipo = (...tipos) => {
+            const seg = segurosData.find(s => {
+                const sel = segurosSeleccionados[s.id_seguro];
+                return sel && sel.valor === 'si' && tipos.includes(clasificarSeguro(s));
+            });
+            return seg ? formatearPesos(seg.valor) : 'No Aplica';
+        };
 
         return {
-            insurance: insuranceValue && insuranceValue.valor === 'si' 
-                ? formatearPesos(segurosData.find(s => s.id_seguro == Object.keys(segurosSeleccionados).find(k => {
-                    const seg = segurosData.find(seg => seg.id_seguro == k);
-                    return seg && seg.nombre_seguro && seg.nombre_seguro.toLowerCase().includes('accidente');
-                }))?.valor || 0) 
-                : 'No Aplica',
-            coverage: coverageValue && coverageValue.valor === 'si' 
-                ? formatearPesos(segurosData.find(s => s.id_seguro == Object.keys(segurosSeleccionados).find(k => {
-                    const seg = segurosData.find(seg => seg.id_seguro == k);
-                    return seg && seg.nombre_seguro && (seg.nombre_seguro.toLowerCase().includes('estudiantil') || seg.nombre_seguro.toLowerCase().includes('colegiatura'));
-                }))?.valor || 0) 
-                : 'No Aplica',
-            vive: viveValue && viveValue.valor === 'si' 
-                ? formatearPesos(segurosData.find(s => s.id_seguro == Object.keys(segurosSeleccionados).find(k => {
-                    const seg = segurosData.find(seg => seg.id_seguro == k);
-                    return seg && seg.nombre_seguro && seg.nombre_seguro.toLowerCase().includes('vive');
-                }))?.valor || 0) 
-                : 'No Aplica',
+            insurance: valorSeguroPorTipo('accidente', 'otro'),
+            coverage: valorSeguroPorTipo('colegiatura'),
+            vive: valorSeguroPorTipo('vive'),
             // Agregar objeto con todos los seguros para uso futuro
             todos: valores
         };
