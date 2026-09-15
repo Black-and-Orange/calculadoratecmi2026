@@ -398,7 +398,7 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
     const becaNombreValido = becaNombre && becaNombre !== '0' && !/^sin beca$/i.test(becaNombre);
     const tcBecaLabel = document.getElementById('tc-beca-label');
     // La etiqueta muestra el % de beca asignado en vez de "(descuento)".
-    const becaBase = becaNombreValido ? `Costo de ${becaNombre}` : 'Costo de beca';
+    const becaBase = becaNombreValido ? (becaNombre.charAt(0).toUpperCase() + becaNombre.slice(1)) : 'Beca';
     if (tcBecaLabel) tcBecaLabel.textContent = becaPct > 0 ? `${becaBase} (${becaPct}%)` : becaBase;
     setDescuento('tc-beca', (becaPct / 100) * colegiaturaBruta);
 

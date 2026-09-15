@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nombre = (leer('selectedScholarshipName') || '').toString().trim();
         const nombreValido = nombre && nombre !== '0' && !/^sin beca$/i.test(nombre);
         // La etiqueta muestra el % de beca asignado en vez de "(descuento)".
-        const base = nombreValido ? `Costo de ${nombre}` : 'Costo de beca';
+        const base = nombreValido ? (nombre.charAt(0).toUpperCase() + nombre.slice(1)) : 'Beca';
         setText('tc-beca-label', pct > 0 ? `${base} (${pct}%)` : base);
         setText('tc-beca', importe > 0 ? `-${fmt(importe)}` : 'No Aplica');
     }
