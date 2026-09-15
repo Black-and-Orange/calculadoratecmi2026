@@ -605,6 +605,32 @@ async function cablearFechasPagoPeriodo(cotizacion, numMensualidades) {
             });
         if (!fechas.length) return;
 
+        // Fuente de verdad del nº de pagos = nº de fechas configuradas en el admin.
+        // Se recalcula el reparto desde el monto base (total financiado − seguros),
+        // derivado de los campos guardados: seguros = primera_cuota − mensualidades.
+        // El total NO cambia. Si hay <2 fechas, se conserva el reparto guardado.
+        const seguros = (parseFloat(cotizacion.primera_cuota) || 0) - (parseFloat(cotizacion.mensualidades) || 0);
+        const baseFinanciado = (parseFloat(cotizacion.total_financiado) || 0) - seguros;
+        if (fechas.length >= 2 && baseFinanciado > 0) {
+            numMensualidades = fechas.length - 1;
+            const mensualidadNum = baseFinanciado / fechas.length;
+            const primeraCuotaNum = mensualidadNum + seguros;
+            const primerPagoEl = document.getElementById('primerPago');
+            const totalFinanciadoEl = document.getElementById('totalFinanciado');
+            const mensualidadesTextEl = document.getElementById('mensualidadesText');
+            const mensualidadesEl = document.getElementById('mensualidades');
+            if (primerPagoEl) primerPagoEl.textContent = formatearPesos(primeraCuotaNum);
+            // Total = suma de los renglones redondeados (para que cuadre exactamente).
+            const r2 = n => Math.round(n * 100) / 100;
+            if (totalFinanciadoEl) totalFinanciadoEl.textContent = formatearPesos(r2(primeraCuotaNum) + r2(mensualidadNum) * numMensualidades);
+            if (mensualidadesTextEl) mensualidadesTextEl.textContent = `${numMensualidades} mensualidades posteriores`;
+            if (mensualidadesEl) {
+                mensualidadesEl.innerHTML = Array(numMensualidades)
+                    .fill(`<b>${formatearPesos(mensualidadNum)}</b>`)
+                    .join('<br>');
+            }
+        }
+
         const setTexto = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
         setTexto('fecha-contado', fechas[0]);
         setTexto('fecha-primer-pago', fechas[0]);

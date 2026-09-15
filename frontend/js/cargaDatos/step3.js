@@ -283,6 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('interesDividido', JSON.stringify(interesDividido));
         localStorage.setItem('primeraCuota', JSON.stringify(primeraCuota));
         localStorage.setItem('totalCost', totalCost.toString());
+        // Monto base financiado (antes de repartir). Lo usa resultados.js para
+        // recalcular el reparto según el nº de fechas de pago configuradas en el
+        // admin, sin depender del divisor hardcodeado por nivel.
+        localStorage.setItem('totalConInteres', JSON.stringify(totalConInteres));
 
         // Actualizar valores de seguros seleccionados en localStorage (desde DOM si está disponible)
         const segurosSeleccionadosActualizados = {};

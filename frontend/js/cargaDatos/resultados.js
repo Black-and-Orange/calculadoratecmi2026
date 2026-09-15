@@ -786,7 +786,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .fill(FECHA_PENDIENTE)
                 .join('<br>');
         }
-        cablearFechasPagoPeriodo(factorMultiplicador);
+        // El nº de pagos real lo mandan las fechas configuradas en el admin;
+        // se pasa el monto base y los seguros para recalcular el reparto ahí.
+        const baseFinanciado = parseFloat(JSON.parse(localStorage.getItem('totalConInteres'))) || 0;
+        const totalCostSeguros = parseFloat(valores.totalCost) || 0;
+        cablearFechasPagoPeriodo(factorMultiplicador, baseFinanciado, totalCostSeguros);
         if (totalFinanciado) {
             totalFinanciado.textContent = formatearPesos(totalfinanciado);
         }
@@ -816,7 +820,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // sustituye los placeholders DD/MM/AAAA: la primera fecha es el vencimiento
     // del contado y del primer pago; las siguientes, las mensualidades en orden.
     // Nivel 13 no pasa por aquí (usa sus fechas de pagos bimestrales).
-    async function cablearFechasPagoPeriodo(numMensualidades) {
+    async function cablearFechasPagoPeriodo(numMensualidades, baseFinanciado, totalCostSeguros) {
         try {
             const periodoSeleccionado = (urlParams.get('select-period') || localStorage.getItem('selectedPeriodo') || '').trim();
             if (!periodoSeleccionado || periodoSeleccionado === 'N/A') return;
@@ -834,6 +838,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
                 });
             if (!fechas.length) return;
+
+            // Fuente de verdad del nº de pagos = nº de fechas configuradas en el admin.
+            // Si hay ≥2 fechas y tenemos el monto base, se recalcula el reparto (primer
+            // pago + mensualidades) para que coincida con las fechas configuradas. El
+            // total financiado NO cambia (base + seguros). Si no, se conserva el reparto
+            // hardcodeado por nivel (fallback), sin romper períodos sin fechas.
+            if (fechas.length >= 2 && baseFinanciado > 0) {
+                numMensualidades = fechas.length - 1;
+                const mensualidadNum = baseFinanciado / fechas.length;
+                const primeraCuotaNum = mensualidadNum + (totalCostSeguros || 0);
+                if (primerPago) primerPago.textContent = formatearPesos(primeraCuotaNum);
+                if (mensualidades) {
+                    mensualidades.innerHTML = Array(numMensualidades)
+                        .fill(`<b>${formatearPesos(mensualidadNum)}</b>`)
+                        .join('<br>');
+                }
+                if (mensualidadesText) mensualidadesText.textContent = `${numMensualidades} mensualidades posteriores`;
+                // Total = suma de los renglones redondeados (para que primer pago +
+                // mensualidades cuadre exactamente con el total mostrado).
+                const r2 = n => Math.round(n * 100) / 100;
+                const totalMostrado = r2(primeraCuotaNum) + r2(mensualidadNum) * numMensualidades;
+                if (totalFinanciado) totalFinanciado.textContent = formatearPesos(totalMostrado);
+            }
 
             const setTexto = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
             setTexto('fecha-contado', fechas[0]);
