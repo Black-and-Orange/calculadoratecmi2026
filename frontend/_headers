@@ -1,0 +1,6 @@
+# Cabeceras de Cloudflare Pages para el frontend.
+# Permite embeber la calculadora en un <iframe> SOLO desde los dominios de
+# Tecmilenio y HubSpot (p. ej. universidad.tecmilenio.mx/calculadora y las
+# vistas previas de HubSpot). Evita que sitios externos la embeban (clickjacking).
+/*
+  Content-Security-Policy: frame-ancestors 'self' https://*.tecmilenio.mx https://*.hubspot.com https://*.hubspotpreview-na1.com https://*.hs-sites.com https://*.hubspotpagebuilder.com
