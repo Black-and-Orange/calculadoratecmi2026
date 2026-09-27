@@ -466,3 +466,13 @@
 @media (max-width: 768px) {
     .cotiz-beneficios-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* Móvil: compactar la tabla de planes de pago para que la columna de fecha
+   no se corte (antes desbordaba la tarjeta y quedaba oculta por overflow). */
+@media (max-width: 768px) {
+    .cotiz-plan-tabla { font-size: 12.5px; }
+    .cotiz-plan-tabla td { padding: 9px 9px; }
+    .cotiz-plan .cotiz-importe { font-size: 12.5px; }
+    .cotiz-importe-grande { font-size: 18px; }
+    .cotiz-fecha { font-size: 11px; white-space: nowrap; }
+}
