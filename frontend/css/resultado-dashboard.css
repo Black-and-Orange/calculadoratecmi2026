@@ -477,6 +477,13 @@ h1#titleBenefit.dash-title {
     padding-bottom: 30px;
 }
 
+/* Los íconos flotan sobre las tarjetas (mt-24 + top:-75px), por lo que quedan
+   muy pegados al título "Beneficios de estudiar en Tecmilenio". Empujamos el
+   grid hacia abajo para darles aire respecto a la cabecera. */
+#benefits-wrappers {
+    margin-top: 42px;
+}
+
 #benefits-wrappers .benefits-item,
 #benefits-wrappers > div > div {
     border: 1px solid rgba(0, 83, 76, 0.08) !important;
