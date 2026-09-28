@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (cotizacionId) {
         // Redirigir a la página dedicada para cotizaciones compartidas
-        window.location.href = `cotizacion-compartida.html?id=${cotizacionId}`;
+        window.location.href = `${window.__COMPARTIDA_URL__ || 'cotizacion-compartida.html'}?id=${cotizacionId}`;
         return;
     }
     const levelId = JSON.parse(localStorage.getItem('selectedNivel')) || 1;
@@ -1523,7 +1523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cotizacionId) {
             // Crear URL de la cotización compartible usando resultado.html
             // Ruta relativa a la página actual: funciona igual en local, staging y producción.
-            const urlCotizacion = new URL(`cotizacion-compartida.html?id=${cotizacionId}`, window.location.href).href;
+            const urlCotizacion = new URL(`${window.__COMPARTIDA_URL__ || 'cotizacion-compartida.html'}?id=${cotizacionId}`, window.location.href).href;
             mensaje = `Hola, aquí tienes tu cotización de Tecmilenio: ${urlCotizacion}`;
         } else {
             // Fallback si no hay ID de cotización
