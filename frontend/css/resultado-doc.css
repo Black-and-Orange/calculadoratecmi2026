@@ -436,6 +436,15 @@
     text-align: center;
     background: #fff;
 }
+/* Círculo del ícono en el módulo "Beneficios de estudiar en Tecmilenio"
+   (tarjetas que arma shared-utils.actualizarBeneficios / resultados.js). El fondo
+   normalmente lo pinta el tema del nivel vía .bg-secondary-color-2 (var(--secondaryColor2));
+   forzamos el verde de marca con mayor especificidad para que aplique en todos los
+   niveles (prepa y profesional), sin tocar la variable de tema. */
+.benefits-item .bg-secondary-color-2 {
+    background: rgb(38 208 124);
+}
+
 .cotiz-beneficio-icono {
     position: absolute;
     top: -28px;
