@@ -27,6 +27,7 @@ const prestamosRoutes = require('./routes/prestamosRoutes');
 const authRoutes = require('./routes/authRoutes');
 const pagosBimestralesRoutes = require('./routes/pagosBimestralesRoutes');
 const configuracionVigenciaRoutes = require('./routes/configuracionVigenciaRoutes');
+const configuracionCondicionesRoutes = require('./routes/configuracionCondicionesRoutes');
 const cotizacionesRoutes = require('./routes/cotizacionesRoutes');
 const fechasPagoPeriodoRoutes = require('./routes/fechasPagoPeriodoRoutes');
 
@@ -139,6 +140,7 @@ app.use('/api/creditos', creditosRoutes);
 app.use('/api/prestamos', prestamosRoutes);
 app.use('/api/pagos-bimestrales', pagosBimestralesRoutes);
 app.use('/api/configuracion-vigencia', configuracionVigenciaRoutes);
+app.use('/api/configuracion-condiciones', configuracionCondicionesRoutes);
 app.use('/api/fechas-pago', fechasPagoPeriodoRoutes);
 app.use('/api/cotizaciones', cotizacionesRoutes);
 

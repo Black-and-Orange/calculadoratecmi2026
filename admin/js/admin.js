@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (becasContainer) fetchBecas();
     if (apoyosContainer) fetchApoyosEstudiantiles();
     cargarDiasVigencia();
+    cargarCondiciones();
 });
 
 // Funciones para configuración de vigencia
@@ -185,3 +186,38 @@ async function actualizarDiasVigencia() {
 
 window.actualizarDiasVigencia = actualizarDiasVigencia;
 window.cargarDiasVigencia = cargarDiasVigencia;
+
+// Funciones para configuración de "Condiciones de la propuesta" (global, todos los niveles)
+async function cargarCondiciones() {
+    const ta = document.getElementById('condicionesPropuesta');
+    if (!ta) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/configuracion-condiciones`);
+        const data = await response.json();
+        ta.value = data.condiciones || '';
+    } catch (error) {
+        console.error('Error al cargar condiciones de la propuesta:', error);
+    }
+}
+
+async function actualizarCondiciones() {
+    const ta = document.getElementById('condicionesPropuesta');
+    if (!ta) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/configuracion-condiciones`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ condiciones: ta.value })
+        });
+        if (response.ok) {
+            window.tecToast('Condiciones de la propuesta actualizadas');
+        } else {
+            window.tecToast('Error al actualizar las condiciones', 'error');
+        }
+    } catch (error) {
+        window.tecToast('Error al actualizar las condiciones', 'error');
+    }
+}
+
+window.actualizarCondiciones = actualizarCondiciones;
+window.cargarCondiciones = cargarCondiciones;

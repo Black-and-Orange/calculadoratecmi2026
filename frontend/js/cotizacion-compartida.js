@@ -12,7 +12,8 @@ import {
     agregarEstiloPorNivel,
     hideZeroPercentages,
     esNivelBimestralMaps,
-    creditosPorCertificado
+    creditosPorCertificado,
+    cargarCondicionesPropuesta
 } from './utils/shared-utils.js';
 
 // Función helper para parsear JSON de manera segura
@@ -260,6 +261,7 @@ async function cargarCotizacion(cotizacionId) {
         // Cargar beneficios y vigencia
         const beneficios = await cargarBeneficios(cotizacion.nivel_id);
         actualizarBeneficios(beneficios, cotizacion.nivel_id);
+        cargarCondicionesPropuesta();
         
         // Mostrar fecha de vigencia guardada en la cotización
         const fechaVencimientoElem = document.getElementById('fechaVencimiento');

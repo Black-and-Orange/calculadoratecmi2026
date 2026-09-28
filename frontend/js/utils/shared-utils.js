@@ -389,4 +389,27 @@ export function actualizarBeneficios(beneficios, nivel) {
     } else {
         benefitsWrapper.classList.remove('benefits-3-2');
     }
+}
+
+/**
+ * Reemplaza las "Condiciones de la propuesta" (los <p> dentro de .cotiz-notas)
+ * con el texto GLOBAL configurado en el admin (una condición por línea). Si la
+ * carga falla o viene vacía, se conserva el texto por defecto del HTML (fallback),
+ * así nunca queda vacío. Aplica para todos los niveles.
+ */
+export async function cargarCondicionesPropuesta() {
+    const cont = document.querySelector('.cotiz-notas');
+    if (!cont) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/configuracion-condiciones`);
+        if (!response.ok) return;
+        const { condiciones } = await response.json();
+        const lineas = (condiciones || '').split('\n').map(l => l.trim()).filter(Boolean);
+        if (!lineas.length) return;
+        // Quitar los <p> de condiciones (todos menos el título) y poner los del admin.
+        cont.querySelectorAll('p:not(.cotiz-notas-titulo)').forEach(p => p.remove());
+        lineas.forEach(l => { const p = document.createElement('p'); p.textContent = l; cont.appendChild(p); });
+    } catch (e) {
+        console.warn('[condiciones] no se pudieron cargar; se usa el texto por defecto:', e.message);
+    }
 } 

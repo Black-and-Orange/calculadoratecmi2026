@@ -3,7 +3,7 @@
 // ajusta detalles del documento. La colegiatura, los planes y "Mi información
 // ingresada" (#info-grid) los puebla resultados.js; aquí solo se completa lo nuevo.
 import { API_BASE_URL } from '../apiConfig.js';
-import { clasificarSeguro, cargarBeneficios } from '../utils/shared-utils.js';
+import { clasificarSeguro, cargarBeneficios, cargarCondicionesPropuesta } from '../utils/shared-utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     cablearInfo();
+    cargarCondicionesPropuesta();
     cablearPrestamo();
     cablearBeca();
     cablearApoyo();
