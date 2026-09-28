@@ -1125,7 +1125,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function agregarEstiloPorNivel() {
         if (styleMap[levelId]) {
-            const estiloHref = styleMap[levelId];
+            // En HubSpot el CSS de tema no está en ./css; el template expone las URLs
+            // resueltas (get_asset_url) en window.__THEME_CSS__. Fuera de HubSpot el
+            // mapa no existe y se usa la ruta relativa original (staging/local).
+            const relHref = styleMap[levelId];
+            const estiloHref = (window.__THEME_CSS__ && window.__THEME_CSS__[relHref]) || relHref;
 
             if (!document.querySelector('link[href="' + estiloHref + '"]')) {
                 const linkElement = document.createElement('link');

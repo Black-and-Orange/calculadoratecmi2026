@@ -312,7 +312,12 @@ export function agregarEstiloPorNivel(levelId) {
     };
 
     if (styleMap[levelId]) {
-        const estiloHref = styleMap[levelId];
+        // En HubSpot los assets no viven en ./css (la página se sirve en una ruta
+        // sin esa subcarpeta); el template expone las URLs ya resueltas por
+        // get_asset_url en window.__THEME_CSS__. Fuera de HubSpot el mapa no existe
+        // y se usa la ruta relativa original (staging/local), sin cambios.
+        const relHref = styleMap[levelId];
+        const estiloHref = (window.__THEME_CSS__ && window.__THEME_CSS__[relHref]) || relHref;
 
         if (!document.querySelector('link[href="' + estiloHref + '"]')) {
             const linkElement = document.createElement('link');
