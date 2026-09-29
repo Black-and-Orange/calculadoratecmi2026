@@ -139,6 +139,9 @@
                             <button id="btnExportCSV" class="btn btn-success">
                                 <i class="fas fa-download"></i> Exportar CSV
                             </button>
+                            <button id="btnEliminarSeleccionadas" class="btn btn-danger ml-3" disabled>
+                                <i class="fas fa-trash"></i> Eliminar seleccionadas (<span id="cotSelCount">0</span>)
+                            </button>
                         </div>
                         <div class="col-md-4 d-flex justify-content-md-end justify-content-center px-0">
                             <div class="card bg-primary text-white" style="min-width: 180px;">
@@ -155,6 +158,7 @@
                             <table id="tablaCotizaciones" class="table table-striped table-hover">
                                 <thead class="thead-dark">
                                     <tr>
+                                        <th style="width:34px;"><input type="checkbox" id="chkSelectAll" title="Seleccionar todo"></th>
                                         <th>ID</th>
                                         <th>Estudiante</th>
                                         <th>Nivel</th>

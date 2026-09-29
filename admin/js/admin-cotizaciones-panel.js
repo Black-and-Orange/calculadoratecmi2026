@@ -18,6 +18,68 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     if (btnRefresh) btnRefresh.addEventListener('click', cargarCotizaciones);
     if (btnExportCSV) btnExportCSV.addEventListener('click', exportarCSV);
+
+    // ── Selección múltiple para eliminar en lote ──
+    const btnEliminarSel = document.getElementById('btnEliminarSeleccionadas');
+    const chkSelectAll = document.getElementById('chkSelectAll');
+    const cotSelCount = document.getElementById('cotSelCount');
+
+    function getChecks() { return [...document.querySelectorAll('.cot-check')]; }
+
+    function actualizarSeleccion() {
+        const checks = getChecks();
+        const marcadas = checks.filter(c => c.checked);
+        if (cotSelCount) cotSelCount.textContent = marcadas.length;
+        if (btnEliminarSel) btnEliminarSel.disabled = marcadas.length === 0;
+        if (chkSelectAll) {
+            chkSelectAll.checked = checks.length > 0 && marcadas.length === checks.length;
+            chkSelectAll.indeterminate = marcadas.length > 0 && marcadas.length < checks.length;
+        }
+    }
+
+    function resetSeleccion() {
+        if (chkSelectAll) { chkSelectAll.checked = false; chkSelectAll.indeterminate = false; }
+        actualizarSeleccion();
+    }
+
+    // "Seleccionar todo" marca/desmarca todas las filas visibles
+    if (chkSelectAll) chkSelectAll.addEventListener('change', () => {
+        getChecks().forEach(c => { c.checked = chkSelectAll.checked; });
+        actualizarSeleccion();
+    });
+
+    // Delegación: cualquier checkbox de fila actualiza el contador
+    if (cotizacionesTableBody) cotizacionesTableBody.addEventListener('change', (e) => {
+        if (e.target && e.target.classList.contains('cot-check')) actualizarSeleccion();
+    });
+
+    if (btnEliminarSel) btnEliminarSel.addEventListener('click', eliminarSeleccionadas);
+
+    // Elimina en lote las cotizaciones seleccionadas (reusa DELETE /cotizaciones/:id).
+    async function eliminarSeleccionadas() {
+        const ids = getChecks().filter(c => c.checked).map(c => Number(c.value));
+        if (!ids.length) return;
+        const ok = await window.tecConfirm(`Se eliminarán ${ids.length} cotización(es) de forma permanente. Esta acción no se puede deshacer.`);
+        if (!ok) return;
+        const original = btnEliminarSel.innerHTML;
+        btnEliminarSel.disabled = true;
+        let hechas = 0, fallidas = 0;
+        const lote = 8; // concurrencia controlada para no saturar el API
+        for (let i = 0; i < ids.length; i += lote) {
+            const grupo = ids.slice(i, i + lote);
+            const res = await Promise.allSettled(grupo.map(id =>
+                fetch(`${API_BASE_URL}/cotizaciones/${id}`, { method: 'DELETE' })
+                    .then(r => { if (!r.ok) throw new Error(String(r.status)); })
+            ));
+            hechas += res.filter(r => r.status === 'fulfilled').length;
+            fallidas += res.filter(r => r.status === 'rejected').length;
+            btnEliminarSel.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Eliminando ${hechas}/${ids.length}...`;
+        }
+        btnEliminarSel.innerHTML = original;
+        if (fallidas) window.tecToast(`${hechas} eliminada(s), ${fallidas} con error`, 'error');
+        else window.tecToast(`${hechas} cotización(es) eliminada(s)`);
+        await cargarCotizaciones();
+    }
     
     // Eliminar event listener del filtro de nivel
     // if (filtroNivel) {
@@ -112,10 +174,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!cotizaciones || cotizaciones.length === 0) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = 9; // Actualizado para reflejar el número correcto de columnas (sin fecha de vigencia)
+            cell.colSpan = 10; // columnas: checkbox + 8 datos + detalle
             cell.textContent = 'No hay cotizaciones registradas.';
             row.appendChild(cell);
             tbody.appendChild(row);
+            resetSeleccion();
             return;
         }
         cotizaciones.forEach(cotizacion => {
@@ -124,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const nivelNombre = cotizacion.nivel_nombre || (nivel ? nivel.nombre : `Nivel ${cotizacion.nivel_id}`);
             
             row.innerHTML = `
+                <td><input type="checkbox" class="cot-check" value="${cotizacion.id}"></td>
                 <td>${cotizacion.id}</td>
                 <td>${cotizacion.nombre_estudiante || ''}</td>
                 <td>${nivelNombre}</td>
@@ -145,6 +209,8 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             tbody.appendChild(row);
         });
+        // Tras re-render, limpiar el estado de selección (checkboxes nuevos)
+        resetSeleccion();
     }
 
     // Función para exportar a CSV
