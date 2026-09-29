@@ -234,12 +234,12 @@ document.addEventListener("DOMContentLoaded", () => {
           if (select.offsetParent !== null && !select.disabled && select.value === "") completo = false;
         });
 
-        // Nivel 13 (bimestral): el periodo es un grupo de checkboxes (de 2 a 5)
+        // Nivel 13 (bimestral): el periodo es un grupo de checkboxes (de 1 a 5)
         const periodosContainer = step1.querySelector("#periodos-checkbox-container");
         const esNivel13 = periodosContainer && periodosContainer.offsetParent !== null;
         if (esNivel13) {
           const marcados = periodosContainer.querySelectorAll('input[type="checkbox"]:checked').length;
-          if (marcados < 2) completo = false;
+          if (marcados < 1) completo = false;
         }
 
         // El costo debe ser mayor a cero (p.ej. MAPS con 0 certificados, 0
