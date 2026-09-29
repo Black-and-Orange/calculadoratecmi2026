@@ -430,8 +430,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Admin en staging (Cloudflare Pages) → frontend de staging
                     urlCotizacion = `https://fase-3.calculadora-tecmi.pages.dev/cotizacion-compartida.html?id=${cotizacion.id}`;
                 } else {
-                    // Producción
-                    urlCotizacion = `https://universidad.tecmilenio.mx/cotizacion?id=${cotizacion.id}`;
+                    // Producción (HubSpot): la página publicada es /cotizacion-compartida
+                    urlCotizacion = `https://universidad.tecmilenio.mx/cotizacion-compartida?id=${cotizacion.id}`;
                 }
                 
                 // Abrir la cotización completa en una nueva pestaña
