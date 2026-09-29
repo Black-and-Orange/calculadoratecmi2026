@@ -469,7 +469,20 @@ async function ejecutarLogicaVisualizacion(cotizacion) {
             }
         }
     }
-    
+
+    // Ocultar del desglose las filas cuyo Importe sea "No Aplica" (mismo criterio que
+    // resultado-doc.js en la hoja de resultados). Solo oculta; no reactiva filas que
+    // otra lógica de arriba (apoyo educativo, separadora) ya haya escondido.
+    const tablaDesglose = document.getElementById('tc-prestamo')?.closest('table');
+    if (tablaDesglose) {
+        tablaDesglose.querySelectorAll('td.cotiz-importe').forEach(td => {
+            const fila = td.closest('tr');
+            if (fila && td.textContent.trim().toLowerCase() === 'no aplica') {
+                fila.style.display = 'none';
+            }
+        });
+    }
+
     // Mostrar total contado (incluyendo seguros)
     if (totalContadoElem) {
         let totalContadoFinal = parseFloat(cotizacion.total_contado) || 0;
