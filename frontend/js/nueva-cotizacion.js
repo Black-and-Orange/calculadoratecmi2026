@@ -97,12 +97,14 @@ function conservarDatosYReiniciar() {
     // al usuario solo re-elegir el plan de estudios.
     localStorage.setItem('reusarDatos', '1');
 
-    window.location.href = 'index.html';
+    // En HubSpot el wizard no es index.html sino /calculadora; el template define
+    // window.__WIZARD_URL__. Fuera de HubSpot (staging/local) se usa index.html.
+    window.location.href = window.__WIZARD_URL__ || 'index.html';
 }
 
 function empezarDesdeCero() {
     localStorage.clear();
-    window.location.href = 'index.html';
+    window.location.href = window.__WIZARD_URL__ || 'index.html';
 }
 
 function inicializarModal() {
