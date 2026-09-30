@@ -19,7 +19,7 @@ export const niveles = [
     },
     {
         id: '2',
-        nombre: 'Profesional Semestral',
+        nombre: 'Profesional Semestral (plan 2018)',
         pestañas: [
             { id: 'campus', nombre: 'Campus' },
             { id: 'programas', nombre: 'Planes' },
@@ -74,7 +74,7 @@ export const niveles = [
     },
     {
         id: '5',
-        nombre: 'Pofesional Asociado',
+        nombre: 'Profesional Asociado',
         pestañas: [
             { id: 'campus', nombre: 'Campus' },
             { id: 'programas', nombre: 'Planes' },
@@ -110,7 +110,7 @@ export const niveles = [
     },
     {
         id: '7',
-        nombre: 'Maestria y Especialidades',
+        nombre: 'Maestría y Especialidades',
         pestañas: [
             { id: 'campus', nombre: 'Campus' },
             { id: 'programas', nombre: 'Planes' },
