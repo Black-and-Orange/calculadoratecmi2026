@@ -234,6 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 segurosData = [];
                 segurosContainer.innerHTML = '<p class="text-muted">No hay seguros disponibles para este nivel.</p>';
+                // Aunque el nivel no tenga seguros, hay que calcular el financiamiento
+                // (interesDividido/primeraCuota); si no, quedan en 0 y el plan financiado
+                // no se muestra (p. ej. MLP Connect nivel 9). Misma llamada que hace
+                // generarSelectsSeguros cuando sí hay seguros.
+                calculateInsuranceCost();
+                actualizarBoton();
             }
         } catch (error) {
             console.error('Error al cargar los seguros:', error.message);
