@@ -441,12 +441,37 @@
         const breadcrumb = document.getElementById('tecBreadcrumb');
         const nivelInfo = document.getElementById('nivelInfo');
 
-        // ── Construir el DOM de todos los niveles (ocultos; se muestra el activo) ──
-        niveles.forEach((nivel, idx) => {
+        // Lista canónica de niveles a mostrar en el admin: orden, visibilidad y
+        // nombre de etiqueta (definida por el cliente). Excluye los niveles que no
+        // deben administrarse aquí (Profesional Asociado id 5, Connect Presencial
+        // Matutino id 12). El resto de la lógica sigue empatando por id con tabs.js.
+        const ORDEN_NIVELES = ['1', '3', '18', '19', '2', '4', '6', '13', '7', '8', '9', '10', '11', '15'];
+        const NOMBRES_NIVEL = {
+            '1': 'Preparatoria Semestral',
+            '3': 'Preparatoria Tetramestral',
+            '18': 'Preparatoria Semestral Nuevo Plan',
+            '19': 'Preparatoria Tetramestral Nuevo Plan',
+            '2': 'Profesional Semestral (plan 2018)',
+            '4': 'Profesional Semestral MAPS',
+            '6': 'Ejecutivo',
+            '13': 'Ejecutivo Bimestral MAPS',
+            '7': 'Maestría y Especialidades',
+            '8': 'Master',
+            '9': 'MLP Connect',
+            '10': 'MEDU+',
+            '11': 'MLP Presencial',
+            '15': 'Posgrados MAPS',
+        };
+        const nivelesOrdenados = ORDEN_NIVELES
+            .map(id => niveles.find(n => String(n.id) === id))
+            .filter(Boolean);
+
+        // ── Construir el DOM de los niveles en el orden definido (ocultos; se muestra el activo) ──
+        nivelesOrdenados.forEach((nivel, idx) => {
             // Opción del selector
             const opt = document.createElement('option');
             opt.value = nivel.id;
-            opt.textContent = nivel.nombre;
+            opt.textContent = NOMBRES_NIVEL[nivel.id] || nivel.nombre;
             select.appendChild(opt);
 
             const panel = document.createElement('div');
@@ -509,6 +534,7 @@
 
         // ── Interacción: nivel activo + chip activo + breadcrumb ──
         function nombreNivel(id) {
+            if (NOMBRES_NIVEL[String(id)]) return NOMBRES_NIVEL[String(id)];
             const n = niveles.find(x => String(x.id) === String(id));
             return n ? n.nombre : '';
         }
