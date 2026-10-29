@@ -12,7 +12,15 @@ router.get('/', segurosController.getAllSeguro);
 
 // IMPORTANTE: La ruta más específica debe ir ANTES de la genérica
 router.get('/nivel/:nivelId/todos', segurosController.getSegurosByNivelAll);
+// Excepciones de precio por campus de un nivel (admin)
+router.get('/nivel/:nivelId/precios-campus', segurosController.getPreciosCampusByNivel);
 router.get('/nivel/:nivelId', segurosController.getSegurosByNivel);
+
+// Alta/edición y borrado de excepciones de precio por campus.
+// (DELETE /precios-campus debe ir ANTES de DELETE /:id para no chocar con el
+//  validador numérico de :id.)
+router.post('/precios-campus', segurosController.upsertPreciosCampus);
+router.delete('/precios-campus', segurosController.deletePrecioCampus);
 
 // Obtener un campus por ID
 router.get('/:id', segurosController.getSeguroById);

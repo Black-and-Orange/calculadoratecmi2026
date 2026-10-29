@@ -596,6 +596,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (property === 'nombre') {
                     option.setAttribute('categoria_coleg', item.categoria_coleg || '');
+                    // id del campus: lo usa el paso 3 para resolver el precio de
+                    // seguros por campus (p. ej. Cobertura VIVE con costo distinto).
+                    if (item.id !== undefined) option.setAttribute('id_campus', item.id);
                 }
                 if (property === 'periodo_descripcion') {
                     option.setAttribute('periodo_codigo', item.periodo_codigo || '');
@@ -1389,6 +1392,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cambiar la función de obtención de períodos seleccionados en el submit
     if (formElement) {
         formElement.addEventListener('submit', (event) => {
+            // Persistir el id del campus elegido para que la página de resultados
+            // (resultados.js / resultado-doc.js) resuelva el precio de seguros por
+            // campus (p. ej. Cobertura VIVE con costo distinto en ciertos campus).
+            const campusSel = selectors.campus;
+            const campusId = (campusSel && campusSel.selectedIndex >= 0 && campusSel.options[campusSel.selectedIndex])
+                ? (campusSel.options[campusSel.selectedIndex].getAttribute('id_campus') || '')
+                : '';
+            localStorage.setItem('selectedCampusId', campusId);
+
             if (esNivelBimestralMaps(parseInt(localStorage.getItem('selectedNivel')))) {
                 const periodosSeleccionados = obtenerPeriodosSeleccionadosSelect();
                 const configuracionesPorPeriodo = obtenerConfiguracionPorPeriodo();

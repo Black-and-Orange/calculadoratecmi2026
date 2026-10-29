@@ -410,7 +410,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchSeguros() {
         try {
-            const response = await fetch(`${API_BASE_URL}/seguros/nivel/${levelId}`);
+            // Campus elegido en el wizard (lo persiste step1): resuelve el precio de
+            // seguros por campus (p. ej. Cobertura VIVE). Sin campus → precio default.
+            const campusId = localStorage.getItem('selectedCampusId') || '';
+            const urlSeguros = `${API_BASE_URL}/seguros/nivel/${levelId}` +
+                (campusId ? `?campus=${encodeURIComponent(campusId)}` : '');
+            const response = await fetch(urlSeguros);
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const segurosDataArray = await response.json(); // Recibimos un array
 

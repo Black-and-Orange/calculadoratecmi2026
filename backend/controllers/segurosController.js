@@ -1,5 +1,6 @@
 const seguroModel = require('../models/seguros');
 const seguroNivelModel = require('../models/segurosNivel');
+const seguroNivelCampusModel = require('../models/segurosNivelCampus');
 
 const getAllSeguro = (req, res) => {
     seguroModel.getAllSeguros((err, result) => {
@@ -13,12 +14,57 @@ const getAllSeguro = (req, res) => {
 
 const getSegurosByNivel = (req, res) => {
     const nivelId = req.params.nivelId;
-    
-    seguroModel.getSegurosByNivel(nivelId, (err, result) => {
+    // Campus opcional: si viene, se resuelve el precio por campus (excepción o default).
+    const campusId = req.query.campus;
+
+    seguroModel.getSegurosByNivel(nivelId, campusId, (err, result) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
         res.json(result);
+    });
+};
+
+// ===== Excepciones de precio por campus (admin) =====
+
+const getPreciosCampusByNivel = (req, res) => {
+    const nivelId = req.params.nivelId;
+    seguroNivelCampusModel.getByNivel(nivelId, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(result);
+    });
+};
+
+// Upsert de una o varias excepciones. Acepta {id_seguro, id_nivel, valor, campus}
+// donde `campus` puede ser un id o un arreglo de ids (para asignar el mismo costo
+// a varios campus de una vez).
+const upsertPreciosCampus = (req, res) => {
+    const { id_seguro, id_nivel, valor } = req.body;
+    let campus = req.body.campus;
+    if (id_seguro === undefined || id_nivel === undefined || valor === undefined || campus === undefined) {
+        return res.status(400).json({ error: 'Se requieren id_seguro, id_nivel, valor y campus' });
+    }
+    const campusIds = Array.isArray(campus) ? campus : [campus];
+    if (!campusIds.length) return res.status(400).json({ error: 'Debe indicar al menos un campus' });
+
+    Promise.all(campusIds.map(id_campus => new Promise((resolve, reject) => {
+        seguroNivelCampusModel.upsert({ id_seguro, id_nivel, id_campus, valor }, (err) => {
+            if (err) return reject(err);
+            resolve();
+        });
+    })))
+        .then(() => res.status(200).json({ message: 'Precios por campus guardados', campus: campusIds }))
+        .catch(err => res.status(500).json({ error: err.message }));
+};
+
+const deletePrecioCampus = (req, res) => {
+    const { id_seguro, id_nivel, id_campus } = req.query;
+    if (!id_seguro || !id_nivel || !id_campus) {
+        return res.status(400).json({ error: 'Se requieren id_seguro, id_nivel e id_campus' });
+    }
+    seguroNivelCampusModel.remove({ id_seguro, id_nivel, id_campus }, (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(200).json({ message: 'Excepción de precio por campus eliminada' });
     });
 };
 
@@ -162,5 +208,8 @@ module.exports = {
     getSeguroById,
     createSeguroWithNivel,
     updateSeguroWithNivel,
-    deleteSeguroWithNivel
+    deleteSeguroWithNivel,
+    getPreciosCampusByNivel,
+    upsertPreciosCampus,
+    deletePrecioCampus
 };

@@ -50,7 +50,11 @@ function loadSeguros(level, containerId) {
                                         class="btn btn-sm btn-warning" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button onclick="deleteSeguro(${seguro.id_seguro}, ${level})" 
+                                <button onclick="gestionarPreciosCampus(${seguro.id_seguro}, '${(seguro.nombre_seguro || '').replace(/'/g, "\\'")}', ${level})"
+                                        class="btn btn-sm btn-info" title="Precios por campus">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </button>
+                                <button onclick="deleteSeguro(${seguro.id_seguro}, ${level})"
                                         class="btn btn-sm btn-danger" title="Eliminar">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -239,7 +243,131 @@ $(document).ready(function () {
     });
 });
 
+// ===== Precios por campus (excepciones al precio por defecto del seguro) =====
+async function gestionarPreciosCampus(id_seguro, nombreSeguro, level) {
+    const esc = (s) => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    // Carga campus del nivel y excepciones actuales de este seguro.
+    let campuses = [];
+    let excepciones = [];
+    try {
+        [campuses, excepciones] = await Promise.all([
+            fetch(`${API_BASE_URL}/campus/nivel/${level}`).then(r => r.json()),
+            fetch(`${apiUrlSeguros}/nivel/${level}/precios-campus`).then(r => r.json())
+        ]);
+    } catch (e) {
+        window.tecToast('No se pudieron cargar los datos de campus', 'error');
+        return;
+    }
+    const excSeguro = (excepciones || []).filter(x => Number(x.id_seguro) === Number(id_seguro));
+    const conExcepcion = new Set(excSeguro.map(x => Number(x.id_campus)));
+
+    const id = 'tecPreciosCampusModal';
+    document.getElementById(id)?.remove();
+
+    const filasExc = excSeguro.length
+        ? excSeguro.map(x => `
+            <tr>
+                <td>${esc(x.campus_nombre)}</td>
+                <td>$${parseFloat(x.valor).toFixed(2)}</td>
+                <td class="text-right">
+                    <button class="btn btn-sm btn-danger" data-del-campus="${x.id_campus}" title="Quitar (vuelve al precio por defecto)">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>`).join('')
+        : '<tr><td colspan="3" class="text-muted">Sin excepciones. Todos los campus usan el precio por defecto.</td></tr>';
+
+    const checksCampus = (campuses || [])
+        .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
+        .map(c => `
+            <label class="d-inline-flex align-items-center mr-3 mb-2" style="gap:6px;">
+                <input type="checkbox" class="pc-campus-chk" value="${c.id}" ${conExcepcion.has(Number(c.id)) ? 'checked' : ''}>
+                ${esc(c.nombre)}
+            </label>`).join('');
+
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = id;
+    modal.setAttribute('tabindex', '-1');
+    modal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content tec-modal">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title tec-modal-titulo">Precios por campus — ${esc(nombreSeguro)}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted" style="font-size:13px;">
+                        El <b>precio por defecto</b> del seguro aplica a todos los campus. Aquí defines
+                        <b>excepciones</b>: un costo distinto para los campus que selecciones.
+                    </p>
+                    <h6 class="font-weight-bold mt-2">Excepciones actuales</h6>
+                    <table class="table table-sm table-striped mb-4">
+                        <thead><tr><th>Campus</th><th>Costo</th><th></th></tr></thead>
+                        <tbody id="pc-tbody">${filasExc}</tbody>
+                    </table>
+                    <h6 class="font-weight-bold">Agregar / actualizar costo</h6>
+                    <div class="form-group">
+                        <label for="pc-valor">Costo para los campus seleccionados</label>
+                        <input type="number" step="any" min="0" class="form-control" id="pc-valor" placeholder="Ej. 2500">
+                    </div>
+                    <label class="font-weight-bold d-block">Campus</label>
+                    <div id="pc-campus-list" style="max-height:180px; overflow:auto;">${checksCampus || '<span class="text-muted">Sin campus en este nivel</span>'}</div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="pc-guardar">Guardar costo</button>
+                </div>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+
+    const recargar = () => { $(modal).modal('hide'); gestionarPreciosCampus(id_seguro, nombreSeguro, level); };
+
+    // Guardar (upsert multi-campus)
+    modal.querySelector('#pc-guardar').addEventListener('click', async () => {
+        const valor = parseFloat(modal.querySelector('#pc-valor').value);
+        const campusSel = [...modal.querySelectorAll('.pc-campus-chk:checked')].map(c => Number(c.value));
+        if (isNaN(valor) || valor < 0) { window.tecToast('Indica un costo válido', 'error'); return; }
+        if (!campusSel.length) { window.tecToast('Selecciona al menos un campus', 'error'); return; }
+        try {
+            const resp = await fetch(`${apiUrlSeguros}/precios-campus`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_seguro, id_nivel: level, valor, campus: campusSel })
+            });
+            if (!resp.ok) throw new Error((await resp.json()).error || resp.status);
+            window.tecToast('Precios por campus guardados');
+            recargar();
+        } catch (e) {
+            window.tecToast(`Error al guardar: ${e.message}`, 'error');
+        }
+    });
+
+    // Borrar excepción
+    modal.querySelectorAll('[data-del-campus]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id_campus = btn.getAttribute('data-del-campus');
+            const ok = await window.tecConfirm('Se quitará la excepción (ese campus volverá al precio por defecto).');
+            if (!ok) return;
+            try {
+                const resp = await fetch(`${apiUrlSeguros}/precios-campus?id_seguro=${id_seguro}&id_nivel=${level}&id_campus=${id_campus}`, { method: 'DELETE' });
+                if (!resp.ok) throw new Error((await resp.json()).error || resp.status);
+                window.tecToast('Excepción eliminada');
+                recargar();
+            } catch (e) {
+                window.tecToast(`Error al eliminar: ${e.message}`, 'error');
+            }
+        });
+    });
+
+    $(modal).on('hidden.bs.modal', () => modal.remove());
+    $(modal).modal('show');
+}
+
 // Exponer funciones al ámbito global para los botones onclick
 window.deleteSeguro = deleteSeguro;
 window.editSeguro = editSeguro;
 window.toggleEstadoSeguro = toggleEstadoSeguro;
+window.gestionarPreciosCampus = gestionarPreciosCampus;

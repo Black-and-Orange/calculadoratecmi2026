@@ -80,7 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let seguros = [];
         if (nivel) {
             try {
-                seguros = await fetch(`${API_BASE_URL}/seguros/nivel/${nivel}`).then(r => r.json());
+                // Precio de seguros por campus (p. ej. Cobertura VIVE) para que el
+                // desglose coincida con lo cobrado. Sin campus → precio default.
+                const campusId = localStorage.getItem('selectedCampusId') || '';
+                const urlSeguros = `${API_BASE_URL}/seguros/nivel/${nivel}` +
+                    (campusId ? `?campus=${encodeURIComponent(campusId)}` : '');
+                seguros = await fetch(urlSeguros).then(r => r.json());
             } catch (e) {
                 console.warn('[resultado-doc] no se pudieron cargar seguros:', e.message);
             }

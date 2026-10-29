@@ -22,6 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sin formato (p.ej. prepa) se trata como presencial, igual que la lógica previa.
     const esPresencial = () => { const f = getFormatCode(); return !f || f === 'P'; };
 
+    // Id del campus elegido en el paso 1 (atributo id_campus del <option>). Se usa
+    // para pedir el precio de seguros por campus (p. ej. Cobertura VIVE con costo
+    // distinto en ciertos campus). Si no hay, se devuelve '' y el backend usa el
+    // precio por defecto del nivel.
+    const getCampusId = () => {
+        const sel = document.getElementById('select-campus');
+        if (!sel || sel.selectedIndex < 0) return '';
+        const opt = sel.options[sel.selectedIndex];
+        return (opt && opt.getAttribute('id_campus')) || '';
+    };
+
     // Clasificación canónica de seguros (fuente única en shared-utils, compartida con
     // el desglose de la Hoja de Resultados). Se conserva el nombre local `tipoSeguro`.
     const tipoSeguro = clasificarSeguro;
@@ -225,7 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            const response = await fetch(`${API_BASE_URL}/seguros/nivel/${levelId}`);
+            const campusId = getCampusId();
+            const url = `${API_BASE_URL}/seguros/nivel/${levelId}` +
+                (campusId ? `?campus=${encodeURIComponent(campusId)}` : '');
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Error al obtener los seguros');
             const segurosArray = await response.json();
             if (Array.isArray(segurosArray) && segurosArray.length > 0) {
