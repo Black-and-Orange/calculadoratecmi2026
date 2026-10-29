@@ -1,5 +1,6 @@
 const campusModel = require('../models/campus');
 const campusNivelModel = require('../models/campusNivel');
+const seguroNivelCampusModel = require('../models/segurosNivelCampus');
 
 const getAllCampus = (req, res) => {
     campusModel.getAllCampuses((err, result) => {
@@ -113,7 +114,10 @@ const deleteCampusWithNivel = (req, res) => {
         // Elimina el campus
         campusModel.deleteCampus(campus_id, (err) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Campus y relación eliminados' });
+            // Limpieza: borrar excepciones de precio de seguro por este campus (evita huérfanos).
+            seguroNivelCampusModel.removeByCampus(campus_id, () => {
+                res.status(200).json({ message: 'Campus y relación eliminados' });
+            });
         });
     });
 };

@@ -36,4 +36,16 @@ const remove = ({ id_seguro, id_nivel, id_campus }, callback) => {
     );
 };
 
-module.exports = { getByNivel, upsert, remove };
+// Limpieza de huérfanos: al eliminar un seguro/relación o un campus, se borran
+// sus excepciones por campus para no dejar filas colgadas.
+const removeBySeguroNivel = (id_seguro, id_nivel, callback) => {
+    db.query('DELETE FROM seguro_nivel_campus WHERE id_seguro = ? AND id_nivel = ?', [id_seguro, id_nivel], callback);
+};
+const removeBySeguro = (id_seguro, callback) => {
+    db.query('DELETE FROM seguro_nivel_campus WHERE id_seguro = ?', [id_seguro], callback);
+};
+const removeByCampus = (id_campus, callback) => {
+    db.query('DELETE FROM seguro_nivel_campus WHERE id_campus = ?', [id_campus], callback);
+};
+
+module.exports = { getByNivel, upsert, remove, removeBySeguroNivel, removeBySeguro, removeByCampus };

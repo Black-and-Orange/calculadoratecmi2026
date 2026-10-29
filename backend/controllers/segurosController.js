@@ -47,6 +47,16 @@ const upsertPreciosCampus = (req, res) => {
     const campusIds = Array.isArray(campus) ? campus : [campus];
     if (!campusIds.length) return res.status(400).json({ error: 'Debe indicar al menos un campus' });
 
+    // Validaciones: valor numérico ≥ 0; ids enteros positivos.
+    const valorNum = parseFloat(valor);
+    if (isNaN(valorNum) || valorNum < 0) {
+        return res.status(400).json({ error: 'El valor debe ser un número mayor o igual a 0' });
+    }
+    const esIdValido = (v) => Number.isInteger(Number(v)) && Number(v) > 0;
+    if (!esIdValido(id_seguro) || !esIdValido(id_nivel) || !campusIds.every(esIdValido)) {
+        return res.status(400).json({ error: 'id_seguro, id_nivel y campus deben ser ids numéricos válidos' });
+    }
+
     Promise.all(campusIds.map(id_campus => new Promise((resolve, reject) => {
         seguroNivelCampusModel.upsert({ id_seguro, id_nivel, id_campus, valor }, (err) => {
             if (err) return reject(err);
@@ -185,17 +195,23 @@ const deleteSeguroWithNivel = (req, res) => {
         // Elimina solo la relación con el nivel específico
         seguroNivelModel.deleteSeguroNivelBySeguroAndNivel(id_seguro, id_nivel, (err) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(200).json({ message: 'Relación seguro-nivel eliminada' });
+            // Limpieza: borrar excepciones por campus de ese seguro+nivel (evita huérfanos).
+            seguroNivelCampusModel.removeBySeguroNivel(id_seguro, id_nivel, () => {
+                res.status(200).json({ message: 'Relación seguro-nivel eliminada' });
+            });
         });
     } else {
         // Elimina todas las relaciones con niveles
         seguroNivelModel.deleteSeguroNivel(id_seguro, (err) => {
             if (err) return res.status(500).json({ error: err.message });
 
-            // Elimina el seguro
-            seguroModel.deleteSeguro(id_seguro, (err) => {
-                if (err) return res.status(500).json({ error: err.message });
-                res.status(200).json({ message: 'Seguro y relaciones eliminados' });
+            // Limpieza: borrar todas las excepciones por campus de ese seguro.
+            seguroNivelCampusModel.removeBySeguro(id_seguro, () => {
+                // Elimina el seguro
+                seguroModel.deleteSeguro(id_seguro, (err) => {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.status(200).json({ message: 'Seguro y relaciones eliminados' });
+                });
             });
         });
     }
