@@ -5,8 +5,10 @@ const getAllCampuses = (callback) => {
 };
 
 const getCampusesByNivel = (nivelId, callback) => {
+    // La categoría ahora vive por nivel en campus_nivel (editable por nivel).
+    // Se expone como `categoria_coleg` para que el front/admin no cambien.
     const query = `
-        SELECT campus.id, campus.nombre, campus.categoria_coleg
+        SELECT campus.id, campus.nombre, campus_nivel.categoria_coleg
         FROM campus
         JOIN campus_nivel ON campus.id = campus_nivel.campus_id
         WHERE campus_nivel.nivel_id = ?
@@ -16,6 +18,11 @@ const getCampusesByNivel = (nivelId, callback) => {
 
 const getCampusById = (id, callback) => {
     db.query('SELECT * FROM campus WHERE id = ?', [id], callback);
+};
+
+// Busca un campus por nombre (para reusar la fila al agregarlo a un nivel y no duplicar).
+const getCampusByNombre = (nombre, callback) => {
+    db.query('SELECT * FROM campus WHERE nombre = ? LIMIT 1', [nombre], callback);
 };
 
 const createCampus = (campus, callback) => {
@@ -48,6 +55,7 @@ module.exports = {
     getAllCampuses,
     getCampusesByNivel,
     getCampusById,
+    getCampusByNombre,
     createCampus,
     deleteCampus,
     updateCampus

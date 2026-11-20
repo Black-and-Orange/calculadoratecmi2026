@@ -48,4 +48,9 @@ const removeByCampus = (id_campus, callback) => {
     db.query('DELETE FROM seguro_nivel_campus WHERE id_campus = ?', [id_campus], callback);
 };
 
-module.exports = { getByNivel, upsert, remove, removeBySeguroNivel, removeBySeguro, removeByCampus };
+// Limpia las excepciones de precio de UN campus en UN nivel (al quitar ese campus de ese nivel).
+const removeByCampusNivel = (id_campus, id_nivel, callback) => {
+    db.query('DELETE FROM seguro_nivel_campus WHERE id_campus = ? AND id_nivel = ?', [id_campus, id_nivel], callback);
+};
+
+module.exports = { getByNivel, upsert, remove, removeBySeguroNivel, removeBySeguro, removeByCampus, removeByCampusNivel };

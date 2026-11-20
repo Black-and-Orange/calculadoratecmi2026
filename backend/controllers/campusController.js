@@ -37,86 +37,86 @@ const getCampusById = (req, res) => {
 const createCampusWithNivel = (req, res) => {
     const { nombre, categoria_coleg, nivel_id } = req.body;
 
-    // Crea el campus
-    campusModel.createCampus({ nombre, categoria_coleg }, (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        const campus_id = result.insertId;
-
-        // Crea la relación con nivel
-        campusNivelModel.createCampusNivel({ campus_id, nivel_id }, (err) => {
+    // Liga el campus al nivel con su categoría; si ya estaba ligado, actualiza la categoría.
+    const ligar = (campus_id) => {
+        campusNivelModel.findByCampusNivel(campus_id, nivel_id, (err, existing) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ campus_id });
+            if (existing && existing.length > 0) {
+                campusNivelModel.updateCampusNivelCategoria(campus_id, nivel_id, categoria_coleg, (e) =>
+                    e ? res.status(500).json({ error: e.message }) : res.status(200).json({ campus_id, reused: true }));
+            } else {
+                campusNivelModel.createCampusNivel({ campus_id, nivel_id, categoria_coleg }, (e) =>
+                    e ? res.status(500).json({ error: e.message }) : res.status(201).json({ campus_id }));
+            }
         });
+    };
+
+    // Reusa la fila de campus si el nombre ya existe (evita duplicados); si no, la crea.
+    campusModel.getCampusByNombre(nombre, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (rows && rows.length > 0) {
+            ligar(rows[0].id);
+        } else {
+            campusModel.createCampus({ nombre, categoria_coleg }, (e, result) => {
+                if (e) return res.status(500).json({ error: e.message });
+                ligar(result.insertId);
+            });
+        }
     });
 };
 
 const updateCampusWithNivel = (req, res) => {
-    const id = req.params.id;
-    const updates = req.body;
+    const campus_id = req.params.id;
+    const { nombre, categoria_coleg, nivel_id } = req.body;
 
-    // Filtrar solo los campos permitidos para la actualización
-    const allowedCampusUpdates = ['nombre', 'categoria_coleg'];
-    const allowedCampusNivelUpdates = ['nivel_id'];
-    const campusFieldsToUpdate = {};
-    const campusNivelFieldsToUpdate = {};
+    const ops = [];
 
-    allowedCampusUpdates.forEach(field => {
-        if (updates[field] !== undefined) {
-            campusFieldsToUpdate[field] = updates[field];
-        }
-    });
+    // El NOMBRE es propiedad del campus (compartido entre niveles).
+    if (nombre !== undefined) {
+        ops.push(new Promise((resolve, reject) => {
+            campusModel.updateCampus(campus_id, { nombre }, (err) => (err ? reject(err) : resolve()));
+        }));
+    }
 
-    allowedCampusNivelUpdates.forEach(field => {
-        if (updates[field] !== undefined) {
-            campusNivelFieldsToUpdate[field] = updates[field];
-        }
-    });
+    // La CATEGORÍA es POR NIVEL: se guarda en campus_nivel para ese (campus, nivel),
+    // así editar un nivel NO afecta a los demás. Requiere nivel_id.
+    if (categoria_coleg !== undefined && nivel_id !== undefined) {
+        ops.push(new Promise((resolve, reject) => {
+            campusNivelModel.updateCampusNivelCategoria(campus_id, nivel_id, categoria_coleg, (err) => (err ? reject(err) : resolve()));
+        }));
+    }
 
-    const campusUpdatePromise = new Promise((resolve, reject) => {
-        if (Object.keys(campusFieldsToUpdate).length > 0) {
-            campusModel.updateCampus(id, campusFieldsToUpdate, (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
-        } else {
-            resolve({ affectedRows: 0 });
-        }
-    });
-
-    const campusNivelUpdatePromise = new Promise((resolve, reject) => {
-        if (Object.keys(campusNivelFieldsToUpdate).length > 0) {
-            campusNivelModel.updateCampusNivel(id, campusNivelFieldsToUpdate, (err, result) => {
-                if (err) return reject(err);
-                resolve(result);
-            });
-        } else {
-            resolve({ affectedRows: 0 });
-        }
-    });
-
-    Promise.all([campusUpdatePromise, campusNivelUpdatePromise])
-        .then(results => {
-            const [campusResult, campusNivelResult] = results;
-            // Un UPDATE sin error es exitoso aunque affectedRows sea 0 (mismo valor / idempotente).
-            res.json({ message: 'Campus y/o nivel actualizado' });
-        })
+    Promise.all(ops)
+        .then(() => res.json({ message: 'Campus actualizado' }))
         .catch(err => res.status(500).json({ error: err.message }));
 };
 
 const deleteCampusWithNivel = (req, res) => {
     const campus_id = req.params.id;
+    const nivel_id = req.query.nivel_id || (req.body && req.body.nivel_id);
+    if (!nivel_id) {
+        return res.status(400).json({ error: 'nivel_id es requerido para quitar el campus por nivel' });
+    }
 
-    // Elimina la relación con nivel
-    campusNivelModel.deleteCampusNivel(campus_id, (err) => {
+    // 1. Quita SOLO la liga de ese nivel (no afecta su presencia en otros niveles).
+    campusNivelModel.deleteByCampusNivel(campus_id, nivel_id, (err) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        // Elimina el campus
-        campusModel.deleteCampus(campus_id, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            // Limpieza: borrar excepciones de precio de seguro por este campus (evita huérfanos).
-            seguroNivelCampusModel.removeByCampus(campus_id, () => {
-                res.status(200).json({ message: 'Campus y relación eliminados' });
+        // 2. Limpia la excepción de precio (VIVE) de ese campus en ese nivel.
+        seguroNivelCampusModel.removeByCampusNivel(campus_id, nivel_id, () => {
+
+            // 3. Si el campus ya no se usa en NINGÚN nivel, borra la fila completa.
+            campusNivelModel.countByCampus(campus_id, (e, rows) => {
+                if (e) return res.status(500).json({ error: e.message });
+                const n = rows && rows[0] ? rows[0].n : 0;
+                if (n === 0) {
+                    seguroNivelCampusModel.removeByCampus(campus_id, () => {
+                        campusModel.deleteCampus(campus_id, () =>
+                            res.json({ message: 'Campus eliminado (ya no se usaba en ningún nivel)' }));
+                    });
+                } else {
+                    res.json({ message: `Campus quitado del nivel ${nivel_id} (sigue en ${n} nivel(es))` });
+                }
             });
         });
     });

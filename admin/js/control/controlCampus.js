@@ -99,9 +99,10 @@ $(document).ready(function () {
 
 // Función para eliminar campus
 async function deleteCampus(id, level) {
-    const confirmado = await window.tecConfirm('Se eliminará el campus de forma permanente.');
+    const confirmado = await window.tecConfirm('Se quitará el campus de este nivel (no afecta a otros niveles).');
     if (!confirmado) return;
-    fetch(`${API_BASE_URL}/campus/${id}`, {
+    // nivel_id (level) va como query: el borrado es POR NIVEL.
+    fetch(`${API_BASE_URL}/campus/${id}?nivel_id=${level}`, {
         method: 'DELETE',
     })
         .then(response => {
@@ -131,7 +132,8 @@ async function editCampus(id, currentName, currentCategory, level) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nombre: valores.nombre, categoria_coleg: valores.categoria }),
+        // nivel_id es obligatorio: la categoría se guarda POR NIVEL (no afecta otros niveles).
+        body: JSON.stringify({ nombre: valores.nombre, categoria_coleg: valores.categoria, nivel_id: level }),
     })
         .then(response => {
             if (response.ok) {
