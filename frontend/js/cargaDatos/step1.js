@@ -144,10 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Cálculo ESCALONADO (niveles actuales; se mantiene exactamente igual):
         if ([1, 2, 3, 4, 5, 6].includes(numeroMaterias)) {
             return numeroMaterias * costoMateria;
-        } // PENDIENTE-FASE3 (confirmar con cliente): materias 7 u 8 se cobran como 6.
-        // ¿Promoción intencional o error? Ver auditoría de cálculo 2026-06-09.
+        } // Regla escalonada (confirmada con cliente nov-2026): a partir de la 7ª
+        // materia UNA va "gratis" -> 7 cuesta como 6, y 8 como 7. Es decir (n-1)×P.
+        // (Antes 7 y 8 se cobraban ambas como 6, lo que subvaluaba la 8ª.)
         else if (numeroMaterias === 7 || numeroMaterias === 8) {
-            return 6 * costoMateria;
+            return (numeroMaterias - 1) * costoMateria;
         } else {
             return 0;
         }
